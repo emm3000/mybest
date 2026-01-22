@@ -1,6 +1,12 @@
 package com.emm.mybest.screens
 
+import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -32,8 +38,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -44,6 +52,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +60,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil3.compose.AsyncImage
 import com.emm.mybest.data.entities.PhotoType
@@ -58,6 +69,7 @@ import com.emm.mybest.viewmodel.AddPhotoEffect
 import com.emm.mybest.viewmodel.AddPhotoIntent
 import com.emm.mybest.viewmodel.AddPhotoViewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +81,7 @@ fun AddPhotoScreen(
     val context = LocalContext.current
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -89,6 +102,34 @@ fun AddPhotoScreen(
     ) { success ->
         if (success && tempPhotoUri != null) {
             viewModel.onIntent(AddPhotoIntent.OnPhotoSelected(tempPhotoUri.toString()))
+        }
+    }
+
+    // Launcher para Permisos
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val uri = createPhotoUri(context)
+            tempPhotoUri = uri
+            cameraLauncher.launch(uri)
+        } else {
+            val isPermanentlyDenied = (context as? Activity)?.let {
+                !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
+            } ?: false
+            
+            if (isPermanentlyDenied) {
+                scope.launch {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "El acceso a la cámara está desactivado",
+                        actionLabel = "AJUSTES",
+                        duration = SnackbarDuration.Long
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        openAppSettings(context)
+                    }
+                }
+            }
         }
     }
 
@@ -236,9 +277,15 @@ fun AddPhotoScreen(
                         label = "Usar Cámara",
                         onClick = {
                             showBottomSheet = false
-                            val uri = createPhotoUri(context)
-                            tempPhotoUri = uri
-                            cameraLauncher.launch(uri)
+                            handleCameraAction(
+                                context = context,
+                                permissionLauncher = permissionLauncher,
+                                onPermissionGranted = {
+                                    val uri = createPhotoUri(context)
+                                    tempPhotoUri = uri
+                                    cameraLauncher.launch(uri)
+                                }
+                            )
                         }
                     )
                     
@@ -280,10 +327,45 @@ fun SourceOption(
     }
 }
 
+private fun handleCameraAction(
+    context: android.content.Context,
+    permissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
+    onPermissionGranted: () -> Unit
+) {
+    when {
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED -> {
+            onPermissionGranted()
+        }
+
+        (context as? Activity)?.let {
+            ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
+        } == true -> {
+            // Podrías mostrar un diálogo explicando por qué necesitas el permiso
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+
+        else -> {
+            // Es la primera vez o el usuario ya declinó definitivamente
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+}
+
+private fun openAppSettings(context: android.content.Context) {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", context.packageName, null)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    context.startActivity(intent)
+}
+
 private fun createPhotoUri(context: android.content.Context): Uri {
-    val directory = File(context.externalCacheDir, "Pictures")
+    val directory = File(context.filesDir, "photos")
     if (!directory.exists()) directory.mkdirs()
-    val file = File.createTempFile("IMG_", ".jpg", directory)
+    val file = File(directory, "IMG_${System.currentTimeMillis()}.jpg")
     val authority = "${context.packageName}.fileprovider"
     return FileProvider.getUriForFile(context, authority, file)
 }
