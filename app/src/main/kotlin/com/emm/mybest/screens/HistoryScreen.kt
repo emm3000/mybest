@@ -55,6 +55,7 @@ import com.emm.mybest.data.entities.PhotoType
 import com.emm.mybest.data.entities.ProgressPhotoEntity
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.DaySummary
+import com.emm.mybest.viewmodel.HistoryIntent
 import com.emm.mybest.viewmodel.HistoryState
 import com.emm.mybest.viewmodel.HistoryViewModel
 import java.time.DayOfWeek
@@ -75,9 +76,7 @@ fun HistoryScreen(
     HistoryContent(
         state = state,
         onBackClick = onBackClick,
-        onMonthChange = viewModel::onMonthChange,
-        onDateSelected = viewModel::onDateSelected,
-        onDateDismiss = viewModel::onDateDismiss
+        onIntent = viewModel::onIntent
     )
 }
 
@@ -86,21 +85,19 @@ fun HistoryScreen(
 fun HistoryContent(
     state: HistoryState,
     onBackClick: () -> Unit,
-    onMonthChange: (YearMonth) -> Unit,
-    onDateSelected: (LocalDate) -> Unit,
-    onDateDismiss: () -> Unit
+    onIntent: (HistoryIntent) -> Unit
 ) {
     val selectedDate = state.selectedDate
     if (selectedDate != null) {
         ModalBottomSheet(
-            onDismissRequest = { onDateDismiss() },
+            onDismissRequest = { onIntent(HistoryIntent.OnDateDismiss) },
             containerColor = MaterialTheme.colorScheme.surface,
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ) {
             DayDetailContent(
                 date = selectedDate,
                 summary = state.monthlyData[selectedDate],
-                onClose = { onDateDismiss() }
+                onClose = { onIntent(HistoryIntent.OnDateDismiss) }
             )
         }
     }
@@ -126,7 +123,7 @@ fun HistoryContent(
         ) {
             MonthSelector(
                 currentMonth = state.selectedMonth,
-                onMonthChange = onMonthChange
+                onMonthChange = { onIntent(HistoryIntent.OnMonthChange(it)) }
             )
 
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -143,7 +140,7 @@ fun HistoryContent(
 
             CalendarGrid(
                 yearMonth = state.selectedMonth,
-                onDateClick = onDateSelected,
+                onDateClick = { onIntent(HistoryIntent.OnDateSelected(it)) },
                 dayData = state.monthlyData
             )
             
@@ -435,9 +432,7 @@ fun HistoryScreenPreview() {
         HistoryContent(
             state = state,
             onBackClick = {},
-            onMonthChange = {},
-            onDateSelected = {},
-            onDateDismiss = {}
+            onIntent = {}
         )
     }
 }

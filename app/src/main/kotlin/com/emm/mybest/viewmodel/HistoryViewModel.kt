@@ -34,6 +34,12 @@ data class HistoryState(
     val isLoading: Boolean = false
 )
 
+sealed class HistoryIntent {
+    data class OnMonthChange(val newMonth: YearMonth) : HistoryIntent()
+    data class OnDateSelected(val date: LocalDate) : HistoryIntent()
+    object OnDateDismiss : HistoryIntent()
+}
+
 class HistoryViewModel(
     dailyWeightDao: DailyWeightDao,
     dailyHabitDao: DailyHabitDao,
@@ -62,16 +68,12 @@ class HistoryViewModel(
         initialValue = HistoryState(isLoading = true)
     )
 
-    fun onMonthChange(newMonth: YearMonth) {
-        _selectedMonth.value = newMonth
-    }
-
-    fun onDateSelected(date: LocalDate) {
-        _selectedDate.value = date
-    }
-    
-    fun onDateDismiss() {
-        _selectedDate.value = null
+    fun onIntent(intent: HistoryIntent) {
+        when (intent) {
+            is HistoryIntent.OnMonthChange -> _selectedMonth.value = intent.newMonth
+            is HistoryIntent.OnDateSelected -> _selectedDate.value = intent.date
+            HistoryIntent.OnDateDismiss -> _selectedDate.value = null
+        }
     }
 
     private fun transformToDaySummary(
