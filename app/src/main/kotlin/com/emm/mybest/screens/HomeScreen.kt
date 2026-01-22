@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddAPhoto
+import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.MonitorWeight
@@ -213,18 +214,33 @@ fun SummaryCard(state: HomeState, onClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = if (state.isLoading) "Cargando..." else "¡Vas muy bien!",
+                    text = if (state.isLoading) {
+                        "Cargando..."
+                    } else if (state.totalWeightLost > 0) {
+                        "¡Has bajado ${String.format("%.1f", state.totalWeightLost)} kg!"
+                    } else {
+                        "¡Vas muy bien!"
+                    },
                     color = Color.White,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Has registrado ${state.habitsCompletedToday} actividades hoy",
+                    text = "Toca para ver tus estadísticas",
                     color = Color.White.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+            Icon(
+                Icons.Rounded.BarChart,
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(24.dp)
+                    .size(64.dp),
+                tint = Color.White.copy(alpha = 0.2f)
+            )
         }
     }
 }
