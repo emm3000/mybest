@@ -64,7 +64,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeScreenContent(
+internal fun HomeScreenContent(
     state: HomeState,
     onAddWeightClick: () -> Unit,
     onAddHabitClick: () -> Unit,
