@@ -3,7 +3,7 @@
     <shortcut
         android:shortcutId="add_weight"
         android:enabled="true"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@mipmap/ic_weight"
         android:shortcutShortLabel="@string/shortcut_add_weight_short"
         android:shortcutLongLabel="@string/shortcut_add_weight_long">
         <intent
@@ -14,7 +14,7 @@
     <shortcut
         android:shortcutId="add_habit"
         android:enabled="true"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@mipmap/ic_habit"
         android:shortcutShortLabel="@string/shortcut_add_habit_short"
         android:shortcutLongLabel="@string/shortcut_add_habit_long">
         <intent
@@ -25,7 +25,7 @@
     <shortcut
         android:shortcutId="add_photo"
         android:enabled="true"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@mipmap/ic_camera"
         android:shortcutShortLabel="@string/shortcut_add_photo_short"
         android:shortcutLongLabel="@string/shortcut_add_photo_long">
         <intent
