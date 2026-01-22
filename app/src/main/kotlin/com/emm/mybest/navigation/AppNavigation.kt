@@ -7,6 +7,10 @@ import androidx.navigation.compose.rememberNavController
 import com.emm.mybest.screens.AddHabitScreen
 import com.emm.mybest.screens.AddWeightScreen
 import com.emm.mybest.screens.HomeScreen
+import com.emm.mybest.viewmodel.AddHabitViewModel
+import com.emm.mybest.viewmodel.AddWeightViewModel
+import com.emm.mybest.viewmodel.HomeViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AppNavigation() {
@@ -17,7 +21,9 @@ fun AppNavigation() {
         startDestination = Screen.Home.route
     ) {
         composable(Screen.Home.route) {
+            val viewModel: HomeViewModel = koinViewModel()
             HomeScreen(
+                viewModel = viewModel,
                 onAddWeightClick = { navController.navigate(Screen.AddWeight.route) },
                 onAddHabitClick = { navController.navigate(Screen.AddHabit.route) },
                 onAddPhotoClick = { /* Próximamente */ }
@@ -25,22 +31,18 @@ fun AppNavigation() {
         }
         
         composable(Screen.AddWeight.route) {
+            val viewModel: AddWeightViewModel = koinViewModel()
             AddWeightScreen(
-                onBackClick = { navController.popBackStack() },
-                onSaveClick = { weight, note -> 
-                    // Aquí iría la lógica del ViewModel para guardar en Room
-                    navController.popBackStack()
-                }
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
         
         composable(Screen.AddHabit.route) {
+            val viewModel: AddHabitViewModel = koinViewModel()
             AddHabitScreen(
-                onBackClick = { navController.popBackStack() },
-                onSaveClick = { ateHealthy, didExercise, notes ->
-                    // Aquí iría la lógica del ViewModel para guardar en Room
-                    navController.popBackStack()
-                }
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

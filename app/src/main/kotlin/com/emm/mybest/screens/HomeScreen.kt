@@ -29,22 +29,27 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.viewmodel.HomeState
+import com.emm.mybest.viewmodel.HomeViewModel
 import java.time.LocalDate
 
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel,
     onAddWeightClick: () -> Unit,
     onAddHabitClick: () -> Unit,
     onAddPhotoClick: () -> Unit
 ) {
+    val state by viewModel.state.collectAsState()
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background
@@ -61,7 +66,7 @@ fun HomeScreen(
             }
             
             item {
-                SummaryCard()
+                SummaryCard(state)
             }
             
             item {
@@ -75,7 +80,7 @@ fun HomeScreen(
             item {
                 QuickActionCard(
                     title = "Registrar Peso",
-                    subtitle = "Sigue tu evolución física",
+                    subtitle = state.lastWeight?.let { "Último: $it kg" } ?: "Sigue tu evolución física",
                     icon = Icons.Rounded.MonitorWeight,
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     iconColor = MaterialTheme.colorScheme.primary,
@@ -86,7 +91,7 @@ fun HomeScreen(
             item {
                 QuickActionCard(
                     title = "Hábitos de Hoy",
-                    subtitle = "¿Qué tal tu alimentación y ejercicio?",
+                    subtitle = if (state.habitsCompletedToday > 0) "¡Ya has registrado hoy!" else "¿Qué tal tu alimentación?",
                     icon = Icons.Rounded.CheckCircle,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     iconColor = MaterialTheme.colorScheme.secondary,
@@ -97,7 +102,7 @@ fun HomeScreen(
             item {
                 QuickActionCard(
                     title = "Foto de Progreso",
-                    subtitle = "Una imagen vale más que mil palabras",
+                    subtitle = "Total: ${state.totalPhotos} fotos",
                     icon = Icons.Rounded.AddAPhoto,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     iconColor = MaterialTheme.colorScheme.tertiary,
@@ -146,7 +151,7 @@ fun HomeHeader() {
 }
 
 @Composable
-fun SummaryCard() {
+fun SummaryCard(state: HomeState) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -157,27 +162,26 @@ fun SummaryCard() {
         )
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Un sutil gradiente o patrón de fondo podría ir aquí
             Column(
                 modifier = Modifier
                     .padding(24.dp)
                     .align(Alignment.CenterStart)
             ) {
                 Text(
-                    text = "Tu Progreso Semanal",
+                    text = "Tu Progreso",
                     color = Color.White.copy(alpha = 0.8f),
                     style = MaterialTheme.typography.labelLarge
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "¡Vas por buen camino!",
+                    text = if (state.isLoading) "Cargando..." else "¡Vas muy bien!",
                     color = Color.White,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Has cumplido el 85% de tus metas",
+                    text = "Has registrado ${state.habitsCompletedToday} actividades hoy",
                     color = Color.White.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -244,13 +248,5 @@ fun QuickActionCard(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-    MyBestTheme {
-        HomeScreen({}, {}, {})
     }
 }

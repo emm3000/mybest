@@ -10,6 +10,8 @@ kotlin = "2.3.0"
 composeBom = "2026.01.00"
 roomRuntime = "2.8.4"
 navigationCompose = "2.8.5"
+koin = "4.0.0"
+
 
 
 [libraries]
@@ -32,6 +34,9 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
+koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
+
 
 
 [plugins]
