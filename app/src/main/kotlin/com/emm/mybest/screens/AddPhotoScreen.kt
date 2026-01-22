@@ -71,10 +71,12 @@ import com.emm.mybest.viewmodel.AddPhotoEffect
 import com.emm.mybest.viewmodel.AddPhotoIntent
 import com.emm.mybest.viewmodel.AddPhotoState
 import com.emm.mybest.viewmodel.AddPhotoViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 @Composable
@@ -112,7 +114,16 @@ fun AddPhotoContent(
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { onIntent(AddPhotoIntent.OnPhotoSelected(it.toString())) }
+        uri?.let {
+            scope.launch(Dispatchers.IO) {
+                val copiedUri = copyUriToInternalStorage(context, it)
+                if (copiedUri != null) {
+                    withContext(Dispatchers.Main) {
+                        onIntent(AddPhotoIntent.OnPhotoSelected(copiedUri.toString()))
+                    }
+                }
+            }
+        }
     }
 
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -382,6 +393,24 @@ private fun createPhotoUri(context: android.content.Context): Uri {
     val file = File(directory, "IMG_${System.currentTimeMillis()}.jpg")
     val authority = "${context.packageName}.fileprovider"
     return FileProvider.getUriForFile(context, authority, file)
+}
+
+private fun copyUriToInternalStorage(context: android.content.Context, uri: Uri): Uri? {
+    return try {
+        val directory = File(context.filesDir, "photos")
+        if (!directory.exists()) directory.mkdirs()
+        val file = File(directory, "IMG_${System.currentTimeMillis()}.jpg")
+
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        val authority = "${context.packageName}.fileprovider"
+        FileProvider.getUriForFile(context, authority, file)
+    } catch (e: Exception) {
+        null
+    }
 }
 
 @Preview(showBackground = true)
