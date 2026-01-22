@@ -28,7 +28,6 @@ data class ProgressPhotoEntity(
     @ColumnInfo(name = "photo_path")
     val photoPath: String,
 
-    // Metadata útil futura
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),
 

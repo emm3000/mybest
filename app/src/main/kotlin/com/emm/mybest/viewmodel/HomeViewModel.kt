@@ -47,16 +47,14 @@ class HomeViewModel(
             val latestWeight = dailyWeightDao.getLatest()
             val todayHabit = dailyHabitDao.getByDate(LocalDate.now())
             
-            // Usamos un count simple para el ejemplo
-            // En una app real, podrías observar flujos
-            val photos = progressPhotoDao.getLastByType(com.emm.mybest.data.entities.PhotoType.FACE) // Ejemplo
+            val photos = progressPhotoDao.getLastByType(com.emm.mybest.data.entities.PhotoType.FACE)
 
             _state.value = HomeState(
                 lastWeight = latestWeight?.weight,
                 habitsCompletedToday = if (todayHabit != null) {
                     (if (todayHabit.ateHealthy) 1 else 0) + (if (todayHabit.didExercise) 1 else 0)
                 } else 0,
-                totalPhotos = 0, // Simplificación
+                totalPhotos = 0,
                 isLoading = false
             )
         }

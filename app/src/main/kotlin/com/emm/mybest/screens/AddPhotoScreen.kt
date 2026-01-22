@@ -86,17 +86,14 @@ fun AddPhotoScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     
-    // URI temporal para la cámara
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Launcher para Galería
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let { viewModel.onIntent(AddPhotoIntent.OnPhotoSelected(it.toString())) }
     }
 
-    // Launcher para Cámara
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
@@ -105,7 +102,6 @@ fun AddPhotoScreen(
         }
     }
 
-    // Launcher para Permisos
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -168,7 +164,6 @@ fun AddPhotoScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            // Image Preview / Placeholder
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -343,12 +338,10 @@ private fun handleCameraAction(
         (context as? Activity)?.let {
             ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
         } == true -> {
-            // Podrías mostrar un diálogo explicando por qué necesitas el permiso
             permissionLauncher.launch(Manifest.permission.CAMERA)
         }
 
         else -> {
-            // Es la primera vez o el usuario ya declinó definitivamente
             permissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }

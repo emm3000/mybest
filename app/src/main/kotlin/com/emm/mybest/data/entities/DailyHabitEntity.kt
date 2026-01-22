@@ -23,7 +23,6 @@ data class DailyHabitEntity(
     @ColumnInfo(name = "notes")
     val notes: String? = null,
 
-    // Extensión futura (NO usar aún)
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),
 
