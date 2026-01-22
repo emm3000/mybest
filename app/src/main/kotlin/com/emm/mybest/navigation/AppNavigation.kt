@@ -8,12 +8,14 @@ import androidx.navigation.compose.rememberNavController
 import com.emm.mybest.screens.AddHabitScreen
 import com.emm.mybest.screens.AddPhotoScreen
 import com.emm.mybest.screens.AddWeightScreen
+import com.emm.mybest.screens.ComparePhotosScreen
 import com.emm.mybest.screens.HistoryScreen
 import com.emm.mybest.screens.HomeScreen
 import com.emm.mybest.screens.InsightsScreen
 import com.emm.mybest.viewmodel.AddHabitViewModel
 import com.emm.mybest.viewmodel.AddPhotoViewModel
 import com.emm.mybest.viewmodel.AddWeightViewModel
+import com.emm.mybest.viewmodel.ComparePhotosViewModel
 import com.emm.mybest.viewmodel.HistoryViewModel
 import com.emm.mybest.viewmodel.HomeViewModel
 import com.emm.mybest.viewmodel.InsightsViewModel
@@ -88,6 +90,15 @@ fun AppNavigation(
         composable(Screen.Insights.route) {
             val viewModel: InsightsViewModel = koinViewModel()
             InsightsScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() },
+                onCompareClick = { navController.navigate(Screen.ComparePhotos.route) }
+            )
+        }
+
+        composable(Screen.ComparePhotos.route) {
+            val viewModel: ComparePhotosViewModel = koinViewModel()
+            ComparePhotosScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() }
             )

@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Compare
 import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material.icons.rounded.North
 import androidx.compose.material.icons.rounded.TrendingDown
@@ -52,7 +53,8 @@ import com.emm.mybest.viewmodel.InsightsViewModel
 @Composable
 fun InsightsScreen(
     viewModel: InsightsViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onCompareClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -63,6 +65,11 @@ fun InsightsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onCompareClick) {
+                        Icon(Icons.Rounded.Compare, contentDescription = "Comparar fotos")
                     }
                 }
             )

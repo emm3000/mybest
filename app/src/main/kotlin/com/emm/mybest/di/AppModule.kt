@@ -5,6 +5,7 @@ import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.viewmodel.AddHabitViewModel
 import com.emm.mybest.viewmodel.AddPhotoViewModel
 import com.emm.mybest.viewmodel.AddWeightViewModel
+import com.emm.mybest.viewmodel.ComparePhotosViewModel
 import com.emm.mybest.viewmodel.HistoryViewModel
 import com.emm.mybest.viewmodel.HomeViewModel
 import com.emm.mybest.viewmodel.InsightsViewModel
@@ -31,4 +32,5 @@ val appModule = module {
     viewModel { AddPhotoViewModel(get()) }
     viewModel { HistoryViewModel(get(), get(), get()) }
     viewModel { InsightsViewModel(get(), get()) }
+    viewModel { ComparePhotosViewModel(get()) }
 }
