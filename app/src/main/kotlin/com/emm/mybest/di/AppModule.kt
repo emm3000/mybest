@@ -7,6 +7,7 @@ import com.emm.mybest.viewmodel.AddPhotoViewModel
 import com.emm.mybest.viewmodel.AddWeightViewModel
 import com.emm.mybest.viewmodel.HistoryViewModel
 import com.emm.mybest.viewmodel.HomeViewModel
+import com.emm.mybest.viewmodel.InsightsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -29,4 +30,5 @@ val appModule = module {
     viewModel { AddHabitViewModel(get()) }
     viewModel { AddPhotoViewModel(get()) }
     viewModel { HistoryViewModel(get(), get(), get()) }
+    viewModel { InsightsViewModel(get(), get()) }
 }

@@ -50,7 +50,8 @@ fun HomeScreen(
     onAddWeightClick: () -> Unit,
     onAddHabitClick: () -> Unit,
     onAddPhotoClick: () -> Unit,
-    onViewHistoryClick: () -> Unit
+    onViewHistoryClick: () -> Unit,
+    onViewInsightsClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -59,7 +60,8 @@ fun HomeScreen(
         onAddWeightClick = onAddWeightClick,
         onAddHabitClick = onAddHabitClick,
         onAddPhotoClick = onAddPhotoClick,
-        onViewHistoryClick = onViewHistoryClick
+        onViewHistoryClick = onViewHistoryClick,
+        onViewInsightsClick = onViewInsightsClick
     )
 }
 
@@ -69,7 +71,8 @@ internal fun HomeScreenContent(
     onAddWeightClick: () -> Unit,
     onAddHabitClick: () -> Unit,
     onAddPhotoClick: () -> Unit,
-    onViewHistoryClick: () -> Unit
+    onViewHistoryClick: () -> Unit,
+    onViewInsightsClick: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -87,7 +90,7 @@ internal fun HomeScreenContent(
             }
             
             item {
-                SummaryCard(state)
+                SummaryCard(state, onClick = onViewInsightsClick)
             }
             
             item {
@@ -101,8 +104,13 @@ internal fun HomeScreenContent(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    TextButton(onClick = onViewHistoryClick) {
-                        Text("Ver Historial")
+                    Row {
+                        TextButton(onClick = onViewInsightsClick) {
+                            Text("Estadísticas")
+                        }
+                        TextButton(onClick = onViewHistoryClick) {
+                            Text("Historial")
+                        }
                     }
                 }
             }
@@ -181,11 +189,12 @@ fun HomeHeader() {
 }
 
 @Composable
-fun SummaryCard(state: HomeState) {
+fun SummaryCard(state: HomeState, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(160.dp),
+        onClick = onClick,
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primary
@@ -295,7 +304,8 @@ fun HomeScreenPreview() {
             onAddWeightClick = {},
             onAddHabitClick = {},
             onAddPhotoClick = {},
-            onViewHistoryClick = {}
+            onViewHistoryClick = {},
+            onViewInsightsClick = {}
         )
     }
 }

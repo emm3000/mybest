@@ -9,11 +9,13 @@ import com.emm.mybest.screens.AddPhotoScreen
 import com.emm.mybest.screens.AddWeightScreen
 import com.emm.mybest.screens.HistoryScreen
 import com.emm.mybest.screens.HomeScreen
+import com.emm.mybest.screens.InsightsScreen
 import com.emm.mybest.viewmodel.AddHabitViewModel
 import com.emm.mybest.viewmodel.AddPhotoViewModel
 import com.emm.mybest.viewmodel.AddWeightViewModel
 import com.emm.mybest.viewmodel.HistoryViewModel
 import com.emm.mybest.viewmodel.HomeViewModel
+import com.emm.mybest.viewmodel.InsightsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -31,7 +33,8 @@ fun AppNavigation() {
                 onAddWeightClick = { navController.navigate(Screen.AddWeight.route) },
                 onAddHabitClick = { navController.navigate(Screen.AddHabit.route) },
                 onAddPhotoClick = { navController.navigate(Screen.AddPhoto.route) },
-                onViewHistoryClick = { navController.navigate(Screen.History.route) }
+                onViewHistoryClick = { navController.navigate(Screen.History.route) },
+                onViewInsightsClick = { navController.navigate(Screen.Insights.route) }
             )
         }
         
@@ -62,6 +65,14 @@ fun AppNavigation() {
         composable(Screen.History.route) {
             val viewModel: HistoryViewModel = koinViewModel()
             HistoryScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Insights.route) {
+            val viewModel: InsightsViewModel = koinViewModel()
+            InsightsScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() }
             )
