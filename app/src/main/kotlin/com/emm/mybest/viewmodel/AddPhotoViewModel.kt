@@ -13,15 +13,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+data class SelectedPhoto(
+    val uri: String,
+    val type: PhotoType = PhotoType.FACE
+)
+
 data class AddPhotoState(
-    val photoUri: String? = null,
-    val selectedType: PhotoType = PhotoType.FACE,
+    val selectedPhotos: List<SelectedPhoto> = emptyList(),
     val isLoading: Boolean = false
 )
 
 sealed class AddPhotoIntent {
-    data class OnPhotoSelected(val uri: String) : AddPhotoIntent()
-    data class OnTypeSelected(val type: PhotoType) : AddPhotoIntent()
+    data class OnPhotosSelected(val uris: List<String>) : AddPhotoIntent()
+    data class OnTypeSelected(val index: Int, val type: PhotoType) : AddPhotoIntent()
+    data class OnRemovePhoto(val index: Int) : AddPhotoIntent()
     object OnSaveClick : AddPhotoIntent()
 }
 
@@ -42,28 +47,52 @@ class AddPhotoViewModel(
 
     fun onIntent(intent: AddPhotoIntent) {
         when (intent) {
-            is AddPhotoIntent.OnPhotoSelected -> _state.update { it.copy(photoUri = intent.uri) }
-            is AddPhotoIntent.OnTypeSelected -> _state.update { it.copy(selectedType = intent.type) }
-            AddPhotoIntent.OnSaveClick -> savePhoto()
+            is AddPhotoIntent.OnPhotosSelected -> {
+                _state.update { s ->
+                    val newPhotos = intent.uris.map { SelectedPhoto(it) }
+                    s.copy(selectedPhotos = s.selectedPhotos + newPhotos)
+                }
+            }
+            is AddPhotoIntent.OnTypeSelected -> {
+                _state.update { s ->
+                    val newList = s.selectedPhotos.toMutableList()
+                    if (intent.index in newList.indices) {
+                        newList[intent.index] = newList[intent.index].copy(type = intent.type)
+                    }
+                    s.copy(selectedPhotos = newList)
+                }
+            }
+            is AddPhotoIntent.OnRemovePhoto -> {
+                _state.update { s ->
+                    val newList = s.selectedPhotos.toMutableList()
+                    if (intent.index in newList.indices) {
+                        newList.removeAt(intent.index)
+                    }
+                    s.copy(selectedPhotos = newList)
+                }
+            }
+            AddPhotoIntent.OnSaveClick -> savePhotos()
         }
     }
 
-    private fun savePhoto() {
-        val uri = _state.value.photoUri
-        if (uri == null) {
-            viewModelScope.launch { _effect.emit(AddPhotoEffect.ShowError("Debes seleccionar una foto")) }
+    private fun savePhotos() {
+        val photos = _state.value.selectedPhotos
+        if (photos.isEmpty()) {
+            viewModelScope.launch { _effect.emit(AddPhotoEffect.ShowError("Debes seleccionar al menos una foto")) }
             return
         }
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
-                val entity = ProgressPhotoEntity(
-                    date = LocalDate.now(),
-                    type = _state.value.selectedType,
-                    photoPath = uri
-                )
-                progressPhotoDao.insert(entity)
+                val entities = photos.map { photo ->
+                    ProgressPhotoEntity(
+                        date = LocalDate.now(),
+                        type = photo.type,
+                        photoPath = photo.uri
+                    )
+                }
+                progressPhotoDao.insertAll(entities)
                 _effect.emit(AddPhotoEffect.NavigateBack)
             } catch (e: Exception) {
                 _effect.emit(AddPhotoEffect.ShowError("Error al guardar: ${e.message}"))

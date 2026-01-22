@@ -11,6 +11,9 @@ interface ProgressPhotoDao {
     @Insert
     suspend fun insert(photo: ProgressPhotoEntity)
 
+    @Insert
+    suspend fun insertAll(photos: List<ProgressPhotoEntity>)
+
     @Query("""
         SELECT * FROM progress_photo
         WHERE type = :type

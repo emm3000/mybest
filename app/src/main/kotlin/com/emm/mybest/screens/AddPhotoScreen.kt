@@ -4,14 +4,18 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,11 +26,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.AddAPhoto
-import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material3.Button
@@ -64,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.exifinterface.media.ExifInterface
 import coil3.compose.AsyncImage
 import com.emm.mybest.data.entities.PhotoType
 import com.emm.mybest.ui.theme.MyBestTheme
@@ -112,15 +121,13 @@ fun AddPhotoContent(
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris: List<Uri> ->
+        if (uris.isNotEmpty()) {
             scope.launch(Dispatchers.IO) {
-                val copiedUri = copyUriToInternalStorage(context, it)
-                if (copiedUri != null) {
-                    withContext(Dispatchers.Main) {
-                        onIntent(AddPhotoIntent.OnPhotoSelected(copiedUri.toString()))
-                    }
+                val copiedUris = uris.mapNotNull { copyUriToInternalStorage(context, it) }
+                withContext(Dispatchers.Main) {
+                    onIntent(AddPhotoIntent.OnPhotosSelected(copiedUris.map { it.toString() }))
                 }
             }
         }
@@ -130,7 +137,7 @@ fun AddPhotoContent(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && tempPhotoUri != null) {
-            onIntent(AddPhotoIntent.OnPhotoSelected(tempPhotoUri.toString()))
+            onIntent(AddPhotoIntent.OnPhotosSelected(listOf(tempPhotoUri.toString())))
         }
     }
 
@@ -174,10 +181,15 @@ fun AddPhotoContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Foto de Progreso") },
+                title = { Text("Añadir Fotos") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showBottomSheet = true }) {
+                        Icon(Icons.Rounded.AddAPhoto, contentDescription = "Añadir")
                     }
                 }
             )
@@ -186,89 +198,50 @@ fun AddPhotoContent(
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(24.dp)
+                .padding(16.dp)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Captura tu evolución",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .clickable { showBottomSheet = true },
-                shape = MaterialTheme.shapes.extraLarge,
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                border = if (state.photoUri == null) {
-                    BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
-                } else null
-            ) {
-                if (state.photoUri != null) {
-                    AsyncImage(
-                        model = state.photoUri,
-                        contentDescription = "Foto seleccionada",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+            if (state.selectedPhotos.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .clickable { showBottomSheet = true },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             Icons.Rounded.AddAPhoto,
                             contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            "Toca para añadir una foto",
-                            style = MaterialTheme.typography.bodyMedium,
+                            "Toca para añadir fotos",
+                            style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
-            }
-
-            Text(
-                text = "¿Qué parte del cuerpo es?",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(PhotoType.entries) { type ->
-                    val isSelected = state.selectedType == type
-                    val label = when (type) {
-                        PhotoType.FACE -> "Cara"
-                        PhotoType.ABDOMEN -> "Abdomen"
-                        PhotoType.BODY -> "Cuerpo"
-                        PhotoType.BREAKFAST -> "Desayuno"
-                        PhotoType.LUNCH -> "Almuerzo"
-                        PhotoType.DINNER -> "Cena"
-                        PhotoType.FOOD -> "Comida"
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    itemsIndexed(state.selectedPhotos) { index, photo ->
+                        PhotoCard(
+                            uri = photo.uri,
+                            selectedType = photo.type,
+                            onTypeClick = { onIntent(AddPhotoIntent.OnTypeSelected(index, it)) },
+                            onRemove = { onIntent(AddPhotoIntent.OnRemovePhoto(index)) }
+                        )
                     }
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { onIntent(AddPhotoIntent.OnTypeSelected(type)) },
-                        label = { Text(label) },
-                        leadingIcon = if (isSelected) {
-                            { Icon(Icons.Rounded.Check, null, modifier = Modifier.size(18.dp)) }
-                        } else null
-                    )
                 }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
 
             Button(
                 onClick = { onIntent(AddPhotoIntent.OnSaveClick) },
@@ -276,7 +249,7 @@ fun AddPhotoContent(
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = MaterialTheme.shapes.large,
-                enabled = state.photoUri != null && !state.isLoading
+                enabled = state.selectedPhotos.isNotEmpty() && !state.isLoading
             ) {
                 if (state.isLoading) {
                     CircularProgressIndicator(
@@ -284,7 +257,10 @@ fun AddPhotoContent(
                         modifier = Modifier.size(24.dp)
                     )
                 } else {
-                    Text("Guardar Foto", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Guardar ${state.selectedPhotos.size} ${if (state.selectedPhotos.size == 1) "Foto" else "Fotos"}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
         }
@@ -340,27 +316,85 @@ fun AddPhotoContent(
 }
 
 @Composable
-fun SourceOption(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
-    onClick: () -> Unit
+fun PhotoCard(
+    uri: String,
+    selectedType: PhotoType,
+    onTypeClick: (PhotoType) -> Unit,
+    onRemove: () -> Unit
 ) {
     Surface(
-        onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+        Column {
+            Box(modifier = Modifier.height(160.dp).fillMaxWidth()) {
+                AsyncImage(
+                    model = uri,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                IconButton(
+                    onClick = onRemove,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                        .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f), CircleShape)
+                        .size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Rounded.Delete,
+                        contentDescription = "Borrar",
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+            
+            var showTypeSelector by remember { mutableStateOf(false) }
+            
+            Text(
+                text = getLabelForType(selectedType),
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showTypeSelector = !showTypeSelector }
+                    .padding(8.dp),
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            
+            if (showTypeSelector) {
+                LazyRow(
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(PhotoType.entries) { type ->
+                        FilterChip(
+                            selected = selectedType == type,
+                            onClick = { 
+                                onTypeClick(type)
+                                showTypeSelector = false
+                            },
+                            label = { Text(getLabelForType(type), style = MaterialTheme.typography.labelSmall) }
+                        )
+                    }
+                }
+            }
         }
     }
+}
+
+private fun getLabelForType(type: PhotoType): String = when (type) {
+    PhotoType.FACE -> "Cara"
+    PhotoType.ABDOMEN -> "Abdomen"
+    PhotoType.BODY -> "Cuerpo"
+    PhotoType.BREAKFAST -> "Desayuno"
+    PhotoType.LUNCH -> "Almuerzo"
+    PhotoType.DINNER -> "Cena"
+    PhotoType.FOOD -> "Comida"
 }
 
 private fun handleCameraAction(
@@ -411,14 +445,67 @@ private fun copyUriToInternalStorage(context: android.content.Context, uri: Uri)
         val file = File(directory, "IMG_${System.currentTimeMillis()}.jpg")
 
         context.contentResolver.openInputStream(uri)?.use { input ->
-            file.outputStream().use { output ->
-                input.copyTo(output)
+            val options = BitmapFactory.Options().apply {
+                inJustDecodeBounds = false
             }
+            val bitmap = BitmapFactory.decodeStream(input, null, options) ?: return null
+            
+            // Handle Orientation
+            val orientation = context.contentResolver.openInputStream(uri)?.use { orientationInput ->
+                val exif = ExifInterface(orientationInput)
+                exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
+            } ?: ExifInterface.ORIENTATION_UNDEFINED
+
+            val rotatedBitmap = when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> rotateBitmap(bitmap, 90f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> rotateBitmap(bitmap, 180f)
+                ExifInterface.ORIENTATION_ROTATE_270 -> rotateBitmap(bitmap, 270f)
+                else -> bitmap
+            }
+
+            file.outputStream().use { output ->
+                rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 85, output)
+            }
+            
+            if (rotatedBitmap != bitmap) {
+                rotatedBitmap.recycle()
+            }
+            bitmap.recycle()
         }
         val authority = "${context.packageName}.fileprovider"
         FileProvider.getUriForFile(context, authority, file)
     } catch (e: Exception) {
+        e.printStackTrace()
         null
+    }
+}
+
+private fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
+    val matrix = Matrix().apply { postRotate(degrees) }
+    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+}
+
+@Composable
+fun SourceOption(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+        }
     }
 }
 
