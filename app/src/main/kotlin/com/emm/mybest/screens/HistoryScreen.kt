@@ -332,14 +332,39 @@ fun DayDetailContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(summary.photos) { photo ->
-                        AsyncImage(
-                            model = photo.photoPath,
-                            contentDescription = null,
+                        Box(
                             modifier = Modifier
                                 .aspectRatio(1f)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
-                        )
+                                .clip(RoundedCornerShape(8.dp))
+                        ) {
+                            AsyncImage(
+                                model = photo.photoPath,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                            val label = when (photo.type) {
+                                PhotoType.FACE -> "Cara"
+                                PhotoType.ABDOMEN -> "Abdomen"
+                                PhotoType.BODY -> "Cuerpo"
+                                PhotoType.BREAKFAST -> "Desayuno"
+                                PhotoType.LUNCH -> "Almuerzo"
+                                PhotoType.DINNER -> "Cena"
+                                PhotoType.FOOD -> "Comida"
+                            }
+                            Surface(
+                                color = Color.Black.copy(alpha = 0.6f),
+                                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(vertical = 2.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

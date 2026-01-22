@@ -248,10 +248,19 @@ fun AddPhotoContent(
             ) {
                 items(PhotoType.entries) { type ->
                     val isSelected = state.selectedType == type
+                    val label = when (type) {
+                        PhotoType.FACE -> "Cara"
+                        PhotoType.ABDOMEN -> "Abdomen"
+                        PhotoType.BODY -> "Cuerpo"
+                        PhotoType.BREAKFAST -> "Desayuno"
+                        PhotoType.LUNCH -> "Almuerzo"
+                        PhotoType.DINNER -> "Cena"
+                        PhotoType.FOOD -> "Comida"
+                    }
                     FilterChip(
                         selected = isSelected,
                         onClick = { onIntent(AddPhotoIntent.OnTypeSelected(type)) },
-                        label = { Text(type.name) },
+                        label = { Text(label) },
                         leadingIcon = if (isSelected) {
                             { Icon(Icons.Rounded.Check, null, modifier = Modifier.size(18.dp)) }
                         } else null
