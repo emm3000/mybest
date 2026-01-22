@@ -1,10 +1,10 @@
 package com.emm.mybest.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,45 +14,48 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.MonitorWeight
-import androidx.compose.material.icons.rounded.PhotoLibrary
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.emm.mybest.data.entities.DailyHabitEntity
-import com.emm.mybest.data.entities.DailyWeightEntity
-import com.emm.mybest.data.entities.ProgressPhotoEntity
+import com.emm.mybest.viewmodel.DaySummary
 import com.emm.mybest.viewmodel.HistoryViewModel
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,13 +64,25 @@ fun HistoryScreen(
     onBackClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Pesos", "Hábitos", "Fotos")
+    
+    if (state.selectedDate != null) {
+        ModalBottomSheet(
+            onDismissRequest = { viewModel.onDateDismiss() },
+            containerColor = MaterialTheme.colorScheme.surface,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            DayDetailContent(
+                date = state.selectedDate!!,
+                summary = state.monthlyData[state.selectedDate!!],
+                onClose = { viewModel.onDateDismiss() }
+            )
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mi Historial") },
+                title = { Text("Mi Progreso") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
@@ -76,178 +91,288 @@ fun HistoryScreen(
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            TabRow(selectedTabIndex = selectedTab) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        text = { Text(title) }
-                    )
-                }
-            }
-
-            if (state.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                when (selectedTab) {
-                    0 -> WeightHistoryList(state.weights)
-                    1 -> HabitHistoryList(state.habits)
-                    2 -> PhotoGallery(state.photos)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun WeightHistoryList(weights: List<DailyWeightEntity>) {
-    if (weights.isEmpty()) {
-        EmptyState("No hay pesos registrados", Icons.Rounded.MonitorWeight)
-    } else {
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(weights) { weight ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = weight.date.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = "${weight.weight} kg",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold
-                            )
-                            weight.note?.let {
-                                Text(
-                                    text = it,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun HabitHistoryList(habits: List<DailyHabitEntity>) {
-    if (habits.isEmpty()) {
-        EmptyState("No hay hábitos registrados", Icons.Rounded.CheckCircle)
-    } else {
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(habits) { habit ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = habit.date.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            HabitStatus(label = "Comida Sabia", success = habit.ateHealthy)
-                            HabitStatus(label = "Ejercicio", success = habit.didExercise)
-                        }
-                        habit.notes?.let {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun HabitStatus(label: String, success: Boolean) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
+        Column(
             modifier = Modifier
-                .size(12.dp)
-                .clip(MaterialTheme.shapes.extraSmall)
-                .background(if (success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(text = label, style = MaterialTheme.typography.bodySmall)
+                .padding(padding)
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            MonthSelector(
+                currentMonth = state.selectedMonth,
+                onMonthChange = viewModel::onMonthChange
+            )
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                DayOfWeek.entries.forEach { dayOfWeek ->
+                    Text(
+                        text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("es", "ES")).uppercase(),
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            CalendarGrid(
+                yearMonth = state.selectedMonth,
+                onDateClick = viewModel::onDateSelected,
+                dayData = state.monthlyData
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
+            LegendItem(color = MaterialTheme.colorScheme.primary, text = "Peso registrado")
+            LegendItem(color = MaterialTheme.colorScheme.secondary, text = "Hábitos completados")
+            LegendItem(color = MaterialTheme.colorScheme.tertiary, text = "Fotos tomadas")
+        }
     }
 }
 
 @Composable
-fun PhotoGallery(photos: List<ProgressPhotoEntity>) {
-    if (photos.isEmpty()) {
-        EmptyState("No hay fotos registradas", Icons.Rounded.PhotoLibrary)
-    } else {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(photos) { photo ->
-                Card(
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .fillMaxWidth(),
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    AsyncImage(
-                        model = photo.photoPath,
-                        contentDescription = "Foto de ${photo.type}",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+fun MonthSelector(
+    currentMonth: YearMonth,
+    onMonthChange: (YearMonth) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = "Mes anterior")
+        }
+        
+        Text(
+            text = currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale("es", "ES"))).replaceFirstChar { it.uppercase() },
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+
+        IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = "Mes siguiente")
+        }
+    }
+}
+
+@Composable
+fun CalendarGrid(
+    yearMonth: YearMonth,
+    dayData: Map<LocalDate, DaySummary>,
+    onDateClick: (LocalDate) -> Unit
+) {
+    val daysInMonth = yearMonth.lengthOfMonth()
+    val firstDayOfMonth = yearMonth.atDay(1).dayOfWeek.value
+    val startOffset = firstDayOfMonth - 1
+    
+    val totalCells = daysInMonth + startOffset
+    
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(7),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(count = totalCells) { index ->
+            if (index < startOffset) {
+                Box(modifier = Modifier.aspectRatio(1f))
+            } else {
+                val dayOfMonth = index - startOffset + 1
+                val date = yearMonth.atDay(dayOfMonth)
+                val summary = dayData[date]
+                
+                DayCell(
+                    date = date,
+                    summary = summary,
+                    onClick = { onDateClick(date) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun EmptyState(message: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+fun DayCell(
+    date: LocalDate,
+    summary: DaySummary?,
+    onClick: () -> Unit
+) {
+    val isToday = date == LocalDate.now()
+    
     Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .aspectRatio(0.8f)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (isToday) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            .clickable(onClick = onClick)
+            .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.outline
-        )
-        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.outline
+            text = date.dayOfMonth.toString(),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+            color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
         )
+        
+        Spacer(modifier = Modifier.weight(1f))
+        
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier.height(6.dp)
+        ) {
+            if (summary?.hasWeight == true) {
+                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
+            }
+            if (summary?.hasHabit == true) {
+                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondary))
+            }
+            if (summary?.hasPhoto == true) {
+                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.tertiary))
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+    }
+}
+
+@Composable
+fun DayDetailContent(
+    date: LocalDate,
+    summary: DaySummary?,
+    onClose: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp)
+            .padding(bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = date.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale("es", "ES"))).replaceFirstChar { it.uppercase() },
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = onClose) {
+                Icon(Icons.Rounded.Close, contentDescription = "Cerrar")
+            }
+        }
+
+        if (summary == null || (!summary.hasWeight && !summary.hasHabit && !summary.hasPhoto)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    "Sin actividad registrada",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+        } else {
+            summary.weight?.let { weight ->
+                DetailItem(
+                    icon = Icons.Rounded.MonitorWeight,
+                    color = MaterialTheme.colorScheme.primary,
+                    title = "Peso: ${weight.weight} kg",
+                    subtitle = weight.note
+                )
+            }
+
+            summary.habit?.let { habit ->
+                DetailItem(
+                    icon = Icons.Rounded.CheckCircle,
+                    color = MaterialTheme.colorScheme.secondary,
+                    title = "Hábitos",
+                    content = {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (habit.ateHealthy) Chip("Comida Sana")
+                            if (habit.didExercise) Chip("Ejercicio")
+                        }
+                        habit.notes?.let { 
+                            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) 
+                        }
+                    }
+                )
+            }
+
+            if (summary.photos.isNotEmpty()) {
+                Text("Fotos del día", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(summary.photos) { photo ->
+                        AsyncImage(
+                            model = photo.photoPath,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DetailItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color,
+    title: String,
+    subtitle: String? = null,
+    content: (@Composable () -> Unit)? = null
+) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, contentDescription = null, tint = color)
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            subtitle?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            content?.invoke()
+        }
+    }
+}
+
+@Composable
+fun Chip(text: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        shape = CircleShape
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    }
+}
+
+@Composable
+fun LegendItem(color: Color, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
