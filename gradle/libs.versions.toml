@@ -12,6 +12,9 @@ roomRuntime = "2.8.4"
 navigationCompose = "2.9.6"
 koin = "4.1.1"
 coil = "3.0.4"
+mockk = "1.13.13"
+kotlinxCoroutinesTest = "1.10.1"
+turbine = "1.1.0"
 
 
 [libraries]
@@ -38,6 +41,9 @@ koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = 
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 
 
