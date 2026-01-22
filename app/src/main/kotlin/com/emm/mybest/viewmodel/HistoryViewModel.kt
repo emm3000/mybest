@@ -9,11 +9,10 @@ import com.emm.mybest.data.entities.DailyWeightEntity
 import com.emm.mybest.data.entities.ProgressPhotoDao
 import com.emm.mybest.data.entities.ProgressPhotoEntity
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -36,62 +35,69 @@ data class HistoryState(
 )
 
 class HistoryViewModel(
-    private val dailyWeightDao: DailyWeightDao,
-    private val dailyHabitDao: DailyHabitDao,
-    private val progressPhotoDao: ProgressPhotoDao
+    dailyWeightDao: DailyWeightDao,
+    dailyHabitDao: DailyHabitDao,
+    progressPhotoDao: ProgressPhotoDao
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(HistoryState(isLoading = true))
-    val state = _state.asStateFlow()
+    private val _selectedMonth = MutableStateFlow(YearMonth.now())
+    private val _selectedDate = MutableStateFlow<LocalDate?>(null)
 
-    init {
-        loadMonthData(YearMonth.now())
-    }
+    val state: StateFlow<HistoryState> = combine(
+        _selectedMonth,
+        _selectedDate,
+        dailyWeightDao.observeAllOrdered(),
+        dailyHabitDao.observeAll(),
+        progressPhotoDao.observeAll()
+    ) { month, selectedDate, weights, habits, photos ->
+        HistoryState(
+            selectedMonth = month,
+            selectedDate = selectedDate,
+            monthlyData = transformToDaySummary(weights, habits, photos),
+            isLoading = false
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = HistoryState(isLoading = true)
+    )
 
     fun onMonthChange(newMonth: YearMonth) {
-        _state.update { it.copy(selectedMonth = newMonth, isLoading = true) }
-        loadMonthData(newMonth)
+        _selectedMonth.value = newMonth
     }
 
     fun onDateSelected(date: LocalDate) {
-        _state.update { it.copy(selectedDate = date) }
+        _selectedDate.value = date
     }
     
     fun onDateDismiss() {
-        _state.update { it.copy(selectedDate = null) }
+        _selectedDate.value = null
     }
 
-    private fun loadMonthData(month: YearMonth) {
-        
-        combine(
-            dailyWeightDao.observeAllOrdered(),
-            dailyHabitDao.observeAll(),
-            progressPhotoDao.observeAll()
-        ) { weights, habits, photos ->
-            
-            val days = mutableMapOf<LocalDate, DaySummary>()
-            
-            weights.forEach { w ->
-                val current = days.getOrPut(w.date) { DaySummary(w.date) }
-                days[w.date] = current.copy(weight = w)
-            }
-            
-            habits.forEach { h ->
-                val current = days.getOrPut(h.date) { DaySummary(h.date) }
-                days[h.date] = current.copy(habit = h)
-            }
-            
-            photos.forEach { p ->
-                val current = days.getOrPut(p.date) { DaySummary(p.date) }
-                val currentPhotos = current.photos.toMutableList()
-                currentPhotos.add(p)
-                days[p.date] = current.copy(photos = currentPhotos)
-            }
-            
-            days.toMap()
-            
-        }.onEach { fullMap ->
-            _state.update { it.copy(monthlyData = fullMap, isLoading = false) }
-        }.launchIn(viewModelScope)
+    private fun transformToDaySummary(
+        weights: List<DailyWeightEntity>,
+        habits: List<DailyHabitEntity>,
+        photos: List<ProgressPhotoEntity>
+    ): Map<LocalDate, DaySummary> {
+        val days = mutableMapOf<LocalDate, DaySummary>()
+
+        weights.forEach { w ->
+            val current = days.getOrPut(w.date) { DaySummary(w.date) }
+            days[w.date] = current.copy(weight = w)
+        }
+
+        habits.forEach { h ->
+            val current = days.getOrPut(h.date) { DaySummary(h.date) }
+            days[h.date] = current.copy(habit = h)
+        }
+
+        photos.forEach { p ->
+            val current = days.getOrPut(p.date) { DaySummary(p.date) }
+            val currentPhotos = current.photos.toMutableList()
+            currentPhotos.add(p)
+            days[p.date] = current.copy(photos = currentPhotos)
+        }
+
+        return days.toMap()
     }
 }
