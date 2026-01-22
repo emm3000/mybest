@@ -7,10 +7,12 @@ import androidx.navigation.compose.rememberNavController
 import com.emm.mybest.screens.AddHabitScreen
 import com.emm.mybest.screens.AddPhotoScreen
 import com.emm.mybest.screens.AddWeightScreen
+import com.emm.mybest.screens.HistoryScreen
 import com.emm.mybest.screens.HomeScreen
 import com.emm.mybest.viewmodel.AddHabitViewModel
 import com.emm.mybest.viewmodel.AddPhotoViewModel
 import com.emm.mybest.viewmodel.AddWeightViewModel
+import com.emm.mybest.viewmodel.HistoryViewModel
 import com.emm.mybest.viewmodel.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -28,7 +30,8 @@ fun AppNavigation() {
                 viewModel = viewModel,
                 onAddWeightClick = { navController.navigate(Screen.AddWeight.route) },
                 onAddHabitClick = { navController.navigate(Screen.AddHabit.route) },
-                onAddPhotoClick = { navController.navigate(Screen.AddPhoto.route) }
+                onAddPhotoClick = { navController.navigate(Screen.AddPhoto.route) },
+                onViewHistoryClick = { navController.navigate(Screen.History.route) }
             )
         }
         
@@ -51,6 +54,14 @@ fun AppNavigation() {
         composable(Screen.AddPhoto.route) {
             val viewModel: AddPhotoViewModel = koinViewModel()
             AddPhotoScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.History.route) {
+            val viewModel: HistoryViewModel = koinViewModel()
+            HistoryScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() }
             )
