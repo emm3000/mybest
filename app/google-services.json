@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "303130923429",
+    "project_id": "mybest-24595",
+    "storage_bucket": "mybest-24595.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:303130923429:android:a8f7a989ded9f3d6fe184c",
+        "android_client_info": {
+          "package_name": "com.emm.mybest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtyqic-q5qbipq5-ks7iKdqMOzEO0RT_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
