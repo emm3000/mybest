@@ -1,0 +1,289 @@
+package com.emm.mybest.screens
+
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.AddAPhoto
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
+import coil3.compose.AsyncImage
+import com.emm.mybest.data.entities.PhotoType
+import com.emm.mybest.viewmodel.AddPhotoEffect
+import com.emm.mybest.viewmodel.AddPhotoIntent
+import com.emm.mybest.viewmodel.AddPhotoViewModel
+import kotlinx.coroutines.flow.collectLatest
+import java.io.File
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddPhotoScreen(
+    viewModel: AddPhotoViewModel,
+    onBackClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    
+    // URI temporal para la cámara
+    var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Launcher para Galería
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.onIntent(AddPhotoIntent.OnPhotoSelected(it.toString())) }
+    }
+
+    // Launcher para Cámara
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && tempPhotoUri != null) {
+            viewModel.onIntent(AddPhotoIntent.OnPhotoSelected(tempPhotoUri.toString()))
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                AddPhotoEffect.NavigateBack -> onBackClick()
+                is AddPhotoEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+            }
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Foto de Progreso") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(24.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            Text(
+                text = "Captura tu evolución",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+            // Image Preview / Placeholder
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+                    .clickable { showBottomSheet = true },
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                border = if (state.photoUri == null) {
+                    BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
+                } else null
+            ) {
+                if (state.photoUri != null) {
+                    AsyncImage(
+                        model = state.photoUri,
+                        contentDescription = "Foto seleccionada",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            Icons.Rounded.AddAPhoto,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            "Toca para añadir una foto",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Text(
+                text = "¿Qué parte del cuerpo es?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(PhotoType.entries) { type ->
+                    val isSelected = state.selectedType == type
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { viewModel.onIntent(AddPhotoIntent.OnTypeSelected(type)) },
+                        label = { Text(type.name) },
+                        leadingIcon = if (isSelected) {
+                            { Icon(Icons.Rounded.Check, null, modifier = Modifier.size(18.dp)) }
+                        } else null
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Button(
+                onClick = { viewModel.onIntent(AddPhotoIntent.OnSaveClick) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = MaterialTheme.shapes.large,
+                enabled = state.photoUri != null && !state.isLoading
+            ) {
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text("Guardar Foto", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+        }
+
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                sheetState = sheetState
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .padding(bottom = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        "Seleccionar origen",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    
+                    SourceOption(
+                        icon = Icons.Rounded.PhotoCamera,
+                        label = "Usar Cámara",
+                        onClick = {
+                            showBottomSheet = false
+                            val uri = createPhotoUri(context)
+                            tempPhotoUri = uri
+                            cameraLauncher.launch(uri)
+                        }
+                    )
+                    
+                    SourceOption(
+                        icon = Icons.Rounded.PhotoLibrary,
+                        label = "Elegir de Galería",
+                        onClick = {
+                            showBottomSheet = false
+                            galleryLauncher.launch("image/*")
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SourceOption(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+        }
+    }
+}
+
+private fun createPhotoUri(context: android.content.Context): Uri {
+    val directory = File(context.externalCacheDir, "Pictures")
+    if (!directory.exists()) directory.mkdirs()
+    val file = File.createTempFile("IMG_", ".jpg", directory)
+    val authority = "${context.packageName}.fileprovider"
+    return FileProvider.getUriForFile(context, authority, file)
+}

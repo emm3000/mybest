@@ -3,6 +3,7 @@ package com.emm.mybest.di
 import androidx.room.Room
 import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.viewmodel.AddHabitViewModel
+import com.emm.mybest.viewmodel.AddPhotoViewModel
 import com.emm.mybest.viewmodel.AddWeightViewModel
 import com.emm.mybest.viewmodel.HomeViewModel
 import org.koin.android.ext.koin.androidContext
@@ -25,4 +26,5 @@ val appModule = module {
     viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { AddWeightViewModel(get()) }
     viewModel { AddHabitViewModel(get()) }
+    viewModel { AddPhotoViewModel(get()) }
 }
