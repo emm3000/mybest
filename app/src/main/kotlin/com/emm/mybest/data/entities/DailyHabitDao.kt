@@ -38,4 +38,7 @@ interface DailyHabitDao {
         WHERE did_exercise = 1
     """)
     suspend fun countExerciseDays(): Int
+
+    @Query("DELETE FROM daily_habit WHERE date = :date")
+    suspend fun deleteByDate(date: LocalDate)
 }

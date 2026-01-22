@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -38,12 +39,15 @@ sealed class HistoryIntent {
     data class OnMonthChange(val newMonth: YearMonth) : HistoryIntent()
     data class OnDateSelected(val date: LocalDate) : HistoryIntent()
     object OnDateDismiss : HistoryIntent()
+    data class OnDeleteWeight(val date: LocalDate) : HistoryIntent()
+    data class OnDeleteHabit(val date: LocalDate) : HistoryIntent()
+    data class OnDeletePhoto(val photoId: String) : HistoryIntent()
 }
 
 class HistoryViewModel(
-    dailyWeightDao: DailyWeightDao,
-    dailyHabitDao: DailyHabitDao,
-    progressPhotoDao: ProgressPhotoDao
+    private val dailyWeightDao: DailyWeightDao,
+    private val dailyHabitDao: DailyHabitDao,
+    private val progressPhotoDao: ProgressPhotoDao
 ) : ViewModel() {
 
     private val _selectedMonth = MutableStateFlow(YearMonth.now())
@@ -73,6 +77,15 @@ class HistoryViewModel(
             is HistoryIntent.OnMonthChange -> _selectedMonth.value = intent.newMonth
             is HistoryIntent.OnDateSelected -> _selectedDate.value = intent.date
             HistoryIntent.OnDateDismiss -> _selectedDate.value = null
+            is HistoryIntent.OnDeleteWeight -> viewModelScope.launch {
+                dailyWeightDao.deleteByDate(intent.date)
+            }
+            is HistoryIntent.OnDeleteHabit -> viewModelScope.launch {
+                dailyHabitDao.deleteByDate(intent.date)
+            }
+            is HistoryIntent.OnDeletePhoto -> viewModelScope.launch {
+                progressPhotoDao.deleteById(intent.photoId)
+            }
         }
     }
 

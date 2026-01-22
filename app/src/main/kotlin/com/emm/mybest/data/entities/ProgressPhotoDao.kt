@@ -42,4 +42,7 @@ interface ProgressPhotoDao {
         LIMIT 1
     """)
     suspend fun getLastByType(type: PhotoType): ProgressPhotoEntity?
+
+    @Query("DELETE FROM progress_photo WHERE id = :photoId")
+    suspend fun deleteById(photoId: String)
 }

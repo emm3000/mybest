@@ -25,7 +25,9 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.MonitorWeight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,11 +36,15 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -97,7 +103,10 @@ fun HistoryContent(
             DayDetailContent(
                 date = selectedDate,
                 summary = state.monthlyData[selectedDate],
-                onClose = { onIntent(HistoryIntent.OnDateDismiss) }
+                onClose = { onIntent(HistoryIntent.OnDateDismiss) },
+                onDeleteWeight = { onIntent(HistoryIntent.OnDeleteWeight(selectedDate)) },
+                onDeleteHabit = { onIntent(HistoryIntent.OnDeleteHabit(selectedDate)) },
+                onDeletePhoto = { onIntent(HistoryIntent.OnDeletePhoto(it)) }
             )
         }
     }
@@ -261,8 +270,35 @@ fun DayCell(
 fun DayDetailContent(
     date: LocalDate,
     summary: DaySummary?,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    onDeleteWeight: () -> Unit,
+    onDeleteHabit: () -> Unit,
+    onDeletePhoto: (String) -> Unit
 ) {
+    val isToday = date == LocalDate.now()
+    var photoToDelete by remember { mutableStateOf<ProgressPhotoEntity?>(null) }
+
+    if (photoToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { photoToDelete = null },
+            title = { Text("¿Eliminar foto?") },
+            text = { Text("Esta acción no se puede deshacer.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    photoToDelete?.let { onDeletePhoto(it.id) }
+                    photoToDelete = null
+                }) {
+                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { photoToDelete = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -304,7 +340,8 @@ fun DayDetailContent(
                     icon = Icons.Rounded.MonitorWeight,
                     color = MaterialTheme.colorScheme.primary,
                     title = "Peso: ${weight.weight} kg",
-                    subtitle = weight.note
+                    subtitle = weight.note,
+                    onDelete = if (isToday) onDeleteWeight else null
                 )
             }
 
@@ -313,6 +350,7 @@ fun DayDetailContent(
                     icon = Icons.Rounded.CheckCircle,
                     color = MaterialTheme.colorScheme.secondary,
                     title = "Hábitos",
+                    onDelete = if (isToday) onDeleteHabit else null,
                     content = {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             if (habit.ateHealthy) Chip("Comida Sana")
@@ -364,6 +402,23 @@ fun DayDetailContent(
                                     modifier = Modifier.padding(vertical = 2.dp)
                                 )
                             }
+                            if (isToday) {
+                                IconButton(
+                                    onClick = { photoToDelete = photo },
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(4.dp)
+                                        .size(24.dp)
+                                        .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                                ) {
+                                    Icon(
+                                        Icons.Rounded.Close,
+                                        contentDescription = "Eliminar foto",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -378,9 +433,13 @@ fun DetailItem(
     color: Color,
     title: String,
     subtitle: String? = null,
+    onDelete: (() -> Unit)? = null,
     content: (@Composable () -> Unit)? = null
 ) {
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -397,6 +456,16 @@ fun DetailItem(
                 Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             content?.invoke()
+        }
+        if (onDelete != null) {
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = onDelete) {
+                Icon(
+                    Icons.Rounded.Delete,
+                    contentDescription = "Eliminar",
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                )
+            }
         }
     }
 }
