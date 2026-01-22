@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="add_weight"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:shortcutShortLabel="@string/shortcut_add_weight_short"
+        android:shortcutLongLabel="@string/shortcut_add_weight_long">
+        <intent
+            android:action="com.emm.mybest.ACTION_ADD_WEIGHT"
+            android:targetPackage="com.emm.mybest"
+            android:targetClass="com.emm.mybest.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="add_habit"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:shortcutShortLabel="@string/shortcut_add_habit_short"
+        android:shortcutLongLabel="@string/shortcut_add_habit_long">
+        <intent
+            android:action="com.emm.mybest.ACTION_ADD_HABIT"
+            android:targetPackage="com.emm.mybest"
+            android:targetClass="com.emm.mybest.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="add_photo"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:shortcutShortLabel="@string/shortcut_add_photo_short"
+        android:shortcutLongLabel="@string/shortcut_add_photo_long">
+        <intent
+            android:action="com.emm.mybest.ACTION_ADD_PHOTO"
+            android:targetPackage="com.emm.mybest"
+            android:targetClass="com.emm.mybest.MainActivity" />
+    </shortcut>
+</shortcuts>

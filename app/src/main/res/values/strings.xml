@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">MyBest</string>
+    <string name="shortcut_add_weight_short">Peso</string>
+    <string name="shortcut_add_weight_long">Registrar Peso</string>
+    <string name="shortcut_add_habit_short">Hábitos</string>
+    <string name="shortcut_add_habit_long">Registrar Hábitos</string>
+    <string name="shortcut_add_photo_short">Foto</string>
+    <string name="shortcut_add_photo_long">Añadir Foto</string>
 </resources>

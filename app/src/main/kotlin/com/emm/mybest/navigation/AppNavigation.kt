@@ -1,6 +1,7 @@
 package com.emm.mybest.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -19,8 +20,22 @@ import com.emm.mybest.viewmodel.InsightsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    intentAction: String? = null,
+    onActionConsumed: () -> Unit = {}
+) {
     val navController = rememberNavController()
+
+    LaunchedEffect(intentAction) {
+        if (intentAction != null) {
+            when (intentAction) {
+                "com.emm.mybest.ACTION_ADD_WEIGHT" -> navController.navigate(Screen.AddWeight.route)
+                "com.emm.mybest.ACTION_ADD_HABIT" -> navController.navigate(Screen.AddHabit.route)
+                "com.emm.mybest.ACTION_ADD_PHOTO" -> navController.navigate(Screen.AddPhoto.route)
+            }
+            onActionConsumed()
+        }
+    }
 
     NavHost(
         navController = navController,
