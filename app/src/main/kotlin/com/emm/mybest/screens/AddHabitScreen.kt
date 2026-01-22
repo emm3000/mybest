@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material3.Button
@@ -70,7 +70,7 @@ fun AddHabitScreen(
                 title = { Text("Hábitos Diarios") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Rounded.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
                     }
                 }
             )
