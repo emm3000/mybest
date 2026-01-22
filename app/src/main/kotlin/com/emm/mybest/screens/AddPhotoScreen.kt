@@ -59,27 +59,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil3.compose.AsyncImage
 import com.emm.mybest.data.entities.PhotoType
+import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.AddPhotoEffect
 import com.emm.mybest.viewmodel.AddPhotoIntent
+import com.emm.mybest.viewmodel.AddPhotoState
 import com.emm.mybest.viewmodel.AddPhotoViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPhotoScreen(
     viewModel: AddPhotoViewModel,
     onBackClick: () -> Unit
 ) {
-    val context = LocalContext.current
     val state by viewModel.state.collectAsState()
+
+    AddPhotoContent(
+        state = state,
+        onIntent = viewModel::onIntent,
+        onBackClick = onBackClick,
+        effect = viewModel.effect
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddPhotoContent(
+    state: AddPhotoState,
+    onIntent: (AddPhotoIntent) -> Unit,
+    onBackClick: () -> Unit,
+    effect: Flow<AddPhotoEffect> = emptyFlow()
+) {
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     
@@ -91,14 +112,14 @@ fun AddPhotoScreen(
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { viewModel.onIntent(AddPhotoIntent.OnPhotoSelected(it.toString())) }
+        uri?.let { onIntent(AddPhotoIntent.OnPhotoSelected(it.toString())) }
     }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && tempPhotoUri != null) {
-            viewModel.onIntent(AddPhotoIntent.OnPhotoSelected(tempPhotoUri.toString()))
+            onIntent(AddPhotoIntent.OnPhotoSelected(tempPhotoUri.toString()))
         }
     }
 
@@ -130,7 +151,7 @@ fun AddPhotoScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.effect.collectLatest { effect ->
+        effect.collectLatest { effect ->
             when (effect) {
                 AddPhotoEffect.NavigateBack -> onBackClick()
                 is AddPhotoEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
@@ -218,7 +239,7 @@ fun AddPhotoScreen(
                     val isSelected = state.selectedType == type
                     FilterChip(
                         selected = isSelected,
-                        onClick = { viewModel.onIntent(AddPhotoIntent.OnTypeSelected(type)) },
+                        onClick = { onIntent(AddPhotoIntent.OnTypeSelected(type)) },
                         label = { Text(type.name) },
                         leadingIcon = if (isSelected) {
                             { Icon(Icons.Rounded.Check, null, modifier = Modifier.size(18.dp)) }
@@ -230,7 +251,7 @@ fun AddPhotoScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { viewModel.onIntent(AddPhotoIntent.OnSaveClick) },
+                onClick = { onIntent(AddPhotoIntent.OnSaveClick) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -361,4 +382,16 @@ private fun createPhotoUri(context: android.content.Context): Uri {
     val file = File(directory, "IMG_${System.currentTimeMillis()}.jpg")
     val authority = "${context.packageName}.fileprovider"
     return FileProvider.getUriForFile(context, authority, file)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AddPhotoScreenPreview() {
+    MyBestTheme {
+        AddPhotoContent(
+            state = AddPhotoState(),
+            onIntent = {},
+            onBackClick = {}
+        )
+    }
 }

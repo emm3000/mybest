@@ -32,13 +32,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.AddWeightEffect
 import com.emm.mybest.viewmodel.AddWeightIntent
+import com.emm.mybest.viewmodel.AddWeightState
 import com.emm.mybest.viewmodel.AddWeightViewModel
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddWeightScreen(
     viewModel: AddWeightViewModel,
@@ -58,7 +60,29 @@ fun AddWeightScreen(
         }
     }
 
+    AddWeightContent(
+        state = state,
+        snackbarHostState = snackbarHostState,
+        onBackClick = onBackClick,
+        onWeightChange = { viewModel.onIntent(AddWeightIntent.OnWeightChange(it)) },
+        onNoteChange = { viewModel.onIntent(AddWeightIntent.OnNoteChange(it)) },
+        onSaveClick = { viewModel.onIntent(AddWeightIntent.OnSaveClick) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddWeightContent(
+    state: AddWeightState,
+    snackbarHostState: SnackbarHostState,
+    onBackClick: () -> Unit,
+    onWeightChange: (String) -> Unit,
+    onNoteChange: (String) -> Unit,
+    onSaveClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
+        modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
@@ -86,7 +110,7 @@ fun AddWeightScreen(
             
             OutlinedTextField(
                 value = state.weight,
-                onValueChange = { viewModel.onIntent(AddWeightIntent.OnWeightChange(it)) },
+                onValueChange = onWeightChange,
                 label = { Text("Peso (kg)") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -96,7 +120,7 @@ fun AddWeightScreen(
             
             OutlinedTextField(
                 value = state.note,
-                onValueChange = { viewModel.onIntent(AddWeightIntent.OnNoteChange(it)) },
+                onValueChange = onNoteChange,
                 label = { Text("Nota (opcional)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
@@ -105,7 +129,7 @@ fun AddWeightScreen(
             Spacer(modifier = Modifier.weight(1f))
             
             Button(
-                onClick = { viewModel.onIntent(AddWeightIntent.OnSaveClick) },
+                onClick = onSaveClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -119,5 +143,24 @@ fun AddWeightScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AddWeightScreenPreview() {
+    MyBestTheme {
+        AddWeightContent(
+            state = AddWeightState(
+                weight = "80.5",
+                note = "Después del entrenamiento",
+                isLoading = false
+            ),
+            snackbarHostState = remember { SnackbarHostState() },
+            onBackClick = {},
+            onWeightChange = {},
+            onNoteChange = {},
+            onSaveClick = {}
+        )
     }
 }

@@ -46,9 +46,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.emm.mybest.data.entities.DailyHabitEntity
+import com.emm.mybest.data.entities.DailyWeightEntity
+import com.emm.mybest.data.entities.PhotoType
+import com.emm.mybest.data.entities.ProgressPhotoEntity
+import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.DaySummary
+import com.emm.mybest.viewmodel.HistoryState
 import com.emm.mybest.viewmodel.HistoryViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -65,16 +72,35 @@ fun HistoryScreen(
 ) {
     val state by viewModel.state.collectAsState()
     
-    if (state.selectedDate != null) {
+    HistoryContent(
+        state = state,
+        onBackClick = onBackClick,
+        onMonthChange = viewModel::onMonthChange,
+        onDateSelected = viewModel::onDateSelected,
+        onDateDismiss = viewModel::onDateDismiss
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HistoryContent(
+    state: HistoryState,
+    onBackClick: () -> Unit,
+    onMonthChange: (YearMonth) -> Unit,
+    onDateSelected: (LocalDate) -> Unit,
+    onDateDismiss: () -> Unit
+) {
+    val selectedDate = state.selectedDate
+    if (selectedDate != null) {
         ModalBottomSheet(
-            onDismissRequest = { viewModel.onDateDismiss() },
+            onDismissRequest = { onDateDismiss() },
             containerColor = MaterialTheme.colorScheme.surface,
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ) {
             DayDetailContent(
-                date = state.selectedDate!!,
-                summary = state.monthlyData[state.selectedDate!!],
-                onClose = { viewModel.onDateDismiss() }
+                date = selectedDate,
+                summary = state.monthlyData[selectedDate],
+                onClose = { onDateDismiss() }
             )
         }
     }
@@ -100,13 +126,13 @@ fun HistoryScreen(
         ) {
             MonthSelector(
                 currentMonth = state.selectedMonth,
-                onMonthChange = viewModel::onMonthChange
+                onMonthChange = onMonthChange
             )
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 DayOfWeek.entries.forEach { dayOfWeek ->
                     Text(
-                        text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("es", "ES")).uppercase(),
+                        text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("es-ES")).uppercase(),
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.labelSmall,
@@ -117,7 +143,7 @@ fun HistoryScreen(
 
             CalendarGrid(
                 yearMonth = state.selectedMonth,
-                onDateClick = viewModel::onDateSelected,
+                onDateClick = onDateSelected,
                 dayData = state.monthlyData
             )
             
@@ -144,7 +170,7 @@ fun MonthSelector(
         }
         
         Text(
-            text = currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale("es", "ES"))).replaceFirstChar { it.uppercase() },
+            text = currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("es-ES"))).replaceFirstChar { it.uppercase() },
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
@@ -253,7 +279,7 @@ fun DayDetailContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = date.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale("es", "ES"))).replaceFirstChar { it.uppercase() },
+                text = date.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.forLanguageTag("es-ES"))).replaceFirstChar { it.uppercase() },
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -374,5 +400,44 @@ fun LegendItem(color: Color, text: String) {
         Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
         Spacer(modifier = Modifier.width(8.dp))
         Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HistoryScreenPreview() {
+    val today = LocalDate.now()
+    val currentMonth = YearMonth.now()
+    
+    val sampleMonthlyData = mapOf(
+        today to DaySummary(
+            date = today,
+            weight = DailyWeightEntity(date = today, weight = 75.5f, note = "Post entrenamiento"),
+            habit = DailyHabitEntity(date = today, ateHealthy = true, didExercise = true, notes = "Buen día"),
+            photos = listOf(
+                ProgressPhotoEntity(date = today, type = PhotoType.BODY, photoPath = ""),
+                ProgressPhotoEntity(date = today, type = PhotoType.ABDOMEN, photoPath = "")
+            )
+        ),
+        today.minusDays(1) to DaySummary(
+            date = today.minusDays(1),
+            weight = DailyWeightEntity(date = today.minusDays(1), weight = 76.0f),
+            habit = DailyHabitEntity(date = today.minusDays(1), ateHealthy = false, didExercise = true)
+        )
+    )
+    
+    val state = HistoryState(
+        selectedMonth = currentMonth,
+        monthlyData = sampleMonthlyData
+    )
+    
+    MyBestTheme {
+        HistoryContent(
+            state = state,
+            onBackClick = {},
+            onMonthChange = {},
+            onDateSelected = {},
+            onDateDismiss = {}
+        )
     }
 }

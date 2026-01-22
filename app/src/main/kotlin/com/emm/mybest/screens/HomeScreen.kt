@@ -37,7 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.HomeState
 import com.emm.mybest.viewmodel.HomeViewModel
 import java.time.LocalDate
@@ -52,6 +54,23 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    HomeScreenContent(
+        state = state,
+        onAddWeightClick = onAddWeightClick,
+        onAddHabitClick = onAddHabitClick,
+        onAddPhotoClick = onAddPhotoClick,
+        onViewHistoryClick = onViewHistoryClick
+    )
+}
+
+@Composable
+private fun HomeScreenContent(
+    state: HomeState,
+    onAddWeightClick: () -> Unit,
+    onAddHabitClick: () -> Unit,
+    onAddPhotoClick: () -> Unit,
+    onViewHistoryClick: () -> Unit
+) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background
@@ -259,5 +278,24 @@ fun QuickActionCard(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    MyBestTheme {
+        HomeScreenContent(
+            state = HomeState(
+                lastWeight = 75.5f,
+                habitsCompletedToday = 1,
+                totalPhotos = 12,
+                isLoading = false
+            ),
+            onAddWeightClick = {},
+            onAddHabitClick = {},
+            onAddPhotoClick = {},
+            onViewHistoryClick = {}
+        )
     }
 }

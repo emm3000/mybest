@@ -37,13 +37,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.AddHabitEffect
 import com.emm.mybest.viewmodel.AddHabitIntent
+import com.emm.mybest.viewmodel.AddHabitState
 import com.emm.mybest.viewmodel.AddHabitViewModel
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddHabitScreen(
     viewModel: AddHabitViewModel,
@@ -63,6 +65,22 @@ fun AddHabitScreen(
         }
     }
 
+    AddHabitContent(
+        state = state,
+        onIntent = viewModel::onIntent,
+        onBackClick = onBackClick,
+        snackbarHostState = snackbarHostState
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddHabitContent(
+    state: AddHabitState,
+    onIntent: (AddHabitIntent) -> Unit,
+    onBackClick: () -> Unit,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -92,20 +110,20 @@ fun AddHabitScreen(
             HabitToggle(
                 label = "Comí saludable",
                 checked = state.ateHealthy,
-                onCheckedChange = { viewModel.onIntent(AddHabitIntent.OnAteHealthyChange(it)) },
+                onCheckedChange = { onIntent(AddHabitIntent.OnAteHealthyChange(it)) },
                 icon = Icons.Rounded.Restaurant
             )
             
             HabitToggle(
                 label = "Hice ejercicio",
                 checked = state.didExercise,
-                onCheckedChange = { viewModel.onIntent(AddHabitIntent.OnDidExerciseChange(it)) },
+                onCheckedChange = { onIntent(AddHabitIntent.OnDidExerciseChange(it)) },
                 icon = Icons.Rounded.FitnessCenter
             )
             
             OutlinedTextField(
                 value = state.notes,
-                onValueChange = { viewModel.onIntent(AddHabitIntent.OnNotesChange(it)) },
+                onValueChange = { onIntent(AddHabitIntent.OnNotesChange(it)) },
                 label = { Text("Comentarios sobre el día") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 4
@@ -114,7 +132,7 @@ fun AddHabitScreen(
             Spacer(modifier = Modifier.weight(1f))
             
             Button(
-                onClick = { viewModel.onIntent(AddHabitIntent.OnSaveClick) },
+                onClick = { onIntent(AddHabitIntent.OnSaveClick) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -157,6 +175,43 @@ fun HabitToggle(
                 modifier = Modifier.weight(1f)
             )
             Switch(checked = checked, onCheckedChange = onCheckedChange)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddHabitScreenPreview() {
+    MyBestTheme {
+        AddHabitContent(
+            state = AddHabitState(
+                ateHealthy = true,
+                didExercise = false,
+                notes = "Hoy fue un buen día, comí ensalada pero no tuve tiempo para el gym."
+            ),
+            onIntent = {},
+            onBackClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HabitTogglePreview() {
+    MyBestTheme {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            HabitToggle(
+                label = "Checked",
+                checked = true,
+                onCheckedChange = {},
+                icon = Icons.Rounded.Restaurant
+            )
+            HabitToggle(
+                label = "Unchecked",
+                checked = false,
+                onCheckedChange = {},
+                icon = Icons.Rounded.FitnessCenter
+            )
         }
     }
 }
