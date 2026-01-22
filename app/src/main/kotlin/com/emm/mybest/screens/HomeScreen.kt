@@ -122,6 +122,7 @@ internal fun HomeScreenContent(
                     subtitle = state.lastWeight?.let { "Último: $it kg" } ?: "Sigue tu evolución física",
                     icon = Icons.Rounded.MonitorWeight,
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     iconColor = MaterialTheme.colorScheme.primary,
                     onClick = onAddWeightClick
                 )
@@ -133,6 +134,7 @@ internal fun HomeScreenContent(
                     subtitle = if (state.habitsCompletedToday > 0) "¡Ya has registrado hoy!" else "¿Qué tal tu alimentación?",
                     icon = Icons.Rounded.CheckCircle,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     iconColor = MaterialTheme.colorScheme.secondary,
                     onClick = onAddHabitClick
                 )
@@ -144,6 +146,7 @@ internal fun HomeScreenContent(
                     subtitle = "Total: ${state.totalPhotos} fotos",
                     icon = Icons.Rounded.AddAPhoto,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     iconColor = MaterialTheme.colorScheme.tertiary,
                     onClick = onAddPhotoClick
                 )
@@ -209,7 +212,7 @@ fun SummaryCard(state: HomeState, onClick: () -> Unit) {
             ) {
                 Text(
                     text = "Tu Progreso",
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                     style = MaterialTheme.typography.labelLarge
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -221,14 +224,14 @@ fun SummaryCard(state: HomeState, onClick: () -> Unit) {
                     } else {
                         "¡Vas muy bien!"
                     },
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Toca para ver tus estadísticas",
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -239,7 +242,7 @@ fun SummaryCard(state: HomeState, onClick: () -> Unit) {
                     .align(Alignment.CenterEnd)
                     .padding(24.dp)
                     .size(64.dp),
-                tint = Color.White.copy(alpha = 0.2f)
+                tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
             )
         }
     }
@@ -251,6 +254,7 @@ fun QuickActionCard(
     subtitle: String,
     icon: ImageVector,
     containerColor: Color,
+    contentColor: Color,
     iconColor: Color,
     onClick: () -> Unit
 ) {
@@ -269,7 +273,7 @@ fun QuickActionCard(
             Surface(
                 modifier = Modifier.size(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                color = Color.White.copy(alpha = 0.5f)
+                color = iconColor.copy(alpha = 0.12f)
             ) {
                 Icon(
                     imageVector = icon,
@@ -286,12 +290,12 @@ fun QuickActionCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = contentColor
                 )
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = contentColor.copy(alpha = 0.8f)
                 )
             }
             
@@ -300,7 +304,7 @@ fun QuickActionCard(
             Icon(
                 imageVector = Icons.Rounded.ChevronRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = contentColor.copy(alpha = 0.5f)
             )
         }
     }
