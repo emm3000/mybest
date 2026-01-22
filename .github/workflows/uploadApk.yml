@@ -26,6 +26,14 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
+      - name: Create keystore.properties file
+        run: echo "${{ secrets.JUST_VERONICA }}" > keystore.properties
+
+      - name: JUST CHILL
+        run: |
+          mkdir -p key
+          echo "${{ secrets.JUST_CHILL }}" | base64 --decode > key/just_chill_key.p12
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
