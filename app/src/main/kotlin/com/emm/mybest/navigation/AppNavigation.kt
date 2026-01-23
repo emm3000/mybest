@@ -15,6 +15,7 @@ import com.emm.mybest.screens.ComparePhotosScreen
 import com.emm.mybest.screens.HistoryScreen
 import com.emm.mybest.screens.HomeScreen
 import com.emm.mybest.screens.InsightsScreen
+import com.emm.mybest.screens.TimelineScreen
 import com.emm.mybest.viewmodel.AddHabitViewModel
 import com.emm.mybest.viewmodel.AddPhotoViewModel
 import com.emm.mybest.viewmodel.AddWeightViewModel
@@ -22,6 +23,7 @@ import com.emm.mybest.viewmodel.ComparePhotosViewModel
 import com.emm.mybest.viewmodel.HistoryViewModel
 import com.emm.mybest.viewmodel.HomeViewModel
 import com.emm.mybest.viewmodel.InsightsViewModel
+import com.emm.mybest.viewmodel.TimelineViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -55,7 +57,8 @@ fun AppNavigation(
                 onAddHabitClick = { navController.navigate(Screen.AddHabit.route) },
                 onAddPhotoClick = { navController.navigate(Screen.AddPhoto.route) },
                 onViewHistoryClick = { navController.navigate(Screen.History.route) },
-                onViewInsightsClick = { navController.navigate(Screen.Insights.route) }
+                onViewInsightsClick = { navController.navigate(Screen.Insights.route) },
+                onViewTimelineClick = { navController.navigate(Screen.Timeline.route) }
             )
         }
         
@@ -103,6 +106,14 @@ fun AppNavigation(
         composable(Screen.ComparePhotos.route) {
             val viewModel: ComparePhotosViewModel = koinViewModel()
             ComparePhotosScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Timeline.route) {
+            val viewModel: TimelineViewModel = koinViewModel()
+            TimelineScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() }
             )

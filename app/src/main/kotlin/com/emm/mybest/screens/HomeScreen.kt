@@ -52,7 +52,8 @@ fun HomeScreen(
     onAddHabitClick: () -> Unit,
     onAddPhotoClick: () -> Unit,
     onViewHistoryClick: () -> Unit,
-    onViewInsightsClick: () -> Unit
+    onViewInsightsClick: () -> Unit,
+    onViewTimelineClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -62,7 +63,8 @@ fun HomeScreen(
         onAddHabitClick = onAddHabitClick,
         onAddPhotoClick = onAddPhotoClick,
         onViewHistoryClick = onViewHistoryClick,
-        onViewInsightsClick = onViewInsightsClick
+        onViewInsightsClick = onViewInsightsClick,
+        onViewTimelineClick = onViewTimelineClick
     )
 }
 
@@ -73,7 +75,8 @@ internal fun HomeScreenContent(
     onAddHabitClick: () -> Unit,
     onAddPhotoClick: () -> Unit,
     onViewHistoryClick: () -> Unit,
-    onViewInsightsClick: () -> Unit
+    onViewInsightsClick: () -> Unit,
+    onViewTimelineClick: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -106,6 +109,9 @@ internal fun HomeScreenContent(
                         fontWeight = FontWeight.Bold
                     )
                     Row {
+                        TextButton(onClick = onViewTimelineClick) {
+                            Text("Timeline")
+                        }
                         TextButton(onClick = onViewInsightsClick) {
                             Text("Estadísticas")
                         }
@@ -325,7 +331,8 @@ fun HomeScreenPreview() {
             onAddHabitClick = {},
             onAddPhotoClick = {},
             onViewHistoryClick = {},
-            onViewInsightsClick = {}
+            onViewInsightsClick = {},
+            onViewTimelineClick = {}
         )
     }
 }

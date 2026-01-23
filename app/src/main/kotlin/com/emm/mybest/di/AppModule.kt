@@ -9,6 +9,7 @@ import com.emm.mybest.viewmodel.ComparePhotosViewModel
 import com.emm.mybest.viewmodel.HistoryViewModel
 import com.emm.mybest.viewmodel.HomeViewModel
 import com.emm.mybest.viewmodel.InsightsViewModel
+import com.emm.mybest.viewmodel.TimelineViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -33,4 +34,5 @@ val appModule = module {
     viewModel { HistoryViewModel(get(), get(), get()) }
     viewModel { InsightsViewModel(get(), get()) }
     viewModel { ComparePhotosViewModel(get()) }
+    viewModel { TimelineViewModel(get()) }
 }
