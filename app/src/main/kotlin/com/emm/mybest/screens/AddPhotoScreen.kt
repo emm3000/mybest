@@ -1,16 +1,6 @@
 package com.emm.mybest.screens
 
-import android.Manifest
-import android.app.Activity
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.net.Uri
-import android.provider.Settings
-import android.util.Log
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -45,10 +35,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -69,10 +57,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import androidx.exifinterface.media.ExifInterface
 import coil3.compose.AsyncImage
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.models.PhotoType
@@ -81,26 +65,20 @@ import com.emm.mybest.viewmodel.AddPhotoEffect
 import com.emm.mybest.viewmodel.AddPhotoIntent
 import com.emm.mybest.viewmodel.AddPhotoState
 import com.emm.mybest.viewmodel.AddPhotoViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-
-private const val JPEG_COMPRESSION_QUALITY = 85
 
 @Composable
 fun AddPhotoScreen(
     viewModel: AddPhotoViewModel,
-    mediaManager: com.emm.mybest.domain.media.MediaManager,
+    mediaManager: MediaManager,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
     val effect = viewModel.effect
-    val context = androidx.compose.ui.platform.LocalContext.current
 
     AddPhotoContent(
         state = state,
@@ -117,7 +95,7 @@ fun AddPhotoScreen(
 fun AddPhotoContent(
     state: AddPhotoState,
     onIntent: (AddPhotoIntent) -> Unit,
-    mediaManager: com.emm.mybest.domain.media.MediaManager,
+    mediaManager: MediaManager,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     effect: Flow<AddPhotoEffect> = emptyFlow()
@@ -133,51 +111,36 @@ fun AddPhotoContent(
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents()
+        contract = ActivityResultContracts.GetMultipleContents(),
     ) { uris: List<Uri> ->
-        if (uris.isNotEmpty()) {
-            scope.launch(Dispatchers.IO) {
-                val copiedUris = uris.mapNotNull { copyUriToInternalStorage(context, it) }
-                withContext(Dispatchers.Main) {
-                    onIntent(AddPhotoIntent.OnPhotosSelected(copiedUris.map { it.toString() }))
-                }
-            }
-        }
+        handleGallerySelection(
+            uris = uris,
+            context = context,
+            scope = scope,
+            onIntent = onIntent,
+        )
     }
 
     val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
+        contract = ActivityResultContracts.TakePicture(),
     ) { success ->
-        if (success && tempPhotoUri != null) {
-            onIntent(AddPhotoIntent.OnPhotosSelected(listOf(tempPhotoUri.toString())))
-        }
+        handleCameraCaptureResult(success = success, tempPhotoUri = tempPhotoUri, onIntent = onIntent)
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
+        contract = ActivityResultContracts.RequestPermission(),
     ) { isGranted ->
-        if (isGranted) {
-            val uri = mediaManager.generatePhotoUri()
-            tempPhotoUri = uri
-            cameraLauncher.launch(uri)
-        } else {
-            val isPermanentlyDenied = (context as? Activity)?.let {
-                !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
-            } ?: false
-
-            if (isPermanentlyDenied) {
-                scope.launch {
-                    val result = snackbarHostState.showSnackbar(
-                        message = "El acceso a la cámara está desactivado",
-                        actionLabel = "AJUSTES",
-                        duration = SnackbarDuration.Long
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        openAppSettings(context)
-                    }
-                }
-            }
-        }
+        handleCameraPermissionResult(
+            isGranted = isGranted,
+            context = context,
+            scope = scope,
+            snackbarHostState = snackbarHostState,
+            mediaManager = mediaManager,
+            onLaunchCamera = { uri ->
+                tempPhotoUri = uri
+                cameraLauncher.launch(uri)
+            },
+        )
     }
 
     LaunchedEffect(Unit) {
@@ -435,85 +398,6 @@ fun PhotoCard(
     }
 }
 
-private fun handleCameraAction(
-    context: android.content.Context,
-    permissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
-    onPermissionGranted: () -> Unit
-) {
-    when {
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED -> {
-            onPermissionGranted()
-        }
-
-        (context as? Activity)?.let {
-            ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
-        } == true -> {
-            permissionLauncher.launch(Manifest.permission.CAMERA)
-        }
-
-        else -> {
-            permissionLauncher.launch(Manifest.permission.CAMERA)
-        }
-    }
-}
-
-private fun openAppSettings(context: android.content.Context) {
-    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-        data = Uri.fromParts("package", context.packageName, null)
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    context.startActivity(intent)
-}
-
-private fun copyUriToInternalStorage(context: android.content.Context, uri: Uri): Uri? {
-    return runCatching {
-        val directory = File(context.filesDir, "photos")
-        if (!directory.exists()) directory.mkdirs()
-        val file = File(directory, "IMG_${System.currentTimeMillis()}.jpg")
-
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            val options = BitmapFactory.Options().apply {
-                inJustDecodeBounds = false
-            }
-            val bitmap = BitmapFactory.decodeStream(input, null, options) ?: return null
-
-            // Handle Orientation
-            val orientation = context.contentResolver.openInputStream(uri)?.use { orientationInput ->
-                val exif = ExifInterface(orientationInput)
-                exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
-            } ?: ExifInterface.ORIENTATION_UNDEFINED
-
-            val rotatedBitmap = when (orientation) {
-                ExifInterface.ORIENTATION_ROTATE_90 -> rotateBitmap(bitmap, 90f)
-                ExifInterface.ORIENTATION_ROTATE_180 -> rotateBitmap(bitmap, 180f)
-                ExifInterface.ORIENTATION_ROTATE_270 -> rotateBitmap(bitmap, 270f)
-                else -> bitmap
-            }
-
-            file.outputStream().use { output ->
-                rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_COMPRESSION_QUALITY, output)
-            }
-
-            if (rotatedBitmap != bitmap) {
-                rotatedBitmap.recycle()
-            }
-            bitmap.recycle()
-        }
-        val authority = "${context.packageName}.fileprovider"
-        FileProvider.getUriForFile(context, authority, file)
-    }.onFailure { error ->
-        Log.e("AddPhotoScreen", "Error copying photo from URI", error)
-    }.getOrNull()
-}
-
-private fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
-    val matrix = Matrix().apply { postRotate(degrees) }
-    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun AddPhotoScreenPreview() {
@@ -521,7 +405,7 @@ private fun AddPhotoScreenPreview() {
         AddPhotoContent(
             state = AddPhotoState(),
             onIntent = {},
-            mediaManager = com.emm.mybest.domain.media.MediaManager(androidx.compose.ui.platform.LocalContext.current),
+            mediaManager = MediaManager(androidx.compose.ui.platform.LocalContext.current),
             onBackClick = {}
         )
     }
