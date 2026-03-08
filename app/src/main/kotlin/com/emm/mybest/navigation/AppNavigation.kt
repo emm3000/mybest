@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -33,47 +34,40 @@ import com.emm.mybest.viewmodel.InsightsViewModel
 import com.emm.mybest.viewmodel.TimelineViewModel
 import org.koin.androidx.compose.koinViewModel
 
+private val TOP_LEVEL_SCREENS = listOf(
+    Screen.Home,
+    Screen.History,
+    Screen.Insights,
+    Screen.Timeline,
+)
+
 @Composable
 fun AppNavigation(
     modifier: Modifier = Modifier,
     intentAction: String? = null,
-    onConsumeAction: () -> Unit = {}
+    onConsumeAction: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val currentOnConsumeAction by rememberUpdatedState(onConsumeAction)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-
-    // Define top-level screens for bottom navigation
-    val topLevelScreens = listOf(
-        Screen.Home,
-        Screen.History,
-        Screen.Insights,
-        Screen.Timeline
-    )
-
-    val showBottomBar = topLevelScreens.any { screen ->
+    val showBottomBar = TOP_LEVEL_SCREENS.any { screen ->
         currentDestination?.hasRoute(screen::class) == true
     }
 
-    LaunchedEffect(intentAction) {
-        if (intentAction != null) {
-            when (intentAction) {
-                "com.emm.mybest.ACTION_ADD_WEIGHT" -> navController.navigate(Screen.AddWeight)
-                "com.emm.mybest.ACTION_ADD_HABIT" -> navController.navigate(Screen.AddHabit)
-                "com.emm.mybest.ACTION_ADD_PHOTO" -> navController.navigate(Screen.AddPhoto)
-            }
-            currentOnConsumeAction()
-        }
-    }
+    HandleIntentAction(
+        intentAction = intentAction,
+        navController = navController,
+        onConsumeAction = currentOnConsumeAction,
+    )
 
     Scaffold(
         modifier = modifier,
         bottomBar = {
             if (showBottomBar) {
                 HBottomNavigationBar(
-                    currentRoute = topLevelScreens.firstOrNull { screen ->
+                    currentRoute = TOP_LEVEL_SCREENS.firstOrNull { screen ->
                         currentDestination?.hasRoute(screen::class) == true
                     },
                     onNavItemClick = { screen ->
@@ -90,90 +84,118 @@ fun AppNavigation(
                             // Restore state when reselecting a previously selected item
                             restoreState = true
                         }
-                    }
+                    },
                 )
             }
-        }
+        },
     ) { innerPadding ->
-        NavHost(
+        AppNavGraph(
             navController = navController,
-            startDestination = Screen.Home,
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            composable<Screen.Home> {
-                val viewModel: HomeViewModel = koinViewModel()
-                HomeScreen(
-                    viewModel = viewModel,
-                    onNavigate = { screen -> navController.navigate(screen) },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+            innerPadding = innerPadding,
+        )
+    }
+}
 
-            composable<Screen.AddWeight> {
-                val viewModel: AddWeightViewModel = koinViewModel()
-                AddWeightScreen(
-                    viewModel = viewModel,
-                    onBackClick = { navController.popBackStack() },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+@Composable
+private fun HandleIntentAction(
+    intentAction: String?,
+    navController: NavHostController,
+    onConsumeAction: () -> Unit,
+) {
+    val currentOnConsumeAction by rememberUpdatedState(onConsumeAction)
+    LaunchedEffect(intentAction) {
+        if (intentAction == null) return@LaunchedEffect
+        when (intentAction) {
+            "com.emm.mybest.ACTION_ADD_WEIGHT" -> navController.navigate(Screen.AddWeight)
+            "com.emm.mybest.ACTION_ADD_HABIT" -> navController.navigate(Screen.AddHabit)
+            "com.emm.mybest.ACTION_ADD_PHOTO" -> navController.navigate(Screen.AddPhoto)
+        }
+        currentOnConsumeAction()
+    }
+}
 
-            composable<Screen.AddHabit> {
-                val viewModel: AddHabitViewModel = koinViewModel()
-                AddHabitScreen(
-                    viewModel = viewModel,
-                    onBackClick = { navController.popBackStack() },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+@Composable
+private fun AppNavGraph(
+    navController: NavHostController,
+    innerPadding: androidx.compose.foundation.layout.PaddingValues,
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Home,
+        modifier = Modifier.background(MaterialTheme.colorScheme.background),
+    ) {
+        composable<Screen.Home> {
+            val viewModel: HomeViewModel = koinViewModel()
+            HomeScreen(
+                viewModel = viewModel,
+                onNavigate = { screen -> navController.navigate(screen) },
+                modifier = Modifier.padding(innerPadding),
+            )
+        }
 
-            composable<Screen.AddPhoto> {
-                val viewModel: AddPhotoViewModel = koinViewModel()
-                AddPhotoScreen(
-                    viewModel = viewModel,
-                    mediaManager = org.koin.compose.koinInject(),
-                    onBackClick = { navController.popBackStack() },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+        composable<Screen.AddWeight> {
+            val viewModel: AddWeightViewModel = koinViewModel()
+            AddWeightScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() },
+                modifier = Modifier.padding(innerPadding),
+            )
+        }
 
-            composable<Screen.History> {
-                val viewModel: HistoryViewModel = koinViewModel()
-                HistoryScreen(
-                    viewModel = viewModel,
-                    onBackClick = { navController.popBackStack() },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+        composable<Screen.AddHabit> {
+            val viewModel: AddHabitViewModel = koinViewModel()
+            AddHabitScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() },
+                modifier = Modifier.padding(innerPadding),
+            )
+        }
 
-            composable<Screen.Insights> {
-                val viewModel: InsightsViewModel = koinViewModel()
-                InsightsScreen(
-                    viewModel = viewModel,
-                    onBackClick = { navController.popBackStack() },
-                    onCompareClick = { navController.navigate(Screen.ComparePhotos) },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+        composable<Screen.AddPhoto> {
+            val viewModel: AddPhotoViewModel = koinViewModel()
+            AddPhotoScreen(
+                viewModel = viewModel,
+                mediaManager = org.koin.compose.koinInject(),
+                onBackClick = { navController.popBackStack() },
+                modifier = Modifier.padding(innerPadding),
+            )
+        }
 
-            composable<Screen.ComparePhotos> {
-                val viewModel: ComparePhotosViewModel = koinViewModel()
-                ComparePhotosScreen(
-                    viewModel = viewModel,
-                    onBackClick = { navController.popBackStack() },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+        composable<Screen.History> {
+            val viewModel: HistoryViewModel = koinViewModel()
+            HistoryScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() },
+                modifier = Modifier.padding(innerPadding),
+            )
+        }
 
-            composable<Screen.Timeline> {
-                val viewModel: TimelineViewModel = koinViewModel()
-                TimelineScreen(
-                    viewModel = viewModel,
-                    onBackClick = { navController.popBackStack() },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+        composable<Screen.Insights> {
+            val viewModel: InsightsViewModel = koinViewModel()
+            InsightsScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() },
+                onCompareClick = { navController.navigate(Screen.ComparePhotos) },
+                modifier = Modifier.padding(innerPadding),
+            )
+        }
+
+        composable<Screen.ComparePhotos> {
+            val viewModel: ComparePhotosViewModel = koinViewModel()
+            ComparePhotosScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() },
+                modifier = Modifier.padding(innerPadding),
+            )
+        }
+
+        composable<Screen.Timeline> {
+            val viewModel: TimelineViewModel = koinViewModel()
+            TimelineScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() },
+                modifier = Modifier.padding(innerPadding),
+            )
         }
     }
 }
