@@ -13,15 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,7 +36,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.HomeEffect
 import com.emm.mybest.viewmodel.HomeIntent
@@ -100,105 +94,38 @@ internal fun HomeScreenContent(
                 SummaryCard(
                     state = state,
                     onClick = { onIntent(HomeIntent.OnViewInsightsClick) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            item {
-                Text(
-                    text = "Hábitos de hoy",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-
-            if (state.dailyHabits.isEmpty()) {
-                item {
-                    HEmptyState(
-                        title = "Sin hábitos para hoy",
-                        description = "Crea un nuevo hábito para empezar a trackear tu progreso.",
-                        icon = Icons.Rounded.CheckCircle,
-                        action = {
-                            TextButton(onClick = { onIntent(HomeIntent.OnAddHabitClick) }) {
-                                Text("Añadir Hábito")
-                            }
-                        }
-                    )
-                }
-            } else {
-                items(state.dailyHabits) { habitWithRecord ->
-                    com.emm.mybest.ui.components.HabitCard(
-                        habit = habitWithRecord.habit,
-                        record = habitWithRecord.record,
-                        onToggle = { onIntent(HomeIntent.ToggleHabit(habitWithRecord)) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-
-            item {
-                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Accesos rápidos",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Row {
-                        TextButton(onClick = { onIntent(HomeIntent.OnViewTimelineClick) }) {
-                            Text("Timeline")
-                        }
-                        TextButton(onClick = { onIntent(HomeIntent.OnViewInsightsClick) }) {
-                            Text("Estadísticas")
-                        }
-                        TextButton(onClick = { onIntent(HomeIntent.OnViewHistoryClick) }) {
-                            Text("Historial")
-                        }
-                    }
-                }
+                )
             }
 
+            homeHabitsSection(state = state, onIntent = onIntent)
+
             item {
-                QuickActionCard(
-                    title = "Registrar Peso",
-                    subtitle = state.lastWeight?.let { "Último: $it kg" } ?: "Sigue tu evolución física",
-                    icon = Icons.Rounded.MonitorWeight,
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    iconColor = MaterialTheme.colorScheme.primary,
-                    onClick = { onIntent(HomeIntent.OnAddWeightClick) }
+                QuickAccessHeader(
+                    onTimelineClick = { onIntent(HomeIntent.OnViewTimelineClick) },
+                    onInsightsClick = { onIntent(HomeIntent.OnViewInsightsClick) },
+                    onHistoryClick = { onIntent(HomeIntent.OnViewHistoryClick) },
                 )
             }
 
             item {
-                QuickActionCard(
-                    title = "Hábitos de Hoy",
-                    subtitle = if (state.dailyHabits.count { it.record?.isCompleted == true } > 0) {
-                        "¡Ya has registrado hoy!"
-                    } else {
-                        "¿Qué tal tu alimentación?"
-                    },
-                    icon = Icons.Rounded.CheckCircle,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    iconColor = MaterialTheme.colorScheme.secondary,
-                    onClick = { onIntent(HomeIntent.OnAddHabitClick) }
+                WeightQuickAction(
+                    state = state,
+                    onClick = { onIntent(HomeIntent.OnAddWeightClick) },
                 )
             }
 
             item {
-                QuickActionCard(
-                    title = "Foto de Progreso",
-                    subtitle = "Total: ${state.totalPhotos} fotos",
-                    icon = Icons.Rounded.AddAPhoto,
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    iconColor = MaterialTheme.colorScheme.tertiary,
-                    onClick = { onIntent(HomeIntent.OnAddPhotoClick) }
+                DailyHabitsQuickAction(
+                    state = state,
+                    onClick = { onIntent(HomeIntent.OnAddHabitClick) },
+                )
+            }
+
+            item {
+                ProgressPhotoQuickAction(
+                    state = state,
+                    onClick = { onIntent(HomeIntent.OnAddPhotoClick) },
                 )
             }
         }
