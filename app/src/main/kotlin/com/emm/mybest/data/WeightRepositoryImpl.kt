@@ -30,6 +30,10 @@ class WeightRepositoryImpl(
             ),
         )
     }
+
+    override suspend fun deleteByDate(date: LocalDate) {
+        dao.deleteByDate(date)
+    }
 }
 
 private fun DailyWeightEntity.toDomain() = WeightEntry(

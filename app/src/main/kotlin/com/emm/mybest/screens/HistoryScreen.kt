@@ -55,10 +55,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.emm.mybest.data.entities.DailyHabitEntity
-import com.emm.mybest.data.entities.DailyWeightEntity
-import com.emm.mybest.data.entities.PhotoType
-import com.emm.mybest.data.entities.ProgressPhotoEntity
+import com.emm.mybest.domain.models.DailyHabitSummary
+import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.domain.models.ProgressPhoto
+import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.DaySummary
 import com.emm.mybest.viewmodel.HistoryIntent
@@ -297,7 +297,7 @@ fun DayDetailContent(
     modifier: Modifier = Modifier
 ) {
     val isToday = date == LocalDate.now()
-    var photoToDelete by remember { mutableStateOf<ProgressPhotoEntity?>(null) }
+    var photoToDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
 
     if (photoToDelete != null) {
         AlertDialog(
@@ -548,17 +548,17 @@ private fun HistoryScreenPreview() {
     val sampleMonthlyData = mapOf(
         today to DaySummary(
             date = today,
-            weight = DailyWeightEntity(date = today, weight = 75.5f, note = "Post entrenamiento"),
-            habit = DailyHabitEntity(date = today, ateHealthy = true, didExercise = true, notes = "Buen día"),
+            weight = WeightEntry(id = "w1", date = today, weight = 75.5f, note = "Post entrenamiento"),
+            habit = DailyHabitSummary(date = today, ateHealthy = true, didExercise = true, notes = "Buen día"),
             photos = listOf(
-                ProgressPhotoEntity(date = today, type = PhotoType.BODY, photoPath = ""),
-                ProgressPhotoEntity(date = today, type = PhotoType.ABDOMEN, photoPath = "")
+                ProgressPhoto(id = "p1", date = today, type = PhotoType.BODY, photoPath = "", createdAt = 0L),
+                ProgressPhoto(id = "p2", date = today, type = PhotoType.ABDOMEN, photoPath = "", createdAt = 0L)
             )
         ),
         today.minusDays(1) to DaySummary(
             date = today.minusDays(1),
-            weight = DailyWeightEntity(date = today.minusDays(1), weight = 76.0f),
-            habit = DailyHabitEntity(date = today.minusDays(1), ateHealthy = false, didExercise = true)
+            weight = WeightEntry(id = "w2", date = today.minusDays(1), weight = 76.0f),
+            habit = DailyHabitSummary(date = today.minusDays(1), ateHealthy = false, didExercise = true, notes = null)
         )
     )
 

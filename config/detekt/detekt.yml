@@ -738,7 +738,7 @@ style:
     active: true
     imports:
       - "kotlinx.android.synthetic.*"
-    forbiddenPatterns: ""
+    forbiddenPatterns: "com\\.emm\\.mybest\\.data"
     excludes:
       [
         "**/data/**",

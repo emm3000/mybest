@@ -2,12 +2,12 @@ package com.emm.mybest.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emm.mybest.data.entities.DailyHabitDao
-import com.emm.mybest.data.entities.DailyHabitEntity
-import com.emm.mybest.data.entities.DailyWeightDao
-import com.emm.mybest.data.entities.DailyWeightEntity
-import com.emm.mybest.data.entities.ProgressPhotoDao
-import com.emm.mybest.data.entities.ProgressPhotoEntity
+import com.emm.mybest.domain.models.DailyHabitSummary
+import com.emm.mybest.domain.models.ProgressPhoto
+import com.emm.mybest.domain.models.WeightEntry
+import com.emm.mybest.domain.repository.DailyHabitRepository
+import com.emm.mybest.domain.repository.PhotoRepository
+import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,9 +19,9 @@ import java.time.YearMonth
 
 data class DaySummary(
     val date: LocalDate,
-    val weight: DailyWeightEntity? = null,
-    val habit: DailyHabitEntity? = null,
-    val photos: List<ProgressPhotoEntity> = emptyList()
+    val weight: WeightEntry? = null,
+    val habit: DailyHabitSummary? = null,
+    val photos: List<ProgressPhoto> = emptyList()
 ) {
     val hasWeight: Boolean get() = weight != null
     val hasHabit: Boolean get() = habit != null
@@ -45,9 +45,9 @@ sealed class HistoryIntent {
 }
 
 class HistoryViewModel(
-    private val dailyWeightDao: DailyWeightDao,
-    private val dailyHabitDao: DailyHabitDao,
-    private val progressPhotoDao: ProgressPhotoDao
+    private val weightRepository: WeightRepository,
+    private val dailyHabitRepository: DailyHabitRepository,
+    private val photoRepository: PhotoRepository
 ) : ViewModel() {
 
     private val _selectedMonth = MutableStateFlow(YearMonth.now())
@@ -56,9 +56,9 @@ class HistoryViewModel(
     val state: StateFlow<HistoryState> = combine(
         _selectedMonth,
         _selectedDate,
-        dailyWeightDao.observeAllOrdered(),
-        dailyHabitDao.observeAll(),
-        progressPhotoDao.observeAll()
+        weightRepository.getWeightProgress(),
+        dailyHabitRepository.getAllDailyHabits(),
+        photoRepository.getAllPhotos()
     ) { month, selectedDate, weights, habits, photos ->
         HistoryState(
             selectedMonth = month,
@@ -78,21 +78,21 @@ class HistoryViewModel(
             is HistoryIntent.OnDateSelected -> _selectedDate.value = intent.date
             HistoryIntent.OnDateDismiss -> _selectedDate.value = null
             is HistoryIntent.OnDeleteWeight -> viewModelScope.launch {
-                dailyWeightDao.deleteByDate(intent.date)
+                weightRepository.deleteByDate(intent.date)
             }
             is HistoryIntent.OnDeleteHabit -> viewModelScope.launch {
-                dailyHabitDao.deleteByDate(intent.date)
+                dailyHabitRepository.deleteByDate(intent.date)
             }
             is HistoryIntent.OnDeletePhoto -> viewModelScope.launch {
-                progressPhotoDao.deleteById(intent.photoId)
+                photoRepository.deletePhoto(intent.photoId)
             }
         }
     }
 
     private fun transformToDaySummary(
-        weights: List<DailyWeightEntity>,
-        habits: List<DailyHabitEntity>,
-        photos: List<ProgressPhotoEntity>
+        weights: List<WeightEntry>,
+        habits: List<DailyHabitSummary>,
+        photos: List<ProgressPhoto>
     ): Map<LocalDate, DaySummary> {
         val days = mutableMapOf<LocalDate, DaySummary>()
 

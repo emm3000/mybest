@@ -29,6 +29,10 @@ class PhotoRepositoryImpl(
     override suspend fun savePhotos(photos: List<NewProgressPhoto>) {
         dao.insertAll(photos.map { it.toEntity() })
     }
+
+    override suspend fun deletePhoto(photoId: String) {
+        dao.deleteById(photoId)
+    }
 }
 
 private fun ProgressPhotoEntity.toDomain() = ProgressPhoto(
