@@ -81,7 +81,11 @@ fun <T> HSelect(
             onExpandedChange = { if (enabled) setIsExpanded(it) },
             modifier = Modifier.fillMaxWidth(),
         ) {
-            // Custom trigger row — same visual as HInput
+            val displayText = selectedItem?.let { itemLabel(it) }
+            val displayColor = selectDisplayColor(
+                enabled = enabled,
+                hasSelectedValue = displayText != null,
+            )
             Box(
                 modifier = Modifier
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
@@ -97,15 +101,10 @@ fun <T> HSelect(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    val displayText = selectedItem?.let { itemLabel(it) }
                     Text(
                         text = displayText ?: placeholder,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (displayText != null) {
-                            if (enabled) cs.onSurface else cs.onSurface.copy(alpha = 0.38f)
-                        } else {
-                            cs.onSurfaceVariant.copy(alpha = 0.6f)
-                        },
+                        color = displayColor,
                         modifier = Modifier.weight(1f),
                     )
                     Icon(
@@ -141,6 +140,19 @@ fun <T> HSelect(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun selectDisplayColor(
+    enabled: Boolean,
+    hasSelectedValue: Boolean,
+): androidx.compose.ui.graphics.Color {
+    val cs = MaterialTheme.colorScheme
+    return when {
+        !hasSelectedValue -> cs.onSurfaceVariant.copy(alpha = 0.6f)
+        enabled -> cs.onSurface
+        else -> cs.onSurface.copy(alpha = 0.38f)
     }
 }
 

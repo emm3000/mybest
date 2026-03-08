@@ -72,17 +72,21 @@ class AddHabitViewModel(
         when (intent) {
             AddHabitIntent.OnNextStep -> handleNextStep()
             AddHabitIntent.OnPreviousStep -> _state.update { it.copy(step = (it.step - 1).coerceAtLeast(1)) }
+            is AddHabitIntent.OnDayToggle -> toggleDay(intent.day)
+            AddHabitIntent.OnSaveClick -> saveHabit()
+            else -> handleFormFieldIntent(intent)
+        }
+    }
 
+    private fun handleFormFieldIntent(intent: AddHabitIntent) {
+        when (intent) {
             is AddHabitIntent.OnNameChange -> _state.update { it.copy(name = intent.name, nameError = null) }
             is AddHabitIntent.OnIconChange -> _state.update { it.copy(icon = intent.icon) }
             is AddHabitIntent.OnCategoryChange -> _state.update { it.copy(category = intent.category) }
-
             is AddHabitIntent.OnTypeChange -> _state.update { it.copy(type = intent.type) }
             is AddHabitIntent.OnGoalValueChange -> _state.update { it.copy(goalValue = intent.value, goalError = null) }
             is AddHabitIntent.OnUnitChange -> _state.update { it.copy(unit = intent.unit) }
-
-            is AddHabitIntent.OnDayToggle -> toggleDay(intent.day)
-            AddHabitIntent.OnSaveClick -> saveHabit()
+            else -> Unit
         }
     }
 

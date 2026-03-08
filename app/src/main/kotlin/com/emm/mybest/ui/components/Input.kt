@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -29,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -72,31 +69,11 @@ fun HInput(
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val cs = MaterialTheme.colorScheme
-
-    // Border color: error → error / focused → outline (ring) / idle → outlineVariant
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            isError -> cs.error
-            isFocused -> cs.outline
-            else -> cs.outlineVariant
-        },
-        animationSpec = tween(durationMillis = 150),
-        label = "input_border",
-    )
-
-    // Text color dims when disabled
-    val textColor = if (enabled) cs.onSurface else cs.onSurface.copy(alpha = 0.38f)
+    val borderColor = inputBorderColor(isError = isError, isFocused = isFocused)
+    val textColor = inputTextColor(enabled = enabled)
 
     Column(modifier = modifier) {
-        // ── External label (shadcn pattern) ──────────────────────────────────
-        if (label != null) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                color = if (isError) cs.error else cs.onSurface,
-            )
-            Spacer(Modifier.height(6.dp))
-        }
+        InputLabelSection(label = label, isError = isError)
 
         // ── Field box ─────────────────────────────────────────────────────────
         BasicTextField(
@@ -137,15 +114,29 @@ fun HInput(
 
         // ── Helper / error text ───────────────────────────────────────────────
         val helperText = errorMessage ?: supportingText
-        if (helperText != null) {
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = helperText,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isError) cs.error else cs.onSurfaceVariant,
-            )
-        }
+        InputHelperSection(helperText = helperText, isError = isError)
     }
+}
+
+@Composable
+private fun inputBorderColor(isError: Boolean, isFocused: Boolean): androidx.compose.ui.graphics.Color {
+    val cs = MaterialTheme.colorScheme
+    val targetColor = when {
+        isError -> cs.error
+        isFocused -> cs.outline
+        else -> cs.outlineVariant
+    }
+    return animateColorAsState(
+        targetValue = targetColor,
+        animationSpec = tween(durationMillis = 150),
+        label = "input_border",
+    ).value
+}
+
+@Composable
+private fun inputTextColor(enabled: Boolean): androidx.compose.ui.graphics.Color {
+    val cs = MaterialTheme.colorScheme
+    return if (enabled) cs.onSurface else cs.onSurface.copy(alpha = 0.38f)
 }
 
 @Composable
