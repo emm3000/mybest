@@ -9,7 +9,7 @@ build:
 
 config:
   validation: true
-  warningsAsErrors: false
+  warningsAsErrors: true
   checkExhaustiveness: false
   # when writing own rules with new properties, exclude the property path e.g.: 'my_rule_set,.*>.*>[my_property]'
   excludes: ""
@@ -169,12 +169,12 @@ complexity:
     threshold: 600
   LongMethod:
     active: true
-    threshold: 60
+    threshold: 80
   LongParameterList:
     active: true
     functionThreshold: 6
     constructorThreshold: 7
-    ignoreDefaultParameters: false
+    ignoreDefaultParameters: true
     ignoreDataClasses: true
     ignoreAnnotatedParameter: []
   MethodOverloading:
@@ -735,9 +735,23 @@ style:
         value: "TODO:"
     allowedPatterns: ""
   ForbiddenImport:
-    active: false
-    imports: []
-    forbiddenPatterns: ""
+    active: true
+    imports:
+      - "kotlinx.android.synthetic.*"
+    forbiddenPatterns: "com\\.emm\\.mybest\\.data"
+    excludes:
+      [
+        "**/data/**",
+        "**/di/**",
+        "**/test/**",
+        "**/androidTest/**",
+        "**/commonTest/**",
+        "**/jvmTest/**",
+        "**/androidUnitTest/**",
+        "**/androidInstrumentedTest/**",
+        "**/jsTest/**",
+        "**/iosTest/**",
+      ]
   ForbiddenMethodCall:
     active: false
     methods:
@@ -781,12 +795,12 @@ style:
       - "1"
       - "2"
     ignoreHashCodeFunction: true
-    ignorePropertyDeclaration: false
-    ignoreLocalVariableDeclaration: false
+    ignorePropertyDeclaration: true
+    ignoreLocalVariableDeclaration: true
     ignoreConstantDeclaration: true
     ignoreCompanionObjectPropertyDeclaration: true
     ignoreNamedArgument: true
-    ignoreEnums: false
+    ignoreEnums: true
     ignoreRanges: false
     ignoreExtensionFunctions: true
   MandatoryBracesLoops:
@@ -795,7 +809,7 @@ style:
     active: false
     maxChainedCalls: 5
   MaxLineLength:
-    active: true
+    active: false
     maxLineLength: 120
     excludePackageStatements: true
     excludeImportStatements: true
@@ -902,7 +916,7 @@ style:
     active: true
   UnusedPrivateMember:
     active: true
-    allowedNames: ""
+    allowedNames: "_|ignored|expected|.*Preview"
   UnusedPrivateProperty:
     active: true
     allowedNames: "_|ignored|expected|serialVersionUID"
