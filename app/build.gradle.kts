@@ -6,6 +6,15 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.gms.google-services")
+    alias(libs.plugins.detekt)
+}
+
+detekt {
+    toolVersion = libs.versions.detekt.get()
+    config.setFrom(file("${project.rootDir}/config/detekt/detekt.yml"))
+    buildUponDefaultConfig = true
+    allRules = false
+    autoCorrect = true
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -61,6 +70,9 @@ kotlin {
 }
 
 dependencies {
+    detektPlugins(libs.detekt.formatting)
+    detektPlugins(libs.detekt.compose.rules)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
