@@ -5,14 +5,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.emm.mybest.navigation.AppNavigation
 import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.viewmodel.MainViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
 
+    private val viewModel: MainViewModel by viewModel()
     private var intentAction by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +27,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            MyBestTheme {
+            val state by viewModel.state.collectAsState()
+            val darkTheme = state.isDarkMode ?: isSystemInDarkTheme()
+
+            MyBestTheme(
+                darkTheme = darkTheme,
+                dynamicColor = state.useDynamicColor
+            ) {
                 AppNavigation(
                     intentAction = intentAction,
                     onActionConsumed = { intentAction = null }
