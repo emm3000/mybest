@@ -1,4 +1,4 @@
-package com.emm.mybest.navigation
+package com.emm.mybest.core.navigation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
@@ -15,23 +15,23 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.emm.mybest.screens.AddHabitScreen
-import com.emm.mybest.screens.AddPhotoScreen
-import com.emm.mybest.screens.AddWeightScreen
-import com.emm.mybest.screens.ComparePhotosScreen
-import com.emm.mybest.screens.HistoryScreen
-import com.emm.mybest.screens.HomeScreen
-import com.emm.mybest.screens.InsightsScreen
-import com.emm.mybest.screens.TimelineScreen
+import com.emm.mybest.features.habit.presentation.AddHabitScreen
+import com.emm.mybest.features.habit.presentation.AddHabitViewModel
+import com.emm.mybest.features.history.presentation.HistoryScreen
+import com.emm.mybest.features.history.presentation.HistoryViewModel
+import com.emm.mybest.features.home.presentation.HomeScreen
+import com.emm.mybest.features.home.presentation.HomeViewModel
+import com.emm.mybest.features.insights.presentation.InsightsScreen
+import com.emm.mybest.features.insights.presentation.InsightsViewModel
+import com.emm.mybest.features.photo.presentation.AddPhotoScreen
+import com.emm.mybest.features.photo.presentation.AddPhotoViewModel
+import com.emm.mybest.features.photo.presentation.ComparePhotosScreen
+import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
+import com.emm.mybest.features.timeline.presentation.TimelineScreen
+import com.emm.mybest.features.timeline.presentation.TimelineViewModel
+import com.emm.mybest.features.weight.presentation.AddWeightScreen
+import com.emm.mybest.features.weight.presentation.AddWeightViewModel
 import com.emm.mybest.ui.components.HBottomNavigationBar
-import com.emm.mybest.viewmodel.AddHabitViewModel
-import com.emm.mybest.viewmodel.AddPhotoViewModel
-import com.emm.mybest.viewmodel.AddWeightViewModel
-import com.emm.mybest.viewmodel.ComparePhotosViewModel
-import com.emm.mybest.viewmodel.HistoryViewModel
-import com.emm.mybest.viewmodel.HomeViewModel
-import com.emm.mybest.viewmodel.InsightsViewModel
-import com.emm.mybest.viewmodel.TimelineViewModel
 import org.koin.androidx.compose.koinViewModel
 
 private val TOP_LEVEL_SCREENS = listOf(

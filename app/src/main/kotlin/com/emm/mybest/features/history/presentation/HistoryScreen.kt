@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.history.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,10 +57,6 @@ import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.ui.theme.MyBestTheme
-import com.emm.mybest.viewmodel.DaySummary
-import com.emm.mybest.viewmodel.HistoryIntent
-import com.emm.mybest.viewmodel.HistoryState
-import com.emm.mybest.viewmodel.HistoryViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth

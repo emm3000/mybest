@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.home.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,12 +36,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.navigation.Screen
+import com.emm.mybest.core.navigation.Screen
 import com.emm.mybest.ui.theme.MyBestTheme
-import com.emm.mybest.viewmodel.HomeEffect
-import com.emm.mybest.viewmodel.HomeIntent
-import com.emm.mybest.viewmodel.HomeState
-import com.emm.mybest.viewmodel.HomeViewModel
 import java.time.LocalDate
 
 @Composable

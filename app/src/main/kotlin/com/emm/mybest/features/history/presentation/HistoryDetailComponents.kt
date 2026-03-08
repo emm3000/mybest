@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.history.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

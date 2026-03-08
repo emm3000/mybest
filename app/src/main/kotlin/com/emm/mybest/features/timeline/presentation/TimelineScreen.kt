@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.timeline.presentation
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -39,10 +39,6 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.HEmptyState
-import com.emm.mybest.viewmodel.TimelineEffect
-import com.emm.mybest.viewmodel.TimelineIntent
-import com.emm.mybest.viewmodel.TimelineState
-import com.emm.mybest.viewmodel.TimelineViewModel
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 

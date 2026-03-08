@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.photo.presentation
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -51,8 +51,6 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
-import com.emm.mybest.viewmodel.ComparePhotosIntent
-import com.emm.mybest.viewmodel.ComparePhotosViewModel
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 

@@ -14,7 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import com.emm.mybest.navigation.AppNavigation
+import com.emm.mybest.core.navigation.AppNavigation
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.MainViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel

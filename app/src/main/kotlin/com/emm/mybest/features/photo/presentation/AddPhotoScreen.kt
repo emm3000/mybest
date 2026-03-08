@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.photo.presentation
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -61,10 +61,6 @@ import coil3.compose.AsyncImage
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.ui.theme.MyBestTheme
-import com.emm.mybest.viewmodel.AddPhotoEffect
-import com.emm.mybest.viewmodel.AddPhotoIntent
-import com.emm.mybest.viewmodel.AddPhotoState
-import com.emm.mybest.viewmodel.AddPhotoViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow

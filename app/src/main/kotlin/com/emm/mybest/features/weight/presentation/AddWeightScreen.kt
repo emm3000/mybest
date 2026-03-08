@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.weight.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,10 +36,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.theme.MyBestTheme
-import com.emm.mybest.viewmodel.AddWeightEffect
-import com.emm.mybest.viewmodel.AddWeightIntent
-import com.emm.mybest.viewmodel.AddWeightState
-import com.emm.mybest.viewmodel.AddWeightViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable

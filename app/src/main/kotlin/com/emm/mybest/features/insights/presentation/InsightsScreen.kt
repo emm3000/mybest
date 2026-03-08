@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.insights.presentation
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
@@ -46,10 +46,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.domain.models.WeightEntry
-import com.emm.mybest.viewmodel.InsightsEffect
-import com.emm.mybest.viewmodel.InsightsIntent
-import com.emm.mybest.viewmodel.InsightsState
-import com.emm.mybest.viewmodel.InsightsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

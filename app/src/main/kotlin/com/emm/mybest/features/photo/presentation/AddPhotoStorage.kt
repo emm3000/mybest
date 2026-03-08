@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.photo.presentation
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

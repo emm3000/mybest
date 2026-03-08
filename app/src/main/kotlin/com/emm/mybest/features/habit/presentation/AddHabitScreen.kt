@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.habit.presentation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
@@ -48,10 +48,6 @@ import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSelect
 import com.emm.mybest.ui.theme.MyBestTheme
-import com.emm.mybest.viewmodel.AddHabitEffect
-import com.emm.mybest.viewmodel.AddHabitIntent
-import com.emm.mybest.viewmodel.AddHabitState
-import com.emm.mybest.viewmodel.AddHabitViewModel
 import kotlinx.coroutines.flow.collectLatest
 import java.time.DayOfWeek
 import java.time.format.TextStyle

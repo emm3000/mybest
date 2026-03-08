@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.home.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -20,8 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HabitCard
-import com.emm.mybest.viewmodel.HomeIntent
-import com.emm.mybest.viewmodel.HomeState
 
 internal fun LazyListScope.homeHabitsSection(
     state: HomeState,

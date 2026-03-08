@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.photo.presentation
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer

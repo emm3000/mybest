@@ -1,4 +1,4 @@
-package com.emm.mybest.screens
+package com.emm.mybest.features.photo.presentation
 
 import android.Manifest
 import android.app.Activity
@@ -13,7 +13,6 @@ import androidx.compose.material3.SnackbarResult
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.emm.mybest.domain.media.MediaManager
-import com.emm.mybest.viewmodel.AddPhotoIntent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

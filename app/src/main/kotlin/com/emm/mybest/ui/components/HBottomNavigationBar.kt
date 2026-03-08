@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.emm.mybest.R
-import com.emm.mybest.navigation.Screen
+import com.emm.mybest.core.navigation.Screen
 
 sealed class HBottomNavItem(
     val screen: Screen,

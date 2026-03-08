@@ -1,4 +1,4 @@
-package com.emm.mybest.navigation
+package com.emm.mybest.core.navigation
 
 import kotlinx.serialization.Serializable
 

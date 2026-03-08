@@ -1,4 +1,4 @@
-package com.emm.mybest.viewmodel
+package com.emm.mybest.features.history.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

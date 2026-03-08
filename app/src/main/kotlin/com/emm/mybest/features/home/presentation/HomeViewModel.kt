@@ -1,11 +1,11 @@
-package com.emm.mybest.viewmodel
+package com.emm.mybest.features.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.navigation.Screen
 import com.emm.mybest.domain.models.HabitWithRecord
 import com.emm.mybest.domain.usecase.GetHomeSummaryUseCase
 import com.emm.mybest.domain.usecase.ToggleHabitUseCase
-import com.emm.mybest.navigation.Screen
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
