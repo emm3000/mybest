@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -86,9 +87,6 @@ fun HInput(
     // Text color dims when disabled
     val textColor = if (enabled) cs.onSurface else cs.onSurface.copy(alpha = 0.38f)
 
-    val boxAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart
-    val trailingAlignment = if (singleLine) Alignment.CenterEnd else Alignment.TopEnd
-
     Column(modifier = modifier) {
         // ── External label (shadcn pattern) ──────────────────────────────────
         if (label != null) {
@@ -125,56 +123,14 @@ fun HInput(
             textStyle = MaterialTheme.typography.bodyMedium.copy(color = textColor),
             cursorBrush = SolidColor(cs.onSurface),
             decorationBox = { innerTextField ->
-                Box(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                    contentAlignment = boxAlignment,
-                ) {
-                    // Leading icon
-                    if (leadingIcon != null) {
-                        Box(
-                            modifier = Modifier
-                                .align(boxAlignment)
-                                .padding(end = 36.dp),
-                        ) { leadingIcon() }
-                    }
-
-                    // Placeholder
-                    if (value.isEmpty() && placeholder != null) {
-                        Text(
-                            text = placeholder,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = cs.onSurfaceVariant.copy(alpha = 0.6f),
-                            modifier = Modifier
-                                .align(boxAlignment)
-                                .then(
-                                    if (leadingIcon != null) {
-                                        Modifier.padding(start = 28.dp)
-                                    } else {
-                                        Modifier
-                                    }
-                                ),
-                        )
-                    }
-
-                    // Trailing icon padding so text doesn't overlap it
-                    val textEndPadding = if (trailingIcon != null) 40.dp else 0.dp
-
-                    // Actual text field
-                    Box(
-                        modifier = Modifier
-                            .align(boxAlignment)
-                            .padding(
-                                start = if (leadingIcon != null) 28.dp else 0.dp,
-                                end = textEndPadding,
-                            )
-                            .fillMaxWidth(),
-                    ) { innerTextField() }
-
-                    // Trailing icon
-                    if (trailingIcon != null) {
-                        Box(Modifier.align(trailingAlignment)) { trailingIcon() }
-                    }
-                }
+                HInputDecoration(
+                    value = value,
+                    placeholder = placeholder,
+                    leadingIcon = leadingIcon,
+                    trailingIcon = trailingIcon,
+                    singleLine = singleLine,
+                    innerTextField = innerTextField,
+                )
             },
 
         )
@@ -190,6 +146,94 @@ fun HInput(
             )
         }
     }
+}
+
+@Composable
+private fun HInputDecoration(
+    value: String,
+    placeholder: String?,
+    leadingIcon: (@Composable () -> Unit)?,
+    trailingIcon: (@Composable () -> Unit)?,
+    singleLine: Boolean,
+    innerTextField: @Composable () -> Unit,
+) {
+    val boxAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart
+    val trailingAlignment = if (singleLine) Alignment.CenterEnd else Alignment.TopEnd
+    val placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+
+    Box(
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+        contentAlignment = boxAlignment,
+    ) {
+        LeadingIconSlot(icon = leadingIcon, alignment = boxAlignment)
+        PlaceholderText(
+            value = value,
+            placeholder = placeholder,
+            hasLeadingIcon = leadingIcon != null,
+            alignment = boxAlignment,
+            placeholderColor = placeholderColor,
+        )
+        InputTextFieldSlot(
+            hasLeadingIcon = leadingIcon != null,
+            hasTrailingIcon = trailingIcon != null,
+            alignment = boxAlignment,
+            innerTextField = innerTextField,
+        )
+        TrailingIconSlot(icon = trailingIcon, alignment = trailingAlignment)
+    }
+}
+
+@Composable
+private fun BoxScope.LeadingIconSlot(icon: (@Composable () -> Unit)?, alignment: Alignment) {
+    if (icon == null) return
+    Box(
+        modifier = Modifier
+            .align(alignment)
+            .padding(end = 36.dp),
+    ) { icon() }
+}
+
+@Composable
+private fun BoxScope.PlaceholderText(
+    value: String,
+    placeholder: String?,
+    hasLeadingIcon: Boolean,
+    alignment: Alignment,
+    placeholderColor: androidx.compose.ui.graphics.Color,
+) {
+    if (!value.isEmpty() || placeholder == null) return
+    Text(
+        text = placeholder,
+        style = MaterialTheme.typography.bodyMedium,
+        color = placeholderColor,
+        modifier = Modifier
+            .align(alignment)
+            .then(if (hasLeadingIcon) Modifier.padding(start = 28.dp) else Modifier),
+    )
+}
+
+@Composable
+private fun BoxScope.InputTextFieldSlot(
+    hasLeadingIcon: Boolean,
+    hasTrailingIcon: Boolean,
+    alignment: Alignment,
+    innerTextField: @Composable () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .align(alignment)
+            .padding(
+                start = if (hasLeadingIcon) 28.dp else 0.dp,
+                end = if (hasTrailingIcon) 40.dp else 0.dp,
+            )
+            .fillMaxWidth(),
+    ) { innerTextField() }
+}
+
+@Composable
+private fun BoxScope.TrailingIconSlot(icon: (@Composable () -> Unit)?, alignment: Alignment) {
+    if (icon == null) return
+    Box(Modifier.align(alignment)) { icon() }
 }
 
 // ─── Previews ────────────────────────────────────────────────────────────────
