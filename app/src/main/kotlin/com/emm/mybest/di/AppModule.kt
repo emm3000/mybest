@@ -21,7 +21,7 @@ val appModule = module {
             androidContext(),
             AppDatabase::class.java,
             "my_best_db"
-        ).fallbackToDestructiveMigration().build()
+        ).fallbackToDestructiveMigration(false).build()
     }
     
     single { get<AppDatabase>().dailyHabitDao() }
