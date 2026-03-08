@@ -18,10 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.TrendingDown
 import androidx.compose.material.icons.rounded.Compare
 import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material.icons.rounded.North
-import androidx.compose.material.icons.rounded.TrendingDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -168,7 +168,7 @@ private fun WeightSummaryCards(
             modifier = Modifier.weight(1f),
             title = "Pérdida",
             value = String.format(java.util.Locale.getDefault(), "%.1fkg", state.totalWeightLost),
-            icon = if (state.totalWeightLost >= 0) Icons.Rounded.TrendingDown else Icons.Rounded.North,
+            icon = if (state.totalWeightLost >= 0) Icons.AutoMirrored.Rounded.TrendingDown else Icons.Rounded.North,
             containerColor = MaterialTheme.colorScheme.tertiaryContainer
         )
     }

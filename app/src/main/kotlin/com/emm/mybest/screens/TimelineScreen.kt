@@ -45,6 +45,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 private const val TIMELINE_PHOTO_HEIGHT_RATIO = 0.8f
+private val SPANISH_LOCALE: Locale = Locale.forLanguageTag("es")
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -146,7 +147,9 @@ fun TimelineContent(
             ) {
                 Column {
                     Text(
-                        text = currentPhoto.date.format(DateTimeFormatter.ofPattern("d 'de' MMMM, yyyy", Locale("es"))),
+                        text = currentPhoto.date.format(
+                            DateTimeFormatter.ofPattern("d 'de' MMMM, yyyy", SPANISH_LOCALE),
+                        ),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

@@ -58,6 +58,7 @@ import java.util.Locale
 
 private const val ADD_HABIT_TOTAL_STEPS = 3
 private const val ADD_HABIT_ICON_GRID_COLUMNS = 4
+private val SPANISH_LOCALE: Locale = Locale.forLanguageTag("es")
 
 @Composable
 fun AddHabitScreen(
@@ -389,7 +390,7 @@ private fun DayChip(
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
-                text = day.getDisplayName(TextStyle.NARROW, Locale("es")).uppercase(),
+                text = day.getDisplayName(TextStyle.NARROW, SPANISH_LOCALE).uppercase(),
                 style = MaterialTheme.typography.labelMedium,
                 color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal

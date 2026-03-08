@@ -39,6 +39,7 @@ fun HabitCard(
     val isCompleted = record?.isCompleted ?: false
     val cs = MaterialTheme.colorScheme
 
+    @Suppress("DEPRECATION")
     val dismissState = androidx.compose.material3.rememberSwipeToDismissBoxState(
         confirmValueChange = {
             if (it != androidx.compose.material3.SwipeToDismissBoxValue.Settled) {
