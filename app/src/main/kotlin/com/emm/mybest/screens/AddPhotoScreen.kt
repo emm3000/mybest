@@ -75,8 +75,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
 import coil3.compose.AsyncImage
-import com.emm.mybest.data.entities.PhotoType
 import com.emm.mybest.domain.media.MediaManager
+import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.AddPhotoEffect
 import com.emm.mybest.viewmodel.AddPhotoIntent

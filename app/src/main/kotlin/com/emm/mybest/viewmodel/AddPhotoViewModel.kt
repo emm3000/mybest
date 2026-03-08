@@ -2,16 +2,15 @@ package com.emm.mybest.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emm.mybest.data.entities.PhotoType
-import com.emm.mybest.data.entities.ProgressPhotoDao
-import com.emm.mybest.data.entities.ProgressPhotoEntity
+import com.emm.mybest.domain.models.NewProgressPhoto
+import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.domain.repository.PhotoRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 data class SelectedPhoto(
     val uri: String,
@@ -36,7 +35,7 @@ sealed class AddPhotoEffect {
 }
 
 class AddPhotoViewModel(
-    private val progressPhotoDao: ProgressPhotoDao
+    private val photoRepository: PhotoRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddPhotoState())
@@ -85,14 +84,13 @@ class AddPhotoViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
-                val entities = photos.map { photo ->
-                    ProgressPhotoEntity(
-                        date = LocalDate.now(),
+                val newPhotos = photos.map { photo ->
+                    NewProgressPhoto(
                         type = photo.type,
-                        photoPath = photo.uri
+                        photoPath = photo.uri,
                     )
                 }
-                progressPhotoDao.insertAll(entities)
+                photoRepository.savePhotos(newPhotos)
                 _effect.emit(AddPhotoEffect.NavigateBack)
             } catch (e: Exception) {
                 _effect.emit(AddPhotoEffect.ShowError("Error al guardar: ${e.message}"))

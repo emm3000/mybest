@@ -49,8 +49,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.emm.mybest.data.entities.PhotoType
-import com.emm.mybest.data.entities.ProgressPhotoEntity
+import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.viewmodel.ComparePhotosIntent
 import com.emm.mybest.viewmodel.ComparePhotosViewModel
 import java.time.format.DateTimeFormatter
@@ -160,7 +160,7 @@ fun ComparePhotosScreen(
 @Composable
 fun ComparisonSlot(
     label: String,
-    photo: ProgressPhotoEntity?,
+    photo: ProgressPhoto?,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -276,7 +276,7 @@ fun PhotoTypeSelector(
 
 @Composable
 fun PhotoSelectionCard(
-    photo: ProgressPhotoEntity,
+    photo: ProgressPhoto,
     isSelected: Boolean,
     onSelect: () -> Unit,
     modifier: Modifier = Modifier

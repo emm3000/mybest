@@ -2,9 +2,9 @@ package com.emm.mybest.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emm.mybest.data.entities.PhotoType
-import com.emm.mybest.data.entities.ProgressPhotoDao
-import com.emm.mybest.data.entities.ProgressPhotoEntity
+import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.domain.models.ProgressPhoto
+import com.emm.mybest.domain.repository.PhotoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,34 +13,34 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 
 data class ComparePhotosState(
-    val photos: List<ProgressPhotoEntity> = emptyList(),
+    val photos: List<ProgressPhoto> = emptyList(),
     val selectedType: PhotoType? = null,
-    val beforePhoto: ProgressPhotoEntity? = null,
-    val afterPhoto: ProgressPhotoEntity? = null,
+    val beforePhoto: ProgressPhoto? = null,
+    val afterPhoto: ProgressPhoto? = null,
     val isLoading: Boolean = false
 )
 
 sealed class ComparePhotosIntent {
     data class OnTypeSelected(val type: PhotoType?) : ComparePhotosIntent()
-    data class OnBeforePhotoSelected(val photo: ProgressPhotoEntity) : ComparePhotosIntent()
-    data class OnAfterPhotoSelected(val photo: ProgressPhotoEntity) : ComparePhotosIntent()
+    data class OnBeforePhotoSelected(val photo: ProgressPhoto) : ComparePhotosIntent()
+    data class OnAfterPhotoSelected(val photo: ProgressPhoto) : ComparePhotosIntent()
     object ToggleSwap : ComparePhotosIntent()
 }
 
 class ComparePhotosViewModel(
-    private val progressPhotoDao: ProgressPhotoDao
+    private val photoRepository: PhotoRepository
 ) : ViewModel() {
 
     private val _selectedType = MutableStateFlow<PhotoType?>(null)
-    private val _beforePhoto = MutableStateFlow<ProgressPhotoEntity?>(null)
-    private val _afterPhoto = MutableStateFlow<ProgressPhotoEntity?>(null)
+    private val _beforePhoto = MutableStateFlow<ProgressPhoto?>(null)
+    private val _afterPhoto = MutableStateFlow<ProgressPhoto?>(null)
 
     val state: StateFlow<ComparePhotosState> = combine(
         _selectedType.flatMapLatest { type ->
             if (type == null) {
-                progressPhotoDao.observeAll()
+                photoRepository.getAllPhotos()
             } else {
-                progressPhotoDao.observeByType(type)
+                photoRepository.getPhotosByType(type)
             }
         },
         _selectedType,

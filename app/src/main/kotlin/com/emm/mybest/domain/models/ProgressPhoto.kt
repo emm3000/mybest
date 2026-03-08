@@ -6,7 +6,7 @@ data class ProgressPhoto(
     val id: String,
     val habitRecordId: String? = null,
     val date: LocalDate,
-    val type: String,
+    val type: PhotoType,
     val photoPath: String,
     val createdAt: Long
 )
