@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.navigation.Screen
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.HomeEffect
 import com.emm.mybest.viewmodel.HomeIntent
@@ -46,7 +47,7 @@ import java.time.LocalDate
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onNavigate: (com.emm.mybest.navigation.Screen) -> Unit,
+    onNavigate: (Screen) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()

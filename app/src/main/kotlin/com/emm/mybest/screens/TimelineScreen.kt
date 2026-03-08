@@ -37,6 +37,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.emm.mybest.domain.models.ProgressPhoto
+import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.viewmodel.TimelineEffect
 import com.emm.mybest.viewmodel.TimelineIntent
 import com.emm.mybest.viewmodel.TimelineState
@@ -109,7 +111,7 @@ fun TimelineContent(
     }
 
     if (state.photosByDate.isEmpty()) {
-        com.emm.mybest.ui.components.HEmptyState(
+        HEmptyState(
             title = "Sin recuerdos aún",
             description = "Tus fotos de progreso aparecerán aquí para que veas tu evolución.",
             icon = Icons.Rounded.PhotoCamera,
@@ -170,7 +172,7 @@ fun TimelineContent(
 
 @Composable
 fun PhotoPagerItem(
-    photo: com.emm.mybest.domain.models.ProgressPhoto,
+    photo: ProgressPhoto,
     modifier: Modifier = Modifier
 ) {
     Card(

@@ -1,14 +1,17 @@
 package com.emm.mybest.domain.repository
 
 import com.emm.mybest.domain.models.Habit
+import com.emm.mybest.domain.models.HabitRecord
+import com.emm.mybest.domain.models.HabitWithRecord
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 interface HabitRepository {
     fun getAllHabits(): Flow<List<Habit>>
     fun getHabitById(id: String): Flow<Habit?>
-    fun getHabitsWithRecordsForDate(date: java.time.LocalDate): Flow<List<com.emm.mybest.domain.models.HabitWithRecord>>
+    fun getHabitsWithRecordsForDate(date: LocalDate): Flow<List<HabitWithRecord>>
     suspend fun insertHabit(habit: Habit)
     suspend fun updateHabit(habit: Habit)
     suspend fun deleteHabit(habit: Habit)
-    suspend fun insertRecord(record: com.emm.mybest.domain.models.HabitRecord)
+    suspend fun insertRecord(record: HabitRecord)
 }

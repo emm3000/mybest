@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.Habit
 import com.emm.mybest.domain.models.HabitType
+import com.emm.mybest.domain.usecase.CreateHabitUseCase
 import com.emm.mybest.domain.validation.HabitValidator
+import com.emm.mybest.ui.theme.shadcnPrimary
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -59,7 +61,7 @@ sealed class AddHabitEffect {
 }
 
 class AddHabitViewModel(
-    private val createHabitUseCase: com.emm.mybest.domain.usecase.CreateHabitUseCase
+    private val createHabitUseCase: CreateHabitUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddHabitState())
@@ -131,7 +133,7 @@ class AddHabitViewModel(
                     id = UUID.randomUUID().toString(),
                     name = _state.value.name,
                     icon = _state.value.icon,
-                    color = com.emm.mybest.ui.theme.shadcnPrimary.hashCode(), // Using theme color
+                    color = shadcnPrimary.hashCode(), // Using theme color
                     category = _state.value.category,
                     type = _state.value.type,
                     goalValue = _state.value.goalValue.toFloatOrNull(),

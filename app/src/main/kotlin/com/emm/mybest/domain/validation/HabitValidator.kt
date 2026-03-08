@@ -1,5 +1,7 @@
 package com.emm.mybest.domain.validation
 
+import com.emm.mybest.domain.models.HabitType
+
 data class ValidationResult(
     val isValid: Boolean,
     val errorMessage: String? = null
@@ -19,8 +21,8 @@ object HabitValidator {
         }
     }
 
-    fun validateGoal(type: com.emm.mybest.domain.models.HabitType, value: Float?): ValidationResult {
-        val requiresGoalValue = type != com.emm.mybest.domain.models.HabitType.BOOLEAN
+    fun validateGoal(type: HabitType, value: Float?): ValidationResult {
+        val requiresGoalValue = type != HabitType.BOOLEAN
         val isInvalidGoalValue = value == null || value <= 0
 
         return if (requiresGoalValue && isInvalidGoalValue) {

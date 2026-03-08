@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSelect
 import com.emm.mybest.ui.theme.MyBestTheme
@@ -267,9 +268,9 @@ private fun StepTwo(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             val types = listOf(
-                "Si/No" to com.emm.mybest.domain.models.HabitType.BOOLEAN,
-                "Tiempo" to com.emm.mybest.domain.models.HabitType.TIME,
-                "Métrica" to com.emm.mybest.domain.models.HabitType.METRIC
+                "Si/No" to HabitType.BOOLEAN,
+                "Tiempo" to HabitType.TIME,
+                "Métrica" to HabitType.METRIC
             )
             types.forEach { (label, type) ->
                 TypeCard(
@@ -281,17 +282,17 @@ private fun StepTwo(
             }
         }
 
-        if (state.type != com.emm.mybest.domain.models.HabitType.BOOLEAN) {
+        if (state.type != HabitType.BOOLEAN) {
             HInput(
                 value = state.goalValue,
                 onValueChange = { onIntent(AddHabitIntent.OnGoalValueChange(it)) },
-                label = if (state.type == com.emm.mybest.domain.models.HabitType.TIME) "Minutos al día" else "Valor objetivo",
+                label = if (state.type == HabitType.TIME) "Minutos al día" else "Valor objetivo",
                 placeholder = "Ej: 30",
                 errorMessage = state.goalError,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            if (state.type == com.emm.mybest.domain.models.HabitType.METRIC) {
+            if (state.type == HabitType.METRIC) {
                 HInput(
                     value = state.unit,
                     onValueChange = { onIntent(AddHabitIntent.OnUnitChange(it)) },

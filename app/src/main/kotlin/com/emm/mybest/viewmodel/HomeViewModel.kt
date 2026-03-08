@@ -3,7 +3,9 @@ package com.emm.mybest.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.HabitWithRecord
+import com.emm.mybest.domain.usecase.GetHomeSummaryUseCase
 import com.emm.mybest.domain.usecase.ToggleHabitUseCase
+import com.emm.mybest.navigation.Screen
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,11 +35,11 @@ sealed class HomeIntent {
 
 sealed class HomeEffect {
     data class ShowError(val message: String) : HomeEffect()
-    data class Navigate(val route: com.emm.mybest.navigation.Screen) : HomeEffect()
+    data class Navigate(val route: Screen) : HomeEffect()
 }
 
 class HomeViewModel(
-    getHomeSummaryUseCase: com.emm.mybest.domain.usecase.GetHomeSummaryUseCase,
+    getHomeSummaryUseCase: GetHomeSummaryUseCase,
     private val toggleHabitUseCase: ToggleHabitUseCase
 ) : ViewModel() {
 
@@ -62,16 +64,16 @@ class HomeViewModel(
     fun onIntent(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.ToggleHabit -> toggleHabit(intent.habitWithRecord)
-            HomeIntent.OnAddWeightClick -> emitNavigate(com.emm.mybest.navigation.Screen.AddWeight)
-            HomeIntent.OnAddHabitClick -> emitNavigate(com.emm.mybest.navigation.Screen.AddHabit)
-            HomeIntent.OnAddPhotoClick -> emitNavigate(com.emm.mybest.navigation.Screen.AddPhoto)
-            HomeIntent.OnViewHistoryClick -> emitNavigate(com.emm.mybest.navigation.Screen.History)
-            HomeIntent.OnViewInsightsClick -> emitNavigate(com.emm.mybest.navigation.Screen.Insights)
-            HomeIntent.OnViewTimelineClick -> emitNavigate(com.emm.mybest.navigation.Screen.Timeline)
+            HomeIntent.OnAddWeightClick -> emitNavigate(Screen.AddWeight)
+            HomeIntent.OnAddHabitClick -> emitNavigate(Screen.AddHabit)
+            HomeIntent.OnAddPhotoClick -> emitNavigate(Screen.AddPhoto)
+            HomeIntent.OnViewHistoryClick -> emitNavigate(Screen.History)
+            HomeIntent.OnViewInsightsClick -> emitNavigate(Screen.Insights)
+            HomeIntent.OnViewTimelineClick -> emitNavigate(Screen.Timeline)
         }
     }
 
-    private fun emitNavigate(screen: com.emm.mybest.navigation.Screen) {
+    private fun emitNavigate(screen: Screen) {
         viewModelScope.launch {
             _effect.emit(HomeEffect.Navigate(screen))
         }

@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.components.HEmptyState
+import com.emm.mybest.ui.components.HabitCard
 import com.emm.mybest.viewmodel.HomeIntent
 import com.emm.mybest.viewmodel.HomeState
 
@@ -50,7 +51,7 @@ internal fun LazyListScope.homeHabitsSection(
         }
     } else {
         items(state.dailyHabits) { habitWithRecord ->
-            com.emm.mybest.ui.components.HabitCard(
+            HabitCard(
                 habit = habitWithRecord.habit,
                 record = habitWithRecord.record,
                 onToggle = { onIntent(HomeIntent.ToggleHabit(habitWithRecord)) },

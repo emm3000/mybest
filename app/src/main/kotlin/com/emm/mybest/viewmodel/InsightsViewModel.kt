@@ -2,6 +2,7 @@ package com.emm.mybest.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class InsightsState(
-    val weightHistory: List<com.emm.mybest.domain.models.WeightEntry> = emptyList(),
+    val weightHistory: List<WeightEntry> = emptyList(),
     val habitConsistency: Float = 0f,
     val totalWeightLost: Float = 0f,
     val currentWeight: Float = 0f,

@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.viewmodel.InsightsEffect
 import com.emm.mybest.viewmodel.InsightsIntent
 import com.emm.mybest.viewmodel.InsightsState
@@ -198,7 +199,7 @@ private fun StatCard(
 
 @Composable
 private fun WeightChart(
-    weights: List<com.emm.mybest.domain.models.WeightEntry>,
+    weights: List<WeightEntry>,
     modifier: Modifier = Modifier
 ) {
     if (weights.size < 2) {
