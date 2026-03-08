@@ -84,6 +84,16 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.exifinterface)
     ksp(libs.androidx.room.compiler)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // Stats (Vico)
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
     
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
@@ -95,10 +105,6 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.ktx)
 
     implementation(platform(libs.firebase.bom))
 }
