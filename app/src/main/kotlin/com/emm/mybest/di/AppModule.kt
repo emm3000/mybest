@@ -2,6 +2,7 @@ package com.emm.mybest.di
 
 import androidx.room.Room
 import com.emm.mybest.data.AppDatabase
+import com.emm.mybest.data.UserPreferencesRepository
 import com.emm.mybest.viewmodel.AddHabitViewModel
 import com.emm.mybest.viewmodel.AddPhotoViewModel
 import com.emm.mybest.viewmodel.AddWeightViewModel
@@ -20,12 +21,15 @@ val appModule = module {
             androidContext(),
             AppDatabase::class.java,
             "my_best_db"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
     
     single { get<AppDatabase>().dailyHabitDao() }
     single { get<AppDatabase>().dailyWeightDao() }
     single { get<AppDatabase>().progressPhotoDao() }
+    single { get<AppDatabase>().habitDao() }
+    single { get<AppDatabase>().habitRecordDao() }
+    single { UserPreferencesRepository(androidContext()) }
     
     viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { AddWeightViewModel(get()) }
