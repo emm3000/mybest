@@ -7,8 +7,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.DayOfWeek
 import org.junit.Test
-import java.time.DayOfWeek
 
 class CreateHabitUseCaseTest {
 
