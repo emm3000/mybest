@@ -61,7 +61,7 @@ fun AppNavigation(
                 onViewTimelineClick = { navController.navigate(Screen.Timeline.route) }
             )
         }
-        
+
         composable(Screen.AddWeight.route) {
             val viewModel: AddWeightViewModel = koinViewModel()
             AddWeightScreen(
@@ -69,7 +69,7 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() }
             )
         }
-        
+
         composable(Screen.AddHabit.route) {
             val viewModel: AddHabitViewModel = koinViewModel()
             AddHabitScreen(

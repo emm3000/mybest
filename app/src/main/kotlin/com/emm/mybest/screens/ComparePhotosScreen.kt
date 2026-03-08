@@ -162,7 +162,7 @@ fun ComparisonSlot(
     onClick: () -> Unit
 ) {
     val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
-    
+
     Column(
         modifier = modifier
             .fillMaxHeight()

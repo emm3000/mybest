@@ -183,9 +183,9 @@ fun TimelineItem(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             photos.forEach { photo ->
                 PhotoCard(photo)
                 Spacer(modifier = Modifier.height(12.dp))
@@ -211,7 +211,7 @@ fun PhotoCard(photo: ProgressPhotoEntity) {
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
                 contentScale = ContentScale.Crop
             )
-            
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -225,7 +225,7 @@ fun PhotoCard(photo: ProgressPhotoEntity) {
                     color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.SemiBold
                 )
-                
+
                 Text(
                     text = DateTimeFormatter.ofPattern("HH:mm").format(
                         java.time.Instant.ofEpochMilli(photo.createdAt)

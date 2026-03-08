@@ -6,9 +6,9 @@ import androidx.room.PrimaryKey
 import java.util.UUID
 
 enum class HabitType {
-    BOOLEAN,   // Yes/No
-    TIME,      // e.g., Read 30 mins
-    METRIC     // e.g., Drink 2L water
+    BOOLEAN, // Yes/No
+    TIME, // e.g., Read 30 mins
+    METRIC // e.g., Drink 2L water
 }
 
 @Entity(tableName = "habits")
@@ -43,7 +43,7 @@ data class HabitEntity(
     // Frequency as a simple JSON string or comma-separated days for now
     // Example: "1,2,3,4,5,6,7" for every day, "1,3,5" for Mon/Wed/Fri
     @ColumnInfo(name = "scheduled_days")
-    val scheduledDays: String, 
+    val scheduledDays: String,
 
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),

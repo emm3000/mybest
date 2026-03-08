@@ -1,6 +1,9 @@
 package com.emm.mybest.data.entities
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -18,7 +21,7 @@ interface HabitRecordDao {
 
     @Query("SELECT * FROM habit_records WHERE habit_id = :habitId ORDER BY date DESC")
     fun getRecordsForHabit(habitId: String): Flow<List<HabitRecordEntity>>
-    
+
     @Query("DELETE FROM habit_records WHERE id = :id")
     suspend fun deleteById(id: String)
 }

@@ -122,7 +122,7 @@ fun HCardFooter(
 @PreviewLightDark
 @Composable
 private fun HCardVariantsPreview() {
-    MyBestTheme() {
+    MyBestTheme {
         Surface {
             Column(
                 modifier = Modifier
@@ -152,7 +152,7 @@ private fun HCardVariantsPreview() {
 @PreviewLightDark
 @Composable
 private fun HCardWithSlotsPreview() {
-    MyBestTheme() {
+    MyBestTheme {
         Surface {
             HCard(
                 modifier = Modifier

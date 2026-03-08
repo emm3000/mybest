@@ -92,11 +92,11 @@ internal fun HomeScreenContent(
             item {
                 HomeHeader()
             }
-            
+
             item {
                 SummaryCard(state, onClick = onViewInsightsClick)
             }
-            
+
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -121,7 +121,7 @@ internal fun HomeScreenContent(
                     }
                 }
             }
-            
+
             item {
                 QuickActionCard(
                     title = "Registrar Peso",
@@ -133,7 +133,7 @@ internal fun HomeScreenContent(
                     onClick = onAddWeightClick
                 )
             }
-            
+
             item {
                 QuickActionCard(
                     title = "Hábitos de Hoy",
@@ -145,7 +145,7 @@ internal fun HomeScreenContent(
                     onClick = onAddHabitClick
                 )
             }
-            
+
             item {
                 QuickActionCard(
                     title = "Foto de Progreso",
@@ -183,7 +183,7 @@ fun HomeHeader() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        
+
         Surface(
             modifier = Modifier.size(44.dp),
             shape = CircleShape,
@@ -288,9 +288,9 @@ fun QuickActionCard(
                     modifier = Modifier.padding(14.dp)
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Column {
                 Text(
                     text = title,
@@ -304,9 +304,9 @@ fun QuickActionCard(
                     color = contentColor.copy(alpha = 0.8f)
                 )
             }
-            
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             Icon(
                 imageVector = Icons.Rounded.ChevronRight,
                 contentDescription = null,

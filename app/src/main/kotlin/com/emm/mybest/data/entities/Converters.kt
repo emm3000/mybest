@@ -23,4 +23,3 @@ class Converters {
     @TypeConverter
     fun toHabitType(value: String): HabitType = value.let(HabitType::valueOf)
 }
-

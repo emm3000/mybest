@@ -89,7 +89,7 @@ fun InsightsScreen(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 WeightSummaryCards(state)
-                
+
                 InsightsSection(title = "Evolución de Peso") {
                     WeightChart(
                         weights = state.weightHistory,
@@ -184,7 +184,11 @@ private fun WeightChart(
 ) {
     if (weights.size < 2) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
-            Text("Registra al menos 2 pesos para ver el gráfico", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
+            Text(
+                "Registra al menos 2 pesos para ver el gráfico",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline
+            )
         }
         return
     }
@@ -196,11 +200,11 @@ private fun WeightChart(
         val minWeight = weights.minOf { it.weight } - 2f
         val maxWeight = weights.maxOf { it.weight } + 2f
         val range = maxWeight - minWeight
-        
+
         val width = size.width
         val height = size.height
         val stepX = width / (weights.size - 1)
-        
+
         val points = weights.mapIndexed { index, dailyWeight ->
             val x = index * stepX
             val y = height - ((dailyWeight.weight - minWeight) / range * height)
@@ -271,10 +275,14 @@ private fun HabitStats(state: InsightsState) {
             Spacer(Modifier.width(20.dp))
             Column {
                 Text("Consistencia General", fontWeight = FontWeight.Bold)
-                Text("Basado en todos tus registros", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                Text(
+                    "Basado en todos tus registros",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
             }
         }
-        
+
         HorizontalStatRow(
             label = "Días de Ejercicio",
             count = state.exerciseDays,

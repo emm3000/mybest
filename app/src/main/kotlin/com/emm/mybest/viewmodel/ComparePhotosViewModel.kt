@@ -37,8 +37,11 @@ class ComparePhotosViewModel(
 
     val state: StateFlow<ComparePhotosState> = combine(
         _selectedType.flatMapLatest { type ->
-            if (type == null) progressPhotoDao.observeAll()
-            else progressPhotoDao.observeByType(type)
+            if (type == null) {
+                progressPhotoDao.observeAll()
+            } else {
+                progressPhotoDao.observeByType(type)
+            }
         },
         _selectedType,
         _beforePhoto,
@@ -61,7 +64,7 @@ class ComparePhotosViewModel(
         when (intent) {
             is ComparePhotosIntent.OnTypeSelected -> {
                 _selectedType.value = intent.type
-                // Reset selection if they are no longer in the list? 
+                // Reset selection if they are no longer in the list?
                 // Better to keep them if they exist, but for simplicity let's reset if type changes
                 _beforePhoto.value = null
                 _afterPhoto.value = null

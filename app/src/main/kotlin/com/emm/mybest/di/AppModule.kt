@@ -23,14 +23,14 @@ val appModule = module {
             "my_best_db"
         ).fallbackToDestructiveMigration(false).build()
     }
-    
+
     single { get<AppDatabase>().dailyHabitDao() }
     single { get<AppDatabase>().dailyWeightDao() }
     single { get<AppDatabase>().progressPhotoDao() }
     single { get<AppDatabase>().habitDao() }
     single { get<AppDatabase>().habitRecordDao() }
     single { UserPreferencesRepository(androidContext()) }
-    
+
     viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { AddWeightViewModel(get()) }
     viewModel { AddHabitViewModel(get()) }

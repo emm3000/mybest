@@ -78,7 +78,7 @@ fun HistoryScreen(
     onBackClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-    
+
     HistoryContent(
         state = state,
         onBackClick = onBackClick,
@@ -152,7 +152,7 @@ fun HistoryContent(
                 onDateClick = { onIntent(HistoryIntent.OnDateSelected(it)) },
                 dayData = state.monthlyData
             )
-            
+
             Spacer(modifier = Modifier.weight(1f))
             LegendItem(color = MaterialTheme.colorScheme.primary, text = "Peso registrado")
             LegendItem(color = MaterialTheme.colorScheme.secondary, text = "Hábitos completados")
@@ -174,9 +174,13 @@ fun MonthSelector(
         IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
             Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = "Mes anterior")
         }
-        
+
         Text(
-            text = currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("es-ES"))).replaceFirstChar { it.uppercase() },
+            text = currentMonth.format(
+                DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("es-ES"))
+            ).replaceFirstChar {
+                it.uppercase()
+            },
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
@@ -196,9 +200,9 @@ fun CalendarGrid(
     val daysInMonth = yearMonth.lengthOfMonth()
     val firstDayOfMonth = yearMonth.atDay(1).dayOfWeek.value
     val startOffset = firstDayOfMonth - 1
-    
+
     val totalCells = daysInMonth + startOffset
-    
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(7),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -211,7 +215,7 @@ fun CalendarGrid(
                 val dayOfMonth = index - startOffset + 1
                 val date = yearMonth.atDay(dayOfMonth)
                 val summary = dayData[date]
-                
+
                 DayCell(
                     date = date,
                     summary = summary,
@@ -229,12 +233,16 @@ fun DayCell(
     onClick: () -> Unit
 ) {
     val isToday = date == LocalDate.now()
-    
+
     Column(
         modifier = Modifier
             .aspectRatio(0.8f)
             .clip(RoundedCornerShape(12.dp))
-            .background(if (isToday) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            .background(
+                if (isToday) MaterialTheme.colorScheme.primaryContainer.copy(
+                    alpha = 0.3f
+                ) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            )
             .clickable(onClick = onClick)
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -245,9 +253,9 @@ fun DayCell(
             fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
             color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
         )
-        
+
         Spacer(modifier = Modifier.weight(1f))
-        
+
         Row(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier.height(6.dp)
@@ -312,7 +320,11 @@ fun DayDetailContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = date.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.forLanguageTag("es-ES"))).replaceFirstChar { it.uppercase() },
+                text = date.format(
+                    DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.forLanguageTag("es-ES"))
+                ).replaceFirstChar {
+                    it.uppercase()
+                },
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -356,8 +368,12 @@ fun DayDetailContent(
                             if (habit.ateHealthy) Chip("Comida Sana")
                             if (habit.didExercise) Chip("Ejercicio")
                         }
-                        habit.notes?.let { 
-                            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) 
+                        habit.notes?.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 )
@@ -453,7 +469,11 @@ fun DetailItem(
         Column {
             Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             subtitle?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             content?.invoke()
         }
@@ -499,7 +519,7 @@ fun LegendItem(color: Color, text: String) {
 fun HistoryScreenPreview() {
     val today = LocalDate.now()
     val currentMonth = YearMonth.now()
-    
+
     val sampleMonthlyData = mapOf(
         today to DaySummary(
             date = today,
@@ -516,12 +536,12 @@ fun HistoryScreenPreview() {
             habit = DailyHabitEntity(date = today.minusDays(1), ateHealthy = false, didExercise = true)
         )
     )
-    
+
     val state = HistoryState(
         selectedMonth = currentMonth,
         monthlyData = sampleMonthlyData
     )
-    
+
     MyBestTheme {
         HistoryContent(
             state = state,

@@ -32,7 +32,7 @@ class InsightsViewModel(
     ) { weights, habits ->
         val initialWeight = weights.firstOrNull()?.weight ?: 0f
         val currentWeight = weights.lastOrNull()?.weight ?: 0f
-        
+
         val totalHabits = habits.size * 2 // each day has 2 habits: exercise and healthy eating
         val completedHabits = habits.count { it.didExercise } + habits.count { it.ateHealthy }
         val consistency = if (totalHabits > 0) completedHabits.toFloat() / totalHabits else 0f

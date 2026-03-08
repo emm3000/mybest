@@ -107,7 +107,7 @@ private fun AddWeightContent(
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
-            
+
             OutlinedTextField(
                 value = state.weight,
                 onValueChange = onWeightChange,
@@ -117,7 +117,7 @@ private fun AddWeightContent(
                 leadingIcon = { Icon(Icons.Rounded.Scale, null) },
                 singleLine = true
             )
-            
+
             OutlinedTextField(
                 value = state.note,
                 onValueChange = onNoteChange,
@@ -125,9 +125,9 @@ private fun AddWeightContent(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )
-            
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             Button(
                 onClick = onSaveClick,
                 modifier = Modifier
@@ -137,7 +137,10 @@ private fun AddWeightContent(
                 enabled = state.weight.isNotEmpty() && !state.isLoading
             ) {
                 if (state.isLoading) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
                 } else {
                     Text("Guardar Registro", style = MaterialTheme.typography.titleMedium)
                 }

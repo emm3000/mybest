@@ -10,27 +10,33 @@ import java.time.LocalDate
 @Dao
 interface DailyWeightDao {
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM daily_weight
         WHERE date = :date
         LIMIT 1
-    """)
+    """
+    )
     suspend fun getByDate(date: LocalDate): DailyWeightEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(weight: DailyWeightEntity)
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM daily_weight
         ORDER BY date ASC
-    """)
+    """
+    )
     fun observeAllOrdered(): Flow<List<DailyWeightEntity>>
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM daily_weight
         ORDER BY date DESC
         LIMIT 1
-    """)
+    """
+    )
     suspend fun getLatest(): DailyWeightEntity?
 
     @Query("DELETE FROM daily_weight WHERE date = :date")

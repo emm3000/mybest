@@ -114,10 +114,10 @@ fun AddPhotoContent(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    
+
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
-    
+
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -152,7 +152,7 @@ fun AddPhotoContent(
             val isPermanentlyDenied = (context as? Activity)?.let {
                 !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
             } ?: false
-            
+
             if (isPermanentlyDenied) {
                 scope.launch {
                     val result = snackbarHostState.showSnackbar(
@@ -283,7 +283,7 @@ fun AddPhotoContent(
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    
+
                     SourceOption(
                         icon = Icons.Rounded.PhotoCamera,
                         label = "Usar Cámara",
@@ -300,7 +300,7 @@ fun AddPhotoContent(
                             )
                         }
                     )
-                    
+
                     SourceOption(
                         icon = Icons.Rounded.PhotoLibrary,
                         label = "Elegir de Galería",
@@ -351,9 +351,9 @@ fun PhotoCard(
                     )
                 }
             }
-            
+
             var showTypeSelector by remember { mutableStateOf(false) }
-            
+
             Text(
                 text = getLabelForType(selectedType),
                 style = MaterialTheme.typography.labelMedium,
@@ -365,7 +365,7 @@ fun PhotoCard(
                 fontWeight = FontWeight.Bold,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-            
+
             if (showTypeSelector) {
                 LazyRow(
                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
@@ -374,7 +374,7 @@ fun PhotoCard(
                     items(PhotoType.entries) { type ->
                         FilterChip(
                             selected = selectedType == type,
-                            onClick = { 
+                            onClick = {
                                 onTypeClick(type)
                                 showTypeSelector = false
                             },
@@ -449,7 +449,7 @@ private fun copyUriToInternalStorage(context: android.content.Context, uri: Uri)
                 inJustDecodeBounds = false
             }
             val bitmap = BitmapFactory.decodeStream(input, null, options) ?: return null
-            
+
             // Handle Orientation
             val orientation = context.contentResolver.openInputStream(uri)?.use { orientationInput ->
                 val exif = ExifInterface(orientationInput)
@@ -466,7 +466,7 @@ private fun copyUriToInternalStorage(context: android.content.Context, uri: Uri)
             file.outputStream().use { output ->
                 rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 85, output)
             }
-            
+
             if (rotatedBitmap != bitmap) {
                 rotatedBitmap.recycle()
             }

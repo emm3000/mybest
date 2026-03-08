@@ -34,13 +34,15 @@ class HomeViewModel(
         val firstWeight = weights.firstOrNull()?.weight ?: 0f
         val today = LocalDate.now()
         val todayHabit = habits.find { it.date == today }
-        
+
         HomeState(
             lastWeight = lastWeight,
             totalWeightLost = if (lastWeight != null) firstWeight - lastWeight else 0f,
             habitsCompletedToday = if (todayHabit != null) {
                 (if (todayHabit.ateHealthy) 1 else 0) + (if (todayHabit.didExercise) 1 else 0)
-            } else 0,
+            } else {
+                0
+            },
             totalPhotos = photos.size,
             isLoading = false
         )

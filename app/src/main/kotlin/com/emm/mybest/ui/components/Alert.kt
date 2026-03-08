@@ -130,7 +130,7 @@ private fun alertTokens(variant: AlertVariant): Triple<Color, Color, Color> {
 @PreviewLightDark
 @Composable
 private fun HAlertVariantsPreview() {
-    MyBestTheme() {
+    MyBestTheme {
         Surface {
             Column(
                 modifier = Modifier

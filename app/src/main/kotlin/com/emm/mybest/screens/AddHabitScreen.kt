@@ -106,21 +106,21 @@ private fun AddHabitContent(
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
-            
+
             HabitToggle(
                 label = "Comí saludable",
                 checked = state.ateHealthy,
                 onCheckedChange = { onIntent(AddHabitIntent.OnAteHealthyChange(it)) },
                 icon = Icons.Rounded.Restaurant
             )
-            
+
             HabitToggle(
                 label = "Hice ejercicio",
                 checked = state.didExercise,
                 onCheckedChange = { onIntent(AddHabitIntent.OnDidExerciseChange(it)) },
                 icon = Icons.Rounded.FitnessCenter
             )
-            
+
             OutlinedTextField(
                 value = state.notes,
                 onValueChange = { onIntent(AddHabitIntent.OnNotesChange(it)) },
@@ -128,9 +128,9 @@ private fun AddHabitContent(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 4
             )
-            
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             Button(
                 onClick = { onIntent(AddHabitIntent.OnSaveClick) },
                 modifier = Modifier
@@ -140,7 +140,10 @@ private fun AddHabitContent(
                 enabled = !state.isLoading
             ) {
                 if (state.isLoading) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
                 } else {
                     Text("Finalizar Registro", style = MaterialTheme.typography.titleMedium)
                 }
@@ -166,7 +169,11 @@ fun HabitToggle(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(icon, null, tint = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(
+                icon,
+                null,
+                tint = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = label,

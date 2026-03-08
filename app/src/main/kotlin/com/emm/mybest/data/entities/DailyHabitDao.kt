@@ -10,33 +10,41 @@ import java.time.LocalDate
 @Dao
 interface DailyHabitDao {
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM daily_habit
         WHERE date = :date
         LIMIT 1
-    """)
+    """
+    )
     suspend fun getByDate(date: LocalDate): DailyHabitEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(habit: DailyHabitEntity)
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM daily_habit
         WHERE date = :date
         LIMIT 1
-    """)
+    """
+    )
     fun observeByDate(date: LocalDate): Flow<DailyHabitEntity?>
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM daily_habit
         ORDER BY date DESC
-    """)
+    """
+    )
     fun observeAll(): Flow<List<DailyHabitEntity>>
 
-    @Query("""
+    @Query(
+        """
         SELECT COUNT(*) FROM daily_habit
         WHERE did_exercise = 1
-    """)
+    """
+    )
     suspend fun countExerciseDays(): Int
 
     @Query("DELETE FROM daily_habit WHERE date = :date")
