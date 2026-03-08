@@ -3,6 +3,10 @@ package com.emm.mybest.di
 import androidx.room.Room
 import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.UserPreferencesRepository
+import com.emm.mybest.domain.media.MediaManager
+import com.emm.mybest.domain.usecase.CreateHabitUseCase
+import com.emm.mybest.domain.usecase.GetDailyHabitsUseCase
+import com.emm.mybest.domain.usecase.ToggleHabitUseCase
 import com.emm.mybest.viewmodel.AddHabitViewModel
 import com.emm.mybest.viewmodel.AddPhotoViewModel
 import com.emm.mybest.viewmodel.AddWeightViewModel
@@ -30,9 +34,14 @@ val appModule = module {
     single { get<AppDatabase>().progressPhotoDao() }
     single { get<AppDatabase>().habitDao() }
     single { get<AppDatabase>().habitRecordDao() }
+    single<com.emm.mybest.domain.repository.HabitRepository> { com.emm.mybest.data.HabitRepositoryImpl(get(), get()) }
+    factory { com.emm.mybest.domain.usecase.CreateHabitUseCase(get()) }
+    factory { com.emm.mybest.domain.usecase.GetDailyHabitsUseCase(get()) }
+    factory { com.emm.mybest.domain.usecase.ToggleHabitUseCase(get()) }
+    single { com.emm.mybest.domain.media.MediaManager(androidContext()) }
     single { UserPreferencesRepository(androidContext()) }
 
-    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get()) }
     viewModel { AddWeightViewModel(get()) }
     viewModel { AddHabitViewModel(get()) }
     viewModel { AddPhotoViewModel(get()) }
