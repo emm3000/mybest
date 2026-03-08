@@ -1,5 +1,6 @@
 package com.emm.mybest.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,17 +54,20 @@ import com.emm.mybest.data.entities.ProgressPhotoEntity
 import com.emm.mybest.viewmodel.ComparePhotosIntent
 import com.emm.mybest.viewmodel.ComparePhotosViewModel
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ComparePhotosScreen(
     viewModel: ComparePhotosViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
     var selectingForBefore by remember { mutableStateOf(true) }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Comparador de Progreso") },
@@ -117,7 +121,7 @@ fun ComparePhotosScreen(
             // Type Filter
             PhotoTypeSelector(
                 selectedType = state.selectedType,
-                onTypeSelected = { viewModel.onIntent(ComparePhotosIntent.OnTypeSelected(it)) }
+                onTypeChange = { viewModel.onIntent(ComparePhotosIntent.OnTypeSelected(it)) }
             )
 
             // Photo Grid for selection
@@ -155,10 +159,10 @@ fun ComparePhotosScreen(
 
 @Composable
 fun ComparisonSlot(
-    modifier: Modifier = Modifier,
     label: String,
     photo: ProgressPhotoEntity?,
     isSelected: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
@@ -224,7 +228,11 @@ fun ComparisonSlot(
                 modifier = Modifier.padding(vertical = 4.dp),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (isSelected) {
+                    MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
@@ -234,24 +242,33 @@ fun ComparisonSlot(
 @Composable
 fun PhotoTypeSelector(
     selectedType: PhotoType?,
-    onTypeSelected: (PhotoType?) -> Unit
+    onTypeChange: (PhotoType?) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LazyRow(
+        modifier = modifier,
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
             FilterChip(
                 selected = selectedType == null,
-                onClick = { onTypeSelected(null) },
+                onClick = { onTypeChange(null) },
                 label = { Text("Todas") }
             )
         }
-        items(PhotoType.values()) { type ->
+        items(PhotoType.entries) { type ->
+            val isSelected = type == selectedType
             FilterChip(
-                selected = selectedType == type,
-                onClick = { onTypeSelected(type) },
-                label = { Text(type.name.lowercase().capitalize()) }
+                selected = isSelected,
+                onClick = { onTypeChange(if (isSelected) null else type) },
+                label = {
+                    Text(
+                        type.name.lowercase().replaceFirstChar {
+                            if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                        }
+                    )
+                }
             )
         }
     }
@@ -261,10 +278,11 @@ fun PhotoTypeSelector(
 fun PhotoSelectionCard(
     photo: ProgressPhotoEntity,
     isSelected: Boolean,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .aspectRatio(1f)
             .clip(RoundedCornerShape(12.dp))
             .border(

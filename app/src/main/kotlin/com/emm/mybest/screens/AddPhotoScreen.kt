@@ -75,6 +75,7 @@ import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
 import coil3.compose.AsyncImage
 import com.emm.mybest.data.entities.PhotoType
+import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.AddPhotoEffect
 import com.emm.mybest.viewmodel.AddPhotoIntent
@@ -91,15 +92,21 @@ import java.io.File
 @Composable
 fun AddPhotoScreen(
     viewModel: AddPhotoViewModel,
-    onBackClick: () -> Unit
+    mediaManager: com.emm.mybest.domain.media.MediaManager,
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
+    val effect = viewModel.effect
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     AddPhotoContent(
         state = state,
         onIntent = viewModel::onIntent,
+        mediaManager = mediaManager,
         onBackClick = onBackClick,
-        effect = viewModel.effect
+        effect = effect,
+        modifier = modifier
     )
 }
 
@@ -108,7 +115,9 @@ fun AddPhotoScreen(
 fun AddPhotoContent(
     state: AddPhotoState,
     onIntent: (AddPhotoIntent) -> Unit,
+    mediaManager: com.emm.mybest.domain.media.MediaManager,
     onBackClick: () -> Unit,
+    modifier: Modifier = Modifier,
     effect: Flow<AddPhotoEffect> = emptyFlow()
 ) {
     val context = LocalContext.current
@@ -145,7 +154,7 @@ fun AddPhotoContent(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            val uri = createPhotoUri(context)
+            val uri = mediaManager.generatePhotoUri()
             tempPhotoUri = uri
             cameraLauncher.launch(uri)
         } else {
@@ -178,6 +187,7 @@ fun AddPhotoContent(
     }
 
     Scaffold(
+        modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
@@ -237,7 +247,8 @@ fun AddPhotoContent(
                             uri = photo.uri,
                             selectedType = photo.type,
                             onTypeClick = { onIntent(AddPhotoIntent.OnTypeSelected(index, it)) },
-                            onRemove = { onIntent(AddPhotoIntent.OnRemovePhoto(index)) }
+                            onRemove = { onIntent(AddPhotoIntent.OnRemovePhoto(index)) },
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
@@ -284,7 +295,7 @@ fun AddPhotoContent(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    SourceOption(
+                    HSourceOption(
                         icon = Icons.Rounded.PhotoCamera,
                         label = "Usar Cámara",
                         onClick = {
@@ -293,21 +304,23 @@ fun AddPhotoContent(
                                 context = context,
                                 permissionLauncher = permissionLauncher,
                                 onPermissionGranted = {
-                                    val uri = createPhotoUri(context)
+                                    val uri = mediaManager.generatePhotoUri()
                                     tempPhotoUri = uri
                                     cameraLauncher.launch(uri)
                                 }
                             )
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
 
-                    SourceOption(
+                    HSourceOption(
                         icon = Icons.Rounded.PhotoLibrary,
                         label = "Elegir de Galería",
                         onClick = {
                             showBottomSheet = false
                             galleryLauncher.launch("image/*")
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -320,12 +333,13 @@ fun PhotoCard(
     uri: String,
     selectedType: PhotoType,
     onTypeClick: (PhotoType) -> Unit,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         Column {
             Box(modifier = Modifier.height(160.dp).fillMaxWidth()) {
@@ -430,14 +444,6 @@ private fun openAppSettings(context: android.content.Context) {
     context.startActivity(intent)
 }
 
-private fun createPhotoUri(context: android.content.Context): Uri {
-    val directory = File(context.filesDir, "photos")
-    if (!directory.exists()) directory.mkdirs()
-    val file = File(directory, "IMG_${System.currentTimeMillis()}.jpg")
-    val authority = "${context.packageName}.fileprovider"
-    return FileProvider.getUriForFile(context, authority, file)
-}
-
 private fun copyUriToInternalStorage(context: android.content.Context, uri: Uri): Uri? {
     return try {
         val directory = File(context.filesDir, "photos")
@@ -486,15 +492,17 @@ private fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
 }
 
 @Composable
-fun SourceOption(
+fun HSourceOption(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
         onClick = onClick,
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface
+        color = MaterialTheme.colorScheme.surface,
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier
@@ -516,6 +524,7 @@ private fun AddPhotoScreenPreview() {
         AddPhotoContent(
             state = AddPhotoState(),
             onIntent = {},
+            mediaManager = com.emm.mybest.domain.media.MediaManager(androidx.compose.ui.platform.LocalContext.current),
             onBackClick = {}
         )
     }
