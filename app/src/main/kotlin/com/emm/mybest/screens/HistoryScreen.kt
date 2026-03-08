@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.MonitorWeight
@@ -49,12 +48,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
@@ -73,7 +70,6 @@ import java.util.Locale
 
 private const val CALENDAR_COLUMNS = 7
 private const val DAY_CELL_ASPECT_RATIO = 0.8f
-private const val DAY_PHOTOS_GRID_COLUMNS = 3
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -351,18 +347,7 @@ fun DayDetailContent(
         }
 
         if (summary?.hasActivity != true) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "Sin actividad registrada",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            }
+            DayEmptyState()
         } else {
             summary.weight?.let { weight ->
                 DetailItem(
@@ -375,86 +360,19 @@ fun DayDetailContent(
             }
 
             summary.habit?.let { habit ->
-                DetailItem(
-                    icon = Icons.Rounded.CheckCircle,
-                    color = MaterialTheme.colorScheme.secondary,
-                    title = "Hábitos",
-                    onDelete = if (isToday) onDeleteHabit else null,
-                    content = {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            if (habit.ateHealthy) HChip("Comida Sana")
-                            if (habit.didExercise) HChip("Ejercicio")
-                        }
-                        habit.notes?.let {
-                            Text(
-                                it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
+                HabitDetailItem(
+                    habit = habit,
+                    isToday = isToday,
+                    onDeleteHabit = onDeleteHabit,
                 )
             }
 
             if (summary.photos.isNotEmpty()) {
-                Text("Fotos del día", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(DAY_PHOTOS_GRID_COLUMNS),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(summary.photos) { photo ->
-                        Box(
-                            modifier = Modifier
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(8.dp))
-                        ) {
-                            AsyncImage(
-                                model = photo.photoPath,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                            val label = when (photo.type) {
-                                PhotoType.FACE -> "Cara"
-                                PhotoType.ABDOMEN -> "Abdomen"
-                                PhotoType.BODY -> "Cuerpo"
-                                PhotoType.BREAKFAST -> "Desayuno"
-                                PhotoType.LUNCH -> "Almuerzo"
-                                PhotoType.DINNER -> "Cena"
-                                PhotoType.FOOD -> "Comida"
-                            }
-                            Surface(
-                                color = Color.Black.copy(alpha = 0.6f),
-                                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = label,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(vertical = 2.dp)
-                                )
-                            }
-                            if (isToday) {
-                                IconButton(
-                                    onClick = { photoToDelete = photo },
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .padding(4.dp)
-                                        .size(24.dp)
-                                        .background(Color.Black.copy(alpha = 0.4f), CircleShape)
-                                ) {
-                                    Icon(
-                                        Icons.Rounded.Close,
-                                        contentDescription = "Eliminar foto",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                DayPhotosSection(
+                    photos = summary.photos,
+                    isToday = isToday,
+                    onDeletePhoto = { photoToDelete = it },
+                )
             }
         }
     }
