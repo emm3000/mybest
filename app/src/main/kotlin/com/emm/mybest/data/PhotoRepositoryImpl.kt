@@ -23,5 +23,6 @@ private fun ProgressPhotoEntity.toDomain() = ProgressPhoto(
     habitRecordId = habitRecordId,
     date = date,
     type = type.name, // Mapping PhotoType enum to String
-    photoPath = photoPath
+    photoPath = photoPath,
+    createdAt = createdAt
 )

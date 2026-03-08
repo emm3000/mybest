@@ -55,7 +55,7 @@ class HomeViewModel(
             )
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(FLOW_STOP_TIMEOUT),
             initialValue = HomeState(isLoading = true)
         )
 
@@ -81,9 +81,17 @@ class HomeViewModel(
         viewModelScope.launch {
             try {
                 toggleHabitUseCase(habitWithRecord, LocalDate.now())
-            } catch (e: Exception) {
-                // Here we would emit a HomeEffect.ShowError if we had an effect channel
+            } catch (
+                e:
+                @Suppress("TooGenericExceptionCaught")
+                Exception
+            ) {
+                _effect.emit(HomeEffect.ShowError(e.message ?: "Error al actualizar hábito"))
             }
         }
+    }
+
+    companion object {
+        private const val FLOW_STOP_TIMEOUT = 5000L
     }
 }

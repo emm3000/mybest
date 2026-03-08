@@ -2,16 +2,17 @@ package com.emm.mybest.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emm.mybest.data.entities.DailyHabitDao
-import com.emm.mybest.data.entities.DailyWeightDao
-import com.emm.mybest.data.entities.DailyWeightEntity
+import com.emm.mybest.domain.usecase.GetInsightsUseCase
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class InsightsState(
-    val weightHistory: List<DailyWeightEntity> = emptyList(),
+    val weightHistory: List<com.emm.mybest.domain.models.WeightEntry> = emptyList(),
     val habitConsistency: Float = 0f,
     val totalWeightLost: Float = 0f,
     val currentWeight: Float = 0f,
@@ -21,35 +22,51 @@ data class InsightsState(
     val isLoading: Boolean = true
 )
 
+sealed class InsightsIntent {
+    object OnBackClick : InsightsIntent()
+    object OnCompareClick : InsightsIntent()
+}
+
+sealed class InsightsEffect {
+    object NavigateBack : InsightsEffect()
+    object NavigateToCompare : InsightsEffect()
+}
+
 class InsightsViewModel(
-    dailyWeightDao: DailyWeightDao,
-    dailyHabitDao: DailyHabitDao
+    getInsightsUseCase: GetInsightsUseCase
 ) : ViewModel() {
 
-    val state: StateFlow<InsightsState> = combine(
-        dailyWeightDao.observeAllOrdered(),
-        dailyHabitDao.observeAll()
-    ) { weights, habits ->
-        val initialWeight = weights.firstOrNull()?.weight ?: 0f
-        val currentWeight = weights.lastOrNull()?.weight ?: 0f
+    private val _effect = MutableSharedFlow<InsightsEffect>()
+    val effect = _effect.asSharedFlow()
 
-        val totalHabits = habits.size * 2 // each day has 2 habits: exercise and healthy eating
-        val completedHabits = habits.count { it.didExercise } + habits.count { it.ateHealthy }
-        val consistency = if (totalHabits > 0) completedHabits.toFloat() / totalHabits else 0f
-
-        InsightsState(
-            weightHistory = weights,
-            habitConsistency = consistency,
-            totalWeightLost = initialWeight - currentWeight,
-            currentWeight = currentWeight,
-            initialWeight = initialWeight,
-            exerciseDays = habits.count { it.didExercise },
-            healthyEatingDays = habits.count { it.ateHealthy },
-            isLoading = false
+    val state: StateFlow<InsightsState> = getInsightsUseCase()
+        .map { data ->
+            InsightsState(
+                weightHistory = data.weightEntries,
+                habitConsistency = data.habitConsistency,
+                totalWeightLost = data.totalWeightLost,
+                currentWeight = data.currentWeight,
+                initialWeight = data.initialWeight,
+                exerciseDays = data.exerciseDays,
+                healthyEatingDays = data.healthyEatingDays,
+                isLoading = false
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(FLOW_STOP_TIMEOUT),
+            initialValue = InsightsState(isLoading = true)
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = InsightsState()
-    )
+
+    fun onIntent(intent: InsightsIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                InsightsIntent.OnBackClick -> _effect.emit(InsightsEffect.NavigateBack)
+                InsightsIntent.OnCompareClick -> _effect.emit(InsightsEffect.NavigateToCompare)
+            }
+        }
+    }
+
+    companion object {
+        private const val FLOW_STOP_TIMEOUT = 5000L
+    }
 }

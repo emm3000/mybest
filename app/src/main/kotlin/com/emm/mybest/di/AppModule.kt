@@ -2,16 +2,20 @@ package com.emm.mybest.di
 
 import androidx.room.Room
 import com.emm.mybest.data.AppDatabase
+import com.emm.mybest.data.DailyHabitRepositoryImpl
 import com.emm.mybest.data.HabitRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepository
 import com.emm.mybest.data.WeightRepositoryImpl
 import com.emm.mybest.domain.media.MediaManager
+import com.emm.mybest.domain.repository.DailyHabitRepository
 import com.emm.mybest.domain.repository.HabitRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.domain.usecase.CreateHabitUseCase
 import com.emm.mybest.domain.usecase.GetDailyHabitsUseCase
+import com.emm.mybest.domain.usecase.GetHomeSummaryUseCase
+import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.domain.usecase.ToggleHabitUseCase
 import com.emm.mybest.viewmodel.AddHabitViewModel
 import com.emm.mybest.viewmodel.AddPhotoViewModel
@@ -44,11 +48,14 @@ val appModule = module {
     single<WeightRepository> { WeightRepositoryImpl(get()) }
     single<PhotoRepository> { PhotoRepositoryImpl(get()) }
 
+    single<DailyHabitRepository> { DailyHabitRepositoryImpl(get()) }
+
     factory { CreateHabitUseCase(get()) }
     factory { GetDailyHabitsUseCase(get()) }
     factory { ToggleHabitUseCase(get()) }
-    factory { com.emm.mybest.domain.usecase.GetHomeSummaryUseCase(get(), get(), get()) }
-    
+    factory { GetHomeSummaryUseCase(get(), get(), get()) }
+    factory { GetInsightsUseCase(get(), get()) }
+
     single { MediaManager(androidContext()) }
     single { UserPreferencesRepository(androidContext()) }
 
@@ -57,7 +64,7 @@ val appModule = module {
     viewModel { AddHabitViewModel(get()) }
     viewModel { AddPhotoViewModel(get()) }
     viewModel { HistoryViewModel(get(), get(), get()) }
-    viewModel { InsightsViewModel(get(), get()) }
+    viewModel { InsightsViewModel(get()) }
     viewModel { ComparePhotosViewModel(get()) }
     viewModel { TimelineViewModel(get()) }
     viewModel { MainViewModel(get()) }

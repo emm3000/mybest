@@ -45,7 +45,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.data.entities.DailyWeightEntity
+import com.emm.mybest.viewmodel.InsightsEffect
+import com.emm.mybest.viewmodel.InsightsIntent
 import com.emm.mybest.viewmodel.InsightsState
 import com.emm.mybest.viewmodel.InsightsViewModel
 
@@ -59,18 +60,30 @@ fun InsightsScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    val currentOnBackClick by androidx.compose.runtime.rememberUpdatedState(onBackClick)
+    val currentOnCompareClick by androidx.compose.runtime.rememberUpdatedState(onCompareClick)
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                InsightsEffect.NavigateBack -> currentOnBackClick()
+                InsightsEffect.NavigateToCompare -> currentOnCompareClick()
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Insights & Progreso") },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = { viewModel.onIntent(InsightsIntent.OnBackClick) }) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
                     }
                 },
                 actions = {
-                    IconButton(onClick = onCompareClick) {
+                    IconButton(onClick = { viewModel.onIntent(InsightsIntent.OnCompareClick) }) {
                         Icon(Icons.Rounded.Compare, contentDescription = "Comparar fotos")
                     }
                 }
@@ -185,7 +198,7 @@ private fun StatCard(
 
 @Composable
 private fun WeightChart(
-    weights: List<DailyWeightEntity>,
+    weights: List<com.emm.mybest.domain.models.WeightEntry>,
     modifier: Modifier = Modifier
 ) {
     if (weights.size < 2) {
@@ -334,16 +347,4 @@ private fun HorizontalStatRow(
             )
         }
     }
-}
-
-@Composable
-private fun HCircle(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    Surface(
-        modifier = modifier,
-        shape = androidx.compose.foundation.shape.CircleShape,
-        content = content
-    )
 }

@@ -57,10 +57,12 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    val currentOnNavigate by androidx.compose.runtime.rememberUpdatedState(onNavigate)
+
     androidx.compose.runtime.LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is HomeEffect.Navigate -> onNavigate(effect.route)
+                is HomeEffect.Navigate -> currentOnNavigate(effect.route)
                 is HomeEffect.ShowError -> { /* Handle error */ }
             }
         }

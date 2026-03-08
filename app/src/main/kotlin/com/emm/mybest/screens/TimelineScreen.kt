@@ -37,7 +37,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.emm.mybest.data.entities.ProgressPhotoEntity
+import com.emm.mybest.viewmodel.TimelineEffect
+import com.emm.mybest.viewmodel.TimelineIntent
 import com.emm.mybest.viewmodel.TimelineState
 import com.emm.mybest.viewmodel.TimelineViewModel
 import java.time.format.DateTimeFormatter
@@ -52,13 +53,23 @@ fun TimelineScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    val currentOnBackClick by androidx.compose.runtime.rememberUpdatedState(onBackClick)
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                TimelineEffect.NavigateBack -> currentOnBackClick()
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text("Línea de Tiempo", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = { viewModel.onIntent(TimelineIntent.OnBackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Regresar"
@@ -138,7 +149,7 @@ fun TimelineContent(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Evolución: ${currentPhoto.type.name}",
+                        text = "Evolución: ${currentPhoto.type}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -154,7 +165,7 @@ fun TimelineContent(
 
 @Composable
 fun PhotoPagerItem(
-    photo: ProgressPhotoEntity,
+    photo: com.emm.mybest.domain.models.ProgressPhoto,
     modifier: Modifier = Modifier
 ) {
     Card(
