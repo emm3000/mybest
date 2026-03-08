@@ -1,0 +1,201 @@
+package com.emm.mybest.ui.components
+
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.theme.MyBestTheme
+
+// ─── Primitive ───────────────────────────────────────────────────────────────
+
+/**
+ * Primitive skeleton inspired by shadcn/ui.
+ *
+ * Produces a rectangle with animated shimmer. Always specify
+ * [modifier] with explicit width/height.
+ */
+@Composable
+fun HSkeleton(
+    modifier: Modifier = Modifier,
+    cornerRadius: Dp = 6.dp,
+) {
+    val baseColor = MaterialTheme.colorScheme.surfaceVariant
+    val highlightColor = MaterialTheme.colorScheme.surface
+
+    val transition = rememberInfiniteTransition(label = "skeleton_shimmer")
+    val translateX by transition.animateFloat(
+        initialValue = -400f,
+        targetValue = 1200f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "skeleton_translateX",
+    )
+
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(baseColor, highlightColor, baseColor),
+        start = Offset(translateX, 0f),
+        end = Offset(translateX + 400f, 0f),
+    )
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(cornerRadius))
+            .background(shimmerBrush),
+    )
+}
+
+// ─── Screen Presets ─────────────────────────────────────────────────────
+
+/** Skeleton of a DeckItem in the Dashboard. */
+@Composable
+fun DeckItemSkeleton(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 0.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            HSkeleton(
+                modifier = Modifier
+                    .fillMaxWidth(0.55f)
+                    .height(16.dp),
+            )
+            Spacer(Modifier.height(8.dp))
+            HSkeleton(
+                modifier = Modifier
+                    .fillMaxWidth(0.35f)
+                    .height(12.dp),
+            )
+        }
+        HSkeleton(
+            modifier = Modifier
+                .width(24.dp)
+                .height(24.dp),
+            cornerRadius = 4.dp,
+        )
+    }
+}
+
+/** Skeleton of the Dashboard screen with N DeckItems. */
+@Composable
+fun DashboardSkeleton(count: Int = 4, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Header row
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            HSkeleton(Modifier.width(80.dp).height(18.dp))
+            Spacer(Modifier.weight(1f))
+            HSkeleton(Modifier.width(100.dp).height(14.dp))
+        }
+        Spacer(Modifier.height(8.dp))
+        repeat(count) {
+            DeckItemSkeleton()
+            HSeparator()
+        }
+    }
+}
+
+/** Generic skeleton for text lines. */
+@Composable
+fun TextSkeleton(
+    lines: Int = 3,
+    modifier: Modifier = Modifier,
+    lastLineWidth: Float = 0.6f,
+) {
+    Column(modifier = modifier) {
+        repeat(lines) { index ->
+            val fraction = if (index == lines - 1) lastLineWidth else 1f
+            HSkeleton(
+                modifier = Modifier
+                    .fillMaxWidth(fraction)
+                    .height(14.dp),
+            )
+            if (index < lines - 1) Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+// ─── Previews ────────────────────────────────────────────────────────────────
+
+@PreviewLightDark
+@Composable
+private fun HSkeletonPreview() {
+    MyBestTheme {
+        Surface {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                // Title line
+                HSkeleton(Modifier.fillMaxWidth(0.5f).height(20.dp))
+                // Body lines
+                HSkeleton(Modifier.fillMaxWidth().height(14.dp))
+                HSkeleton(Modifier.fillMaxWidth().height(14.dp))
+                HSkeleton(Modifier.fillMaxWidth(0.7f).height(14.dp))
+                // Skeleton button
+                HSkeleton(Modifier.size(width = 120.dp, height = 36.dp), cornerRadius = 20.dp)
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DashboardSkeletonPreview() {
+    MyBestTheme {
+        Surface {
+            DashboardSkeleton(
+                count = 4,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun TextSkeletonPreview() {
+    MyBestTheme {
+        Surface {
+            TextSkeleton(
+                lines = 4,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            )
+        }
+    }
+}
