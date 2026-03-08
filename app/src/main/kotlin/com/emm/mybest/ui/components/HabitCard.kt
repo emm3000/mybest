@@ -53,102 +53,147 @@ fun HabitCard(
     androidx.compose.material3.SwipeToDismissBox(
         state = dismissState,
         backgroundContent = {
-            val color = if (isCompleted) cs.errorContainer else cs.primaryContainer
-            val alignment = Alignment.CenterStart
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.medium)
-                    .background(color)
-                    .padding(horizontal = 20.dp),
-                contentAlignment = alignment
-            ) {
-                Icon(
-                    imageVector = if (isCompleted) {
-                        Icons.Rounded.RadioButtonUnchecked
-                    } else {
-                        Icons.Rounded.CheckCircle
-                    },
-                    contentDescription = null,
-                    tint = if (isCompleted) cs.onErrorContainer else cs.onPrimaryContainer
-                )
-            }
+            HabitCardSwipeBackground(isCompleted = isCompleted)
         },
-        modifier = modifier
+        modifier = modifier,
     ) {
         HCard(
             modifier = Modifier.fillMaxWidth(),
-            variant = if (isCompleted) CardVariant.Outlined else CardVariant.Elevated
+            variant = if (isCompleted) CardVariant.Outlined else CardVariant.Elevated,
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Icon with background
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color(habit.color).copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // In a real app we'd map string icon names to ImageVectors
-                    Icon(
-                        imageVector = Icons.Rounded.CheckCircle,
-                        contentDescription = null,
-                        tint = Color(habit.color)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = habit.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (isCompleted) cs.onSurface.copy(alpha = 0.6f) else cs.onSurface
-                    )
-
-                    if (habit.type != HabitType.BOOLEAN) {
-                        val progressText = if (record != null) {
-                            "${record.value.toInt()} / ${habit.goalValue?.toInt()} ${habit.unit ?: ""}"
-                        } else {
-                            "0 / ${habit.goalValue?.toInt()} ${habit.unit ?: ""}"
-                        }
-                        Text(
-                            text = progressText,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = cs.onSurfaceVariant
-                        )
-                    } else {
-                        Text(
-                            text = habit.category,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = cs.onSurfaceVariant
-                        )
-                    }
-                }
-
-                IconButton(onClick = onToggle) {
-                    Icon(
-                        imageVector = if (isCompleted) {
-                            Icons.Rounded.CheckCircle
-                        } else {
-                            Icons.Rounded.RadioButtonUnchecked
-                        },
-                        contentDescription = if (isCompleted) {
-                            "Completado"
-                        } else {
-                            "Marcar como completado"
-                        },
-                        tint = if (isCompleted) cs.primary else cs.outline
-                    )
-                }
-            }
+            HabitCardContent(
+                habit = habit,
+                record = record,
+                isCompleted = isCompleted,
+                onToggle = onToggle,
+            )
         }
     }
+}
+
+@Composable
+private fun HabitCardSwipeBackground(isCompleted: Boolean) {
+    val cs = MaterialTheme.colorScheme
+    val backgroundColor = if (isCompleted) cs.errorContainer else cs.primaryContainer
+    val iconTint = if (isCompleted) cs.onErrorContainer else cs.onPrimaryContainer
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .background(backgroundColor)
+            .padding(horizontal = 20.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Icon(
+            imageVector = completionIcon(isCompleted = isCompleted),
+            contentDescription = null,
+            tint = iconTint,
+        )
+    }
+}
+
+@Composable
+private fun HabitCardContent(
+    habit: Habit,
+    record: HabitRecord?,
+    isCompleted: Boolean,
+    onToggle: () -> Unit,
+) {
+    val cs = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        HabitCardLeadingIcon(color = habit.color)
+        Spacer(modifier = Modifier.width(16.dp))
+        HabitCardTexts(
+            habit = habit,
+            record = record,
+            isCompleted = isCompleted,
+            modifier = Modifier.weight(1f),
+        )
+        CompletionToggle(
+            isCompleted = isCompleted,
+            onToggle = onToggle,
+            tint = if (isCompleted) cs.primary else cs.outline,
+        )
+    }
+}
+
+@Composable
+private fun HabitCardLeadingIcon(color: Int) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(Color(color).copy(alpha = 0.1f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.CheckCircle,
+            contentDescription = null,
+            tint = Color(color),
+        )
+    }
+}
+
+@Composable
+private fun HabitCardTexts(
+    habit: Habit,
+    record: HabitRecord?,
+    isCompleted: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val cs = MaterialTheme.colorScheme
+    Column(modifier = modifier) {
+        Text(
+            text = habit.name,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isCompleted) cs.onSurface.copy(alpha = 0.6f) else cs.onSurface,
+        )
+        Text(
+            text = habit.secondaryText(record),
+            style = MaterialTheme.typography.bodySmall,
+            color = cs.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun CompletionToggle(
+    isCompleted: Boolean,
+    onToggle: () -> Unit,
+    tint: Color,
+) {
+    IconButton(onClick = onToggle) {
+        Icon(
+            imageVector = completionIcon(isCompleted = isCompleted),
+            contentDescription = completionLabel(isCompleted = isCompleted),
+            tint = tint,
+        )
+    }
+}
+
+private fun completionIcon(isCompleted: Boolean) = if (isCompleted) {
+    Icons.Rounded.CheckCircle
+} else {
+    Icons.Rounded.RadioButtonUnchecked
+}
+
+private fun completionLabel(isCompleted: Boolean): String = if (isCompleted) {
+    "Completado"
+} else {
+    "Marcar como completado"
+}
+
+private fun Habit.secondaryText(record: HabitRecord?): String {
+    if (type == HabitType.BOOLEAN) return category
+    val goalText = goalValue?.toInt()?.toString() ?: "0"
+    val currentValue = record?.value?.toInt() ?: 0
+    val unitText = unit ?: ""
+    return "$currentValue / $goalText $unitText"
 }

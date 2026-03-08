@@ -53,88 +53,97 @@ fun HButton(
     contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
     content: @Composable RowScope.() -> Unit,
 ) {
-    val colors = when (variant) {
-        ButtonVariant.Default -> ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.38f),
-            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.38f),
-        )
-        ButtonVariant.Destructive -> ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError,
-            disabledContainerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.38f),
-            disabledContentColor = MaterialTheme.colorScheme.onError.copy(alpha = 0.38f),
-        )
-        ButtonVariant.Secondary -> ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        )
-        ButtonVariant.Outline, ButtonVariant.Ghost, ButtonVariant.Link ->
-            ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.primary,
-                disabledContainerColor = Color.Transparent,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            )
+    HButtonContainer(
+        variant = variant,
+        onClick = onClick,
+        enabled = enabled && !isLoading,
+        contentPadding = contentPadding,
+        modifier = modifier.defaultMinSize(minHeight = 40.dp),
+    ) {
+        ButtonContent(leadingIcon = leadingIcon, isLoading = isLoading, content = content)
     }
+}
 
-    val border: BorderStroke? = when (variant) {
-        ButtonVariant.Outline -> BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outline,
-        )
-        else -> null
-    }
-
+@Composable
+private fun HButtonContainer(
+    variant: ButtonVariant,
+    onClick: () -> Unit,
+    enabled: Boolean,
+    contentPadding: PaddingValues,
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit,
+) {
+    val cs = MaterialTheme.colorScheme
     when (variant) {
         ButtonVariant.Ghost -> TextButton(
             onClick = onClick,
-            modifier = modifier.defaultMinSize(minHeight = 40.dp),
-            enabled = enabled && !isLoading,
+            modifier = modifier,
+            enabled = enabled,
             colors = ButtonDefaults.textButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                contentColor = cs.onSurface,
+                disabledContentColor = cs.onSurface.copy(alpha = 0.38f),
             ),
             contentPadding = contentPadding,
-        ) {
-            ButtonContent(leadingIcon = leadingIcon, isLoading = isLoading, content = content)
-        }
+            content = content,
+        )
         ButtonVariant.Link -> TextButton(
             onClick = onClick,
-            modifier = modifier.defaultMinSize(minHeight = 40.dp),
-            enabled = enabled && !isLoading,
+            modifier = modifier,
+            enabled = enabled,
             colors = ButtonDefaults.textButtonColors(
-                contentColor = MaterialTheme.colorScheme.primary,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                contentColor = cs.primary,
+                disabledContentColor = cs.onSurface.copy(alpha = 0.38f),
             ),
             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
-        ) {
-            ButtonContent(leadingIcon = leadingIcon, isLoading = isLoading, content = content)
-        }
+            content = content,
+        )
         ButtonVariant.Outline -> OutlinedButton(
             onClick = onClick,
-            modifier = modifier.defaultMinSize(minHeight = 40.dp),
-            enabled = enabled && !isLoading,
+            modifier = modifier,
+            enabled = enabled,
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                contentColor = cs.onSurface,
+                disabledContentColor = cs.onSurface.copy(alpha = 0.38f),
             ),
-            border = border,
+            border = BorderStroke(width = 1.dp, color = cs.outline),
             contentPadding = contentPadding,
-        ) {
-            ButtonContent(leadingIcon = leadingIcon, isLoading = isLoading, content = content)
-        }
+            content = content,
+        )
         else -> Button(
             onClick = onClick,
-            modifier = modifier.defaultMinSize(minHeight = 40.dp),
-            enabled = enabled && !isLoading,
-            colors = colors,
+            modifier = modifier,
+            enabled = enabled,
+            colors = variant.defaultButtonColors(),
             contentPadding = contentPadding,
-        ) {
-            ButtonContent(leadingIcon = leadingIcon, isLoading = isLoading, content = content)
-        }
+            content = content,
+        )
     }
+}
+
+@Composable
+private fun ButtonVariant.defaultButtonColors() = when (this) {
+    ButtonVariant.Default -> ButtonDefaults.buttonColors(
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.38f),
+        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.38f),
+    )
+    ButtonVariant.Destructive -> ButtonDefaults.buttonColors(
+        containerColor = MaterialTheme.colorScheme.error,
+        contentColor = MaterialTheme.colorScheme.onError,
+        disabledContainerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.38f),
+        disabledContentColor = MaterialTheme.colorScheme.onError.copy(alpha = 0.38f),
+    )
+    ButtonVariant.Secondary -> ButtonDefaults.buttonColors(
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    )
+    ButtonVariant.Outline, ButtonVariant.Ghost, ButtonVariant.Link -> ButtonDefaults.buttonColors(
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.primary,
+        disabledContainerColor = Color.Transparent,
+        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+    )
 }
 
 @Composable
