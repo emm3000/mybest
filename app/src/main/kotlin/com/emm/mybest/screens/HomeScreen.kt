@@ -45,44 +45,38 @@ import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.HomeState
 import com.emm.mybest.viewmodel.HomeViewModel
+import com.emm.mybest.viewmodel.HomeIntent
+import com.emm.mybest.viewmodel.HomeEffect
 import java.time.LocalDate
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onAddWeightClick: () -> Unit,
-    onAddHabitClick: () -> Unit,
-    onAddPhotoClick: () -> Unit,
-    onViewHistoryClick: () -> Unit,
-    onViewInsightsClick: () -> Unit,
-    onViewTimelineClick: () -> Unit,
+    onNavigate: (com.emm.mybest.navigation.Screen) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
 
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is HomeEffect.Navigate -> onNavigate(effect.route)
+                is HomeEffect.ShowError -> { /* Handle error */ }
+            }
+        }
+    }
+
     HomeScreenContent(
         modifier = modifier,
         state = state,
-        onAddWeightClick = onAddWeightClick,
-        onAddHabitClick = onAddHabitClick,
-        onAddPhotoClick = onAddPhotoClick,
-        onViewHistoryClick = onViewHistoryClick,
-        onViewInsightsClick = onViewInsightsClick,
-        onViewTimelineClick = onViewTimelineClick,
-        onToggleHabit = viewModel::onToggleHabit
+        onIntent = viewModel::onIntent
     )
 }
 
 @Composable
 internal fun HomeScreenContent(
     state: HomeState,
-    onAddWeightClick: () -> Unit,
-    onAddHabitClick: () -> Unit,
-    onAddPhotoClick: () -> Unit,
-    onViewHistoryClick: () -> Unit,
-    onViewInsightsClick: () -> Unit,
-    onViewTimelineClick: () -> Unit,
-    onToggleHabit: (com.emm.mybest.domain.models.HabitWithRecord) -> Unit,
+    onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -103,7 +97,7 @@ internal fun HomeScreenContent(
             item {
                 SummaryCard(
                     state = state,
-                    onClick = onViewInsightsClick,
+                    onClick = { onIntent(HomeIntent.OnViewInsightsClick) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -124,7 +118,7 @@ internal fun HomeScreenContent(
                         description = "Crea un nuevo hábito para empezar a trackear tu progreso.",
                         icon = Icons.Rounded.CheckCircle,
                         action = {
-                            TextButton(onClick = onAddHabitClick) {
+                            TextButton(onClick = { onIntent(HomeIntent.OnAddHabitClick) }) {
                                 Text("Añadir Hábito")
                             }
                         }
@@ -135,7 +129,7 @@ internal fun HomeScreenContent(
                     com.emm.mybest.ui.components.HabitCard(
                         habit = habitWithRecord.habit,
                         record = habitWithRecord.record,
-                        onToggle = { onToggleHabit(habitWithRecord) },
+                        onToggle = { onIntent(HomeIntent.ToggleHabit(habitWithRecord)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -153,13 +147,13 @@ internal fun HomeScreenContent(
                         fontWeight = FontWeight.Bold
                     )
                     Row {
-                        TextButton(onClick = onViewTimelineClick) {
+                        TextButton(onClick = { onIntent(HomeIntent.OnViewTimelineClick) }) {
                             Text("Timeline")
                         }
-                        TextButton(onClick = onViewInsightsClick) {
+                        TextButton(onClick = { onIntent(HomeIntent.OnViewInsightsClick) }) {
                             Text("Estadísticas")
                         }
-                        TextButton(onClick = onViewHistoryClick) {
+                        TextButton(onClick = { onIntent(HomeIntent.OnViewHistoryClick) }) {
                             Text("Historial")
                         }
                     }
@@ -174,7 +168,7 @@ internal fun HomeScreenContent(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     iconColor = MaterialTheme.colorScheme.primary,
-                    onClick = onAddWeightClick
+                    onClick = { onIntent(HomeIntent.OnAddWeightClick) }
                 )
             }
 
@@ -190,7 +184,7 @@ internal fun HomeScreenContent(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     iconColor = MaterialTheme.colorScheme.secondary,
-                    onClick = onAddHabitClick
+                    onClick = { onIntent(HomeIntent.OnAddHabitClick) }
                 )
             }
 
@@ -202,7 +196,7 @@ internal fun HomeScreenContent(
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     iconColor = MaterialTheme.colorScheme.tertiary,
-                    onClick = onAddPhotoClick
+                    onClick = { onIntent(HomeIntent.OnAddPhotoClick) }
                 )
             }
         }
@@ -377,13 +371,7 @@ private fun HomeScreenPreview() {
                 totalPhotos = 12,
                 isLoading = false
             ),
-            onAddWeightClick = {},
-            onAddHabitClick = {},
-            onAddPhotoClick = {},
-            onViewHistoryClick = {},
-            onViewInsightsClick = {},
-            onViewTimelineClick = {},
-            onToggleHabit = {}
+            onIntent = {}
         )
     }
 }

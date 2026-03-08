@@ -10,6 +10,7 @@ import com.emm.mybest.domain.usecase.ToggleHabitUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -22,12 +23,30 @@ data class HomeState(
     val isLoading: Boolean = false
 )
 
+sealed class HomeIntent {
+    data class ToggleHabit(val habitWithRecord: HabitWithRecord) : HomeIntent()
+    object OnAddWeightClick : HomeIntent()
+    object OnAddHabitClick : HomeIntent()
+    object OnAddPhotoClick : HomeIntent()
+    object OnViewHistoryClick : HomeIntent()
+    object OnViewInsightsClick : HomeIntent()
+    object OnViewTimelineClick : HomeIntent()
+}
+
+sealed class HomeEffect {
+    data class ShowError(val message: String) : HomeEffect()
+    data class Navigate(val route: com.emm.mybest.navigation.Screen) : HomeEffect()
+}
+
 class HomeViewModel(
     dailyWeightDao: DailyWeightDao,
     progressPhotoDao: ProgressPhotoDao,
     getDailyHabitsUseCase: GetDailyHabitsUseCase,
     private val toggleHabitUseCase: ToggleHabitUseCase
 ) : ViewModel() {
+
+    private val _effect = kotlinx.coroutines.flow.MutableSharedFlow<HomeEffect>()
+    val effect = _effect.asSharedFlow()
 
     val state: StateFlow<HomeState> = combine(
         dailyWeightDao.observeAllOrdered(),
@@ -50,9 +69,31 @@ class HomeViewModel(
         initialValue = HomeState(isLoading = true)
     )
 
-    fun onToggleHabit(habitWithRecord: HabitWithRecord) {
+    fun onIntent(intent: HomeIntent) {
+        when (intent) {
+            is HomeIntent.ToggleHabit -> toggleHabit(intent.habitWithRecord)
+            HomeIntent.OnAddWeightClick -> emitNavigate(com.emm.mybest.navigation.Screen.AddWeight)
+            HomeIntent.OnAddHabitClick -> emitNavigate(com.emm.mybest.navigation.Screen.AddHabit)
+            HomeIntent.OnAddPhotoClick -> emitNavigate(com.emm.mybest.navigation.Screen.AddPhoto)
+            HomeIntent.OnViewHistoryClick -> emitNavigate(com.emm.mybest.navigation.Screen.History)
+            HomeIntent.OnViewInsightsClick -> emitNavigate(com.emm.mybest.navigation.Screen.Insights)
+            HomeIntent.OnViewTimelineClick -> emitNavigate(com.emm.mybest.navigation.Screen.Timeline)
+        }
+    }
+
+    private fun emitNavigate(screen: com.emm.mybest.navigation.Screen) {
         viewModelScope.launch {
-            toggleHabitUseCase(habitWithRecord, LocalDate.now())
+            _effect.emit(HomeEffect.Navigate(screen))
+        }
+    }
+
+    private fun toggleHabit(habitWithRecord: HabitWithRecord) {
+        viewModelScope.launch {
+            try {
+                toggleHabitUseCase(habitWithRecord, LocalDate.now())
+            } catch (e: Exception) {
+                // Here we would emit a HomeEffect.ShowError if we had an effect channel
+            }
         }
     }
 }

@@ -105,12 +105,7 @@ fun AppNavigation(
                 val viewModel: HomeViewModel = koinViewModel()
                 HomeScreen(
                     viewModel = viewModel,
-                    onAddWeightClick = { navController.navigate(Screen.AddWeight) },
-                    onAddHabitClick = { navController.navigate(Screen.AddHabit) },
-                    onAddPhotoClick = { navController.navigate(Screen.AddPhoto) },
-                    onViewHistoryClick = { navController.navigate(Screen.History) },
-                    onViewInsightsClick = { navController.navigate(Screen.Insights) },
-                    onViewTimelineClick = { navController.navigate(Screen.Timeline) },
+                    onNavigate = { screen -> navController.navigate(screen) },
                     modifier = Modifier.padding(innerPadding)
                 )
             }
