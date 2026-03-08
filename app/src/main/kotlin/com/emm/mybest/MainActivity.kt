@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 AppNavigation(
                     intentAction = intentAction,
-                    onActionConsumed = { intentAction = null }
+                    onConsumeAction = { intentAction = null }
                 )
             }
         }

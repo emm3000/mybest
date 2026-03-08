@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,41 +29,43 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AppNavigation(
+    modifier: Modifier = Modifier,
     intentAction: String? = null,
-    onActionConsumed: () -> Unit = {}
+    onConsumeAction: () -> Unit = {}
 ) {
     val navController = rememberNavController()
+    val currentOnConsumeAction by rememberUpdatedState(onConsumeAction)
 
     LaunchedEffect(intentAction) {
         if (intentAction != null) {
             when (intentAction) {
-                "com.emm.mybest.ACTION_ADD_WEIGHT" -> navController.navigate(Screen.AddWeight.route)
-                "com.emm.mybest.ACTION_ADD_HABIT" -> navController.navigate(Screen.AddHabit.route)
-                "com.emm.mybest.ACTION_ADD_PHOTO" -> navController.navigate(Screen.AddPhoto.route)
+                "com.emm.mybest.ACTION_ADD_WEIGHT" -> navController.navigate(Screen.AddWeight)
+                "com.emm.mybest.ACTION_ADD_HABIT" -> navController.navigate(Screen.AddHabit)
+                "com.emm.mybest.ACTION_ADD_PHOTO" -> navController.navigate(Screen.AddPhoto)
             }
-            onActionConsumed()
+            currentOnConsumeAction()
         }
     }
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route,
-        modifier = Modifier.background(MaterialTheme.colorScheme.background)
+        startDestination = Screen.Home,
+        modifier = modifier.background(MaterialTheme.colorScheme.background)
     ) {
-        composable(Screen.Home.route) {
+        composable<Screen.Home> {
             val viewModel: HomeViewModel = koinViewModel()
             HomeScreen(
                 viewModel = viewModel,
-                onAddWeightClick = { navController.navigate(Screen.AddWeight.route) },
-                onAddHabitClick = { navController.navigate(Screen.AddHabit.route) },
-                onAddPhotoClick = { navController.navigate(Screen.AddPhoto.route) },
-                onViewHistoryClick = { navController.navigate(Screen.History.route) },
-                onViewInsightsClick = { navController.navigate(Screen.Insights.route) },
-                onViewTimelineClick = { navController.navigate(Screen.Timeline.route) }
+                onAddWeightClick = { navController.navigate(Screen.AddWeight) },
+                onAddHabitClick = { navController.navigate(Screen.AddHabit) },
+                onAddPhotoClick = { navController.navigate(Screen.AddPhoto) },
+                onViewHistoryClick = { navController.navigate(Screen.History) },
+                onViewInsightsClick = { navController.navigate(Screen.Insights) },
+                onViewTimelineClick = { navController.navigate(Screen.Timeline) }
             )
         }
 
-        composable(Screen.AddWeight.route) {
+        composable<Screen.AddWeight> {
             val viewModel: AddWeightViewModel = koinViewModel()
             AddWeightScreen(
                 viewModel = viewModel,
@@ -70,7 +73,7 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.AddHabit.route) {
+        composable<Screen.AddHabit> {
             val viewModel: AddHabitViewModel = koinViewModel()
             AddHabitScreen(
                 viewModel = viewModel,
@@ -78,7 +81,7 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.AddPhoto.route) {
+        composable<Screen.AddPhoto> {
             val viewModel: AddPhotoViewModel = koinViewModel()
             AddPhotoScreen(
                 viewModel = viewModel,
@@ -86,7 +89,7 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.History.route) {
+        composable<Screen.History> {
             val viewModel: HistoryViewModel = koinViewModel()
             HistoryScreen(
                 viewModel = viewModel,
@@ -94,16 +97,16 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.Insights.route) {
+        composable<Screen.Insights> {
             val viewModel: InsightsViewModel = koinViewModel()
             InsightsScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
-                onCompareClick = { navController.navigate(Screen.ComparePhotos.route) }
+                onCompareClick = { navController.navigate(Screen.ComparePhotos) }
             )
         }
 
-        composable(Screen.ComparePhotos.route) {
+        composable<Screen.ComparePhotos> {
             val viewModel: ComparePhotosViewModel = koinViewModel()
             ComparePhotosScreen(
                 viewModel = viewModel,
@@ -111,7 +114,7 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.Timeline.route) {
+        composable<Screen.Timeline> {
             val viewModel: TimelineViewModel = koinViewModel()
             TimelineScreen(
                 viewModel = viewModel,
