@@ -1,7 +1,7 @@
 package com.emm.mybest.data
 
 import com.emm.mybest.data.entities.DailyHabitDao
-import com.emm.mybest.data.entities.DailyHabitEntity
+import com.emm.mybest.data.mappers.toDomain
 import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.repository.DailyHabitRepository
 import kotlinx.coroutines.flow.Flow
@@ -22,10 +22,3 @@ class DailyHabitRepositoryImpl(
         dao.deleteByDate(date)
     }
 }
-
-private fun DailyHabitEntity.toDomain() = DailyHabitSummary(
-    date = date,
-    ateHealthy = ateHealthy,
-    didExercise = didExercise,
-    notes = notes
-)

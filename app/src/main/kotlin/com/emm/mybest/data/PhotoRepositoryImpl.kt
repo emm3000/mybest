@@ -1,17 +1,18 @@
 package com.emm.mybest.data
 
 import com.emm.mybest.data.entities.ProgressPhotoDao
-import com.emm.mybest.data.entities.ProgressPhotoEntity
+import com.emm.mybest.data.mappers.toData
+import com.emm.mybest.data.mappers.toDomain
+import com.emm.mybest.data.mappers.toEntity
 import com.emm.mybest.domain.models.NewProgressPhoto
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.repository.PhotoRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import com.emm.mybest.data.entities.PhotoType as DataPhotoType
 
 class PhotoRepositoryImpl(
-    private val dao: ProgressPhotoDao
+    private val dao: ProgressPhotoDao,
 ) : PhotoRepository {
 
     override fun getAllPhotos(): Flow<List<ProgressPhoto>> {
@@ -34,21 +35,3 @@ class PhotoRepositoryImpl(
         dao.deleteById(photoId)
     }
 }
-
-private fun ProgressPhotoEntity.toDomain() = ProgressPhoto(
-    id = id,
-    habitRecordId = habitRecordId,
-    date = date,
-    type = type.toDomain(),
-    photoPath = photoPath,
-    createdAt = createdAt
-)
-
-private fun NewProgressPhoto.toEntity() = ProgressPhotoEntity(
-    date = date,
-    type = type.toData(),
-    photoPath = photoPath,
-)
-
-private fun DataPhotoType.toDomain() = PhotoType.valueOf(name)
-private fun PhotoType.toData() = DataPhotoType.valueOf(name)

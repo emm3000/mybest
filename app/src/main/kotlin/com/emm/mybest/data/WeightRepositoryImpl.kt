@@ -2,6 +2,7 @@ package com.emm.mybest.data
 
 import com.emm.mybest.data.entities.DailyWeightDao
 import com.emm.mybest.data.entities.DailyWeightEntity
+import com.emm.mybest.data.mappers.toDomain
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.Flow
@@ -35,11 +36,3 @@ class WeightRepositoryImpl(
         dao.deleteByDate(date)
     }
 }
-
-private fun DailyWeightEntity.toDomain() = WeightEntry(
-    id = id,
-    date = date,
-    weight = weight,
-    photoPath = photoPath,
-    note = note
-)
