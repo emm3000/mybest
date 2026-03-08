@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,19 +38,15 @@ fun HabitCard(
     modifier: Modifier = Modifier
 ) {
     val isCompleted = record?.isCompleted ?: false
-    val cs = MaterialTheme.colorScheme
+    val currentOnToggle = androidx.compose.runtime.rememberUpdatedState(onToggle)
+    val dismissState = androidx.compose.material3.rememberSwipeToDismissBoxState()
 
-    @Suppress("DEPRECATION")
-    val dismissState = androidx.compose.material3.rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it != androidx.compose.material3.SwipeToDismissBoxValue.Settled) {
-                onToggle()
-                false // Don't actually dismiss, just trigger action and snap back
-            } else {
-                false
-            }
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue != androidx.compose.material3.SwipeToDismissBoxValue.Settled) {
+            currentOnToggle.value()
+            dismissState.reset()
         }
-    )
+    }
 
     androidx.compose.material3.SwipeToDismissBox(
         state = dismissState,
