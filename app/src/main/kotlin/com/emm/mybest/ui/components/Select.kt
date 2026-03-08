@@ -47,8 +47,8 @@ import com.emm.mybest.ui.theme.MyBestTheme
 @Composable
 fun <T> HSelect(
     items: List<T>,
-    itemSelected: T?,
-    onItemSelected: (T) -> Unit,
+    selectedItem: T?,
+    onItemSelect: (T) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -95,7 +95,7 @@ fun <T> HSelect(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    val displayText = itemSelected?.let { itemLabel(it) }
+                    val displayText = selectedItem?.let { itemLabel(it) }
                     Text(
                         text = displayText ?: placeholder,
                         style = MaterialTheme.typography.bodyMedium,
@@ -127,12 +127,12 @@ fun <T> HSelect(
                             Text(
                                 text = itemLabel(option),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = if (itemSelected == option) cs.primary else cs.onSurface,
-                                fontWeight = if (itemSelected == option) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (selectedItem == option) cs.primary else cs.onSurface,
+                                fontWeight = if (selectedItem == option) FontWeight.SemiBold else FontWeight.Normal,
                             )
                         },
                         onClick = {
-                            onItemSelected(option)
+                            onItemSelect(option)
                             setIsExpanded(false)
                         },
                     )
@@ -153,8 +153,8 @@ private fun HSelectEmptyPreview() {
         Surface {
             HSelect(
                 items = demoItems,
-                itemSelected = null,
-                onItemSelected = {},
+                selectedItem = null,
+                onItemSelect = {},
                 label = "Mazo",
                 placeholder = "Seleccionar mazo…",
                 modifier = Modifier
@@ -179,16 +179,16 @@ private fun HSelectWithValuePreview() {
                 var selected1 by remember { mutableStateOf<String?>(demoItems.first()) }
                 HSelect(
                     items = demoItems,
-                    itemSelected = selected1,
-                    onItemSelected = { selected1 = it },
+                    selectedItem = selected1,
+                    onItemSelect = { selected1 = it },
                     label = "Mazo seleccionado",
                 )
 
                 var selected2 by remember { mutableStateOf<String?>(null) }
                 HSelect(
                     items = demoItems,
-                    itemSelected = selected2,
-                    onItemSelected = { selected2 = it },
+                    selectedItem = selected2,
+                    onItemSelect = { selected2 = it },
                     label = "Dificultad",
                     enabled = false,
                     placeholder = "Desactivado",
