@@ -1,6 +1,8 @@
 package com.emm.mybest.screens
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,23 +11,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.Restaurant
+import androidx.compose.material.icons.rounded.SelfImprovement
+import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -33,31 +37,39 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.components.HInput
+import com.emm.mybest.ui.components.HSelect
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.AddHabitEffect
 import com.emm.mybest.viewmodel.AddHabitIntent
 import com.emm.mybest.viewmodel.AddHabitState
 import com.emm.mybest.viewmodel.AddHabitViewModel
 import kotlinx.coroutines.flow.collectLatest
+import java.time.DayOfWeek
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Composable
 fun AddHabitScreen(
     viewModel: AddHabitViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val currentOnBackClick by rememberUpdatedState(onBackClick)
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
-                AddHabitEffect.NavigateBack -> onBackClick()
+                AddHabitEffect.NavigateBack -> currentOnBackClick()
                 is AddHabitEffect.ShowError -> {
                     snackbarHostState.showSnackbar(effect.message)
                 }
@@ -66,6 +78,7 @@ fun AddHabitScreen(
     }
 
     AddHabitContent(
+        modifier = modifier,
         state = state,
         onIntent = viewModel::onIntent,
         onBackClick = onBackClick,
@@ -79,15 +92,23 @@ private fun AddHabitContent(
     state: AddHabitState,
     onIntent: (AddHabitIntent) -> Unit,
     onBackClick: () -> Unit,
+    modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     Scaffold(
+        modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Hábitos Diarios") },
+                title = { Text("Nuevo Hábito") },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(
+                        onClick = if (state.step > 1) {
+                            { onIntent(AddHabitIntent.OnPreviousStep) }
+                        } else {
+                            onBackClick
+                        }
+                    ) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
                     }
                 }
@@ -98,127 +119,290 @@ private fun AddHabitContent(
             modifier = Modifier
                 .padding(padding)
                 .padding(24.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .fillMaxSize()
         ) {
+            // Step indicator
             Text(
-                text = "¿Cómo fue tu día?",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                text = "Paso ${state.step} de 3",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary
             )
+            Spacer(modifier = Modifier.height(16.dp))
 
-            HabitToggle(
-                label = "Comí saludable",
-                checked = state.ateHealthy,
-                onCheckedChange = { onIntent(AddHabitIntent.OnAteHealthyChange(it)) },
-                icon = Icons.Rounded.Restaurant
-            )
-
-            HabitToggle(
-                label = "Hice ejercicio",
-                checked = state.didExercise,
-                onCheckedChange = { onIntent(AddHabitIntent.OnDidExerciseChange(it)) },
-                icon = Icons.Rounded.FitnessCenter
-            )
-
-            OutlinedTextField(
-                value = state.notes,
-                onValueChange = { onIntent(AddHabitIntent.OnNotesChange(it)) },
-                label = { Text("Comentarios sobre el día") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 4
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
+            AnimatedContent(
+                targetState = state.step,
+                label = "WizardStep",
+                modifier = Modifier.weight(1f)
+            ) { step ->
+                when (step) {
+                    1 -> StepOne(state, onIntent)
+                    2 -> StepTwo(state, onIntent)
+                    3 -> StepThree(state, onIntent)
+                }
+            }
 
             Button(
-                onClick = { onIntent(AddHabitIntent.OnSaveClick) },
+                onClick = {
+                    if (state.step < 3) {
+                        onIntent(AddHabitIntent.OnNextStep)
+                    } else {
+                        onIntent(AddHabitIntent.OnSaveClick)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = MaterialTheme.shapes.large,
-                enabled = !state.isLoading
+                shape = MaterialTheme.shapes.medium
             ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                } else {
-                    Text("Finalizar Registro", style = MaterialTheme.typography.titleMedium)
-                }
+                Text(if (state.step < 3) "Continuar" else "Crear Hábito")
             }
         }
     }
 }
 
 @Composable
-fun HabitToggle(
-    label: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
+private fun StepOne(
+    state: AddHabitState,
+    onIntent: (AddHabitIntent) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        HInput(
+            value = state.name,
+            onValueChange = { onIntent(AddHabitIntent.OnNameChange(it)) },
+            label = "Nombre del hábito",
+            placeholder = "Ej: Beber agua",
+            errorMessage = state.nameError,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        HSelect(
+            items = listOf("Salud", "Deporte", "Mente", "Productividad"),
+            selectedItem = state.category,
+            onItemSelect = { onIntent(AddHabitIntent.OnCategoryChange(it)) },
+            label = "Categoría",
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Text(
+            text = "Elige un icono",
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold
+        )
+
+        val icons = listOf(
+            Icons.Rounded.FitnessCenter,
+            Icons.Rounded.Restaurant,
+            Icons.Rounded.WaterDrop,
+            Icons.Rounded.SelfImprovement
+        )
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(icons) { icon ->
+                val isSelected = state.icon == icon.name // Simplified for demonstration
+                IconCard(
+                    icon = icon,
+                    isSelected = isSelected,
+                    onClick = { onIntent(AddHabitIntent.OnIconChange(icon.name)) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun IconCard(
     icon: ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
     Surface(
-        onClick = { onCheckedChange(!checked) },
+        onClick = onClick,
         shape = MaterialTheme.shapes.medium,
-        color = if (checked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier.fillMaxWidth()
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.size(64.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Box(contentAlignment = Alignment.Center) {
             Icon(
-                icon,
-                null,
-                tint = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            if (isSelected) {
+                Icon(
+                    Icons.Rounded.Check,
+                    null,
+                    modifier = Modifier
+                        .size(16.dp)
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StepTwo(
+    state: AddHabitState,
+    onIntent: (AddHabitIntent) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        Text(
+            text = "¿Cómo medirás tu progreso?",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            val types = listOf(
+                "Si/No" to com.emm.mybest.domain.models.HabitType.BOOLEAN,
+                "Tiempo" to com.emm.mybest.domain.models.HabitType.TIME,
+                "Métrica" to com.emm.mybest.domain.models.HabitType.METRIC
+            )
+            types.forEach { (label, type) ->
+                TypeCard(
+                    label = label,
+                    isSelected = state.type == type,
+                    onClick = { onIntent(AddHabitIntent.OnTypeChange(type)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        if (state.type != com.emm.mybest.domain.models.HabitType.BOOLEAN) {
+            HInput(
+                value = state.goalValue,
+                onValueChange = { onIntent(AddHabitIntent.OnGoalValueChange(it)) },
+                label = if (state.type == com.emm.mybest.domain.models.HabitType.TIME) "Minutos al día" else "Valor objetivo",
+                placeholder = "Ej: 30",
+                errorMessage = state.goalError,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            if (state.type == com.emm.mybest.domain.models.HabitType.METRIC) {
+                HInput(
+                    value = state.unit,
+                    onValueChange = { onIntent(AddHabitIntent.OnUnitChange(it)) },
+                    label = "Unidad",
+                    placeholder = "Ej: Vasos, Litros",
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TypeCard(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.medium,
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+        modifier = modifier.height(48.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
-            Switch(checked = checked, onCheckedChange = onCheckedChange)
+        }
+    }
+}
+
+@Composable
+private fun StepThree(
+    state: AddHabitState,
+    onIntent: (AddHabitIntent) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        Text(
+            text = "¿Qué días realizarás este hábito?",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        val days = DayOfWeek.entries
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            days.forEach { day ->
+                val isSelected = state.scheduledDays.contains(day)
+                DayChip(
+                    day = day,
+                    isSelected = isSelected,
+                    onClick = { onIntent(AddHabitIntent.OnDayToggle(day)) }
+                )
+            }
+        }
+
+        // Reminder section (placeholder)
+        Text(
+            text = "Recordatorios",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Se te notificará para completar el hábito en los días seleccionados.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DayChip(
+    day: DayOfWeek,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.small,
+        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.size(40.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = day.getDisplayName(TextStyle.NARROW, Locale("es")).uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+            )
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun AddHabitScreenPreview() {
+private fun AddHabitScreenPreview() {
     MyBestTheme {
         AddHabitContent(
-            state = AddHabitState(
-                ateHealthy = true,
-                didExercise = false,
-                notes = "Hoy fue un buen día, comí ensalada pero no tuve tiempo para el gym."
-            ),
+            state = AddHabitState(),
             onIntent = {},
             onBackClick = {}
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HabitTogglePreview() {
-    MyBestTheme {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            HabitToggle(
-                label = "Checked",
-                checked = true,
-                onCheckedChange = {},
-                icon = Icons.Rounded.Restaurant
-            )
-            HabitToggle(
-                label = "Unchecked",
-                checked = false,
-                onCheckedChange = {},
-                icon = Icons.Rounded.FitnessCenter
-            )
-        }
     }
 }
