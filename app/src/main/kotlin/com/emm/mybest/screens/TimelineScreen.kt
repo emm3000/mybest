@@ -44,6 +44,8 @@ import com.emm.mybest.viewmodel.TimelineViewModel
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+private const val TIMELINE_PHOTO_HEIGHT_RATIO = 0.8f
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TimelineScreen(
@@ -171,7 +173,7 @@ fun PhotoPagerItem(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.8f),
+            .fillMaxHeight(TIMELINE_PHOTO_HEIGHT_RATIO),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {

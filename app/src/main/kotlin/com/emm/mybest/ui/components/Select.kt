@@ -36,6 +36,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.theme.MyBestTheme
 
+private const val SELECT_EXPANDED_ROTATION_DEGREES = 180f
+
 /**
  * Dropdown selector inspired by shadcn/ui `<Select />`.
  *
@@ -111,7 +113,7 @@ fun <T> HSelect(
                         contentDescription = null,
                         modifier = Modifier
                             .size(18.dp)
-                            .rotate(if (isExpanded) 180f else 0f),
+                            .rotate(if (isExpanded) SELECT_EXPANDED_ROTATION_DEGREES else 0f),
                         tint = cs.onSurfaceVariant,
                     )
                 }

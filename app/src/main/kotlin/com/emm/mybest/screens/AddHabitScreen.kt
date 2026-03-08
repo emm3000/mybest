@@ -56,6 +56,9 @@ import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
 
+private const val ADD_HABIT_TOTAL_STEPS = 3
+private const val ADD_HABIT_ICON_GRID_COLUMNS = 4
+
 @Composable
 fun AddHabitScreen(
     viewModel: AddHabitViewModel,
@@ -123,7 +126,7 @@ private fun AddHabitContent(
         ) {
             // Step indicator
             Text(
-                text = "Paso ${state.step} de 3",
+                text = "Paso ${state.step} de $ADD_HABIT_TOTAL_STEPS",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -137,13 +140,13 @@ private fun AddHabitContent(
                 when (step) {
                     1 -> StepOne(state, onIntent)
                     2 -> StepTwo(state, onIntent)
-                    3 -> StepThree(state, onIntent)
+                    ADD_HABIT_TOTAL_STEPS -> StepThree(state, onIntent)
                 }
             }
 
             Button(
                 onClick = {
-                    if (state.step < 3) {
+                    if (state.step < ADD_HABIT_TOTAL_STEPS) {
                         onIntent(AddHabitIntent.OnNextStep)
                     } else {
                         onIntent(AddHabitIntent.OnSaveClick)
@@ -154,7 +157,7 @@ private fun AddHabitContent(
                     .height(56.dp),
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text(if (state.step < 3) "Continuar" else "Crear Hábito")
+                Text(if (state.step < ADD_HABIT_TOTAL_STEPS) "Continuar" else "Crear Hábito")
             }
         }
     }
@@ -197,7 +200,7 @@ private fun StepOne(
         )
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
+            columns = GridCells.Fixed(ADD_HABIT_ICON_GRID_COLUMNS),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {

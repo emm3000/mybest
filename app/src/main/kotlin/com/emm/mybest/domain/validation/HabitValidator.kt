@@ -5,14 +5,16 @@ data class ValidationResult(
     val errorMessage: String? = null
 )
 
+private const val MIN_HABIT_NAME_LENGTH = 3
+
 object HabitValidator {
 
     fun validateName(name: String): ValidationResult {
         if (name.isBlank()) {
             return ValidationResult(false, "El nombre no puede estar vacío")
         }
-        if (name.length < 3) {
-            return ValidationResult(false, "El nombre debe tener al menos 3 caracteres")
+        if (name.length < MIN_HABIT_NAME_LENGTH) {
+            return ValidationResult(false, "El nombre debe tener al menos $MIN_HABIT_NAME_LENGTH caracteres")
         }
         return ValidationResult(true)
     }

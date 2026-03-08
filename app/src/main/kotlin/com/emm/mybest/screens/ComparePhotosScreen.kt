@@ -56,6 +56,8 @@ import com.emm.mybest.viewmodel.ComparePhotosViewModel
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+private const val PHOTO_SELECTION_GRID_COLUMNS = 3
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ComparePhotosScreen(
@@ -133,7 +135,7 @@ fun ComparePhotosScreen(
             )
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+                columns = GridCells.Fixed(PHOTO_SELECTION_GRID_COLUMNS),
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),

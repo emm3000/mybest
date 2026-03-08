@@ -71,6 +71,10 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
+private const val CALENDAR_COLUMNS = 7
+private const val DAY_CELL_ASPECT_RATIO = 0.8f
+private const val DAY_PHOTOS_GRID_COLUMNS = 3
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
@@ -211,7 +215,7 @@ fun CalendarGrid(
 
     LazyVerticalGrid(
         modifier = modifier,
-        columns = GridCells.Fixed(7),
+        columns = GridCells.Fixed(CALENDAR_COLUMNS),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -244,7 +248,7 @@ fun DayCell(
 
     Column(
         modifier = modifier
-            .aspectRatio(0.8f)
+            .aspectRatio(DAY_CELL_ASPECT_RATIO)
             .clip(RoundedCornerShape(12.dp))
             .background(
                 if (isToday) {
@@ -395,7 +399,7 @@ fun DayDetailContent(
             if (summary.photos.isNotEmpty()) {
                 Text("Fotos del día", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
+                    columns = GridCells.Fixed(DAY_PHOTOS_GRID_COLUMNS),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(summary.photos) { photo ->

@@ -91,6 +91,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+private const val JPEG_COMPRESSION_QUALITY = 85
+
 @Composable
 fun AddPhotoScreen(
     viewModel: AddPhotoViewModel,
@@ -473,7 +475,7 @@ private fun copyUriToInternalStorage(context: android.content.Context, uri: Uri)
             }
 
             file.outputStream().use { output ->
-                rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 85, output)
+                rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_COMPRESSION_QUALITY, output)
             }
 
             if (rotatedBitmap != bitmap) {

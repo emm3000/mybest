@@ -32,6 +32,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.theme.MyBestTheme
 
+private const val DECK_ITEM_TITLE_WIDTH_RATIO = 0.55f
+private const val DECK_ITEM_SUBTITLE_WIDTH_RATIO = 0.35f
+private const val SKELETON_PREVIEW_TITLE_WIDTH_RATIO = 0.5f
+private const val SKELETON_PREVIEW_LAST_LINE_WIDTH_RATIO = 0.7f
+
 // ─── Primitive ───────────────────────────────────────────────────────────────
 
 /**
@@ -86,13 +91,13 @@ fun DeckItemSkeleton(modifier: Modifier = Modifier) {
         Column(modifier = Modifier.weight(1f)) {
             HSkeleton(
                 modifier = Modifier
-                    .fillMaxWidth(0.55f)
+                    .fillMaxWidth(DECK_ITEM_TITLE_WIDTH_RATIO)
                     .height(16.dp),
             )
             Spacer(Modifier.height(8.dp))
             HSkeleton(
                 modifier = Modifier
-                    .fillMaxWidth(0.35f)
+                    .fillMaxWidth(DECK_ITEM_SUBTITLE_WIDTH_RATIO)
                     .height(12.dp),
             )
         }
@@ -160,11 +165,11 @@ private fun HSkeletonPreview() {
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 // Title line
-                HSkeleton(Modifier.fillMaxWidth(0.5f).height(20.dp))
+                HSkeleton(Modifier.fillMaxWidth(SKELETON_PREVIEW_TITLE_WIDTH_RATIO).height(20.dp))
                 // Body lines
                 HSkeleton(Modifier.fillMaxWidth().height(14.dp))
                 HSkeleton(Modifier.fillMaxWidth().height(14.dp))
-                HSkeleton(Modifier.fillMaxWidth(0.7f).height(14.dp))
+                HSkeleton(Modifier.fillMaxWidth(SKELETON_PREVIEW_LAST_LINE_WIDTH_RATIO).height(14.dp))
                 // Skeleton button
                 HSkeleton(Modifier.size(width = 120.dp, height = 36.dp), cornerRadius = 20.dp)
             }
