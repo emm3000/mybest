@@ -2,8 +2,14 @@ package com.emm.mybest.di
 
 import androidx.room.Room
 import com.emm.mybest.data.AppDatabase
+import com.emm.mybest.data.HabitRepositoryImpl
+import com.emm.mybest.data.PhotoRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepository
+import com.emm.mybest.data.WeightRepositoryImpl
 import com.emm.mybest.domain.media.MediaManager
+import com.emm.mybest.domain.repository.HabitRepository
+import com.emm.mybest.domain.repository.PhotoRepository
+import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.domain.usecase.CreateHabitUseCase
 import com.emm.mybest.domain.usecase.GetDailyHabitsUseCase
 import com.emm.mybest.domain.usecase.ToggleHabitUseCase
@@ -34,14 +40,19 @@ val appModule = module {
     single { get<AppDatabase>().progressPhotoDao() }
     single { get<AppDatabase>().habitDao() }
     single { get<AppDatabase>().habitRecordDao() }
-    single<com.emm.mybest.domain.repository.HabitRepository> { com.emm.mybest.data.HabitRepositoryImpl(get(), get()) }
-    factory { com.emm.mybest.domain.usecase.CreateHabitUseCase(get()) }
-    factory { com.emm.mybest.domain.usecase.GetDailyHabitsUseCase(get()) }
-    factory { com.emm.mybest.domain.usecase.ToggleHabitUseCase(get()) }
-    single { com.emm.mybest.domain.media.MediaManager(androidContext()) }
+    single<HabitRepository> { HabitRepositoryImpl(get(), get()) }
+    single<WeightRepository> { WeightRepositoryImpl(get()) }
+    single<PhotoRepository> { PhotoRepositoryImpl(get()) }
+
+    factory { CreateHabitUseCase(get()) }
+    factory { GetDailyHabitsUseCase(get()) }
+    factory { ToggleHabitUseCase(get()) }
+    factory { com.emm.mybest.domain.usecase.GetHomeSummaryUseCase(get(), get(), get()) }
+    
+    single { MediaManager(androidContext()) }
     single { UserPreferencesRepository(androidContext()) }
 
-    viewModel { HomeViewModel(get(), get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get()) }
     viewModel { AddWeightViewModel(get()) }
     viewModel { AddHabitViewModel(get()) }
     viewModel { AddPhotoViewModel(get()) }

@@ -2,15 +2,13 @@ package com.emm.mybest.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emm.mybest.data.entities.DailyWeightDao
-import com.emm.mybest.data.entities.ProgressPhotoDao
 import com.emm.mybest.domain.models.HabitWithRecord
-import com.emm.mybest.domain.usecase.GetDailyHabitsUseCase
 import com.emm.mybest.domain.usecase.ToggleHabitUseCase
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -39,35 +37,27 @@ sealed class HomeEffect {
 }
 
 class HomeViewModel(
-    dailyWeightDao: DailyWeightDao,
-    progressPhotoDao: ProgressPhotoDao,
-    getDailyHabitsUseCase: GetDailyHabitsUseCase,
+    getHomeSummaryUseCase: com.emm.mybest.domain.usecase.GetHomeSummaryUseCase,
     private val toggleHabitUseCase: ToggleHabitUseCase
 ) : ViewModel() {
 
-    private val _effect = kotlinx.coroutines.flow.MutableSharedFlow<HomeEffect>()
+    private val _effect = MutableSharedFlow<HomeEffect>()
     val effect = _effect.asSharedFlow()
 
-    val state: StateFlow<HomeState> = combine(
-        dailyWeightDao.observeAllOrdered(),
-        progressPhotoDao.observeAll(),
-        getDailyHabitsUseCase(LocalDate.now())
-    ) { weights, photos, dailyHabits ->
-        val lastWeight = weights.lastOrNull()?.weight
-        val firstWeight = weights.firstOrNull()?.weight ?: 0f
-
-        HomeState(
-            dailyHabits = dailyHabits,
-            lastWeight = lastWeight,
-            totalWeightLost = if (lastWeight != null) firstWeight - lastWeight else 0f,
-            totalPhotos = photos.size,
-            isLoading = false
+    val state: StateFlow<HomeState> = getHomeSummaryUseCase()
+        .map { summary ->
+            HomeState(
+                dailyHabits = summary.dailyHabits,
+                lastWeight = summary.latestWeight,
+                totalWeightLost = summary.totalWeightLost,
+                totalPhotos = summary.totalPhotos,
+                isLoading = false
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = HomeState(isLoading = true)
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = HomeState(isLoading = true)
-    )
 
     fun onIntent(intent: HomeIntent) {
         when (intent) {
