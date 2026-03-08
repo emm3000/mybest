@@ -2,15 +2,13 @@ package com.emm.mybest.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emm.mybest.data.entities.DailyWeightDao
-import com.emm.mybest.data.entities.DailyWeightEntity
+import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 data class AddWeightState(
     val weight: String = "",
@@ -30,7 +28,7 @@ sealed class AddWeightEffect {
 }
 
 class AddWeightViewModel(
-    private val dailyWeightDao: DailyWeightDao
+    private val weightRepository: WeightRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddWeightState())
@@ -61,12 +59,10 @@ class AddWeightViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
-                val entity = DailyWeightEntity(
-                    date = LocalDate.now(),
+                weightRepository.saveWeight(
                     weight = weightValue,
-                    note = _state.value.note.takeIf { it.isNotBlank() }
+                    note = _state.value.note.takeIf { it.isNotBlank() },
                 )
-                dailyWeightDao.upsert(entity)
                 _effect.emit(AddWeightEffect.NavigateBack)
             } catch (e: Exception) {
                 _effect.emit(AddWeightEffect.ShowError("Error al guardar: ${e.message}"))

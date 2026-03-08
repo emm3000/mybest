@@ -6,12 +6,13 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
+import com.emm.mybest.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
-class UserPreferencesRepository(private val context: Context) {
+class UserPreferencesRepositoryImpl(private val context: Context) : UserPreferencesRepository {
 
     private object PreferencesKeys {
         val DARK_MODE_ENABLED = booleanPreferencesKey("dark_mode_enabled")
@@ -19,25 +20,25 @@ class UserPreferencesRepository(private val context: Context) {
         val DYNAMIC_COLOR_ENABLED = booleanPreferencesKey("dynamic_color_enabled")
     }
 
-    val isDarkMode: Flow<Boolean?> = context.dataStore.data.map { preferences ->
+    override val isDarkMode: Flow<Boolean?> = context.dataStore.data.map { preferences ->
         preferences[PreferencesKeys.DARK_MODE_ENABLED]
     }
 
-    suspend fun updateDarkMode(enabled: Boolean) {
+    override suspend fun updateDarkMode(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.DARK_MODE_ENABLED] = enabled
         }
     }
 
-    val notificationsEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    override val notificationsEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: true
     }
 
-    val useDynamicColor: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    override val useDynamicColor: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[PreferencesKeys.DYNAMIC_COLOR_ENABLED] ?: true
     }
 
-    suspend fun updateDynamicColor(enabled: Boolean) {
+    override suspend fun updateDynamicColor(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.DYNAMIC_COLOR_ENABLED] = enabled
         }

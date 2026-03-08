@@ -5,4 +5,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface WeightRepository {
     fun getWeightProgress(): Flow<List<WeightEntry>>
+    suspend fun saveWeight(
+        weight: Float,
+        note: String?,
+    )
 }

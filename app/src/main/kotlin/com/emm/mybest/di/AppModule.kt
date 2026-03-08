@@ -5,12 +5,13 @@ import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.DailyHabitRepositoryImpl
 import com.emm.mybest.data.HabitRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
-import com.emm.mybest.data.UserPreferencesRepository
+import com.emm.mybest.data.UserPreferencesRepositoryImpl
 import com.emm.mybest.data.WeightRepositoryImpl
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.repository.DailyHabitRepository
 import com.emm.mybest.domain.repository.HabitRepository
 import com.emm.mybest.domain.repository.PhotoRepository
+import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.domain.usecase.CreateHabitUseCase
 import com.emm.mybest.domain.usecase.GetDailyHabitsUseCase
@@ -57,7 +58,7 @@ val appModule = module {
     factory { GetInsightsUseCase(get(), get()) }
 
     single { MediaManager(androidContext()) }
-    single { UserPreferencesRepository(androidContext()) }
+    single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
     viewModel { HomeViewModel(get(), get()) }
     viewModel { AddWeightViewModel(get()) }

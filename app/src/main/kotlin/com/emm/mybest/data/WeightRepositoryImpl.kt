@@ -6,6 +6,7 @@ import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
 
 class WeightRepositoryImpl(
     private val dao: DailyWeightDao
@@ -15,6 +16,19 @@ class WeightRepositoryImpl(
         return dao.observeAllOrdered().map { list ->
             list.map { it.toDomain() }
         }
+    }
+
+    override suspend fun saveWeight(
+        weight: Float,
+        note: String?,
+    ) {
+        dao.upsert(
+            DailyWeightEntity(
+                date = LocalDate.now(),
+                weight = weight,
+                note = note,
+            ),
+        )
     }
 }
 
