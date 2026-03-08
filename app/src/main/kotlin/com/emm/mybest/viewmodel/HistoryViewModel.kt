@@ -26,6 +26,7 @@ data class DaySummary(
     val hasWeight: Boolean get() = weight != null
     val hasHabit: Boolean get() = habit != null
     val hasPhoto: Boolean get() = photos.isNotEmpty()
+    val hasActivity: Boolean get() = hasWeight || hasHabit || hasPhoto
 }
 
 data class HistoryState(

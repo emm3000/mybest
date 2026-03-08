@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.repository.PhotoRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +36,7 @@ class ComparePhotosViewModel(
     private val _beforePhoto = MutableStateFlow<ProgressPhoto?>(null)
     private val _afterPhoto = MutableStateFlow<ProgressPhoto?>(null)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val state: StateFlow<ComparePhotosState> = combine(
         _selectedType.flatMapLatest { type ->
             if (type == null) {
@@ -64,8 +66,7 @@ class ComparePhotosViewModel(
         when (intent) {
             is ComparePhotosIntent.OnTypeSelected -> {
                 _selectedType.value = intent.type
-                // Reset selection if they are no longer in the list?
-                // Better to keep them if they exist, but for simplicity let's reset if type changes
+                // Keep selection logic simple while filters change.
                 _beforePhoto.value = null
                 _afterPhoto.value = null
             }

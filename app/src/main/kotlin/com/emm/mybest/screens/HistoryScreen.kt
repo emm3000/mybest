@@ -350,7 +350,7 @@ fun DayDetailContent(
             }
         }
 
-        if (summary == null || (!summary.hasWeight && !summary.hasHabit && !summary.hasPhoto)) {
+        if (summary?.hasActivity != true) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
