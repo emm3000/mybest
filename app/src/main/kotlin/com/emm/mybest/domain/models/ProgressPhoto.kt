@@ -1,6 +1,6 @@
 package com.emm.mybest.domain.models
 
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 data class ProgressPhoto(
     val id: String,

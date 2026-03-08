@@ -11,6 +11,7 @@ import com.emm.mybest.domain.repository.HabitRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.datetime.LocalDate
 
 class HabitRepositoryImpl(
     private val habitDao: HabitDao,
@@ -27,7 +28,7 @@ class HabitRepositoryImpl(
         return habitDao.getHabitById(id).map { it?.toDomain() }
     }
 
-    override fun getHabitsWithRecordsForDate(date: java.time.LocalDate): Flow<List<HabitWithRecord>> {
+    override fun getHabitsWithRecordsForDate(date: LocalDate): Flow<List<HabitWithRecord>> {
         return combine(
             habitDao.getAllEnabledHabits(),
             habitRecordDao.getRecordsByDate(date),

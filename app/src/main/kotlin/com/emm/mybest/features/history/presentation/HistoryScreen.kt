@@ -52,17 +52,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.core.datetime.YearMonthValue
+import com.emm.mybest.core.datetime.currentDate
+import com.emm.mybest.core.datetime.formatEsMonthYear
+import com.emm.mybest.core.datetime.formatEsWeekdayDayMonth
+import com.emm.mybest.core.datetime.minusDays
+import com.emm.mybest.core.datetime.shortEs
 import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.ui.theme.MyBestTheme
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.util.Locale
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 
 private const val CALENDAR_COLUMNS = 7
 private const val DAY_CELL_ASPECT_RATIO = 0.8f
@@ -138,7 +140,7 @@ fun HistoryContent(
             Row(modifier = Modifier.fillMaxWidth()) {
                 DayOfWeek.entries.forEach { dayOfWeek ->
                     Text(
-                        text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("es-ES")).uppercase(),
+                        text = dayOfWeek.shortEs(),
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.labelSmall,
@@ -163,8 +165,8 @@ fun HistoryContent(
 
 @Composable
 fun MonthSelector(
-    currentMonth: YearMonth,
-    onMonthChange: (YearMonth) -> Unit,
+    currentMonth: YearMonthValue,
+    onMonthChange: (YearMonthValue) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -177,11 +179,7 @@ fun MonthSelector(
         }
 
         Text(
-            text = currentMonth.format(
-                DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("es-ES"))
-            ).replaceFirstChar {
-                it.uppercase()
-            },
+            text = currentMonth.formatEsMonthYear(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
@@ -194,13 +192,13 @@ fun MonthSelector(
 
 @Composable
 fun CalendarGrid(
-    yearMonth: YearMonth,
+    yearMonth: YearMonthValue,
     dayData: Map<LocalDate, DaySummary>,
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val daysInMonth = yearMonth.lengthOfMonth()
-    val firstDayOfMonth = yearMonth.atDay(1).dayOfWeek.value
+    val firstDayOfMonth = yearMonth.atDay(1).dayOfWeek.ordinal + 1
     val startOffset = firstDayOfMonth - 1
 
     val totalCells = daysInMonth + startOffset
@@ -236,7 +234,7 @@ fun DayCell(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isToday = date == LocalDate.now()
+    val isToday = date == currentDate()
 
     Column(
         modifier = modifier
@@ -256,7 +254,7 @@ fun DayCell(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = date.dayOfMonth.toString(),
+            text = date.day.toString(),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
             color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
@@ -292,7 +290,7 @@ fun DayDetailContent(
     onDeletePhoto: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isToday = date == LocalDate.now()
+    val isToday = date == currentDate()
     var photoToDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
 
     if (photoToDelete != null) {
@@ -329,11 +327,7 @@ fun DayDetailContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = date.format(
-                    DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.forLanguageTag("es-ES"))
-                ).replaceFirstChar {
-                    it.uppercase()
-                },
+                text = date.formatEsWeekdayDayMonth(),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -460,8 +454,8 @@ fun LegendItem(
 @Preview(showBackground = true)
 @Composable
 private fun HistoryScreenPreview() {
-    val today = LocalDate.now()
-    val currentMonth = YearMonth.now()
+    val today = currentDate()
+    val currentMonth = YearMonthValue.now()
 
     val sampleMonthlyData = mapOf(
         today to DaySummary(

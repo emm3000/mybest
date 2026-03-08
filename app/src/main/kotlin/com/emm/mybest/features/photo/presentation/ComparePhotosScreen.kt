@@ -49,9 +49,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.emm.mybest.core.datetime.formatDdMmYy
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 private const val PHOTO_SELECTION_GRID_COLUMNS = 3
@@ -193,7 +193,7 @@ fun ComparisonSlot(
                     modifier = Modifier.align(Alignment.TopStart)
                 ) {
                     Text(
-                        text = photo.date.format(DateTimeFormatter.ofPattern("dd/MM/yy")),
+                        text = photo.date.formatDdMmYy(),
                         color = Color.White,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

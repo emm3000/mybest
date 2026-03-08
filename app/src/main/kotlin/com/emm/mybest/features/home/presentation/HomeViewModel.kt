@@ -2,6 +2,7 @@ package com.emm.mybest.features.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.datetime.currentDate
 import com.emm.mybest.core.navigation.Screen
 import com.emm.mybest.domain.models.HabitWithRecord
 import com.emm.mybest.domain.usecase.GetHomeSummaryUseCase
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 data class HomeState(
     val dailyHabits: List<HabitWithRecord> = emptyList(),
@@ -82,7 +82,7 @@ class HomeViewModel(
     private fun toggleHabit(habitWithRecord: HabitWithRecord) {
         viewModelScope.launch {
             try {
-                toggleHabitUseCase(habitWithRecord, LocalDate.now())
+                toggleHabitUseCase(habitWithRecord, currentDate())
             } catch (
                 e:
                 @Suppress("TooGenericExceptionCaught")

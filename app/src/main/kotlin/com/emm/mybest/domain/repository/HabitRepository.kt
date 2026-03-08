@@ -4,7 +4,7 @@ import com.emm.mybest.domain.models.Habit
 import com.emm.mybest.domain.models.HabitRecord
 import com.emm.mybest.domain.models.HabitWithRecord
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 interface HabitRepository {
     fun getAllHabits(): Flow<List<Habit>>

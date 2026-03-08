@@ -1,7 +1,7 @@
 package com.emm.mybest.data.entities
 
 import androidx.room.TypeConverter
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 class Converters {
 

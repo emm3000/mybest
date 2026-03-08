@@ -6,7 +6,7 @@ import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.repository.DailyHabitRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 class DailyHabitRepositoryImpl(
     private val dao: DailyHabitDao

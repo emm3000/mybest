@@ -1,11 +1,11 @@
 package com.emm.mybest.domain.usecase
 
+import com.emm.mybest.core.datetime.currentDate
 import com.emm.mybest.domain.models.HomeSummary
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import java.time.LocalDate
 
 class GetHomeSummaryUseCase(
     private val weightRepository: WeightRepository,
@@ -16,7 +16,7 @@ class GetHomeSummaryUseCase(
         return combine(
             weightRepository.getWeightProgress(),
             photoRepository.getAllPhotos(),
-            getDailyHabitsUseCase(LocalDate.now())
+            getDailyHabitsUseCase(currentDate())
         ) { weights, photos, habits ->
             val latestEntry = weights.lastOrNull()?.weight
             val initialEntry = weights.firstOrNull()?.weight ?: 0f

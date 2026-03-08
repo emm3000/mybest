@@ -3,7 +3,7 @@ package com.emm.mybest.domain.usecase
 import com.emm.mybest.domain.models.HabitWithRecord
 import com.emm.mybest.domain.repository.HabitRepository
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 class GetDailyHabitsUseCase(
     private val habitRepository: HabitRepository

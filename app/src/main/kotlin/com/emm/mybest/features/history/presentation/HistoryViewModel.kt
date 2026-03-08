@@ -2,6 +2,7 @@ package com.emm.mybest.features.history.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
@@ -14,8 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.YearMonth
+import kotlinx.datetime.LocalDate
 
 data class DaySummary(
     val date: LocalDate,
@@ -30,14 +30,14 @@ data class DaySummary(
 }
 
 data class HistoryState(
-    val selectedMonth: YearMonth = YearMonth.now(),
+    val selectedMonth: YearMonthValue = YearMonthValue.now(),
     val monthlyData: Map<LocalDate, DaySummary> = emptyMap(),
     val selectedDate: LocalDate? = null,
     val isLoading: Boolean = false
 )
 
 sealed class HistoryIntent {
-    data class OnMonthChange(val newMonth: YearMonth) : HistoryIntent()
+    data class OnMonthChange(val newMonth: YearMonthValue) : HistoryIntent()
     data class OnDateSelected(val date: LocalDate) : HistoryIntent()
     object OnDateDismiss : HistoryIntent()
     data class OnDeleteWeight(val date: LocalDate) : HistoryIntent()
@@ -51,7 +51,7 @@ class HistoryViewModel(
     private val photoRepository: PhotoRepository
 ) : ViewModel() {
 
-    private val _selectedMonth = MutableStateFlow(YearMonth.now())
+    private val _selectedMonth = MutableStateFlow(YearMonthValue.now())
     private val _selectedDate = MutableStateFlow<LocalDate?>(null)
 
     val state: StateFlow<HistoryState> = combine(

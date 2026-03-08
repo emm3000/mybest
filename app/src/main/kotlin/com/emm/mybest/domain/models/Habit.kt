@@ -1,6 +1,6 @@
 package com.emm.mybest.domain.models
 
-import java.time.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 
 enum class HabitType {
     BOOLEAN,

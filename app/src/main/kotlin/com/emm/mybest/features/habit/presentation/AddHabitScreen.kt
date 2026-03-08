@@ -44,18 +44,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.core.datetime.narrowEs
 import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSelect
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.coroutines.flow.collectLatest
-import java.time.DayOfWeek
-import java.time.format.TextStyle
-import java.util.Locale
+import kotlinx.datetime.DayOfWeek
 
 private const val ADD_HABIT_TOTAL_STEPS = 3
 private const val ADD_HABIT_ICON_GRID_COLUMNS = 4
-private val SPANISH_LOCALE: Locale = Locale.forLanguageTag("es")
 
 @Composable
 fun AddHabitScreen(
@@ -387,7 +385,7 @@ private fun DayChip(
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
-                text = day.getDisplayName(TextStyle.NARROW, SPANISH_LOCALE).uppercase(),
+                text = day.narrowEs(),
                 style = MaterialTheme.typography.labelMedium,
                 color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal

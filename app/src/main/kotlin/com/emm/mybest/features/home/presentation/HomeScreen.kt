@@ -36,9 +36,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.core.datetime.currentDate
 import com.emm.mybest.core.navigation.Screen
 import com.emm.mybest.ui.theme.MyBestTheme
-import java.time.LocalDate
 
 @Composable
 fun HomeScreen(
@@ -145,7 +145,7 @@ fun HomeHeader(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Hoy es ${LocalDate.now()}",
+                text = "Hoy es ${currentDate()}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

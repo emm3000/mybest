@@ -5,7 +5,7 @@ import com.emm.mybest.data.entities.HabitRecordEntity
 import com.emm.mybest.domain.models.Habit
 import com.emm.mybest.domain.models.HabitRecord
 import com.emm.mybest.domain.models.HabitType
-import java.time.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 import com.emm.mybest.data.entities.HabitType as DataHabitType
 
 fun HabitEntity.toDomain(): Habit = Habit(
@@ -22,7 +22,15 @@ fun HabitEntity.toDomain(): Habit = Habit(
     goalValue = goalValue,
     unit = unit,
     isEnabled = isEnabled,
-    scheduledDays = scheduledDays.split(",").filter { it.isNotBlank() }.map { DayOfWeek.of(it.toInt()) }.toSet(),
+    scheduledDays = scheduledDays
+        .split(",")
+        .filter { it.isNotBlank() }
+        .map { value ->
+            value.toIntOrNull()?.let { iso ->
+                DayOfWeek.entries.getOrNull(iso - 1)
+            } ?: DayOfWeek.valueOf(value)
+        }
+        .toSet(),
     createdAt = createdAt,
 )
 
@@ -40,7 +48,7 @@ fun Habit.toEntity(): HabitEntity = HabitEntity(
     goalValue = goalValue,
     unit = unit,
     isEnabled = isEnabled,
-    scheduledDays = scheduledDays.joinToString(",") { it.value.toString() },
+    scheduledDays = scheduledDays.joinToString(",") { (it.ordinal + 1).toString() },
     createdAt = createdAt,
 )
 

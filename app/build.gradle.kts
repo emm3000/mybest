@@ -101,6 +101,7 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.datetime)
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)

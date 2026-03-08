@@ -37,13 +37,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.HEmptyState
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 private const val TIMELINE_PHOTO_HEIGHT_RATIO = 0.8f
-private val SPANISH_LOCALE: Locale = Locale.forLanguageTag("es")
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -145,9 +143,7 @@ fun TimelineContent(
             ) {
                 Column {
                     Text(
-                        text = currentPhoto.date.format(
-                            DateTimeFormatter.ofPattern("d 'de' MMMM, yyyy", SPANISH_LOCALE),
-                        ),
+                        text = currentPhoto.date.formatEsLongDate(),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

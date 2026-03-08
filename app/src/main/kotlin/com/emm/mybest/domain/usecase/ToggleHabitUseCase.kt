@@ -3,7 +3,7 @@ package com.emm.mybest.domain.usecase
 import com.emm.mybest.domain.models.HabitRecord
 import com.emm.mybest.domain.models.HabitWithRecord
 import com.emm.mybest.domain.repository.HabitRepository
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 import java.util.UUID
 
 class ToggleHabitUseCase(
