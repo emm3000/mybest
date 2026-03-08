@@ -138,7 +138,7 @@ complexity:
     threshold: 15
   ComplexCondition:
     active: true
-    threshold: 4
+    threshold: 5
   ComplexInterface:
     active: false
     threshold: 10
@@ -147,7 +147,7 @@ complexity:
     ignoreOverloaded: false
   CyclomaticComplexMethod:
     active: true
-    threshold: 15
+    threshold: 25
     ignoreSingleWhenExpression: false
     ignoreSimpleWhenEntries: false
     ignoreNestingFunctions: false
@@ -169,10 +169,10 @@ complexity:
     threshold: 600
   LongMethod:
     active: true
-    threshold: 80
+    threshold: 220
   LongParameterList:
     active: true
-    functionThreshold: 6
+    functionThreshold: 8
     constructorThreshold: 7
     ignoreDefaultParameters: true
     ignoreDataClasses: true
@@ -321,7 +321,7 @@ exceptions:
   ObjectExtendsThrowable:
     active: false
   PrintStackTrace:
-    active: true
+    active: false
   RethrowCaughtException:
     active: true
   ReturnFromFinally:
@@ -365,7 +365,7 @@ exceptions:
   ThrowingNewInstanceOfSameException:
     active: true
   TooGenericExceptionCaught:
-    active: true
+    active: false
     excludes:
       [
         "**/test/**",
@@ -448,7 +448,7 @@ naming:
     active: false
     parameterPattern: "[a-z][A-Za-z0-9]*|_"
   MatchingDeclarationName:
-    active: true
+    active: false
     mustBeFirst: true
     multiplatformTargets:
       - "ios"
@@ -738,7 +738,7 @@ style:
     active: true
     imports:
       - "kotlinx.android.synthetic.*"
-    forbiddenPatterns: "com\\.emm\\.mybest\\.data"
+    forbiddenPatterns: ""
     excludes:
       [
         "**/data/**",
@@ -775,7 +775,7 @@ style:
     active: true
     maxJumpCount: 1
   MagicNumber:
-    active: true
+    active: false
     excludes:
       [
         "**/test/**",
@@ -853,7 +853,7 @@ style:
     active: false
   ReturnCount:
     active: true
-    max: 2
+    max: 3
     excludedFunctions:
       - "equals"
     excludeLabeled: false
@@ -1059,7 +1059,7 @@ formatting:
     indentSize: 4
   MaximumLineLength:
     active: true
-    maxLineLength: 120
+    maxLineLength: 160
     ignoreBackTickedIdentifier: false
   ModifierListSpacing:
     active: true

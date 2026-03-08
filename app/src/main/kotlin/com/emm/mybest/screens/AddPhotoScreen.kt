@@ -61,6 +61,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -123,6 +124,7 @@ fun AddPhotoContent(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val currentOnBackClick by rememberUpdatedState(onBackClick)
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -180,7 +182,7 @@ fun AddPhotoContent(
     LaunchedEffect(Unit) {
         effect.collectLatest { effect ->
             when (effect) {
-                AddPhotoEffect.NavigateBack -> onBackClick()
+                AddPhotoEffect.NavigateBack -> currentOnBackClick()
                 is AddPhotoEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
             }
         }

@@ -162,8 +162,8 @@ fun ComparisonSlot(
     label: String,
     photo: ProgressPhotoEntity?,
     isSelected: Boolean,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
 ) {
     val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
 

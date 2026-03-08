@@ -237,8 +237,8 @@ fun CalendarGrid(
 fun DayCell(
     date: LocalDate,
     summary: DaySummary?,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
 ) {
     val isToday = date == LocalDate.now()
 

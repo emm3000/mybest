@@ -107,7 +107,7 @@ fun DeckItemSkeleton(modifier: Modifier = Modifier) {
 
 /** Skeleton of the Dashboard screen with N DeckItems. */
 @Composable
-fun DashboardSkeleton(count: Int = 4, modifier: Modifier = Modifier) {
+fun DashboardSkeleton(modifier: Modifier = Modifier, count: Int = 4) {
     Column(modifier = modifier.fillMaxWidth()) {
         // Header row
         Row(
@@ -129,8 +129,8 @@ fun DashboardSkeleton(count: Int = 4, modifier: Modifier = Modifier) {
 /** Generic skeleton for text lines. */
 @Composable
 fun TextSkeleton(
-    lines: Int = 3,
     modifier: Modifier = Modifier,
+    lines: Int = 3,
     lastLineWidth: Float = 0.6f,
 ) {
     Column(modifier = modifier) {
