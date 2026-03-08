@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -40,6 +41,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.HomeState
 import com.emm.mybest.viewmodel.HomeViewModel
@@ -53,18 +55,21 @@ fun HomeScreen(
     onAddPhotoClick: () -> Unit,
     onViewHistoryClick: () -> Unit,
     onViewInsightsClick: () -> Unit,
-    onViewTimelineClick: () -> Unit
+    onViewTimelineClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
 
     HomeScreenContent(
+        modifier = modifier,
         state = state,
         onAddWeightClick = onAddWeightClick,
         onAddHabitClick = onAddHabitClick,
         onAddPhotoClick = onAddPhotoClick,
         onViewHistoryClick = onViewHistoryClick,
         onViewInsightsClick = onViewInsightsClick,
-        onViewTimelineClick = onViewTimelineClick
+        onViewTimelineClick = onViewTimelineClick,
+        onToggleHabit = viewModel::onToggleHabit
     )
 }
 
@@ -76,10 +81,12 @@ internal fun HomeScreenContent(
     onAddPhotoClick: () -> Unit,
     onViewHistoryClick: () -> Unit,
     onViewInsightsClick: () -> Unit,
-    onViewTimelineClick: () -> Unit
+    onViewTimelineClick: () -> Unit,
+    onToggleHabit: (com.emm.mybest.domain.models.HabitWithRecord) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         LazyColumn(
@@ -90,11 +97,48 @@ internal fun HomeScreenContent(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item {
-                HomeHeader()
+                HomeHeader(modifier = Modifier.fillMaxWidth())
             }
 
             item {
-                SummaryCard(state, onClick = onViewInsightsClick)
+                SummaryCard(
+                    state = state,
+                    onClick = onViewInsightsClick,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            item {
+                Text(
+                    text = "Hábitos de hoy",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            if (state.dailyHabits.isEmpty()) {
+                item {
+                    HEmptyState(
+                        title = "Sin hábitos para hoy",
+                        description = "Crea un nuevo hábito para empezar a trackear tu progreso.",
+                        icon = Icons.Rounded.CheckCircle,
+                        action = {
+                            TextButton(onClick = onAddHabitClick) {
+                                Text("Añadir Hábito")
+                            }
+                        }
+                    )
+                }
+            } else {
+                items(state.dailyHabits) { habitWithRecord ->
+                    com.emm.mybest.ui.components.HabitCard(
+                        habit = habitWithRecord.habit,
+                        record = habitWithRecord.record,
+                        onToggle = { onToggleHabit(habitWithRecord) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
 
             item {
@@ -104,7 +148,7 @@ internal fun HomeScreenContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Registro Diario",
+                        text = "Accesos rápidos",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -137,7 +181,11 @@ internal fun HomeScreenContent(
             item {
                 QuickActionCard(
                     title = "Hábitos de Hoy",
-                    subtitle = if (state.habitsCompletedToday > 0) "¡Ya has registrado hoy!" else "¿Qué tal tu alimentación?",
+                    subtitle = if (state.dailyHabits.count { it.record?.isCompleted == true } > 0) {
+                        "¡Ya has registrado hoy!"
+                    } else {
+                        "¿Qué tal tu alimentación?"
+                    },
                     icon = Icons.Rounded.CheckCircle,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -162,10 +210,9 @@ internal fun HomeScreenContent(
 }
 
 @Composable
-fun HomeHeader() {
+fun HomeHeader(modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -199,10 +246,13 @@ fun HomeHeader() {
 }
 
 @Composable
-fun SummaryCard(state: HomeState, onClick: () -> Unit) {
+fun SummaryCard(
+    state: HomeState,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .height(160.dp),
         onClick = onClick,
         shape = RoundedCornerShape(28.dp),
@@ -226,7 +276,7 @@ fun SummaryCard(state: HomeState, onClick: () -> Unit) {
                     text = if (state.isLoading) {
                         "Cargando..."
                     } else if (state.totalWeightLost > 0) {
-                        "¡Has bajado ${String.format("%.1f", state.totalWeightLost)} kg!"
+                        "¡Has bajado ${String.format(java.util.Locale.getDefault(), "%.1f", state.totalWeightLost)} kg!"
                     } else {
                         "¡Vas muy bien!"
                     },
@@ -262,13 +312,14 @@ fun QuickActionCard(
     containerColor: Color,
     contentColor: Color,
     iconColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = containerColor,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier
@@ -318,12 +369,11 @@ fun QuickActionCard(
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
+private fun HomeScreenPreview() {
     MyBestTheme {
         HomeScreenContent(
             state = HomeState(
                 lastWeight = 75.5f,
-                habitsCompletedToday = 1,
                 totalPhotos = 12,
                 isLoading = false
             ),
@@ -332,7 +382,8 @@ fun HomeScreenPreview() {
             onAddPhotoClick = {},
             onViewHistoryClick = {},
             onViewInsightsClick = {},
-            onViewTimelineClick = {}
+            onViewTimelineClick = {},
+            onToggleHabit = {}
         )
     }
 }
