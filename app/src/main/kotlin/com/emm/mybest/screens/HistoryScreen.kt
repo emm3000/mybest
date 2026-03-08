@@ -239,9 +239,13 @@ fun DayCell(
             .aspectRatio(0.8f)
             .clip(RoundedCornerShape(12.dp))
             .background(
-                if (isToday) MaterialTheme.colorScheme.primaryContainer.copy(
-                    alpha = 0.3f
-                ) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                if (isToday) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(
+                        alpha = 0.3f
+                    )
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                }
             )
             .clickable(onClick = onClick)
             .padding(4.dp),
