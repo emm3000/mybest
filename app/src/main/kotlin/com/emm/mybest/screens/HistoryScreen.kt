@@ -75,11 +75,13 @@ import java.util.Locale
 @Composable
 fun HistoryScreen(
     viewModel: HistoryViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
 
     HistoryContent(
+        modifier = modifier,
         state = state,
         onBackClick = onBackClick,
         onIntent = viewModel::onIntent
@@ -91,7 +93,8 @@ fun HistoryScreen(
 fun HistoryContent(
     state: HistoryState,
     onBackClick: () -> Unit,
-    onIntent: (HistoryIntent) -> Unit
+    onIntent: (HistoryIntent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val selectedDate = state.selectedDate
     if (selectedDate != null) {
@@ -112,6 +115,7 @@ fun HistoryContent(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Mi Progreso") },
@@ -164,10 +168,11 @@ fun HistoryContent(
 @Composable
 fun MonthSelector(
     currentMonth: YearMonth,
-    onMonthChange: (YearMonth) -> Unit
+    onMonthChange: (YearMonth) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -195,7 +200,8 @@ fun MonthSelector(
 fun CalendarGrid(
     yearMonth: YearMonth,
     dayData: Map<LocalDate, DaySummary>,
-    onDateClick: (LocalDate) -> Unit
+    onDateClick: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val daysInMonth = yearMonth.lengthOfMonth()
     val firstDayOfMonth = yearMonth.atDay(1).dayOfWeek.value
@@ -204,6 +210,7 @@ fun CalendarGrid(
     val totalCells = daysInMonth + startOffset
 
     LazyVerticalGrid(
+        modifier = modifier,
         columns = GridCells.Fixed(7),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -230,12 +237,13 @@ fun CalendarGrid(
 fun DayCell(
     date: LocalDate,
     summary: DaySummary?,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val isToday = date == LocalDate.now()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .aspectRatio(0.8f)
             .clip(RoundedCornerShape(12.dp))
             .background(
@@ -285,7 +293,8 @@ fun DayDetailContent(
     onClose: () -> Unit,
     onDeleteWeight: () -> Unit,
     onDeleteHabit: () -> Unit,
-    onDeletePhoto: (String) -> Unit
+    onDeletePhoto: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val isToday = date == LocalDate.now()
     var photoToDelete by remember { mutableStateOf<ProgressPhotoEntity?>(null) }
@@ -312,7 +321,7 @@ fun DayDetailContent(
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(24.dp)
             .padding(bottom = 32.dp),
@@ -369,8 +378,8 @@ fun DayDetailContent(
                     onDelete = if (isToday) onDeleteHabit else null,
                     content = {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            if (habit.ateHealthy) Chip("Comida Sana")
-                            if (habit.didExercise) Chip("Ejercicio")
+                            if (habit.ateHealthy) HChip("Comida Sana")
+                            if (habit.didExercise) HChip("Ejercicio")
                         }
                         habit.notes?.let {
                             Text(
@@ -452,12 +461,13 @@ fun DetailItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     color: Color,
     title: String,
+    modifier: Modifier = Modifier,
     subtitle: String? = null,
     onDelete: (() -> Unit)? = null,
     content: (@Composable () -> Unit)? = null
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -495,8 +505,12 @@ fun DetailItem(
 }
 
 @Composable
-fun Chip(text: String) {
+fun HChip(
+    text: String,
+    modifier: Modifier = Modifier
+) {
     Surface(
+        modifier = modifier,
         color = MaterialTheme.colorScheme.secondaryContainer,
         shape = CircleShape
     ) {
@@ -510,8 +524,15 @@ fun Chip(text: String) {
 }
 
 @Composable
-fun LegendItem(color: Color, text: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+fun LegendItem(
+    color: Color,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
         Spacer(modifier = Modifier.width(8.dp))
         Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -520,7 +541,7 @@ fun LegendItem(color: Color, text: String) {
 
 @Preview(showBackground = true)
 @Composable
-fun HistoryScreenPreview() {
+private fun HistoryScreenPreview() {
     val today = LocalDate.now()
     val currentMonth = YearMonth.now()
 

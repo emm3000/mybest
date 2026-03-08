@@ -20,8 +20,14 @@ interface HabitDao {
     @Delete
     suspend fun delete(habit: HabitEntity)
 
+    @Query("SELECT * FROM habits")
+    fun getAllHabits(): Flow<List<HabitEntity>>
+
     @Query("SELECT * FROM habits WHERE is_enabled = 1")
     fun getAllEnabledHabits(): Flow<List<HabitEntity>>
+
+    @Query("SELECT * FROM habits WHERE id = :id")
+    fun getHabitById(id: String): Flow<HabitEntity?>
 
     @Query("SELECT * FROM habits WHERE id = :id")
     suspend fun getById(id: String): HabitEntity?

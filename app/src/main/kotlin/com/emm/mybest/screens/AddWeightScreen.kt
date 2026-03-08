@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,15 +45,17 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun AddWeightScreen(
     viewModel: AddWeightViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val currentOnBackClick by rememberUpdatedState(onBackClick)
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
-                AddWeightEffect.NavigateBack -> onBackClick()
+                AddWeightEffect.NavigateBack -> currentOnBackClick()
                 is AddWeightEffect.ShowError -> {
                     snackbarHostState.showSnackbar(effect.message)
                 }
@@ -63,10 +66,9 @@ fun AddWeightScreen(
     AddWeightContent(
         state = state,
         snackbarHostState = snackbarHostState,
-        onBackClick = onBackClick,
-        onWeightChange = { viewModel.onIntent(AddWeightIntent.OnWeightChange(it)) },
-        onNoteChange = { viewModel.onIntent(AddWeightIntent.OnNoteChange(it)) },
-        onSaveClick = { viewModel.onIntent(AddWeightIntent.OnSaveClick) }
+        onBackClick = currentOnBackClick,
+        onIntent = viewModel::onIntent,
+        modifier = modifier
     )
 }
 
@@ -76,9 +78,7 @@ private fun AddWeightContent(
     state: AddWeightState,
     snackbarHostState: SnackbarHostState,
     onBackClick: () -> Unit,
-    onWeightChange: (String) -> Unit,
-    onNoteChange: (String) -> Unit,
-    onSaveClick: () -> Unit,
+    onIntent: (AddWeightIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -110,7 +110,7 @@ private fun AddWeightContent(
 
             OutlinedTextField(
                 value = state.weight,
-                onValueChange = onWeightChange,
+                onValueChange = { onIntent(AddWeightIntent.OnWeightChange(it)) },
                 label = { Text("Peso (kg)") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -120,7 +120,7 @@ private fun AddWeightContent(
 
             OutlinedTextField(
                 value = state.note,
-                onValueChange = onNoteChange,
+                onValueChange = { onIntent(AddWeightIntent.OnNoteChange(it)) },
                 label = { Text("Nota (opcional)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
@@ -129,7 +129,7 @@ private fun AddWeightContent(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = onSaveClick,
+                onClick = { onIntent(AddWeightIntent.OnSaveClick) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -161,9 +161,7 @@ private fun AddWeightScreenPreview() {
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onBackClick = {},
-            onWeightChange = {},
-            onNoteChange = {},
-            onSaveClick = {}
+            onIntent = {}
         )
     }
 }

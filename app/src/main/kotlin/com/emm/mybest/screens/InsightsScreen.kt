@@ -54,11 +54,13 @@ import com.emm.mybest.viewmodel.InsightsViewModel
 fun InsightsScreen(
     viewModel: InsightsViewModel,
     onBackClick: () -> Unit,
-    onCompareClick: () -> Unit
+    onCompareClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Insights & Progreso") },
@@ -111,9 +113,10 @@ fun InsightsScreen(
 @Composable
 private fun InsightsSection(
     title: String,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    Column {
+    Column(modifier = modifier) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
@@ -133,9 +136,12 @@ private fun InsightsSection(
 }
 
 @Composable
-private fun WeightSummaryCards(state: InsightsState) {
+private fun WeightSummaryCards(
+    state: InsightsState,
+    modifier: Modifier = Modifier
+) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         StatCard(
@@ -148,7 +154,7 @@ private fun WeightSummaryCards(state: InsightsState) {
         StatCard(
             modifier = Modifier.weight(1f),
             title = "Pérdida",
-            value = "${String.format("%.1f", state.totalWeightLost)}kg",
+            value = String.format(java.util.Locale.getDefault(), "%.1fkg", state.totalWeightLost),
             icon = if (state.totalWeightLost >= 0) Icons.Rounded.TrendingDown else Icons.Rounded.North,
             containerColor = MaterialTheme.colorScheme.tertiaryContainer
         )
@@ -157,11 +163,11 @@ private fun WeightSummaryCards(state: InsightsState) {
 
 @Composable
 private fun StatCard(
-    modifier: Modifier = Modifier,
     title: String,
     value: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    containerColor: Color
+    containerColor: Color,
+    modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier,
@@ -194,7 +200,6 @@ private fun WeightChart(
     }
 
     val primaryColor = MaterialTheme.colorScheme.primary
-    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     Canvas(modifier = modifier) {
         val minWeight = weights.minOf { it.weight } - 2f
@@ -255,8 +260,14 @@ private fun WeightChart(
 }
 
 @Composable
-private fun HabitStats(state: InsightsState) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+private fun HabitStats(
+    state: InsightsState,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(80.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
@@ -297,16 +308,21 @@ private fun HabitStats(state: InsightsState) {
 }
 
 @Composable
-private fun HorizontalStatRow(label: String, count: Int, color: Color) {
+private fun HorizontalStatRow(
+    label: String,
+    count: Int,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(label, style = MaterialTheme.typography.bodyMedium)
         Surface(
             color = color.copy(alpha = 0.1f),
-            shape = CircleShape,
+            shape = androidx.compose.foundation.shape.CircleShape,
             modifier = Modifier.padding(start = 8.dp)
         ) {
             Text(
@@ -321,6 +337,13 @@ private fun HorizontalStatRow(label: String, count: Int, color: Color) {
 }
 
 @Composable
-private fun CircleShape(content: @Composable () -> Unit) {
-    Surface(shape = CircleShape, content = content)
+private fun HCircle(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Surface(
+        modifier = modifier,
+        shape = androidx.compose.foundation.shape.CircleShape,
+        content = content
+    )
 }
