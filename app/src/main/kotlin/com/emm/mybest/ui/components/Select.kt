@@ -123,15 +123,10 @@ fun <T> HSelect(
                 onDismissRequest = { setIsExpanded(false) },
             ) {
                 items.forEach { option ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = itemLabel(option),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (selectedItem == option) cs.primary else cs.onSurface,
-                                fontWeight = if (selectedItem == option) FontWeight.SemiBold else FontWeight.Normal,
-                            )
-                        },
+                    SelectDropdownItem(
+                        option = option,
+                        itemLabel = itemLabel,
+                        isSelected = selectedItem == option,
                         onClick = {
                             onItemSelect(option)
                             setIsExpanded(false)
@@ -141,6 +136,27 @@ fun <T> HSelect(
             }
         }
     }
+}
+
+@Composable
+private fun <T> SelectDropdownItem(
+    option: T,
+    itemLabel: (T) -> String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    val cs = MaterialTheme.colorScheme
+    DropdownMenuItem(
+        text = {
+            Text(
+                text = itemLabel(option),
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (isSelected) cs.primary else cs.onSurface,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+            )
+        },
+        onClick = onClick,
+    )
 }
 
 @Composable
