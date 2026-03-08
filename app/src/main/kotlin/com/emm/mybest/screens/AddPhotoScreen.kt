@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -447,7 +448,7 @@ private fun openAppSettings(context: android.content.Context) {
 }
 
 private fun copyUriToInternalStorage(context: android.content.Context, uri: Uri): Uri? {
-    return try {
+    return runCatching {
         val directory = File(context.filesDir, "photos")
         if (!directory.exists()) directory.mkdirs()
         val file = File(directory, "IMG_${System.currentTimeMillis()}.jpg")
@@ -482,10 +483,9 @@ private fun copyUriToInternalStorage(context: android.content.Context, uri: Uri)
         }
         val authority = "${context.packageName}.fileprovider"
         FileProvider.getUriForFile(context, authority, file)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
+    }.onFailure { error ->
+        Log.e("AddPhotoScreen", "Error copying photo from URI", error)
+    }.getOrNull()
 }
 
 private fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {

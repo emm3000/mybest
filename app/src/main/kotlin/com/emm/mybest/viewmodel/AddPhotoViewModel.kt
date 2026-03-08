@@ -83,7 +83,7 @@ class AddPhotoViewModel(
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            try {
+            runCatching {
                 val newPhotos = photos.map { photo ->
                     NewProgressPhoto(
                         type = photo.type,
@@ -91,12 +91,12 @@ class AddPhotoViewModel(
                     )
                 }
                 photoRepository.savePhotos(newPhotos)
+            }.onSuccess {
                 _effect.emit(AddPhotoEffect.NavigateBack)
-            } catch (e: Exception) {
-                _effect.emit(AddPhotoEffect.ShowError("Error al guardar: ${e.message}"))
-            } finally {
-                _state.update { it.copy(isLoading = false) }
+            }.onFailure { error ->
+                _effect.emit(AddPhotoEffect.ShowError("Error al guardar: ${error.message}"))
             }
+            _state.update { it.copy(isLoading = false) }
         }
     }
 }

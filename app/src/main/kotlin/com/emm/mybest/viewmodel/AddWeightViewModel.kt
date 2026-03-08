@@ -58,17 +58,17 @@ class AddWeightViewModel(
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            try {
+            runCatching {
                 weightRepository.saveWeight(
                     weight = weightValue,
                     note = _state.value.note.takeIf { it.isNotBlank() },
                 )
+            }.onSuccess {
                 _effect.emit(AddWeightEffect.NavigateBack)
-            } catch (e: Exception) {
-                _effect.emit(AddWeightEffect.ShowError("Error al guardar: ${e.message}"))
-            } finally {
-                _state.update { it.copy(isLoading = false) }
+            }.onFailure { error ->
+                _effect.emit(AddWeightEffect.ShowError("Error al guardar: ${error.message}"))
             }
+            _state.update { it.copy(isLoading = false) }
         }
     }
 }

@@ -321,7 +321,7 @@ exceptions:
   ObjectExtendsThrowable:
     active: false
   PrintStackTrace:
-    active: false
+    active: true
   RethrowCaughtException:
     active: true
   ReturnFromFinally:
@@ -365,7 +365,7 @@ exceptions:
   ThrowingNewInstanceOfSameException:
     active: true
   TooGenericExceptionCaught:
-    active: false
+    active: true
     excludes:
       [
         "**/test/**",

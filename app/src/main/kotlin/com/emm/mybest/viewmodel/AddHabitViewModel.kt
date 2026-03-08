@@ -122,7 +122,7 @@ class AddHabitViewModel(
     private fun saveHabit() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            try {
+            runCatching {
                 val habit = Habit(
                     id = UUID.randomUUID().toString(),
                     name = _state.value.name,
@@ -135,12 +135,12 @@ class AddHabitViewModel(
                     scheduledDays = _state.value.scheduledDays
                 )
                 createHabitUseCase(habit)
+            }.onSuccess {
                 _effect.emit(AddHabitEffect.NavigateBack)
-            } catch (e: Exception) {
-                _effect.emit(AddHabitEffect.ShowError("Error al guardar: ${e.message}"))
-            } finally {
-                _state.update { it.copy(isLoading = false) }
+            }.onFailure { error ->
+                _effect.emit(AddHabitEffect.ShowError("Error al guardar: ${error.message}"))
             }
+            _state.update { it.copy(isLoading = false) }
         }
     }
 }
