@@ -2,13 +2,13 @@ package com.emm.mybest.core.datetime
 
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import java.lang.Math.floorDiv
 import java.lang.Math.floorMod
+import kotlin.time.Clock
 
 private const val FIRST_MONTH = 1
 private const val MONTHS_PER_YEAR = 12
@@ -28,8 +28,7 @@ private val SPANISH_MONTHS = listOf(
     "diciembre",
 )
 
-fun currentDate(): LocalDate = Instant
-    .fromEpochMilliseconds(System.currentTimeMillis())
+fun currentDate(): LocalDate = Clock.System.now()
     .toLocalDateTime(TimeZone.currentSystemDefault())
     .date
 
@@ -63,10 +62,10 @@ data class YearMonthValue(
     companion object {
         fun now(): YearMonthValue {
             val today = currentDate()
-            return YearMonthValue(today.year, today.monthNumber)
+            return YearMonthValue(today.year, today.monthValue)
         }
 
-        fun from(date: LocalDate): YearMonthValue = YearMonthValue(date.year, date.monthNumber)
+        fun from(date: LocalDate): YearMonthValue = YearMonthValue(date.year, date.monthValue)
     }
 }
 
@@ -92,13 +91,13 @@ fun DayOfWeek.narrowEs(): String = when (this) {
     DayOfWeek.SUNDAY -> "D"
 }
 
-fun LocalDate.formatDdMmYy(): String = "%02d/%02d/%02d".format(day, monthNumber, year % TWO_DIGIT_YEAR_DIVISOR)
+fun LocalDate.formatDdMmYy(): String = "%02d/%02d/%02d".format(day, monthValue, year % TWO_DIGIT_YEAR_DIVISOR)
 
-fun LocalDate.formatEsLongDate(): String = "$day de ${monthNameEs(monthNumber)}, $year"
+fun LocalDate.formatEsLongDate(): String = "$day de ${monthNameEs(monthValue)}, $year"
 
 fun LocalDate.formatEsWeekdayDayMonth(): String {
     val weekday = dayNameEs(dayOfWeek).replaceFirstChar { it.uppercase() }
-    return "$weekday $day ${monthNameEs(monthNumber)}"
+    return "$weekday $day ${monthNameEs(monthValue)}"
 }
 
 fun YearMonthValue.formatEsMonthYear(): String {
@@ -120,3 +119,6 @@ private fun dayNameEs(dayOfWeek: DayOfWeek): String = when (dayOfWeek) {
     DayOfWeek.SATURDAY -> "sabado"
     DayOfWeek.SUNDAY -> "domingo"
 }
+
+private val LocalDate.monthValue: Int
+    get() = month.ordinal + 1
