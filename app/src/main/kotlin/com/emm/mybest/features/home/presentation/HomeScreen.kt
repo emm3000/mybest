@@ -25,11 +25,14 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +53,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val currentOnNavigate by androidx.compose.runtime.rememberUpdatedState(onNavigate)
 
@@ -57,7 +61,7 @@ fun HomeScreen(
         viewModel.effect.collect { effect ->
             when (effect) {
                 is HomeEffect.Navigate -> currentOnNavigate(effect.route)
-                is HomeEffect.ShowError -> { /* Handle error */ }
+                is HomeEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
             }
         }
     }
@@ -66,6 +70,7 @@ fun HomeScreen(
         modifier = modifier,
         state = state,
         onIntent = viewModel::onIntent,
+        snackbarHostState = snackbarHostState,
     )
 }
 
@@ -74,10 +79,12 @@ internal fun HomeScreenContent(
     state: HomeState,
     onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize().consumeWindowInsets(WindowInsets.safeContent),
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -90,23 +97,7 @@ internal fun HomeScreenContent(
                 HomeHeader(modifier = Modifier.fillMaxWidth())
             }
 
-            item {
-                SummaryCard(
-                    state = state,
-                    onClick = { onIntent(HomeIntent.OnViewInsightsClick) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-
             homeHabitsSection(state = state, onIntent = onIntent)
-
-            item {
-                QuickAccessHeader(
-                    onTimelineClick = { onIntent(HomeIntent.OnViewTimelineClick) },
-                    onInsightsClick = { onIntent(HomeIntent.OnViewInsightsClick) },
-                    onHistoryClick = { onIntent(HomeIntent.OnViewHistoryClick) },
-                )
-            }
 
             item {
                 WeightQuickAction(
@@ -116,7 +107,7 @@ internal fun HomeScreenContent(
             }
 
             item {
-                DailyHabitsQuickAction(
+                NewHabitQuickAction(
                     state = state,
                     onClick = { onIntent(HomeIntent.OnAddHabitClick) },
                 )
@@ -126,6 +117,14 @@ internal fun HomeScreenContent(
                 ProgressPhotoQuickAction(
                     state = state,
                     onClick = { onIntent(HomeIntent.OnAddPhotoClick) },
+                )
+            }
+
+            item {
+                SummaryCard(
+                    state = state,
+                    onClick = { onIntent(HomeIntent.OnViewInsightsClick) },
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
@@ -195,7 +194,7 @@ fun SummaryCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = if (state.isLoading) {
-                        "Cargando... xD"
+                        "Cargando progreso..."
                     } else if (state.totalWeightLost > 0) {
                         "¡Has bajado ${String.format(java.util.Locale.getDefault(), "%.1f", state.totalWeightLost)} kg!"
                     } else {
@@ -299,6 +298,7 @@ private fun HomeScreenPreview() {
                 isLoading = false,
             ),
             onIntent = {},
+            snackbarHostState = remember { SnackbarHostState() },
         )
     }
 }

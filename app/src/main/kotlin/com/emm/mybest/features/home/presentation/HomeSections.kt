@@ -1,7 +1,5 @@
 package com.emm.mybest.features.home.presentation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
@@ -13,11 +11,9 @@ import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HabitCard
@@ -62,30 +58,6 @@ internal fun LazyListScope.homeHabitsSection(
 }
 
 @Composable
-internal fun QuickAccessHeader(
-    onTimelineClick: () -> Unit,
-    onInsightsClick: () -> Unit,
-    onHistoryClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = "Accesos rápidos",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-        )
-        Row {
-            HButton(text = "Timeline", onClick = onTimelineClick, variant = ButtonVariant.Link)
-            HButton(text = "Estadísticas", onClick = onInsightsClick, variant = ButtonVariant.Link)
-            HButton(text = "Historial", onClick = onHistoryClick, variant = ButtonVariant.Link)
-        }
-    }
-}
-
-@Composable
 internal fun WeightQuickAction(
     state: HomeState,
     onClick: () -> Unit,
@@ -102,18 +74,18 @@ internal fun WeightQuickAction(
 }
 
 @Composable
-internal fun DailyHabitsQuickAction(
+internal fun NewHabitQuickAction(
     state: HomeState,
     onClick: () -> Unit,
 ) {
-    val subtitle = if (state.dailyHabits.count { it.record?.isCompleted == true } > 0) {
-        "¡Ya has registrado hoy!"
+    val subtitle = if (state.dailyHabits.isEmpty()) {
+        "Define tu primer hábito diario"
     } else {
-        "¿Qué tal tu alimentación?"
+        "Añade otro hábito a tu seguimiento"
     }
 
     QuickActionCard(
-        title = "Hábitos de Hoy",
+        title = "Crear Hábito",
         subtitle = subtitle,
         icon = Icons.Rounded.CheckCircle,
         containerColor = MaterialTheme.colorScheme.secondaryContainer,

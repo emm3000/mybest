@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
 import com.emm.mybest.features.home.presentation.HomeIntent
 import com.emm.mybest.features.home.presentation.HomeScreenContent
 import com.emm.mybest.features.home.presentation.HomeState
@@ -30,6 +32,7 @@ class HomeScreenTest {
                 HomeScreenContent(
                     state = state,
                     onIntent = {},
+                    snackbarHostState = remember { SnackbarHostState() },
                 )
             }
         }
@@ -49,12 +52,13 @@ class HomeScreenTest {
                 HomeScreenContent(
                     state = HomeState(),
                     onIntent = {},
+                    snackbarHostState = remember { SnackbarHostState() },
                 )
             }
         }
 
         composeTestRule.onNodeWithText("Registrar Peso").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Hábitos de Hoy").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Crear Hábito").assertIsDisplayed()
     }
 
     @Test
@@ -67,6 +71,7 @@ class HomeScreenTest {
                     onIntent = { intent ->
                         if (intent is HomeIntent.OnAddWeightClick) clicked = true
                     },
+                    snackbarHostState = remember { SnackbarHostState() },
                 )
             }
         }
