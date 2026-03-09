@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.emm.mybest.core.navigation.AppNavigation
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.viewmodel.MainViewModel
@@ -25,6 +26,7 @@ class MainActivity : ComponentActivity() {
     private var intentAction by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         intentAction = intent.action
