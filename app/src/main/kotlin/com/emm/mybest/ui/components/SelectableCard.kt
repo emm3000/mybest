@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -16,7 +18,11 @@ fun HSelectableCard(
     content: @Composable BoxScope.() -> Unit,
 ) {
     HCard(
-        modifier = modifier,
+        modifier = modifier.semantics {
+            this[SemanticsProperties.Selected] = selected
+            this[SemanticsProperties.StateDescription] =
+                if (selected) "Seleccionado" else "No seleccionado"
+        },
         variant = if (selected) CardVariant.Filled else CardVariant.Outlined,
         onClick = onClick,
         border = if (selected) {

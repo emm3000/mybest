@@ -96,13 +96,21 @@ internal fun handleCameraPermissionResult(
     if (isPermanentlyDenied) {
         scope.launch {
             val result = snackbarHostState.showSnackbar(
-                message = "El acceso a la cámara está desactivado",
-                actionLabel = "AJUSTES",
+                message = "Habilita el permiso de camara en Ajustes para tomar fotos.",
+                actionLabel = "Ajustes",
                 duration = SnackbarDuration.Long,
             )
             if (result == SnackbarResult.ActionPerformed) {
                 openAppSettings(context)
             }
         }
+        return
+    }
+
+    scope.launch {
+        snackbarHostState.showSnackbar(
+            message = "Se necesita acceso a la camara para tomar fotos.",
+            duration = SnackbarDuration.Short,
+        )
     }
 }

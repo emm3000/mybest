@@ -44,6 +44,7 @@ class AddHabitViewModelTest {
         assertEquals(false, state.isLoading)
         assertNull(state.nameError)
         assertNull(state.goalError)
+        assertNull(state.scheduledDaysError)
     }
 
     @Test
@@ -139,6 +140,28 @@ class AddHabitViewModelTest {
         coVerify(exactly = 1) { createHabitUseCase.invoke(any()) }
         assertEquals("Leer", capturedHabit.captured.name)
         assertEquals(HabitType.BOOLEAN, capturedHabit.captured.type)
+        assertEquals(false, viewModel.state.value.isLoading)
+    }
+
+    @Test
+    fun `OnSaveClick keeps user on screen when no days are selected`() = runTest {
+        viewModel.onIntent(AddHabitIntent.OnNameChange("Leer"))
+        DayOfWeek.entries.forEach { day ->
+            viewModel.onIntent(AddHabitIntent.OnDayToggle(day))
+        }
+
+        viewModel.effect.test {
+            viewModel.onIntent(AddHabitIntent.OnSaveClick)
+            advanceUntilIdle()
+
+            expectNoEvents()
+        }
+
+        coVerify(exactly = 0) { createHabitUseCase.invoke(any()) }
+        assertEquals(
+            "Selecciona al menos un día para este hábito",
+            viewModel.state.value.scheduledDaysError,
+        )
         assertEquals(false, viewModel.state.value.isLoading)
     }
 

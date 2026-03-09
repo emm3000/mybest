@@ -6,12 +6,15 @@ import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.repository.PhotoRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class ComparePhotosState(
     val photos: List<ProgressPhoto> = emptyList(),
@@ -28,6 +31,10 @@ sealed class ComparePhotosIntent {
     object ToggleSwap : ComparePhotosIntent()
 }
 
+sealed class ComparePhotosEffect {
+    data class ShowError(val message: String) : ComparePhotosEffect()
+}
+
 class ComparePhotosViewModel(
     private val photoRepository: PhotoRepository,
 ) : ViewModel() {
@@ -35,6 +42,9 @@ class ComparePhotosViewModel(
     private val _selectedType = MutableStateFlow<PhotoType?>(null)
     private val _beforePhoto = MutableStateFlow<ProgressPhoto?>(null)
     private val _afterPhoto = MutableStateFlow<ProgressPhoto?>(null)
+    private val _effect = MutableSharedFlow<ComparePhotosEffect>()
+
+    val effect = _effect.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val state: StateFlow<ComparePhotosState> = combine(
@@ -70,13 +80,31 @@ class ComparePhotosViewModel(
                 _beforePhoto.value = null
                 _afterPhoto.value = null
             }
-            is ComparePhotosIntent.OnBeforePhotoSelected -> _beforePhoto.value = intent.photo
-            is ComparePhotosIntent.OnAfterPhotoSelected -> _afterPhoto.value = intent.photo
+            is ComparePhotosIntent.OnBeforePhotoSelected -> {
+                if (_afterPhoto.value?.id == intent.photo.id) {
+                    showError("Elige una foto distinta para ANTES.")
+                } else {
+                    _beforePhoto.value = intent.photo
+                }
+            }
+            is ComparePhotosIntent.OnAfterPhotoSelected -> {
+                if (_beforePhoto.value?.id == intent.photo.id) {
+                    showError("Elige una foto distinta para DESPUES.")
+                } else {
+                    _afterPhoto.value = intent.photo
+                }
+            }
             ComparePhotosIntent.ToggleSwap -> {
                 val temp = _beforePhoto.value
                 _beforePhoto.value = _afterPhoto.value
                 _afterPhoto.value = temp
             }
+        }
+    }
+
+    private fun showError(message: String) {
+        viewModelScope.launch {
+            _effect.emit(ComparePhotosEffect.ShowError(message))
         }
     }
 }

@@ -29,13 +29,17 @@ import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +56,7 @@ import com.emm.mybest.ui.components.HFilterChip
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.shadcnWhite
+import kotlinx.coroutines.flow.collectLatest
 import java.util.Locale
 
 private const val PHOTO_SELECTION_GRID_COLUMNS = 3
@@ -64,10 +69,21 @@ fun ComparePhotosScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val currentOnBackClick by rememberUpdatedState(onBackClick)
     var selectingForBefore by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is ComparePhotosEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             HTopBar(
                 title = "Comparador de Progreso",
@@ -75,7 +91,7 @@ fun ComparePhotosScreen(
                     HIconButton(
                         icon = Icons.AutoMirrored.Rounded.ArrowBack,
                         contentDescription = "Atrás",
-                        onClick = onBackClick,
+                        onClick = currentOnBackClick,
                     )
                 },
                 actions = {
@@ -88,75 +104,153 @@ fun ComparePhotosScreen(
             )
         },
     ) { padding ->
-        Column(
+        ComparePhotosContent(
+            state = state,
+            contentPadding = padding,
+            selectingForBefore = selectingForBefore,
+            onActivateBefore = { selectingForBefore = true },
+            onActivateAfter = { selectingForBefore = false },
+            onIntent = viewModel::onIntent,
+        )
+    }
+}
+
+@Composable
+private fun ComparePhotosContent(
+    state: ComparePhotosState,
+    contentPadding: PaddingValues,
+    selectingForBefore: Boolean,
+    onActivateBefore: () -> Unit,
+    onActivateAfter: () -> Unit,
+    onIntent: (ComparePhotosIntent) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .padding(contentPadding)
+            .fillMaxSize(),
+    ) {
+        Text(
+            text = "Elige una foto para ANTES y otra para DESPUES. Toca el bloque superior para cambiar el slot activo.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        )
+
+        Box(
             modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
+                .fillMaxWidth()
+                .height(300.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                .padding(16.dp),
         ) {
-            // Top Comparison View
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                    .padding(16.dp),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    ComparisonSlot(
-                        modifier = Modifier.weight(1f),
-                        label = "ANTES",
-                        photo = state.beforePhoto,
-                        isSelected = selectingForBefore,
-                        onClick = { selectingForBefore = true },
-                    )
-                    ComparisonSlot(
-                        modifier = Modifier.weight(1f),
-                        label = "DESPUÉS",
-                        photo = state.afterPhoto,
-                        isSelected = !selectingForBefore,
-                        onClick = { selectingForBefore = false },
-                    )
-                }
-            }
-
-            // Type Filter
-            PhotoTypeSelector(
-                selectedType = state.selectedType,
-                onTypeChange = { viewModel.onIntent(ComparePhotosIntent.OnTypeSelected(it)) },
-            )
-
-            // Photo Grid for selection
-            Text(
-                text = "Selecciona para ${if (selectingForBefore) "Antes" else "Después"}",
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                color = MaterialTheme.colorScheme.primary,
-            )
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(PHOTO_SELECTION_GRID_COLUMNS),
-                contentPadding = PaddingValues(16.dp),
+            Row(
+                modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.weight(1f),
             ) {
-                items(state.photos) { photo ->
-                    PhotoSelectionCard(
-                        photo = photo,
-                        isSelected = photo == state.beforePhoto || photo == state.afterPhoto,
-                        onSelect = {
-                            if (selectingForBefore) {
-                                viewModel.onIntent(ComparePhotosIntent.OnBeforePhotoSelected(photo))
-                            } else {
-                                viewModel.onIntent(ComparePhotosIntent.OnAfterPhotoSelected(photo))
-                            }
-                        },
-                    )
-                }
+                ComparisonSlot(
+                    modifier = Modifier.weight(1f),
+                    label = "ANTES",
+                    photo = state.beforePhoto,
+                    isSelected = selectingForBefore,
+                    onClick = onActivateBefore,
+                )
+                ComparisonSlot(
+                    modifier = Modifier.weight(1f),
+                    label = "DESPUÉS",
+                    photo = state.afterPhoto,
+                    isSelected = !selectingForBefore,
+                    onClick = onActivateAfter,
+                )
             }
+        }
+
+        PhotoTypeSelector(
+            selectedType = state.selectedType,
+            onTypeChange = { onIntent(ComparePhotosIntent.OnTypeSelected(it)) },
+        )
+
+        Text(
+            text = "Slot activo: ${if (selectingForBefore) "ANTES" else "DESPUES"}",
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            color = MaterialTheme.colorScheme.primary,
+        )
+
+        ComparePhotosSelectionSection(
+            state = state,
+            selectingForBefore = selectingForBefore,
+            onIntent = onIntent,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun ComparePhotosSelectionSection(
+    state: ComparePhotosState,
+    selectingForBefore: Boolean,
+    onIntent: (ComparePhotosIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    when {
+        state.isLoading -> {
+            Box(
+                modifier = modifier.padding(16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "Cargando fotos...",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        state.photos.isEmpty() -> ComparePhotosEmptyState(
+            hasActiveFilter = state.selectedType != null,
+            modifier = modifier,
+        )
+        else -> ComparePhotosGrid(
+            state = state,
+            selectingForBefore = selectingForBefore,
+            onIntent = onIntent,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun ComparePhotosGrid(
+    state: ComparePhotosState,
+    selectingForBefore: Boolean,
+    onIntent: (ComparePhotosIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(PHOTO_SELECTION_GRID_COLUMNS),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier,
+    ) {
+        items(state.photos) { photo ->
+            PhotoSelectionCard(
+                photo = photo,
+                selectionLabel = when (photo.id) {
+                    state.beforePhoto?.id -> "ANTES"
+                    state.afterPhoto?.id -> "DESPUES"
+                    else -> null
+                },
+                isSelected = photo == state.beforePhoto || photo == state.afterPhoto,
+                onSelect = {
+                    if (selectingForBefore) {
+                        onIntent(ComparePhotosIntent.OnBeforePhotoSelected(photo))
+                    } else {
+                        onIntent(ComparePhotosIntent.OnAfterPhotoSelected(photo))
+                    }
+                },
+            )
         }
     }
 }
@@ -187,7 +281,7 @@ fun ComparisonSlot(
             if (photo != null) {
                 AsyncImage(
                     model = photo.photoPath,
-                    contentDescription = null,
+                    contentDescription = comparisonSlotDescription(label, photo),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                 )
@@ -202,6 +296,20 @@ fun ComparisonSlot(
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     )
+                }
+                if (isSelected) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(bottomStart = 12.dp),
+                        modifier = Modifier.align(Alignment.TopEnd),
+                    ) {
+                        Text(
+                            text = "Activo",
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        )
+                    }
                 }
             } else {
                 Column(
@@ -277,6 +385,7 @@ fun PhotoTypeSelector(
 @Composable
 fun PhotoSelectionCard(
     photo: ProgressPhoto,
+    selectionLabel: String?,
     isSelected: Boolean,
     onSelect: () -> Unit,
     modifier: Modifier = Modifier,
@@ -294,10 +403,32 @@ fun PhotoSelectionCard(
     ) {
         AsyncImage(
             model = photo.photoPath,
-            contentDescription = null,
+            contentDescription = photoSelectionDescription(photo),
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
         )
+        Surface(
+            color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f),
+            shape = RoundedCornerShape(topEnd = 12.dp),
+            modifier = Modifier.align(Alignment.BottomStart),
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = photo.date.formatDdMmYy(),
+                    color = shadcnWhite,
+                    style = MaterialTheme.typography.labelSmall,
+                )
+                Text(
+                    text = getLabelForType(photo.type),
+                    color = shadcnWhite,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+        }
         if (isSelected) {
             Box(
                 modifier = Modifier
@@ -305,5 +436,69 @@ fun PhotoSelectionCard(
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
             )
         }
+        selectionLabel?.let { label ->
+            Surface(
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(bottomStart = 12.dp),
+                modifier = Modifier.align(Alignment.TopEnd),
+            ) {
+                Text(
+                    text = label,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                )
+            }
+        }
     }
+}
+
+@Composable
+private fun ComparePhotosEmptyState(
+    hasActiveFilter: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier.padding(16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Image,
+                contentDescription = null,
+                modifier = Modifier.size(56.dp),
+                tint = MaterialTheme.colorScheme.outline,
+            )
+            Text(
+                text = if (hasActiveFilter) {
+                    "No hay fotos del tipo seleccionado."
+                } else {
+                    "Aun no tienes fotos para comparar."
+                },
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = if (hasActiveFilter) {
+                    "Prueba otro filtro o agrega nuevas fotos."
+                } else {
+                    "Agrega fotos de progreso para empezar a comparar cambios."
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+private fun comparisonSlotDescription(label: String, photo: ProgressPhoto): String {
+    return "$label, ${getLabelForType(photo.type)}, ${photo.date.formatDdMmYy()}"
+}
+
+private fun photoSelectionDescription(photo: ProgressPhoto): String {
+    return "Foto de ${getLabelForType(photo.type).lowercase(Locale.getDefault())}, ${photo.date.formatDdMmYy()}"
 }

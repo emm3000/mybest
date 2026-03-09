@@ -32,6 +32,7 @@ data class AddHabitState(
     val isLoading: Boolean = false,
     val nameError: String? = null,
     val goalError: String? = null,
+    val scheduledDaysError: String? = null,
 )
 
 sealed class AddHabitIntent {
@@ -121,11 +122,18 @@ class AddHabitViewModel(
             } else {
                 it.scheduledDays + day
             }
-            it.copy(scheduledDays = newDays)
+            it.copy(scheduledDays = newDays, scheduledDaysError = null)
         }
     }
 
     private fun saveHabit() {
+        if (_state.value.scheduledDays.isEmpty()) {
+            _state.update {
+                it.copy(scheduledDaysError = "Selecciona al menos un día para este hábito")
+            }
+            return
+        }
+
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             runCatching {

@@ -3,7 +3,6 @@ package com.emm.mybest.features.photo.presentation
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HFilterChip
@@ -137,6 +137,22 @@ fun AddPhotoContent(
         )
     }
 
+    val launchCamera = {
+        handleCameraAction(
+            context = context,
+            permissionLauncher = permissionLauncher,
+            onPermissionGranted = {
+                val uri = mediaManager.generatePhotoUri()
+                tempPhotoUri = uri
+                cameraLauncher.launch(uri)
+            },
+        )
+    }
+
+    val launchGallery = {
+        galleryLauncher.launch("image/*")
+    }
+
     LaunchedEffect(Unit) {
         effect.collectLatest { effect ->
             when (effect) {
@@ -162,7 +178,7 @@ fun AddPhotoContent(
                 actions = {
                     HIconButton(
                         icon = Icons.Rounded.AddAPhoto,
-                        contentDescription = "Añadir",
+                        contentDescription = "Añadir fotos",
                         onClick = { showBottomSheet = true },
                     )
                 },
@@ -173,7 +189,8 @@ fun AddPhotoContent(
             state = state,
             contentPadding = padding,
             onIntent = onIntent,
-            onAddPhotoClick = { showBottomSheet = true },
+            onUseCameraClick = launchCamera,
+            onPickFromGalleryClick = launchGallery,
         )
     }
 
@@ -183,19 +200,11 @@ fun AddPhotoContent(
             onDismiss = { showBottomSheet = false },
             onCameraClick = {
                 showBottomSheet = false
-                handleCameraAction(
-                    context = context,
-                    permissionLauncher = permissionLauncher,
-                    onPermissionGranted = {
-                        val uri = mediaManager.generatePhotoUri()
-                        tempPhotoUri = uri
-                        cameraLauncher.launch(uri)
-                    },
-                )
+                launchCamera()
             },
             onGalleryClick = {
                 showBottomSheet = false
-                galleryLauncher.launch("image/*")
+                launchGallery()
             },
         )
     }
@@ -206,7 +215,8 @@ private fun AddPhotoBody(
     state: AddPhotoState,
     contentPadding: androidx.compose.foundation.layout.PaddingValues,
     onIntent: (AddPhotoIntent) -> Unit,
-    onAddPhotoClick: () -> Unit,
+    onUseCameraClick: () -> Unit,
+    onPickFromGalleryClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -216,25 +226,52 @@ private fun AddPhotoBody(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (state.selectedPhotos.isEmpty()) {
-            Box(
+            Surface(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-                    .clickable(onClick = onAddPhotoClick),
-                contentAlignment = Alignment.Center,
+                    .fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = MaterialTheme.shapes.large,
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     Icon(
                         Icons.Rounded.AddAPhoto,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.65f),
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "Toca para añadir fotos",
-                        style = MaterialTheme.typography.bodyLarge,
+                        "Registra una foto de progreso",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "Puedes tomar una foto ahora o elegir una existente de tu galeria.",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    HButton(
+                        text = "Usar camara",
+                        onClick = onUseCameraClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = Icons.Rounded.PhotoCamera,
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HButton(
+                        text = "Elegir de galeria",
+                        onClick = onPickFromGalleryClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        variant = ButtonVariant.Outline,
+                        leadingIcon = Icons.Rounded.PhotoLibrary,
                     )
                 }
             }
@@ -289,7 +326,7 @@ private fun PhotoSourceBottomSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                "Seleccionar origen",
+                "Anadir fotos",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp),
@@ -297,14 +334,14 @@ private fun PhotoSourceBottomSheet(
 
             HSourceOption(
                 icon = Icons.Rounded.PhotoCamera,
-                label = "Usar Cámara",
+                label = "Usar camara",
                 onClick = onCameraClick,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             HSourceOption(
                 icon = Icons.Rounded.PhotoLibrary,
-                label = "Elegir de Galería",
+                label = "Elegir de galeria",
                 onClick = onGalleryClick,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -329,13 +366,13 @@ fun PhotoCard(
             Box(modifier = Modifier.height(160.dp).fillMaxWidth()) {
                 AsyncImage(
                     model = uri,
-                    contentDescription = null,
+                    contentDescription = selectedPhotoContentDescription(selectedType),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                 )
                 HIconButton(
                     icon = Icons.Rounded.Delete,
-                    contentDescription = "Borrar",
+                    contentDescription = "Eliminar foto seleccionada",
                     onClick = onRemove,
                     variant = IconButtonVariant.Destructive,
                     modifier = Modifier
@@ -345,39 +382,33 @@ fun PhotoCard(
                 )
             }
 
-            var showTypeSelector by remember { mutableStateOf(false) }
-
             Text(
-                text = getLabelForType(selectedType),
-                style = MaterialTheme.typography.labelMedium,
+                text = "Tipo de foto",
+                style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showTypeSelector = !showTypeSelector }
-                    .padding(8.dp),
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-
-            if (showTypeSelector) {
-                LazyRow(
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    items(PhotoType.entries) { type ->
-                        HFilterChip(
-                            selected = selectedType == type,
-                            onClick = {
-                                onTypeClick(type)
-                                showTypeSelector = false
-                            },
-                            label = getLabelForType(type),
-                        )
-                    }
+            LazyRow(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 0.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(PhotoType.entries) { type ->
+                    HFilterChip(
+                        selected = selectedType == type,
+                        onClick = { onTypeClick(type) },
+                        label = getLabelForType(type),
+                    )
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
+}
+
+private fun selectedPhotoContentDescription(type: PhotoType): String {
+    return "Foto seleccionada de ${getLabelForType(type).lowercase()}"
 }
 
 @Preview(showBackground = true)

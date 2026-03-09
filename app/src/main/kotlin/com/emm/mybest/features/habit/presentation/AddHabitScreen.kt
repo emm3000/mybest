@@ -1,6 +1,7 @@
 package com.emm.mybest.features.habit.presentation
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,8 +41,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.narrowEs
 import com.emm.mybest.domain.models.HabitType
@@ -51,12 +53,24 @@ import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSelect
 import com.emm.mybest.ui.components.HSelectableCard
 import com.emm.mybest.ui.components.HTopBar
-import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.datetime.DayOfWeek
 
 private const val ADD_HABIT_TOTAL_STEPS = 3
 private const val ADD_HABIT_ICON_GRID_COLUMNS = 4
+
+private data class HabitIconOption(
+    val value: String,
+    val label: String,
+    val icon: ImageVector,
+)
+
+private val addHabitIconOptions = listOf(
+    HabitIconOption("FitnessCenter", "Entrenamiento", Icons.Rounded.FitnessCenter),
+    HabitIconOption("Restaurant", "Alimentacion", Icons.Rounded.Restaurant),
+    HabitIconOption("WaterDrop", "Hidratacion", Icons.Rounded.WaterDrop),
+    HabitIconOption("SelfImprovement", "Bienestar", Icons.Rounded.SelfImprovement),
+)
 
 @Composable
 fun AddHabitScreen(
@@ -122,12 +136,13 @@ private fun AddHabitContent(
                 .padding(24.dp)
                 .fillMaxSize(),
         ) {
-            // Step indicator
             Text(
                 text = "Paso ${state.step} de $ADD_HABIT_TOTAL_STEPS",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            AddHabitStepIndicator(currentStep = state.step)
             Spacer(modifier = Modifier.height(16.dp))
 
             AnimatedContent(
@@ -162,11 +177,38 @@ private fun AddHabitContent(
 }
 
 @Composable
+private fun AddHabitStepIndicator(
+    currentStep: Int,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        repeat(ADD_HABIT_TOTAL_STEPS) { index ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(8.dp)
+                    .background(
+                        color = if (index < currentStep) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        },
+                        shape = MaterialTheme.shapes.small,
+                    ),
+            )
+        }
+    }
+}
+
+@Composable
 private fun StepOne(
     state: AddHabitState,
     onIntent: (AddHabitIntent) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         HInput(
             value = state.name,
             onValueChange = { onIntent(AddHabitIntent.OnNameChange(it)) },
@@ -185,29 +227,28 @@ private fun StepOne(
         )
 
         Text(
-            text = "Elige un icono",
+            text = "Icono (opcional)",
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-
-        val icons = listOf(
-            Icons.Rounded.FitnessCenter,
-            Icons.Rounded.Restaurant,
-            Icons.Rounded.WaterDrop,
-            Icons.Rounded.SelfImprovement,
+        Text(
+            text = "Elige el que mejor represente el habito. Puedes cambiarlo mas adelante.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(ADD_HABIT_ICON_GRID_COLUMNS),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            items(icons) { icon ->
-                val isSelected = state.icon == icon.name // Simplified for demonstration
+            items(addHabitIconOptions) { option ->
+                val isSelected = state.icon == option.value
                 IconCard(
-                    icon = icon,
+                    icon = option.icon,
+                    label = option.label,
                     isSelected = isSelected,
-                    onClick = { onIntent(AddHabitIntent.OnIconChange(icon.name)) },
+                    onClick = { onIntent(AddHabitIntent.OnIconChange(option.value)) },
                 )
             }
         }
@@ -217,18 +258,23 @@ private fun StepOne(
 @Composable
 private fun IconCard(
     icon: ImageVector,
+    label: String,
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
     HSelectableCard(
         selected = isSelected,
         onClick = onClick,
-        modifier = Modifier.size(64.dp),
+        modifier = Modifier
+            .size(56.dp)
+            .semantics {
+                contentDescription = "Icono $label"
+            },
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = label,
                 tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             )
             if (isSelected) {
@@ -349,10 +395,16 @@ private fun StepThree(
                 )
             }
         }
+        state.scheduledDaysError?.let { error ->
+            Text(
+                text = error,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
 
-        // Reminder section (placeholder)
         Text(
-            text = "Recordatorios",
+            text = "Programacion semanal",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
         )
@@ -362,7 +414,8 @@ private fun StepThree(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = "Se te notificará para completar el hábito en los días seleccionados.",
+                text = "Los dias seleccionados definen cuando aparecera este habito en " +
+                    "tu seguimiento diario. Los recordatorios automaticos aun no estan disponibles.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp),
@@ -380,7 +433,11 @@ private fun DayChip(
     HSelectableCard(
         selected = isSelected,
         onClick = onClick,
-        modifier = Modifier.size(40.dp),
+        modifier = Modifier
+            .size(40.dp)
+            .semantics {
+                contentDescription = day.accessibilityLabelEs()
+            },
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
@@ -393,14 +450,12 @@ private fun DayChip(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun AddHabitScreenPreview() {
-    MyBestTheme {
-        AddHabitContent(
-            state = AddHabitState(),
-            onIntent = {},
-            onBackClick = {},
-        )
-    }
+private fun DayOfWeek.accessibilityLabelEs(): String = when (this) {
+    DayOfWeek.MONDAY -> "Lunes"
+    DayOfWeek.TUESDAY -> "Martes"
+    DayOfWeek.WEDNESDAY -> "Miercoles"
+    DayOfWeek.THURSDAY -> "Jueves"
+    DayOfWeek.FRIDAY -> "Viernes"
+    DayOfWeek.SATURDAY -> "Sabado"
+    DayOfWeek.SUNDAY -> "Domingo"
 }

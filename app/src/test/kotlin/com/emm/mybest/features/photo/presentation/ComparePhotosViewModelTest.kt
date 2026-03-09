@@ -10,6 +10,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
@@ -100,6 +101,35 @@ class ComparePhotosViewModelTest {
             val swapped = awaitState { it.beforePhoto == face && it.afterPhoto == body }
             assertEquals(face, swapped.beforePhoto)
             assertEquals(body, swapped.afterPhoto)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `selecting the same photo in both slots emits error and keeps previous selection`() = runTest {
+        every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
+        every { repository.getPhotosByType(any()) } returns flowOf(listOf(face))
+        val viewModel = ComparePhotosViewModel(repository)
+
+        viewModel.state.test {
+            awaitItem()
+            awaitItem()
+            viewModel.onIntent(ComparePhotosIntent.OnBeforePhotoSelected(face))
+            awaitState { it.beforePhoto == face }
+
+            viewModel.effect.test {
+                viewModel.onIntent(ComparePhotosIntent.OnAfterPhotoSelected(face))
+                advanceUntilIdle()
+
+                assertEquals(
+                    ComparePhotosEffect.ShowError("Elige una foto distinta para DESPUES."),
+                    awaitItem(),
+                )
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            assertEquals(face, viewModel.state.value.beforePhoto)
+            assertEquals(null, viewModel.state.value.afterPhoto)
             cancelAndIgnoreRemainingEvents()
         }
     }
