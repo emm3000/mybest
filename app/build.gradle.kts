@@ -1,6 +1,5 @@
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -42,14 +41,8 @@ jacoco {
     toolVersion = "0.8.12"
 }
 
-val keystorePropertiesFile = rootProject.file("keystore.properties")
-val keystoreProperties = Properties()
-val hasReleaseKeystore = keystorePropertiesFile.exists()
-if (hasReleaseKeystore) {
-    keystorePropertiesFile.inputStream().use { input ->
-        keystoreProperties.load(input)
-    }
-}
+val releaseSigningProperties = rootProject.loadReleaseSigningProperties()
+val hasCompleteReleaseSigning = releaseSigningProperties?.hasRequiredReleaseSigningKeys() == true
 
 android {
     namespace = "com.emm.mybest"
@@ -68,12 +61,12 @@ android {
     }
 
     signingConfigs {
-        if (hasReleaseKeystore) {
+        if (hasCompleteReleaseSigning) {
             create("config") {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = releaseSigningProperties?.getProperty("keyAlias")
+                keyPassword = releaseSigningProperties?.getProperty("keyPassword")
+                storeFile = file(releaseSigningProperties?.getProperty("storeFile").orEmpty())
+                storePassword = releaseSigningProperties?.getProperty("storePassword")
             }
         }
     }
@@ -117,30 +110,11 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         csv.required.set(false)
     }
 
-    val excludes = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "**/*Preview*.*",
-        // Generated Room classes and DAO declarations are validated by integration tests.
-        "**/*Dao_Impl*.*",
-        "**/*Database_Impl*.*",
-        "**/data/entities/*Dao*.*",
-        // UI rendering classes are excluded from unit-test coverage baseline.
-        "**/*Screen*.*",
-        "**/ui/components/**",
-        "**/ui/theme/**",
-        "**/core/navigation/**",
-        "**/MainActivity*.*",
-    )
-
     val javaClasses = fileTree("${layout.buildDirectory.get().asFile}/intermediates/javac/debug/compileDebugJavaWithJavac/classes") {
-        exclude(excludes)
+        exclude(appJacocoExcludes)
     }
     val kotlinClasses = fileTree("${layout.buildDirectory.get().asFile}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes") {
-        exclude(excludes)
+        exclude(appJacocoExcludes)
     }
 
     classDirectories.setFrom(files(javaClasses, kotlinClasses))
