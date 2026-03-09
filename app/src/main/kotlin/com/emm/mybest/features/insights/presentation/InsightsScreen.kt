@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -22,15 +21,12 @@ import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Compare
 import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material.icons.rounded.North
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -47,7 +43,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.ui.components.AlertVariant
+import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HAlert
+import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
 
@@ -221,9 +219,10 @@ private fun InsightsSection(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp),
         )
-        Surface(
-            shape = RoundedCornerShape(INSIGHTS_SECTION_CORNER.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        HCard(
+            variant = CardVariant.Filled,
+            cornerRadius = INSIGHTS_SECTION_CORNER.dp,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
             modifier = Modifier.fillMaxWidth(),
         ) {
             Box(modifier = Modifier.padding(INSIGHTS_SECTION_CONTENT_PADDING.dp)) {
@@ -267,10 +266,11 @@ private fun StatCard(
     containerColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    Card(
+    HCard(
         modifier = modifier,
-        shape = RoundedCornerShape(INSIGHTS_SECTION_CORNER.dp),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
+        variant = CardVariant.Filled,
+        cornerRadius = INSIGHTS_SECTION_CORNER.dp,
+        containerColor = containerColor,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp))

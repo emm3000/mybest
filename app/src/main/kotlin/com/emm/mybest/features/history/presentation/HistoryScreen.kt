@@ -27,7 +27,6 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.MonitorWeight
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,7 +35,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -65,6 +63,7 @@ import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.ui.components.AlertVariant
 import com.emm.mybest.ui.components.HAlert
+import com.emm.mybest.ui.components.HAlertDialog
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.theme.MyBestTheme
@@ -351,22 +350,16 @@ fun DayDetailContent(
     var photoToDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
 
     if (photoToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { photoToDelete = null },
-            title = { Text("¿Eliminar foto?") },
-            text = { Text("Esta acción no se puede deshacer.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    photoToDelete?.let { onDeletePhoto(it.id) }
-                    photoToDelete = null
-                }) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { photoToDelete = null }) {
-                    Text("Cancelar")
-                }
+        HAlertDialog(
+            title = "¿Eliminar foto?",
+            description = "Esta acción no se puede deshacer.",
+            confirmText = "Eliminar",
+            cancelText = "Cancelar",
+            isDangerous = true,
+            onDismiss = { photoToDelete = null },
+            onConfirm = {
+                photoToDelete?.let { onDeletePhoto(it.id) }
+                photoToDelete = null
             },
         )
     }

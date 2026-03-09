@@ -12,12 +12,13 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.components.ButtonVariant
+import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HabitCard
 
@@ -41,9 +42,10 @@ internal fun LazyListScope.homeHabitsSection(
                 description = "Crea un nuevo hábito para empezar a trackear tu progreso.",
                 icon = Icons.Rounded.CheckCircle,
                 action = {
-                    TextButton(onClick = { onIntent(HomeIntent.OnAddHabitClick) }) {
-                        Text("Añadir Hábito")
-                    }
+                    HButton(
+                        text = "Añadir Hábito",
+                        onClick = { onIntent(HomeIntent.OnAddHabitClick) },
+                    )
                 },
             )
         }
@@ -76,9 +78,9 @@ internal fun QuickAccessHeader(
             fontWeight = FontWeight.Bold,
         )
         Row {
-            TextButton(onClick = onTimelineClick) { Text("Timeline") }
-            TextButton(onClick = onInsightsClick) { Text("Estadísticas") }
-            TextButton(onClick = onHistoryClick) { Text("Historial") }
+            HButton(text = "Timeline", onClick = onTimelineClick, variant = ButtonVariant.Link)
+            HButton(text = "Estadísticas", onClick = onInsightsClick, variant = ButtonVariant.Link)
+            HButton(text = "Historial", onClick = onHistoryClick, variant = ButtonVariant.Link)
         }
     }
 }

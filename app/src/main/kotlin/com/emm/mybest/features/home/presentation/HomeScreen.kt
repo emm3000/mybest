@@ -19,8 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -38,6 +36,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.currentDate
 import com.emm.mybest.core.navigation.Screen
+import com.emm.mybest.ui.components.CardVariant
+import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.theme.MyBestTheme
 
 @Composable
@@ -171,14 +171,12 @@ fun SummaryCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(
-        modifier = modifier
-            .height(160.dp),
+    HCard(
+        modifier = modifier.height(160.dp),
         onClick = onClick,
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-        ),
+        variant = CardVariant.Filled,
+        cornerRadius = 28.dp,
+        containerColor = MaterialTheme.colorScheme.primary,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

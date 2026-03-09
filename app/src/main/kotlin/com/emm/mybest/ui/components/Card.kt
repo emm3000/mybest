@@ -33,19 +33,40 @@ fun HCard(
     modifier: Modifier = Modifier,
     variant: CardVariant = CardVariant.Elevated,
     cornerRadius: Dp = 12.dp,
+    onClick: (() -> Unit)? = null,
+    containerColor: Color? = null,
+    shadowElevation: Dp? = null,
+    border: BorderStroke? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val (containerColor, tonalElevation, border) = cardTokens(variant)
+    val (defaultContainerColor, tonalElevation, defaultBorder) = cardTokens(variant)
+    val finalContainerColor = containerColor ?: defaultContainerColor
+    val finalBorder = border ?: defaultBorder
+    val finalShadowElevation = shadowElevation ?: if (variant == CardVariant.Elevated) 2.dp else 0.dp
 
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(cornerRadius),
-        color = containerColor,
-        tonalElevation = tonalElevation,
-        shadowElevation = if (variant == CardVariant.Elevated) 2.dp else 0.dp,
-        border = border,
-    ) {
-        Column(content = content)
+    if (onClick == null) {
+        Surface(
+            modifier = modifier,
+            shape = RoundedCornerShape(cornerRadius),
+            color = finalContainerColor,
+            tonalElevation = tonalElevation,
+            shadowElevation = finalShadowElevation,
+            border = finalBorder,
+        ) {
+            Column(content = content)
+        }
+    } else {
+        Surface(
+            onClick = onClick,
+            modifier = modifier,
+            shape = RoundedCornerShape(cornerRadius),
+            color = finalContainerColor,
+            tonalElevation = tonalElevation,
+            shadowElevation = finalShadowElevation,
+            border = finalBorder,
+        ) {
+            Column(content = content)
+        }
     }
 }
 
