@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+private const val MIN_COMPARE_PHOTOS = 2
+
 data class ComparePhotosState(
     val photos: List<ProgressPhoto> = emptyList(),
     val selectedType: PhotoType? = null,
@@ -59,11 +61,16 @@ class ComparePhotosViewModel(
         _beforePhoto,
         _afterPhoto,
     ) { photos, type, before, after ->
+        val resolvedSelection = resolveComparisonSelection(
+            photos = photos,
+            before = before,
+            after = after,
+        )
         ComparePhotosState(
             photos = photos,
             selectedType = type,
-            beforePhoto = before,
-            afterPhoto = after,
+            beforePhoto = resolvedSelection.before,
+            afterPhoto = resolvedSelection.after,
             isLoading = false,
         )
     }.stateIn(
@@ -81,23 +88,23 @@ class ComparePhotosViewModel(
                 _afterPhoto.value = null
             }
             is ComparePhotosIntent.OnBeforePhotoSelected -> {
-                if (_afterPhoto.value?.id == intent.photo.id) {
+                if (state.value.afterPhoto?.id == intent.photo.id) {
                     showError("Elige una foto distinta para ANTES.")
                 } else {
                     _beforePhoto.value = intent.photo
                 }
             }
             is ComparePhotosIntent.OnAfterPhotoSelected -> {
-                if (_beforePhoto.value?.id == intent.photo.id) {
+                if (state.value.beforePhoto?.id == intent.photo.id) {
                     showError("Elige una foto distinta para DESPUES.")
                 } else {
                     _afterPhoto.value = intent.photo
                 }
             }
             ComparePhotosIntent.ToggleSwap -> {
-                val temp = _beforePhoto.value
-                _beforePhoto.value = _afterPhoto.value
-                _afterPhoto.value = temp
+                val currentSelection = state.value
+                _beforePhoto.value = currentSelection.afterPhoto
+                _afterPhoto.value = currentSelection.beforePhoto
             }
         }
     }
@@ -107,4 +114,35 @@ class ComparePhotosViewModel(
             _effect.emit(ComparePhotosEffect.ShowError(message))
         }
     }
+}
+
+private data class ComparisonSelection(
+    val before: ProgressPhoto?,
+    val after: ProgressPhoto?,
+)
+
+private fun resolveComparisonSelection(
+    photos: List<ProgressPhoto>,
+    before: ProgressPhoto?,
+    after: ProgressPhoto?,
+): ComparisonSelection {
+    val sortedPhotos = photos.sortedBy { it.createdAt }
+    val validPhotoIds = sortedPhotos.mapTo(mutableSetOf()) { it.id }
+
+    val resolvedBefore = before?.takeIf { it.id in validPhotoIds } ?: sortedPhotos.firstOrNull()
+    val resolvedAfter = after
+        ?.takeIf { it.id in validPhotoIds && it.id != resolvedBefore?.id }
+        ?: sortedPhotos.lastOrNull { it.id != resolvedBefore?.id }
+
+    if (sortedPhotos.size < MIN_COMPARE_PHOTOS) {
+        return ComparisonSelection(
+            before = sortedPhotos.firstOrNull(),
+            after = null,
+        )
+    }
+
+    return ComparisonSelection(
+        before = resolvedBefore,
+        after = resolvedAfter,
+    )
 }

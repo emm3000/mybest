@@ -38,6 +38,13 @@ class ComparePhotosViewModelTest {
         photoPath = "/tmp/body.jpg",
         createdAt = 2L,
     )
+    private val dinner = ProgressPhoto(
+        id = "p-dinner",
+        date = LocalDate(2026, 3, 9),
+        type = PhotoType.DINNER,
+        photoPath = "/tmp/dinner.jpg",
+        createdAt = 3L,
+    )
 
     @Test
     fun `state emits initial photos from repository`() = runTest {
@@ -50,12 +57,14 @@ class ComparePhotosViewModelTest {
             val loaded = awaitItem()
             assertEquals(listOf(face, body), loaded.photos)
             assertEquals(null, loaded.selectedType)
+            assertEquals(face, loaded.beforePhoto)
+            assertEquals(body, loaded.afterPhoto)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `OnTypeSelected filters photos and clears selections`() = runTest {
+    fun `OnTypeSelected filters photos and preselects available comparison pair`() = runTest {
         every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
         every { repository.getPhotosByType(PhotoType.FACE) } returns flowOf(listOf(face))
         every { repository.getPhotosByType(PhotoType.BODY) } returns flowOf(listOf(body))
@@ -65,20 +74,40 @@ class ComparePhotosViewModelTest {
             awaitItem() // loading
             awaitItem() // initial loaded
 
-            viewModel.onIntent(ComparePhotosIntent.OnBeforePhotoSelected(body))
-            viewModel.onIntent(ComparePhotosIntent.OnAfterPhotoSelected(face))
-            awaitState { it.beforePhoto == body && it.afterPhoto == face }
-
             viewModel.onIntent(ComparePhotosIntent.OnTypeSelected(PhotoType.FACE))
             val filtered = awaitState {
                 it.selectedType == PhotoType.FACE &&
                     it.photos == listOf(face) &&
-                    it.beforePhoto == null &&
+                    it.beforePhoto == face &&
                     it.afterPhoto == null
             }
             assertEquals(listOf(face), filtered.photos)
-            assertEquals(null, filtered.beforePhoto)
+            assertEquals(face, filtered.beforePhoto)
             assertEquals(null, filtered.afterPhoto)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `selection keeps manual choices while they remain available`() = runTest {
+        every { repository.getAllPhotos() } returns flowOf(listOf(face, body, dinner))
+        every { repository.getPhotosByType(any()) } returns flowOf(listOf(face, body, dinner))
+        val viewModel = ComparePhotosViewModel(repository)
+
+        viewModel.state.test {
+            awaitItem()
+            awaitState { it.beforePhoto == face && it.afterPhoto == dinner }
+
+            viewModel.onIntent(ComparePhotosIntent.OnAfterPhotoSelected(body))
+            awaitState { it.beforePhoto == face && it.afterPhoto == body }
+
+            viewModel.onIntent(ComparePhotosIntent.OnBeforePhotoSelected(dinner))
+
+            val manualSelection = awaitState {
+                it.beforePhoto == dinner && it.afterPhoto == body
+            }
+            assertEquals(dinner, manualSelection.beforePhoto)
+            assertEquals(body, manualSelection.afterPhoto)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -91,16 +120,12 @@ class ComparePhotosViewModelTest {
 
         viewModel.state.test {
             awaitItem() // loading
-            awaitItem() // initial loaded
-
-            viewModel.onIntent(ComparePhotosIntent.OnBeforePhotoSelected(body))
-            viewModel.onIntent(ComparePhotosIntent.OnAfterPhotoSelected(face))
-            awaitState { it.beforePhoto == body && it.afterPhoto == face }
+            awaitState { it.beforePhoto == face && it.afterPhoto == body }
 
             viewModel.onIntent(ComparePhotosIntent.ToggleSwap)
-            val swapped = awaitState { it.beforePhoto == face && it.afterPhoto == body }
-            assertEquals(face, swapped.beforePhoto)
-            assertEquals(body, swapped.afterPhoto)
+            val swapped = awaitState { it.beforePhoto == body && it.afterPhoto == face }
+            assertEquals(body, swapped.beforePhoto)
+            assertEquals(face, swapped.afterPhoto)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -113,9 +138,9 @@ class ComparePhotosViewModelTest {
 
         viewModel.state.test {
             awaitItem()
-            awaitItem()
-            viewModel.onIntent(ComparePhotosIntent.OnBeforePhotoSelected(face))
-            awaitState { it.beforePhoto == face }
+            val initialLoaded = awaitItem()
+            assertEquals(face, initialLoaded.beforePhoto)
+            assertEquals(body, initialLoaded.afterPhoto)
 
             viewModel.effect.test {
                 viewModel.onIntent(ComparePhotosIntent.OnAfterPhotoSelected(face))
@@ -129,7 +154,7 @@ class ComparePhotosViewModelTest {
             }
 
             assertEquals(face, viewModel.state.value.beforePhoto)
-            assertEquals(null, viewModel.state.value.afterPhoto)
+            assertEquals(body, viewModel.state.value.afterPhoto)
             cancelAndIgnoreRemainingEvents()
         }
     }

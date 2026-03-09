@@ -16,12 +16,10 @@ import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -44,6 +42,7 @@ import com.emm.mybest.core.datetime.currentDate
 import com.emm.mybest.core.navigation.Screen
 import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HCard
+import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.theme.MyBestTheme
 
 @Composable
@@ -133,37 +132,21 @@ internal fun HomeScreenContent(
 
 @Composable
 fun HomeHeader(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        modifier = modifier.padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Column {
-            Text(
-                text = "Mi Mejor Versión",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = "Hoy es ${currentDate()}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        Surface(
-            modifier = Modifier.size(44.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Person,
-                contentDescription = "Perfil",
-                modifier = Modifier.padding(8.dp),
-            )
-        }
+        Text(
+            text = "Mi Mejor Versión",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.ExtraBold,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            text = "Hoy es ${currentDate()}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -186,30 +169,28 @@ fun SummaryCard(
                     .padding(24.dp)
                     .align(Alignment.CenterStart),
             ) {
-                Text(
-                    text = "Tu Progreso",
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = if (state.isLoading) {
-                        "Cargando progreso..."
-                    } else if (state.totalWeightLost > 0) {
-                        "¡Has bajado ${String.format(java.util.Locale.getDefault(), "%.1f", state.totalWeightLost)} kg!"
-                    } else {
-                        "¡Vas muy bien!"
-                    },
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Toca para ver tus estadísticas",
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                if (state.isLoading) {
+                    SummaryCardLoadingState()
+                } else {
+                    Text(
+                        text = "Tu Progreso",
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = progressHeadline(state.totalWeightLost),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Toca para ver tus estadísticas",
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
             Icon(
                 Icons.Rounded.BarChart,
@@ -222,6 +203,43 @@ fun SummaryCard(
             )
         }
     }
+}
+
+@Composable
+private fun SummaryCardLoadingState() {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        HSkeleton(
+            modifier = Modifier
+                .width(100.dp)
+                .height(16.dp),
+            cornerRadius = 8.dp,
+        )
+        HSkeleton(
+            modifier = Modifier
+                .width(180.dp)
+                .height(36.dp),
+            cornerRadius = 12.dp,
+        )
+        HSkeleton(
+            modifier = Modifier
+                .width(150.dp)
+                .height(14.dp),
+            cornerRadius = 8.dp,
+        )
+    }
+}
+
+private fun progressHeadline(totalWeightLost: Float): String {
+    if (totalWeightLost <= 0f) {
+        return "¡Vas muy bien!"
+    }
+
+    val formattedWeight = String.format(
+        java.util.Locale.getDefault(),
+        "%.1f",
+        totalWeightLost,
+    )
+    return "¡Has bajado $formattedWeight kg!"
 }
 
 @Composable
