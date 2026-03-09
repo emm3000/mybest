@@ -5,6 +5,12 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      release_build:
+        description: Build and distribute release APK (slower)
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -107,15 +113,25 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Build Release (assembleRelease)
-        run: ./gradlew :app:assembleRelease
+      - name: Build APK
+        run: |
+          BUILD_TASK=":app:assembleQa"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.release_build }}" = "true" ]; then
+            BUILD_TASK=":app:assembleRelease"
+          fi
+          echo "Running $BUILD_TASK"
+          ./gradlew "$BUILD_TASK"
 
-      - name: Get Release APK path
+      - name: Get APK path
         id: releaseApk
         run: |
-          APK_PATH=$(ls -1 app/build/outputs/apk/release/*.apk | head -n 1)
+          APK_DIR="app/build/outputs/apk/qa"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.release_build }}" = "true" ]; then
+            APK_DIR="app/build/outputs/apk/release"
+          fi
+          APK_PATH=$(ls -1 "$APK_DIR"/*.apk | head -n 1)
           if [ -z "$APK_PATH" ]; then
-            echo "No release APK found in app/build/outputs/apk/release"
+            echo "No APK found in $APK_DIR"
             exit 1
           fi
           echo "release=$APK_PATH" >> "$GITHUB_OUTPUT"

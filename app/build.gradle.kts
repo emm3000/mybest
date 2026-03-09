@@ -72,6 +72,14 @@ android {
     }
 
     buildTypes {
+        create("qa") {
+            initWith(getByName("release"))
+            // Fast validation build for day-to-day development.
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.findByName("config") ?: signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
