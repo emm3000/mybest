@@ -12,7 +12,11 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
-class UserPreferencesRepositoryImpl(private val context: Context) : UserPreferencesRepository {
+class UserPreferencesRepositoryImpl(
+    private val dataStore: DataStore<Preferences>,
+) : UserPreferencesRepository {
+
+    constructor(context: Context) : this(context.dataStore)
 
     private object PreferencesKeys {
         val DARK_MODE_ENABLED = booleanPreferencesKey("dark_mode_enabled")
@@ -20,26 +24,26 @@ class UserPreferencesRepositoryImpl(private val context: Context) : UserPreferen
         val DYNAMIC_COLOR_ENABLED = booleanPreferencesKey("dynamic_color_enabled")
     }
 
-    override val isDarkMode: Flow<Boolean?> = context.dataStore.data.map { preferences ->
+    override val isDarkMode: Flow<Boolean?> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.DARK_MODE_ENABLED]
     }
 
     override suspend fun updateDarkMode(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[PreferencesKeys.DARK_MODE_ENABLED] = enabled
         }
     }
 
-    override val notificationsEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    override val notificationsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: true
     }
 
-    override val useDynamicColor: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    override val useDynamicColor: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.DYNAMIC_COLOR_ENABLED] ?: true
     }
 
     override suspend fun updateDynamicColor(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[PreferencesKeys.DYNAMIC_COLOR_ENABLED] = enabled
         }
     }

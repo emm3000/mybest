@@ -67,6 +67,60 @@ class AddHabitViewModelTest {
     }
 
     @Test
+    fun `OnNextStep from step 2 moves to step 3 when goal is valid`() {
+        viewModel.onIntent(AddHabitIntent.OnNameChange("Entrenar"))
+        viewModel.onIntent(AddHabitIntent.OnNextStep)
+        viewModel.onIntent(AddHabitIntent.OnTypeChange(HabitType.TIME))
+        viewModel.onIntent(AddHabitIntent.OnGoalValueChange("30"))
+
+        viewModel.onIntent(AddHabitIntent.OnNextStep)
+
+        assertEquals(3, viewModel.state.value.step)
+        assertNull(viewModel.state.value.goalError)
+    }
+
+    @Test
+    fun `OnNextStep from step 2 stays and sets error when goal is invalid`() {
+        viewModel.onIntent(AddHabitIntent.OnNameChange("Entrenar"))
+        viewModel.onIntent(AddHabitIntent.OnNextStep)
+        viewModel.onIntent(AddHabitIntent.OnTypeChange(HabitType.TIME))
+        viewModel.onIntent(AddHabitIntent.OnGoalValueChange("0"))
+
+        viewModel.onIntent(AddHabitIntent.OnNextStep)
+
+        assertEquals(2, viewModel.state.value.step)
+        assertEquals("El objetivo debe ser mayor a 0", viewModel.state.value.goalError)
+    }
+
+    @Test
+    fun `OnPreviousStep never goes below step 1`() {
+        viewModel.onIntent(AddHabitIntent.OnPreviousStep)
+
+        assertEquals(1, viewModel.state.value.step)
+    }
+
+    @Test
+    fun `OnDayToggle removes and adds day`() {
+        viewModel.onIntent(AddHabitIntent.OnDayToggle(DayOfWeek.MONDAY))
+        assertEquals(false, viewModel.state.value.scheduledDays.contains(DayOfWeek.MONDAY))
+
+        viewModel.onIntent(AddHabitIntent.OnDayToggle(DayOfWeek.MONDAY))
+        assertEquals(true, viewModel.state.value.scheduledDays.contains(DayOfWeek.MONDAY))
+    }
+
+    @Test
+    fun `form field intents update state values`() {
+        viewModel.onIntent(AddHabitIntent.OnIconChange("Run"))
+        viewModel.onIntent(AddHabitIntent.OnCategoryChange("Fitness"))
+        viewModel.onIntent(AddHabitIntent.OnUnitChange("min"))
+
+        val state = viewModel.state.value
+        assertEquals("Run", state.icon)
+        assertEquals("Fitness", state.category)
+        assertEquals("min", state.unit)
+    }
+
+    @Test
     fun `OnSaveClick success emits NavigateBack and calls use case`() = runTest {
         val capturedHabit = slot<Habit>()
         coEvery { createHabitUseCase.invoke(capture(capturedHabit)) } returns Unit
