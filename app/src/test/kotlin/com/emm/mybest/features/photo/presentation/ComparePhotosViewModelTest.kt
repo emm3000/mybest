@@ -147,7 +147,7 @@ class ComparePhotosViewModelTest {
                 advanceUntilIdle()
 
                 assertEquals(
-                    ComparePhotosEffect.ShowError("Elige una foto distinta para DESPUES."),
+                    ComparePhotosEffect.ShowError("Elige una foto distinta para DESPUÉS."),
                     awaitItem(),
                 )
                 cancelAndIgnoreRemainingEvents()

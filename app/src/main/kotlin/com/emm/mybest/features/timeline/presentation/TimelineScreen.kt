@@ -10,14 +10,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -32,6 +35,7 @@ import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
+import kotlinx.coroutines.launch
 
 private const val TIMELINE_PHOTO_HEIGHT_RATIO = 0.8f
 
@@ -97,8 +101,23 @@ fun TimelineContent(
 
     val allPhotos = state.photosByDate.values.flatten().sortedByDescending { it.createdAt }
     val pagerState = androidx.compose.foundation.pager.rememberPagerState(pageCount = { allPhotos.size })
+    val thumbnailListState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val firstPageIndexByDate = buildMap {
+        allPhotos.forEachIndexed { index, photo ->
+            putIfAbsent(photo.date, index)
+        }
+    }
+    val currentPhoto = allPhotos[pagerState.currentPage]
 
-    Column(modifier = modifier.fillMaxSize()) {
+    LaunchedEffect(pagerState.currentPage) {
+        thumbnailListState.animateScrollToItem(pagerState.currentPage.coerceAtLeast(0))
+    }
+
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         androidx.compose.foundation.pager.HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f),
@@ -109,12 +128,10 @@ fun TimelineContent(
             PhotoPagerItem(photo)
         }
 
-        // Pager Indicators / Info
-        val currentPhoto = allPhotos[pagerState.currentPage]
         HCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(horizontal = 24.dp),
             variant = CardVariant.Filled,
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ) {
@@ -141,6 +158,28 @@ fun TimelineContent(
                 )
             }
         }
+
+        TimelineDateJumpRow(
+            dates = firstPageIndexByDate.keys.toList(),
+            selectedDate = currentPhoto.date,
+            onDateSelected = { date ->
+                scope.launch {
+                    pagerState.animateScrollToPage(firstPageIndexByDate.getValue(date))
+                }
+            },
+        )
+
+        TimelineThumbnailStrip(
+            photos = allPhotos,
+            currentPhotoId = currentPhoto.id,
+            listState = thumbnailListState,
+            onPhotoSelected = { page ->
+                scope.launch {
+                    pagerState.animateScrollToPage(page)
+                }
+            },
+            modifier = Modifier.padding(bottom = 24.dp),
+        )
     }
 }
 
@@ -168,7 +207,7 @@ fun PhotoPagerItem(
     }
 }
 
-private fun timelinePhotoTypeLabel(type: PhotoType): String = when (type) {
+internal fun timelinePhotoTypeLabel(type: PhotoType): String = when (type) {
     PhotoType.FACE -> "Cara"
     PhotoType.ABDOMEN -> "Abdomen"
     PhotoType.BODY -> "Cuerpo"

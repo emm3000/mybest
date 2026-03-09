@@ -254,20 +254,20 @@ private fun AddPhotoBody(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "Puedes tomar una foto ahora o elegir una existente de tu galeria.",
+                        "Puedes tomar una foto ahora o elegir una existente de tu galería.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                     HButton(
-                        text = "Usar camara",
+                        text = "Usar cámara",
                         onClick = onUseCameraClick,
                         modifier = Modifier.fillMaxWidth(),
                         leadingIcon = Icons.Rounded.PhotoCamera,
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     HButton(
-                        text = "Elegir de galeria",
+                        text = "Elegir de galería",
                         onClick = onPickFromGalleryClick,
                         modifier = Modifier.fillMaxWidth(),
                         variant = ButtonVariant.Outline,
@@ -326,7 +326,7 @@ private fun PhotoSourceBottomSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                "Anadir fotos",
+                "Añadir fotos",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp),
@@ -334,14 +334,14 @@ private fun PhotoSourceBottomSheet(
 
             HSourceOption(
                 icon = Icons.Rounded.PhotoCamera,
-                label = "Usar camara",
+                label = "Usar cámara",
                 onClick = onCameraClick,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             HSourceOption(
                 icon = Icons.Rounded.PhotoLibrary,
-                label = "Elegir de galeria",
+                label = "Elegir de galería",
                 onClick = onGalleryClick,
                 modifier = Modifier.fillMaxWidth(),
             )

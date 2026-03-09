@@ -96,7 +96,7 @@ class ComparePhotosViewModel(
             }
             is ComparePhotosIntent.OnAfterPhotoSelected -> {
                 if (state.value.beforePhoto?.id == intent.photo.id) {
-                    showError("Elige una foto distinta para DESPUES.")
+                    showError("Elige una foto distinta para DESPUÉS.")
                 } else {
                     _afterPhoto.value = intent.photo
                 }
