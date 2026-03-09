@@ -1,7 +1,6 @@
 package com.emm.mybest.core.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -65,7 +64,6 @@ fun AppNavigation(
 
     Scaffold(
         modifier = modifier,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {
                 HBottomNavigationBar(
@@ -124,14 +122,16 @@ private fun AppNavGraph(
     NavHost(
         navController = navController,
         startDestination = Screen.Home,
-        modifier = Modifier.background(MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .padding(innerPadding),
     ) {
         composable<Screen.Home> {
             val viewModel: HomeViewModel = koinViewModel()
             HomeScreen(
                 viewModel = viewModel,
                 onNavigate = { screen -> navController.navigate(screen) },
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier,
             )
         }
 
@@ -140,7 +140,7 @@ private fun AppNavGraph(
             AddWeightScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier,
             )
         }
 
@@ -149,7 +149,7 @@ private fun AppNavGraph(
             AddHabitScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier,
             )
         }
 
@@ -159,7 +159,7 @@ private fun AppNavGraph(
                 viewModel = viewModel,
                 mediaManager = org.koin.compose.koinInject(),
                 onBackClick = { navController.popBackStack() },
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier,
             )
         }
 
@@ -168,7 +168,7 @@ private fun AppNavGraph(
             HistoryScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier,
             )
         }
 
@@ -178,7 +178,7 @@ private fun AppNavGraph(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
                 onCompareClick = { navController.navigate(Screen.ComparePhotos) },
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier,
             )
         }
 
@@ -187,7 +187,7 @@ private fun AppNavGraph(
             ComparePhotosScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier,
             )
         }
 
@@ -196,7 +196,7 @@ private fun AppNavGraph(
             TimelineScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier,
             )
         }
     }
