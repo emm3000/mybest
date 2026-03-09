@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -62,12 +63,21 @@ import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
+import com.emm.mybest.ui.components.AlertVariant
+import com.emm.mybest.ui.components.HAlert
+import com.emm.mybest.ui.components.HEmptyState
+import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 private const val CALENDAR_COLUMNS = 7
 private const val DAY_CELL_ASPECT_RATIO = 0.8f
+private const val HISTORY_SCREEN_PADDING = 16
+private const val HISTORY_SECTION_SPACING = 12
+private const val HISTORY_SECTION_CORNER = 16
+private const val HISTORY_LOADING_CARD_HEIGHT = 56
+private const val HISTORY_LOADING_GRID_HEIGHT = 320
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,41 +135,88 @@ fun HistoryContent(
             )
         },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            MonthSelector(
-                currentMonth = state.selectedMonth,
-                onMonthChange = { onIntent(HistoryIntent.OnMonthChange(it)) },
-            )
+        val contentModifier = Modifier
+            .padding(padding)
+            .fillMaxSize()
+            .padding(HISTORY_SCREEN_PADDING.dp)
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                DayOfWeek.entries.forEach { dayOfWeek ->
-                    Text(
-                        text = dayOfWeek.shortEs(),
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        when {
+            state.isLoading -> HistoryLoadingState(modifier = contentModifier)
+            state.errorMessage != null -> {
+                HAlert(
+                    title = "No se pudo cargar el historial",
+                    description = state.errorMessage,
+                    variant = AlertVariant.Destructive,
+                    modifier = contentModifier,
+                )
+            }
+            state.monthlyData.isEmpty() -> {
+                HEmptyState(
+                    title = "Historial vacío",
+                    description = "Registra peso, hábitos o fotos para empezar a ver actividad por día.",
+                    icon = Icons.Rounded.History,
+                    modifier = contentModifier,
+                )
+            }
+            else -> {
+                Column(
+                    modifier = contentModifier,
+                    verticalArrangement = Arrangement.spacedBy(HISTORY_SECTION_SPACING.dp),
+                ) {
+                    MonthSelector(
+                        currentMonth = state.selectedMonth,
+                        onMonthChange = { onIntent(HistoryIntent.OnMonthChange(it)) },
                     )
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        DayOfWeek.entries.forEach { dayOfWeek ->
+                            Text(
+                                text = dayOfWeek.shortEs(),
+                                modifier = Modifier.weight(1f),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    CalendarGrid(
+                        yearMonth = state.selectedMonth,
+                        onDateClick = { onIntent(HistoryIntent.OnDateSelected(it)) },
+                        dayData = state.monthlyData,
+                    )
+
+                    HistoryLegendSection()
                 }
             }
-
-            CalendarGrid(
-                yearMonth = state.selectedMonth,
-                onDateClick = { onIntent(HistoryIntent.OnDateSelected(it)) },
-                dayData = state.monthlyData,
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-            LegendItem(color = MaterialTheme.colorScheme.primary, text = "Peso registrado")
-            LegendItem(color = MaterialTheme.colorScheme.secondary, text = "Hábitos completados")
-            LegendItem(color = MaterialTheme.colorScheme.tertiary, text = "Fotos tomadas")
         }
+    }
+}
+
+@Composable
+private fun HistoryLoadingState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(HISTORY_SECTION_SPACING.dp),
+    ) {
+        HSkeleton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HISTORY_LOADING_CARD_HEIGHT.dp),
+            cornerRadius = HISTORY_SECTION_CORNER.dp,
+        )
+        HSkeleton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HISTORY_LOADING_GRID_HEIGHT.dp),
+            cornerRadius = HISTORY_SECTION_CORNER.dp,
+        )
+        HSkeleton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HISTORY_LOADING_CARD_HEIGHT.dp),
+            cornerRadius = HISTORY_SECTION_CORNER.dp,
+        )
     }
 }
 
@@ -432,22 +489,6 @@ fun HChip(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
         )
-    }
-}
-
-@Composable
-fun LegendItem(
-    color: Color,
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

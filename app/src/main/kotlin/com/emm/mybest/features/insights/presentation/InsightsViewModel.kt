@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -21,6 +22,7 @@ data class InsightsState(
     val exerciseDays: Int = 0,
     val healthyEatingDays: Int = 0,
     val isLoading: Boolean = true,
+    val errorMessage: String? = null,
 )
 
 sealed class InsightsIntent {
@@ -51,6 +53,14 @@ class InsightsViewModel(
                 exerciseDays = data.exerciseDays,
                 healthyEatingDays = data.healthyEatingDays,
                 isLoading = false,
+                errorMessage = null,
+            )
+        }.catch { throwable ->
+            emit(
+                InsightsState(
+                    isLoading = false,
+                    errorMessage = throwable.message ?: "No se pudo cargar la información de insights.",
+                ),
             )
         }.stateIn(
             scope = viewModelScope,

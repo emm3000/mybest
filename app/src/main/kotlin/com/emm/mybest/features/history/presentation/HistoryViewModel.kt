@@ -12,6 +12,7 @@ import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -34,6 +35,7 @@ data class HistoryState(
     val monthlyData: Map<LocalDate, DaySummary> = emptyMap(),
     val selectedDate: LocalDate? = null,
     val isLoading: Boolean = false,
+    val errorMessage: String? = null,
 )
 
 sealed class HistoryIntent {
@@ -66,6 +68,16 @@ class HistoryViewModel(
             selectedDate = selectedDate,
             monthlyData = transformToDaySummary(weights, habits, photos),
             isLoading = false,
+            errorMessage = null,
+        )
+    }.catch { throwable ->
+        emit(
+            HistoryState(
+                selectedMonth = _selectedMonth.value,
+                selectedDate = _selectedDate.value,
+                isLoading = false,
+                errorMessage = throwable.message ?: "No se pudo cargar el historial.",
+            ),
         )
     }.stateIn(
         scope = viewModelScope,
