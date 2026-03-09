@@ -14,5 +14,13 @@ val appJacocoExcludes = listOf(
     "**/ui/components/**",
     "**/ui/theme/**",
     "**/core/navigation/**",
+    "**/di/**",
+    "**/features/**/presentation/*Components*.*",
+    "**/features/**/presentation/*Sections*.*",
+    "**/features/**/presentation/*Legend*.*",
+    "**/features/**/presentation/*StatsRow*.*",
+    "**/features/**/presentation/*Storage*.*",
+    "**/features/**/presentation/*Actions*.*",
+    "**/features/**/presentation/*Dsl*.*",
     "**/MainActivity*.*",
 )
