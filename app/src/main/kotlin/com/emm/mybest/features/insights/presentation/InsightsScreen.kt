@@ -22,13 +22,11 @@ import androidx.compose.material.icons.rounded.Compare
 import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material.icons.rounded.North
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,6 +46,7 @@ import com.emm.mybest.ui.components.HAlert
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
+import com.emm.mybest.ui.components.HTopBar
 
 private const val INSIGHTS_SCREEN_PADDING = 16
 private const val INSIGHTS_SECTION_SPACING = 16
@@ -57,7 +56,6 @@ private const val INSIGHTS_CHART_HEIGHT = 250
 private const val INSIGHTS_STATS_GAP = 16
 private const val INSIGHTS_RING_SIZE = 80
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsightsScreen(
     viewModel: InsightsViewModel,
@@ -76,8 +74,8 @@ fun InsightsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text("Insights & Progreso") },
+            HTopBar(
+                title = "Insights & Progreso",
                 navigationIcon = {
                     IconButton(onClick = { viewModel.onIntent(InsightsIntent.OnBackClick) }) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")

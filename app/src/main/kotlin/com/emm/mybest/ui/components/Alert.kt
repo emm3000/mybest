@@ -26,11 +26,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.shadcnDarkOnWarningContainer
+import com.emm.mybest.ui.theme.shadcnDarkWarning
+import com.emm.mybest.ui.theme.shadcnDarkWarningContainer
 import com.emm.mybest.ui.theme.shadcnOnWarningContainer
 import com.emm.mybest.ui.theme.shadcnWarning
 import com.emm.mybest.ui.theme.shadcnWarningContainer
@@ -101,6 +105,7 @@ fun HAlert(
 @Composable
 private fun alertTokens(variant: AlertVariant): Triple<Color, Color, Color> {
     val cs = MaterialTheme.colorScheme
+    val isDark = cs.background.luminance() < 0.5f
     return when (variant) {
         AlertVariant.Default -> Triple(
             cs.surfaceContainerHigh,
@@ -113,9 +118,9 @@ private fun alertTokens(variant: AlertVariant): Triple<Color, Color, Color> {
             cs.error,
         )
         AlertVariant.Warning -> Triple(
-            shadcnWarningContainer,
-            shadcnOnWarningContainer,
-            shadcnWarning,
+            if (isDark) shadcnDarkWarningContainer else shadcnWarningContainer,
+            if (isDark) shadcnDarkOnWarningContainer else shadcnOnWarningContainer,
+            if (isDark) shadcnDarkWarning else shadcnWarning,
         )
         AlertVariant.Success -> Triple(
             cs.tertiaryContainer,

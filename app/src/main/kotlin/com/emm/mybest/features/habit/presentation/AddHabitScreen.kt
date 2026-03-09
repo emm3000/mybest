@@ -21,7 +21,6 @@ import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.material.icons.rounded.WaterDrop
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +29,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,6 +46,7 @@ import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSelect
+import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.datetime.DayOfWeek
@@ -85,7 +84,6 @@ fun AddHabitScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddHabitContent(
     state: AddHabitState,
@@ -98,8 +96,8 @@ private fun AddHabitContent(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text("Nuevo Hábito") },
+            HTopBar(
+                title = "Nuevo Hábito",
                 navigationIcon = {
                     IconButton(
                         onClick = if (state.step > 1) {

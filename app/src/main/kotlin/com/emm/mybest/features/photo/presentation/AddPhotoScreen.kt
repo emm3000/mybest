@@ -27,7 +27,6 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +36,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,6 +57,8 @@ import coil3.compose.AsyncImage
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.ui.components.HButton
+import com.emm.mybest.ui.components.HFilterChip
+import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -151,8 +151,8 @@ fun AddPhotoContent(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text("Añadir Fotos") },
+            HTopBar(
+                title = "Añadir Fotos",
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
@@ -367,13 +367,13 @@ fun PhotoCard(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     items(PhotoType.entries) { type ->
-                        FilterChip(
+                        HFilterChip(
                             selected = selectedType == type,
                             onClick = {
                                 onTypeClick(type)
                                 showTypeSelector = false
                             },
-                            label = { Text(getLabelForType(type), style = MaterialTheme.typography.labelSmall) },
+                            label = getLabelForType(type),
                         )
                     }
                 }
