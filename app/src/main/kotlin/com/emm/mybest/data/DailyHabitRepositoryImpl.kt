@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 
 class DailyHabitRepositoryImpl(
-    private val dao: DailyHabitDao
+    private val dao: DailyHabitDao,
 ) : DailyHabitRepository {
 
     override fun getAllDailyHabits(): Flow<List<DailyHabitSummary>> {

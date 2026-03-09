@@ -8,10 +8,10 @@ data class HabitRecord(
     val date: LocalDate,
     val value: Float,
     val isCompleted: Boolean,
-    val notes: String? = null
+    val notes: String? = null,
 )
 
 data class HabitWithRecord(
     val habit: Habit,
-    val record: HabitRecord?
+    val record: HabitRecord?,
 )

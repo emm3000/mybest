@@ -4,7 +4,7 @@ import com.emm.mybest.domain.models.HabitType
 
 data class ValidationResult(
     val isValid: Boolean,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
 )
 
 private const val MIN_HABIT_NAME_LENGTH = 3

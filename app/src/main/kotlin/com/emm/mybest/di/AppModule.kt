@@ -36,7 +36,7 @@ val appModule = module {
         Room.databaseBuilder(
             androidContext(),
             AppDatabase::class.java,
-            "my_best_db"
+            "my_best_db",
         ).fallbackToDestructiveMigration(false).build()
     }
 

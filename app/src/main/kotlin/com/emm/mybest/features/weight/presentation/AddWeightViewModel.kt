@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 data class AddWeightState(
     val weight: String = "",
     val note: String = "",
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 )
 
 sealed class AddWeightIntent {
@@ -28,7 +28,7 @@ sealed class AddWeightEffect {
 }
 
 class AddWeightViewModel(
-    private val weightRepository: WeightRepository
+    private val weightRepository: WeightRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddWeightState())

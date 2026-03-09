@@ -7,7 +7,7 @@ import kotlinx.datetime.LocalDate
 import java.util.UUID
 
 class ToggleHabitUseCase(
-    private val habitRepository: HabitRepository
+    private val habitRepository: HabitRepository,
 ) {
     suspend operator fun invoke(habitWithRecord: HabitWithRecord, date: LocalDate) {
         val currentRecord = habitWithRecord.record
@@ -17,12 +17,12 @@ class ToggleHabitUseCase(
                 habitId = habitWithRecord.habit.id,
                 date = date,
                 value = 1f,
-                isCompleted = true
+                isCompleted = true,
             )
         } else {
             currentRecord.copy(
                 isCompleted = !currentRecord.isCompleted,
-                value = if (!currentRecord.isCompleted) 1f else 0f
+                value = if (!currentRecord.isCompleted) 1f else 0f,
             )
         }
         habitRepository.insertRecord(newRecord)

@@ -15,7 +15,7 @@ class MediaManager(private val context: Context) {
         return FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
-            photoFile
+            photoFile,
         )
     }
 
@@ -27,7 +27,7 @@ class MediaManager(private val context: Context) {
         return File.createTempFile(
             "JPEG_${timeStamp}_",
             ".jpg",
-            storageDir
+            storageDir,
         )
     }
 }

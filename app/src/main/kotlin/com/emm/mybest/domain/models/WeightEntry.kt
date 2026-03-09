@@ -7,5 +7,5 @@ data class WeightEntry(
     val date: LocalDate,
     val weight: Float,
     val photoPath: String? = null,
-    val note: String? = null
+    val note: String? = null,
 )

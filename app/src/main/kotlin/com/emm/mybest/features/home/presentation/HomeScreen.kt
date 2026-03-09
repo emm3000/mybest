@@ -44,7 +44,7 @@ import com.emm.mybest.ui.theme.MyBestTheme
 fun HomeScreen(
     viewModel: HomeViewModel,
     onNavigate: (Screen) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -62,7 +62,7 @@ fun HomeScreen(
     HomeScreenContent(
         modifier = modifier,
         state = state,
-        onIntent = viewModel::onIntent
+        onIntent = viewModel::onIntent,
     )
 }
 
@@ -70,18 +70,18 @@ fun HomeScreen(
 internal fun HomeScreenContent(
     state: HomeState,
     onIntent: (HomeIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             item {
                 HomeHeader(modifier = Modifier.fillMaxWidth())
@@ -135,31 +135,31 @@ fun HomeHeader(modifier: Modifier = Modifier) {
         modifier = modifier
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column {
             Text(
                 text = "Mi Mejor Versión",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
             Text(
                 text = "Hoy es ${currentDate()}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
         Surface(
             modifier = Modifier.size(44.dp),
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceVariant
+            color = MaterialTheme.colorScheme.surfaceVariant,
         ) {
             Icon(
                 imageVector = Icons.Rounded.Person,
                 contentDescription = "Perfil",
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
             )
         }
     }
@@ -169,7 +169,7 @@ fun HomeHeader(modifier: Modifier = Modifier) {
 fun SummaryCard(
     state: HomeState,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier
@@ -177,19 +177,19 @@ fun SummaryCard(
         onClick = onClick,
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary
-        )
+            containerColor = MaterialTheme.colorScheme.primary,
+        ),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .padding(24.dp)
-                    .align(Alignment.CenterStart)
+                    .align(Alignment.CenterStart),
             ) {
                 Text(
                     text = "Tu Progreso",
                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -202,13 +202,13 @@ fun SummaryCard(
                     },
                     color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Toca para ver tus estadísticas",
                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
             Icon(
@@ -218,7 +218,7 @@ fun SummaryCard(
                     .align(Alignment.CenterEnd)
                     .padding(24.dp)
                     .size(64.dp),
-                tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
+                tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f),
             )
         }
     }
@@ -233,30 +233,30 @@ fun QuickActionCard(
     contentColor: Color,
     iconColor: Color,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = containerColor,
-        modifier = modifier
+        modifier = modifier,
     ) {
         Row(
             modifier = Modifier
                 .padding(20.dp)
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
                 modifier = Modifier.size(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                color = iconColor.copy(alpha = 0.12f)
+                color = iconColor.copy(alpha = 0.12f),
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = iconColor,
-                    modifier = Modifier.padding(14.dp)
+                    modifier = Modifier.padding(14.dp),
                 )
             }
 
@@ -267,12 +267,12 @@ fun QuickActionCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = contentColor
+                    color = contentColor,
                 )
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = contentColor.copy(alpha = 0.8f)
+                    color = contentColor.copy(alpha = 0.8f),
                 )
             }
 
@@ -281,7 +281,7 @@ fun QuickActionCard(
             Icon(
                 imageVector = Icons.Rounded.ChevronRight,
                 contentDescription = null,
-                tint = contentColor.copy(alpha = 0.5f)
+                tint = contentColor.copy(alpha = 0.5f),
             )
         }
     }
@@ -295,9 +295,9 @@ private fun HomeScreenPreview() {
             state = HomeState(
                 lastWeight = 75.5f,
                 totalPhotos = 12,
-                isLoading = false
+                isLoading = false,
             ),
-            onIntent = {}
+            onIntent = {},
         )
     }
 }

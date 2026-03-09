@@ -8,7 +8,7 @@ import java.util.UUID
 enum class HabitType {
     BOOLEAN, // Yes/No
     TIME, // e.g., Read 30 mins
-    METRIC // e.g., Drink 2L water
+    METRIC, // e.g., Drink 2L water
 }
 
 @Entity(tableName = "habits")
@@ -49,5 +49,5 @@ data class HabitEntity(
     val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
 )

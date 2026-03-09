@@ -42,7 +42,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun AddWeightScreen(
     viewModel: AddWeightViewModel,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -64,7 +64,7 @@ fun AddWeightScreen(
         snackbarHostState = snackbarHostState,
         onBackClick = currentOnBackClick,
         onIntent = viewModel::onIntent,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -75,7 +75,7 @@ private fun AddWeightContent(
     snackbarHostState: SnackbarHostState,
     onBackClick: () -> Unit,
     onIntent: (AddWeightIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
@@ -87,21 +87,21 @@ private fun AddWeightContent(
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .padding(24.dp)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Text(
                 text = "¿Cuánto pesas hoy?",
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
 
             OutlinedTextField(
@@ -111,7 +111,7 @@ private fun AddWeightContent(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 leadingIcon = { Icon(Icons.Rounded.Scale, null) },
-                singleLine = true
+                singleLine = true,
             )
 
             OutlinedTextField(
@@ -119,7 +119,7 @@ private fun AddWeightContent(
                 onValueChange = { onIntent(AddWeightIntent.OnNoteChange(it)) },
                 label = { Text("Nota (opcional)") },
                 modifier = Modifier.fillMaxWidth(),
-                minLines = 3
+                minLines = 3,
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -130,12 +130,12 @@ private fun AddWeightContent(
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = MaterialTheme.shapes.large,
-                enabled = state.weight.isNotEmpty() && !state.isLoading
+                enabled = state.weight.isNotEmpty() && !state.isLoading,
             ) {
                 if (state.isLoading) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                 } else {
                     Text("Guardar Registro", style = MaterialTheme.typography.titleMedium)
@@ -153,11 +153,11 @@ private fun AddWeightScreenPreview() {
             state = AddWeightState(
                 weight = "80.5",
                 note = "Después del entrenamiento",
-                isLoading = false
+                isLoading = false,
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onBackClick = {},
-            onIntent = {}
+            onIntent = {},
         )
     }
 }

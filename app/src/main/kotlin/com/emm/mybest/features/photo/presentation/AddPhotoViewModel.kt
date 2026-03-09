@@ -14,12 +14,12 @@ import kotlinx.coroutines.launch
 
 data class SelectedPhoto(
     val uri: String,
-    val type: PhotoType = PhotoType.FACE
+    val type: PhotoType = PhotoType.FACE,
 )
 
 data class AddPhotoState(
     val selectedPhotos: List<SelectedPhoto> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 )
 
 sealed class AddPhotoIntent {
@@ -35,7 +35,7 @@ sealed class AddPhotoEffect {
 }
 
 class AddPhotoViewModel(
-    private val photoRepository: PhotoRepository
+    private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddPhotoState())

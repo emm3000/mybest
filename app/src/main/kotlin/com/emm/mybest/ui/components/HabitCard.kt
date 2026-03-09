@@ -35,7 +35,7 @@ fun HabitCard(
     habit: Habit,
     record: HabitRecord?,
     onToggle: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val isCompleted = record?.isCompleted ?: false
     val currentOnToggle = androidx.compose.runtime.rememberUpdatedState(onToggle)

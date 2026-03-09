@@ -24,7 +24,7 @@ class CreateHabitUseCaseTest {
             color = 0,
             category = "Cat",
             type = HabitType.BOOLEAN,
-            scheduledDays = setOf(DayOfWeek.MONDAY)
+            scheduledDays = setOf(DayOfWeek.MONDAY),
         )
 
         coEvery { repository.insertHabit(any()) } returns Unit

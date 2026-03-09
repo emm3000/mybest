@@ -20,7 +20,7 @@ data class HomeState(
     val lastWeight: Float? = null,
     val totalWeightLost: Float = 0f,
     val totalPhotos: Int = 0,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 )
 
 sealed class HomeIntent {
@@ -40,7 +40,7 @@ sealed class HomeEffect {
 
 class HomeViewModel(
     getHomeSummaryUseCase: GetHomeSummaryUseCase,
-    private val toggleHabitUseCase: ToggleHabitUseCase
+    private val toggleHabitUseCase: ToggleHabitUseCase,
 ) : ViewModel() {
 
     private val _effect = MutableSharedFlow<HomeEffect>()
@@ -53,12 +53,12 @@ class HomeViewModel(
                 lastWeight = summary.latestWeight,
                 totalWeightLost = summary.totalWeightLost,
                 totalPhotos = summary.totalPhotos,
-                isLoading = false
+                isLoading = false,
             )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(FLOW_STOP_TIMEOUT),
-            initialValue = HomeState(isLoading = true)
+            initialValue = HomeState(isLoading = true),
         )
 
     fun onIntent(intent: HomeIntent) {
@@ -86,7 +86,7 @@ class HomeViewModel(
             } catch (
                 e:
                 @Suppress("TooGenericExceptionCaught")
-                Exception
+                Exception,
             ) {
                 _effect.emit(HomeEffect.ShowError(e.message ?: "Error al actualizar hábito"))
             }

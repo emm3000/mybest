@@ -15,7 +15,7 @@ interface DailyWeightDao {
         SELECT * FROM daily_weight
         WHERE date = :date
         LIMIT 1
-    """
+    """,
     )
     suspend fun getByDate(date: LocalDate): DailyWeightEntity?
 
@@ -26,7 +26,7 @@ interface DailyWeightDao {
         """
         SELECT * FROM daily_weight
         ORDER BY date ASC
-    """
+    """,
     )
     fun observeAllOrdered(): Flow<List<DailyWeightEntity>>
 
@@ -35,7 +35,7 @@ interface DailyWeightDao {
         SELECT * FROM daily_weight
         ORDER BY date DESC
         LIMIT 1
-    """
+    """,
     )
     suspend fun getLatest(): DailyWeightEntity?
 

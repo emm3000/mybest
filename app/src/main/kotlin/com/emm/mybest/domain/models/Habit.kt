@@ -5,7 +5,7 @@ import kotlinx.datetime.DayOfWeek
 enum class HabitType {
     BOOLEAN,
     TIME,
-    METRIC
+    METRIC,
 }
 
 data class Habit(
@@ -19,5 +19,5 @@ data class Habit(
     val unit: String? = null,
     val isEnabled: Boolean = true,
     val scheduledDays: Set<DayOfWeek>,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
 )

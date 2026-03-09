@@ -31,7 +31,7 @@ data class AddHabitState(
 
     val isLoading: Boolean = false,
     val nameError: String? = null,
-    val goalError: String? = null
+    val goalError: String? = null,
 )
 
 sealed class AddHabitIntent {
@@ -61,7 +61,7 @@ sealed class AddHabitEffect {
 }
 
 class AddHabitViewModel(
-    private val createHabitUseCase: CreateHabitUseCase
+    private val createHabitUseCase: CreateHabitUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddHabitState())
@@ -138,7 +138,7 @@ class AddHabitViewModel(
                     type = _state.value.type,
                     goalValue = _state.value.goalValue.toFloatOrNull(),
                     unit = _state.value.unit,
-                    scheduledDays = _state.value.scheduledDays
+                    scheduledDays = _state.value.scheduledDays,
                 )
                 createHabitUseCase(habit)
             }.onSuccess {

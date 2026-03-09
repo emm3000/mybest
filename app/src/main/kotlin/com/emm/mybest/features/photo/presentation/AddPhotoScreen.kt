@@ -71,7 +71,7 @@ fun AddPhotoScreen(
     viewModel: AddPhotoViewModel,
     mediaManager: MediaManager,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
     val effect = viewModel.effect
@@ -82,7 +82,7 @@ fun AddPhotoScreen(
         mediaManager = mediaManager,
         onBackClick = onBackClick,
         effect = effect,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -94,7 +94,7 @@ fun AddPhotoContent(
     mediaManager: MediaManager,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    effect: Flow<AddPhotoEffect> = emptyFlow()
+    effect: Flow<AddPhotoEffect> = emptyFlow(),
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -163,9 +163,9 @@ fun AddPhotoContent(
                     IconButton(onClick = { showBottomSheet = true }) {
                         Icon(Icons.Rounded.AddAPhoto, contentDescription = "Añadir")
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         AddPhotoBody(
             state = state,
@@ -327,12 +327,12 @@ fun PhotoCard(
     selectedType: PhotoType,
     onTypeClick: (PhotoType) -> Unit,
     onRemove: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier
+        modifier = modifier,
     ) {
         Column {
             Box(modifier = Modifier.height(160.dp).fillMaxWidth()) {
@@ -340,7 +340,7 @@ fun PhotoCard(
                     model = uri,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
                 )
                 IconButton(
                     onClick = onRemove,
@@ -348,13 +348,13 @@ fun PhotoCard(
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
                         .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f), CircleShape)
-                        .size(32.dp)
+                        .size(32.dp),
                 ) {
                     Icon(
                         Icons.Rounded.Delete,
                         contentDescription = "Borrar",
                         modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.onErrorContainer
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
                     )
                 }
             }
@@ -370,13 +370,13 @@ fun PhotoCard(
                     .padding(8.dp),
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )
 
             if (showTypeSelector) {
                 LazyRow(
                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     items(PhotoType.entries) { type ->
                         FilterChip(
@@ -385,7 +385,7 @@ fun PhotoCard(
                                 onTypeClick(type)
                                 showTypeSelector = false
                             },
-                            label = { Text(getLabelForType(type), style = MaterialTheme.typography.labelSmall) }
+                            label = { Text(getLabelForType(type), style = MaterialTheme.typography.labelSmall) },
                         )
                     }
                 }
@@ -402,7 +402,7 @@ private fun AddPhotoScreenPreview() {
             state = AddPhotoState(),
             onIntent = {},
             mediaManager = MediaManager(androidx.compose.ui.platform.LocalContext.current),
-            onBackClick = {}
+            onBackClick = {},
         )
     }
 }

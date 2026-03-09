@@ -20,7 +20,7 @@ data class InsightsState(
     val initialWeight: Float = 0f,
     val exerciseDays: Int = 0,
     val healthyEatingDays: Int = 0,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
 )
 
 sealed class InsightsIntent {
@@ -34,7 +34,7 @@ sealed class InsightsEffect {
 }
 
 class InsightsViewModel(
-    getInsightsUseCase: GetInsightsUseCase
+    getInsightsUseCase: GetInsightsUseCase,
 ) : ViewModel() {
 
     private val _effect = MutableSharedFlow<InsightsEffect>()
@@ -50,12 +50,12 @@ class InsightsViewModel(
                 initialWeight = data.initialWeight,
                 exerciseDays = data.exerciseDays,
                 healthyEatingDays = data.healthyEatingDays,
-                isLoading = false
+                isLoading = false,
             )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(FLOW_STOP_TIMEOUT),
-            initialValue = InsightsState(isLoading = true)
+            initialValue = InsightsState(isLoading = true),
         )
 
     fun onIntent(intent: InsightsIntent) {

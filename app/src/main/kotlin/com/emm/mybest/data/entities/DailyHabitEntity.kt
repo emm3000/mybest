@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import kotlinx.datetime.LocalDate
 
 @Entity(
-    tableName = "daily_habit"
+    tableName = "daily_habit",
 )
 data class DailyHabitEntity(
 
@@ -27,5 +27,5 @@ data class DailyHabitEntity(
     val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
 )

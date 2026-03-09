@@ -15,7 +15,7 @@ interface DailyHabitDao {
         SELECT * FROM daily_habit
         WHERE date = :date
         LIMIT 1
-    """
+    """,
     )
     suspend fun getByDate(date: LocalDate): DailyHabitEntity?
 
@@ -27,7 +27,7 @@ interface DailyHabitDao {
         SELECT * FROM daily_habit
         WHERE date = :date
         LIMIT 1
-    """
+    """,
     )
     fun observeByDate(date: LocalDate): Flow<DailyHabitEntity?>
 
@@ -35,7 +35,7 @@ interface DailyHabitDao {
         """
         SELECT * FROM daily_habit
         ORDER BY date DESC
-    """
+    """,
     )
     fun observeAll(): Flow<List<DailyHabitEntity>>
 
@@ -43,7 +43,7 @@ interface DailyHabitDao {
         """
         SELECT COUNT(*) FROM daily_habit
         WHERE did_exercise = 1
-    """
+    """,
     )
     suspend fun countExerciseDays(): Int
 

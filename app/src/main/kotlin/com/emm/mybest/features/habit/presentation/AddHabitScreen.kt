@@ -59,7 +59,7 @@ private const val ADD_HABIT_ICON_GRID_COLUMNS = 4
 fun AddHabitScreen(
     viewModel: AddHabitViewModel,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -81,7 +81,7 @@ fun AddHabitScreen(
         state = state,
         onIntent = viewModel::onIntent,
         onBackClick = onBackClick,
-        snackbarHostState = snackbarHostState
+        snackbarHostState = snackbarHostState,
     )
 }
 
@@ -92,7 +92,7 @@ private fun AddHabitContent(
     onIntent: (AddHabitIntent) -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     Scaffold(
         modifier = modifier,
@@ -106,32 +106,32 @@ private fun AddHabitContent(
                             { onIntent(AddHabitIntent.OnPreviousStep) }
                         } else {
                             onBackClick
-                        }
+                        },
                     ) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .padding(24.dp)
-                .fillMaxSize()
+                .fillMaxSize(),
         ) {
             // Step indicator
             Text(
                 text = "Paso ${state.step} de $ADD_HABIT_TOTAL_STEPS",
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             AnimatedContent(
                 targetState = state.step,
                 label = "WizardStep",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) { step ->
                 when (step) {
                     1 -> StepOne(state, onIntent)
@@ -151,7 +151,7 @@ private fun AddHabitContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
             ) {
                 Text(if (state.step < ADD_HABIT_TOTAL_STEPS) "Continuar" else "Crear Hábito")
             }
@@ -162,7 +162,7 @@ private fun AddHabitContent(
 @Composable
 private fun StepOne(
     state: AddHabitState,
-    onIntent: (AddHabitIntent) -> Unit
+    onIntent: (AddHabitIntent) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         HInput(
@@ -171,7 +171,7 @@ private fun StepOne(
             label = "Nombre del hábito",
             placeholder = "Ej: Beber agua",
             errorMessage = state.nameError,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
 
         HSelect(
@@ -179,33 +179,33 @@ private fun StepOne(
             selectedItem = state.category,
             onItemSelect = { onIntent(AddHabitIntent.OnCategoryChange(it)) },
             label = "Categoría",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Text(
             text = "Elige un icono",
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
         val icons = listOf(
             Icons.Rounded.FitnessCenter,
             Icons.Rounded.Restaurant,
             Icons.Rounded.WaterDrop,
-            Icons.Rounded.SelfImprovement
+            Icons.Rounded.SelfImprovement,
         )
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(ADD_HABIT_ICON_GRID_COLUMNS),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(icons) { icon ->
                 val isSelected = state.icon == icon.name // Simplified for demonstration
                 IconCard(
                     icon = icon,
                     isSelected = isSelected,
-                    onClick = { onIntent(AddHabitIntent.OnIconChange(icon.name)) }
+                    onClick = { onIntent(AddHabitIntent.OnIconChange(icon.name)) },
                 )
             }
         }
@@ -216,19 +216,19 @@ private fun StepOne(
 private fun IconCard(
     icon: ImageVector,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Surface(
         onClick = onClick,
         shape = MaterialTheme.shapes.medium,
         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier.size(64.dp)
+        modifier = Modifier.size(64.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (isSelected) {
                 Icon(
@@ -238,7 +238,7 @@ private fun IconCard(
                         .size(16.dp)
                         .align(Alignment.TopEnd)
                         .padding(4.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         }
@@ -248,30 +248,30 @@ private fun IconCard(
 @Composable
 private fun StepTwo(
     state: AddHabitState,
-    onIntent: (AddHabitIntent) -> Unit
+    onIntent: (AddHabitIntent) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Text(
             text = "¿Cómo medirás tu progreso?",
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             val types = listOf(
                 "Si/No" to HabitType.BOOLEAN,
                 "Tiempo" to HabitType.TIME,
-                "Métrica" to HabitType.METRIC
+                "Métrica" to HabitType.METRIC,
             )
             types.forEach { (label, type) ->
                 TypeCard(
                     label = label,
                     isSelected = state.type == type,
                     onClick = { onIntent(AddHabitIntent.OnTypeChange(type)) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
@@ -283,7 +283,7 @@ private fun StepTwo(
                 label = if (state.type == HabitType.TIME) "Minutos al día" else "Valor objetivo",
                 placeholder = "Ej: 30",
                 errorMessage = state.goalError,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
 
             if (state.type == HabitType.METRIC) {
@@ -292,7 +292,7 @@ private fun StepTwo(
                     onValueChange = { onIntent(AddHabitIntent.OnUnitChange(it)) },
                     label = "Unidad",
                     placeholder = "Ej: Vasos, Litros",
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
@@ -304,20 +304,20 @@ private fun TypeCard(
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         onClick = onClick,
         shape = MaterialTheme.shapes.medium,
         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.height(48.dp)
+        modifier = modifier.height(48.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             )
         }
     }
@@ -326,26 +326,26 @@ private fun TypeCard(
 @Composable
 private fun StepThree(
     state: AddHabitState,
-    onIntent: (AddHabitIntent) -> Unit
+    onIntent: (AddHabitIntent) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Text(
             text = "¿Qué días realizarás este hábito?",
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
         val days = DayOfWeek.entries
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             days.forEach { day ->
                 val isSelected = state.scheduledDays.contains(day)
                 DayChip(
                     day = day,
                     isSelected = isSelected,
-                    onClick = { onIntent(AddHabitIntent.OnDayToggle(day)) }
+                    onClick = { onIntent(AddHabitIntent.OnDayToggle(day)) },
                 )
             }
         }
@@ -354,18 +354,18 @@ private fun StepThree(
         Text(
             text = "Recordatorios",
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant,
             shape = MaterialTheme.shapes.medium,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
                 text = "Se te notificará para completar el hábito en los días seleccionados.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
             )
         }
     }
@@ -375,20 +375,20 @@ private fun StepThree(
 private fun DayChip(
     day: DayOfWeek,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Surface(
         onClick = onClick,
         shape = MaterialTheme.shapes.small,
         color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier.size(40.dp)
+        modifier = Modifier.size(40.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = day.narrowEs(),
                 style = MaterialTheme.typography.labelMedium,
                 color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             )
         }
     }
@@ -401,7 +401,7 @@ private fun AddHabitScreenPreview() {
         AddHabitContent(
             state = AddHabitState(),
             onIntent = {},
-            onBackClick = {}
+            onBackClick = {},
         )
     }
 }

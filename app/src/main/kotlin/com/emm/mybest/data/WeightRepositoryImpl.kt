@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 
 class WeightRepositoryImpl(
-    private val dao: DailyWeightDao
+    private val dao: DailyWeightDao,
 ) : WeightRepository {
 
     override fun getWeightProgress(): Flow<List<WeightEntry>> {

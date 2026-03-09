@@ -10,26 +10,26 @@ import kotlinx.coroutines.flow.stateIn
 
 data class MainState(
     val isDarkMode: Boolean? = null,
-    val useDynamicColor: Boolean = true
+    val useDynamicColor: Boolean = true,
 )
 
 class MainViewModel(
-    private val preferencesRepository: UserPreferencesRepository
+    private val preferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     val state: StateFlow<MainState> = combine(
         preferencesRepository.isDarkMode,
-        preferencesRepository.useDynamicColor
+        preferencesRepository.useDynamicColor,
     ) { isDarkMode, useDynamicColor ->
         MainState(
             isDarkMode = isDarkMode,
-            useDynamicColor = useDynamicColor
+            useDynamicColor = useDynamicColor,
         )
     }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_FLOW_STOP_TIMEOUT),
-            initialValue = MainState()
+            initialValue = MainState(),
         )
 
     companion object {

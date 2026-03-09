@@ -48,7 +48,7 @@ private const val TIMELINE_PHOTO_HEIGHT_RATIO = 0.8f
 fun TimelineScreen(
     viewModel: TimelineViewModel,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -71,20 +71,20 @@ fun TimelineScreen(
                     IconButton(onClick = { viewModel.onIntent(TimelineIntent.OnBackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Regresar"
+                            contentDescription = "Regresar",
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
-                )
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
             )
-        }
+        },
     ) { paddingValues ->
         TimelineContent(
             state = state,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
         )
     }
 }
@@ -93,7 +93,7 @@ fun TimelineScreen(
 @Composable
 fun TimelineContent(
     state: TimelineState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val contentModifier = modifier.fillMaxSize()
 
@@ -109,7 +109,7 @@ fun TimelineContent(
             title = "Sin recuerdos aún",
             description = "Tus fotos de progreso aparecerán aquí para que veas tu evolución.",
             icon = Icons.Rounded.PhotoCamera,
-            modifier = contentModifier
+            modifier = contentModifier,
         )
         return
     }
@@ -122,7 +122,7 @@ fun TimelineContent(
             state = pagerState,
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(horizontal = 32.dp),
-            pageSpacing = 16.dp
+            pageSpacing = 16.dp,
         ) { page ->
             val photo = allPhotos[page]
             PhotoPagerItem(photo)
@@ -134,28 +134,28 @@ fun TimelineContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column {
                     Text(
                         text = currentPhoto.date.formatEsLongDate(),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                     Text(
                         text = "Evolución: ${currentPhoto.type}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
                 Text(
                     text = "${pagerState.currentPage + 1} / ${allPhotos.size}",
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
@@ -165,20 +165,20 @@ fun TimelineContent(
 @Composable
 fun PhotoPagerItem(
     photo: ProgressPhoto,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight(TIMELINE_PHOTO_HEIGHT_RATIO),
         shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
     ) {
         AsyncImage(
             model = photo.photoPath,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
         )
     }
 }

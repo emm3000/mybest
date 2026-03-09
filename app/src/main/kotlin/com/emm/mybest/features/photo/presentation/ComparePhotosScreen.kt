@@ -61,7 +61,7 @@ private const val PHOTO_SELECTION_GRID_COLUMNS = 3
 fun ComparePhotosScreen(
     viewModel: ComparePhotosViewModel,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
     var selectingForBefore by remember { mutableStateOf(true) }
@@ -80,14 +80,14 @@ fun ComparePhotosScreen(
                     IconButton(onClick = { viewModel.onIntent(ComparePhotosIntent.ToggleSwap) }) {
                         Icon(Icons.Rounded.SwapHoriz, contentDescription = "Intercambiar")
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
-                .fillMaxSize()
+                .fillMaxSize(),
         ) {
             // Top Comparison View
             Box(
@@ -95,25 +95,25 @@ fun ComparePhotosScreen(
                     .fillMaxWidth()
                     .height(300.dp)
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                    .padding(16.dp)
+                    .padding(16.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     ComparisonSlot(
                         modifier = Modifier.weight(1f),
                         label = "ANTES",
                         photo = state.beforePhoto,
                         isSelected = selectingForBefore,
-                        onClick = { selectingForBefore = true }
+                        onClick = { selectingForBefore = true },
                     )
                     ComparisonSlot(
                         modifier = Modifier.weight(1f),
                         label = "DESPUÉS",
                         photo = state.afterPhoto,
                         isSelected = !selectingForBefore,
-                        onClick = { selectingForBefore = false }
+                        onClick = { selectingForBefore = false },
                     )
                 }
             }
@@ -121,7 +121,7 @@ fun ComparePhotosScreen(
             // Type Filter
             PhotoTypeSelector(
                 selectedType = state.selectedType,
-                onTypeChange = { viewModel.onIntent(ComparePhotosIntent.OnTypeSelected(it)) }
+                onTypeChange = { viewModel.onIntent(ComparePhotosIntent.OnTypeSelected(it)) },
             )
 
             // Photo Grid for selection
@@ -129,7 +129,7 @@ fun ComparePhotosScreen(
                 text = "Selecciona para ${if (selectingForBefore) "Antes" else "Después"}",
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
 
             LazyVerticalGrid(
@@ -137,7 +137,7 @@ fun ComparePhotosScreen(
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 items(state.photos) { photo ->
                     PhotoSelectionCard(
@@ -149,7 +149,7 @@ fun ComparePhotosScreen(
                             } else {
                                 viewModel.onIntent(ComparePhotosIntent.OnAfterPhotoSelected(photo))
                             }
-                        }
+                        },
                     )
                 }
             }
@@ -172,56 +172,56 @@ fun ComparisonSlot(
             .fillMaxHeight()
             .clip(RoundedCornerShape(16.dp))
             .border(2.dp, borderColor, RoundedCornerShape(16.dp))
-            .clickable { onClick() }
+            .clickable { onClick() },
     ) {
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
+                .background(MaterialTheme.colorScheme.surface),
         ) {
             if (photo != null) {
                 AsyncImage(
                     model = photo.photoPath,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
                 )
                 Surface(
                     color = Color.Black.copy(alpha = 0.6f),
                     shape = RoundedCornerShape(bottomEnd = 12.dp),
-                    modifier = Modifier.align(Alignment.TopStart)
+                    modifier = Modifier.align(Alignment.TopStart),
                 ) {
                     Text(
                         text = photo.date.formatDdMmYy(),
                         color = Color.White,
                         style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     )
                 }
             } else {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Icon(
                         Icons.Rounded.Image,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(48.dp),
                     )
                     Text(
                         "Sin foto",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline
+                        color = MaterialTheme.colorScheme.outline,
                     )
                 }
             }
         }
         Surface(
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
                 text = label,
@@ -233,7 +233,7 @@ fun ComparisonSlot(
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
                 },
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )
         }
     }
@@ -243,18 +243,18 @@ fun ComparisonSlot(
 fun PhotoTypeSelector(
     selectedType: PhotoType?,
     onTypeChange: (PhotoType?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
             FilterChip(
                 selected = selectedType == null,
                 onClick = { onTypeChange(null) },
-                label = { Text("Todas") }
+                label = { Text("Todas") },
             )
         }
         items(PhotoType.entries) { type ->
@@ -266,9 +266,9 @@ fun PhotoTypeSelector(
                     Text(
                         type.name.lowercase().replaceFirstChar {
                             if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
-                        }
+                        },
                     )
-                }
+                },
             )
         }
     }
@@ -279,7 +279,7 @@ fun PhotoSelectionCard(
     photo: ProgressPhoto,
     isSelected: Boolean,
     onSelect: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
@@ -288,21 +288,21 @@ fun PhotoSelectionCard(
             .border(
                 width = if (isSelected) 3.dp else 0.dp,
                 color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
             )
-            .clickable { onSelect() }
+            .clickable { onSelect() },
     ) {
         AsyncImage(
             model = photo.photoPath,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
         )
         if (isSelected) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
             )
         }
     }

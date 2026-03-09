@@ -15,7 +15,7 @@ import kotlinx.datetime.LocalDate
 
 data class TimelineState(
     val photosByDate: Map<LocalDate, List<ProgressPhoto>> = emptyMap(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 )
 
 sealed class TimelineIntent {
@@ -27,7 +27,7 @@ sealed class TimelineEffect {
 }
 
 class TimelineViewModel(
-    photoRepository: PhotoRepository
+    photoRepository: PhotoRepository,
 ) : ViewModel() {
 
     private val _effect = MutableSharedFlow<TimelineEffect>()
@@ -37,12 +37,12 @@ class TimelineViewModel(
         .map { photos ->
             TimelineState(
                 photosByDate = photos.groupBy { it.date },
-                isLoading = false
+                isLoading = false,
             )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(FLOW_STOP_TIMEOUT),
-            initialValue = TimelineState(isLoading = true)
+            initialValue = TimelineState(isLoading = true),
         )
 
     fun onIntent(intent: TimelineIntent) {

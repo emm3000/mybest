@@ -18,7 +18,7 @@ data class ComparePhotosState(
     val selectedType: PhotoType? = null,
     val beforePhoto: ProgressPhoto? = null,
     val afterPhoto: ProgressPhoto? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 )
 
 sealed class ComparePhotosIntent {
@@ -29,7 +29,7 @@ sealed class ComparePhotosIntent {
 }
 
 class ComparePhotosViewModel(
-    private val photoRepository: PhotoRepository
+    private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
     private val _selectedType = MutableStateFlow<PhotoType?>(null)
@@ -47,19 +47,19 @@ class ComparePhotosViewModel(
         },
         _selectedType,
         _beforePhoto,
-        _afterPhoto
+        _afterPhoto,
     ) { photos, type, before, after ->
         ComparePhotosState(
             photos = photos,
             selectedType = type,
             beforePhoto = before,
             afterPhoto = after,
-            isLoading = false
+            isLoading = false,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ComparePhotosState(isLoading = true)
+        initialValue = ComparePhotosState(isLoading = true),
     )
 
     fun onIntent(intent: ComparePhotosIntent) {

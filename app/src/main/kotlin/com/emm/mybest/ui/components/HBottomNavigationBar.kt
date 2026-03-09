@@ -19,7 +19,7 @@ import com.emm.mybest.core.navigation.Screen
 sealed class HBottomNavItem(
     val screen: Screen,
     val icon: ImageVector,
-    val labelResId: Int
+    val labelResId: Int,
 ) {
     data object Home : HBottomNavItem(Screen.Home, Icons.Default.Home, R.string.nav_home)
     data object History : HBottomNavItem(Screen.History, Icons.Default.History, R.string.nav_history)
@@ -31,13 +31,13 @@ sealed class HBottomNavItem(
 fun HBottomNavigationBar(
     currentRoute: Screen?,
     onNavItemClick: (Screen) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val items = listOf(
         HBottomNavItem.Home,
         HBottomNavItem.History,
         HBottomNavItem.Insights,
-        HBottomNavItem.Timeline
+        HBottomNavItem.Timeline,
     )
 
     NavigationBar(
@@ -54,12 +54,12 @@ fun HBottomNavigationBar(
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = stringResource(id = item.labelResId)
+                        contentDescription = stringResource(id = item.labelResId),
                     )
                 },
                 label = {
                     Text(text = stringResource(id = item.labelResId))
-                }
+                },
             )
         }
     }

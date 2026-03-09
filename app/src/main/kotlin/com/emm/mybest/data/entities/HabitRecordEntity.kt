@@ -15,16 +15,16 @@ import java.util.UUID
 @Entity(
     tableName = "habit_records",
     indices = [
-        Index(value = ["habit_id", "date"], unique = true)
+        Index(value = ["habit_id", "date"], unique = true),
     ],
     foreignKeys = [
         ForeignKey(
             entity = HabitEntity::class,
             parentColumns = ["id"],
             childColumns = ["habit_id"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
 )
 data class HabitRecordEntity(
     @PrimaryKey
@@ -49,5 +49,5 @@ data class HabitRecordEntity(
     val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
 )

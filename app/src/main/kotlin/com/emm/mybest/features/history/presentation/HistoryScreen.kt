@@ -74,7 +74,7 @@ private const val DAY_CELL_ASPECT_RATIO = 0.8f
 fun HistoryScreen(
     viewModel: HistoryViewModel,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -82,7 +82,7 @@ fun HistoryScreen(
         modifier = modifier,
         state = state,
         onBackClick = onBackClick,
-        onIntent = viewModel::onIntent
+        onIntent = viewModel::onIntent,
     )
 }
 
@@ -92,14 +92,14 @@ fun HistoryContent(
     state: HistoryState,
     onBackClick: () -> Unit,
     onIntent: (HistoryIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val selectedDate = state.selectedDate
     if (selectedDate != null) {
         ModalBottomSheet(
             onDismissRequest = { onIntent(HistoryIntent.OnDateDismiss) },
             containerColor = MaterialTheme.colorScheme.surface,
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         ) {
             DayDetailContent(
                 date = selectedDate,
@@ -107,7 +107,7 @@ fun HistoryContent(
                 onClose = { onIntent(HistoryIntent.OnDateDismiss) },
                 onDeleteWeight = { onIntent(HistoryIntent.OnDeleteWeight(selectedDate)) },
                 onDeleteHabit = { onIntent(HistoryIntent.OnDeleteHabit(selectedDate)) },
-                onDeletePhoto = { onIntent(HistoryIntent.OnDeletePhoto(it)) }
+                onDeletePhoto = { onIntent(HistoryIntent.OnDeletePhoto(it)) },
             )
         }
     }
@@ -121,20 +121,20 @@ fun HistoryContent(
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             MonthSelector(
                 currentMonth = state.selectedMonth,
-                onMonthChange = { onIntent(HistoryIntent.OnMonthChange(it)) }
+                onMonthChange = { onIntent(HistoryIntent.OnMonthChange(it)) },
             )
 
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -144,7 +144,7 @@ fun HistoryContent(
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -152,7 +152,7 @@ fun HistoryContent(
             CalendarGrid(
                 yearMonth = state.selectedMonth,
                 onDateClick = { onIntent(HistoryIntent.OnDateSelected(it)) },
-                dayData = state.monthlyData
+                dayData = state.monthlyData,
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -167,12 +167,12 @@ fun HistoryContent(
 fun MonthSelector(
     currentMonth: YearMonthValue,
     onMonthChange: (YearMonthValue) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
             Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = "Mes anterior")
@@ -181,7 +181,7 @@ fun MonthSelector(
         Text(
             text = currentMonth.formatEsMonthYear(),
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
         IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
@@ -195,7 +195,7 @@ fun CalendarGrid(
     yearMonth: YearMonthValue,
     dayData: Map<LocalDate, DaySummary>,
     onDateClick: (LocalDate) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val daysInMonth = yearMonth.lengthOfMonth()
     val firstDayOfMonth = yearMonth.atDay(1).dayOfWeek.ordinal + 1
@@ -207,7 +207,7 @@ fun CalendarGrid(
         modifier = modifier,
         columns = GridCells.Fixed(CALENDAR_COLUMNS),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(count = totalCells) { index ->
             if (index < startOffset) {
@@ -220,7 +220,7 @@ fun CalendarGrid(
                 DayCell(
                     date = date,
                     summary = summary,
-                    onClick = { onDateClick(date) }
+                    onClick = { onDateClick(date) },
                 )
             }
         }
@@ -243,28 +243,28 @@ fun DayCell(
             .background(
                 if (isToday) {
                     MaterialTheme.colorScheme.primaryContainer.copy(
-                        alpha = 0.3f
+                        alpha = 0.3f,
                     )
                 } else {
                     MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                }
+                },
             )
             .clickable(onClick = onClick)
             .padding(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = date.day.toString(),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-            color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
-            modifier = Modifier.height(6.dp)
+            modifier = Modifier.height(6.dp),
         ) {
             if (summary?.hasWeight == true) {
                 Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
@@ -288,7 +288,7 @@ fun DayDetailContent(
     onDeleteWeight: () -> Unit,
     onDeleteHabit: () -> Unit,
     onDeletePhoto: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val isToday = date == currentDate()
     var photoToDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
@@ -310,7 +310,7 @@ fun DayDetailContent(
                 TextButton(onClick = { photoToDelete = null }) {
                     Text("Cancelar")
                 }
-            }
+            },
         )
     }
 
@@ -319,17 +319,17 @@ fun DayDetailContent(
             .fillMaxWidth()
             .padding(24.dp)
             .padding(bottom = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = date.formatEsWeekdayDayMonth(),
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
             IconButton(onClick = onClose) {
                 Icon(Icons.Rounded.Close, contentDescription = "Cerrar")
@@ -345,7 +345,7 @@ fun DayDetailContent(
                     color = MaterialTheme.colorScheme.primary,
                     title = "Peso: ${weight.weight} kg",
                     subtitle = weight.note,
-                    onDelete = if (isToday) onDeleteWeight else null
+                    onDelete = if (isToday) onDeleteWeight else null,
                 )
             }
 
@@ -376,18 +376,18 @@ fun DetailItem(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     onDelete: (() -> Unit)? = null,
-    content: (@Composable () -> Unit)? = null
+    content: (@Composable () -> Unit)? = null,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
                 .background(color.copy(alpha = 0.1f)),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Icon(icon, contentDescription = null, tint = color)
         }
@@ -398,7 +398,7 @@ fun DetailItem(
                 Text(
                     it,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             content?.invoke()
@@ -409,7 +409,7 @@ fun DetailItem(
                 Icon(
                     Icons.Rounded.Delete,
                     contentDescription = "Eliminar",
-                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
                 )
             }
         }
@@ -419,18 +419,18 @@ fun DetailItem(
 @Composable
 fun HChip(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.secondaryContainer,
-        shape = CircleShape
+        shape = CircleShape,
     ) {
         Text(
             text = text,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
         )
     }
 }
@@ -439,11 +439,11 @@ fun HChip(
 fun LegendItem(
     color: Color,
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
         Spacer(modifier = Modifier.width(8.dp))
@@ -464,26 +464,26 @@ private fun HistoryScreenPreview() {
             habit = DailyHabitSummary(date = today, ateHealthy = true, didExercise = true, notes = "Buen día"),
             photos = listOf(
                 ProgressPhoto(id = "p1", date = today, type = PhotoType.BODY, photoPath = "", createdAt = 0L),
-                ProgressPhoto(id = "p2", date = today, type = PhotoType.ABDOMEN, photoPath = "", createdAt = 0L)
-            )
+                ProgressPhoto(id = "p2", date = today, type = PhotoType.ABDOMEN, photoPath = "", createdAt = 0L),
+            ),
         ),
         today.minusDays(1) to DaySummary(
             date = today.minusDays(1),
             weight = WeightEntry(id = "w2", date = today.minusDays(1), weight = 76.0f),
-            habit = DailyHabitSummary(date = today.minusDays(1), ateHealthy = false, didExercise = true, notes = null)
-        )
+            habit = DailyHabitSummary(date = today.minusDays(1), ateHealthy = false, didExercise = true, notes = null),
+        ),
     )
 
     val state = HistoryState(
         selectedMonth = currentMonth,
-        monthlyData = sampleMonthlyData
+        monthlyData = sampleMonthlyData,
     )
 
     MyBestTheme {
         HistoryContent(
             state = state,
             onBackClick = {},
-            onIntent = {}
+            onIntent = {},
         )
     }
 }

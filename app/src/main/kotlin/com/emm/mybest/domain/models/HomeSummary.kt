@@ -4,5 +4,5 @@ data class HomeSummary(
     val dailyHabits: List<HabitWithRecord>,
     val latestWeight: Float?,
     val totalWeightLost: Float,
-    val totalPhotos: Int
+    val totalPhotos: Int,
 )

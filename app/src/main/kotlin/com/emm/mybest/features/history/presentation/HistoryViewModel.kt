@@ -21,7 +21,7 @@ data class DaySummary(
     val date: LocalDate,
     val weight: WeightEntry? = null,
     val habit: DailyHabitSummary? = null,
-    val photos: List<ProgressPhoto> = emptyList()
+    val photos: List<ProgressPhoto> = emptyList(),
 ) {
     val hasWeight: Boolean get() = weight != null
     val hasHabit: Boolean get() = habit != null
@@ -33,7 +33,7 @@ data class HistoryState(
     val selectedMonth: YearMonthValue = YearMonthValue.now(),
     val monthlyData: Map<LocalDate, DaySummary> = emptyMap(),
     val selectedDate: LocalDate? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 )
 
 sealed class HistoryIntent {
@@ -48,7 +48,7 @@ sealed class HistoryIntent {
 class HistoryViewModel(
     private val weightRepository: WeightRepository,
     private val dailyHabitRepository: DailyHabitRepository,
-    private val photoRepository: PhotoRepository
+    private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
     private val _selectedMonth = MutableStateFlow(YearMonthValue.now())
@@ -59,18 +59,18 @@ class HistoryViewModel(
         _selectedDate,
         weightRepository.getWeightProgress(),
         dailyHabitRepository.getAllDailyHabits(),
-        photoRepository.getAllPhotos()
+        photoRepository.getAllPhotos(),
     ) { month, selectedDate, weights, habits, photos ->
         HistoryState(
             selectedMonth = month,
             selectedDate = selectedDate,
             monthlyData = transformToDaySummary(weights, habits, photos),
-            isLoading = false
+            isLoading = false,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = HistoryState(isLoading = true)
+        initialValue = HistoryState(isLoading = true),
     )
 
     fun onIntent(intent: HistoryIntent) {
@@ -93,7 +93,7 @@ class HistoryViewModel(
     private fun transformToDaySummary(
         weights: List<WeightEntry>,
         habits: List<DailyHabitSummary>,
-        photos: List<ProgressPhoto>
+        photos: List<ProgressPhoto>,
     ): Map<LocalDate, DaySummary> {
         val days = mutableMapOf<LocalDate, DaySummary>()
 

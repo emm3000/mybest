@@ -21,10 +21,10 @@ import com.emm.mybest.data.entities.ProgressPhotoEntity
         DailyWeightEntity::class,
         ProgressPhotoEntity::class,
         HabitEntity::class,
-        HabitRecordEntity::class
+        HabitRecordEntity::class,
     ],
     version = 2,
-    exportSchema = false
+    exportSchema = false,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {

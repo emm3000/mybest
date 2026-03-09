@@ -10,8 +10,8 @@ import java.util.UUID
 @Entity(
     tableName = "daily_weight",
     indices = [
-        Index(value = ["date"], unique = true)
-    ]
+        Index(value = ["date"], unique = true),
+    ],
 )
 data class DailyWeightEntity(
 
@@ -34,5 +34,5 @@ data class DailyWeightEntity(
     val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
 )

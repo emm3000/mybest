@@ -8,5 +8,5 @@ data class ProgressPhoto(
     val date: LocalDate,
     val type: PhotoType,
     val photoPath: String,
-    val createdAt: Long
+    val createdAt: Long,
 )

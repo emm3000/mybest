@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.combine
 
 class GetInsightsUseCase(
     private val weightRepository: WeightRepository,
-    private val dailyHabitRepository: DailyHabitRepository
+    private val dailyHabitRepository: DailyHabitRepository,
 ) {
     operator fun invoke(): Flow<InsightsData> {
         return combine(
             weightRepository.getWeightProgress(),
-            dailyHabitRepository.getAllDailyHabits()
+            dailyHabitRepository.getAllDailyHabits(),
         ) { weights, habits ->
             val initialWeight = weights.firstOrNull()?.weight ?: 0f
             val currentWeight = weights.lastOrNull()?.weight ?: 0f
@@ -29,7 +29,7 @@ class GetInsightsUseCase(
                 currentWeight = currentWeight,
                 initialWeight = initialWeight,
                 exerciseDays = habits.count { it.didExercise },
-                healthyEatingDays = habits.count { it.ateHealthy }
+                healthyEatingDays = habits.count { it.ateHealthy },
             )
         }
     }

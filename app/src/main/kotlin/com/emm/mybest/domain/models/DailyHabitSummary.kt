@@ -6,5 +6,5 @@ data class DailyHabitSummary(
     val date: LocalDate,
     val ateHealthy: Boolean,
     val didExercise: Boolean,
-    val notes: String?
+    val notes: String?,
 )

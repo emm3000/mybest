@@ -12,16 +12,16 @@ import java.util.UUID
     tableName = "progress_photo",
     indices = [
         Index(value = ["habit_record_id"]),
-        Index(value = ["type"])
+        Index(value = ["type"]),
     ],
     foreignKeys = [
         ForeignKey(
             entity = HabitRecordEntity::class,
             parentColumns = ["id"],
             childColumns = ["habit_record_id"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
 )
 data class ProgressPhotoEntity(
 
@@ -44,5 +44,5 @@ data class ProgressPhotoEntity(
     val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
 )

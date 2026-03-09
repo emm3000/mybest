@@ -53,7 +53,7 @@ fun InsightsScreen(
     viewModel: InsightsViewModel,
     onBackClick: () -> Unit,
     onCompareClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -83,9 +83,9 @@ fun InsightsScreen(
                     IconButton(onClick = { viewModel.onIntent(InsightsIntent.OnCompareClick) }) {
                         Icon(Icons.Rounded.Compare, contentDescription = "Comparar fotos")
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         if (state.isLoading) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -98,7 +98,7 @@ fun InsightsScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 WeightSummaryCards(state)
 
@@ -108,7 +108,7 @@ fun InsightsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(250.dp)
-                            .padding(top = 16.dp)
+                            .padding(top = 16.dp),
                     )
                 }
 
@@ -124,19 +124,19 @@ fun InsightsScreen(
 private fun InsightsSection(
     title: String,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Column(modifier = modifier) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 12.dp),
         )
         Surface(
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Box(modifier = Modifier.padding(16.dp)) {
                 content()
@@ -148,25 +148,25 @@ private fun InsightsSection(
 @Composable
 private fun WeightSummaryCards(
     state: InsightsState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         StatCard(
             modifier = Modifier.weight(1f),
             title = "Actual",
             value = "${state.currentWeight}kg",
             icon = Icons.Rounded.MonitorWeight,
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
         )
         StatCard(
             modifier = Modifier.weight(1f),
             title = "Pérdida",
             value = String.format(java.util.Locale.getDefault(), "%.1fkg", state.totalWeightLost),
             icon = if (state.totalWeightLost >= 0) Icons.AutoMirrored.Rounded.TrendingDown else Icons.Rounded.North,
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
         )
     }
 }
@@ -177,12 +177,12 @@ private fun StatCard(
     value: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     containerColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = containerColor)
+        colors = CardDefaults.cardColors(containerColor = containerColor),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp))
@@ -196,14 +196,14 @@ private fun StatCard(
 @Composable
 private fun WeightChart(
     weights: List<WeightEntry>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (weights.size < 2) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
             Text(
                 "Registra al menos 2 pesos para ver el gráfico",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline
+                color = MaterialTheme.colorScheme.outline,
             )
         }
         return
@@ -243,14 +243,14 @@ private fun WeightChart(
             brush = Brush.verticalGradient(
                 colors = listOf(primaryColor.copy(alpha = 0.3f), Color.Transparent),
                 startY = 0f,
-                endY = height
-            )
+                endY = height,
+            ),
         )
 
         drawPath(
             path = path,
             color = primaryColor,
-            style = Stroke(width = 4.dp.toPx())
+            style = Stroke(width = 4.dp.toPx()),
         )
 
         // Draw points
@@ -258,12 +258,12 @@ private fun WeightChart(
             drawCircle(
                 color = primaryColor,
                 radius = 4.dp.toPx(),
-                center = point
+                center = point,
             )
             drawCircle(
                 color = Color.White,
                 radius = 2.dp.toPx(),
-                center = point
+                center = point,
             )
         }
     }
@@ -272,11 +272,11 @@ private fun WeightChart(
 @Composable
 private fun HabitStats(
     state: InsightsState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(80.dp), contentAlignment = Alignment.Center) {
@@ -285,12 +285,12 @@ private fun HabitStats(
                     modifier = Modifier.fillMaxSize(),
                     strokeWidth = 8.dp,
                     color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+                    trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                 )
                 Text(
                     text = "${(state.habitConsistency * 100).toInt()}%",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
             Spacer(Modifier.width(20.dp))
@@ -299,7 +299,7 @@ private fun HabitStats(
                 Text(
                     "Basado en todos tus registros",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
+                    color = MaterialTheme.colorScheme.outline,
                 )
             }
         }
@@ -307,12 +307,12 @@ private fun HabitStats(
         HorizontalStatRow(
             label = "Días de Ejercicio",
             count = state.exerciseDays,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.secondary,
         )
         HorizontalStatRow(
             label = "Comida Saludable",
             count = state.healthyEatingDays,
-            color = MaterialTheme.colorScheme.tertiary
+            color = MaterialTheme.colorScheme.tertiary,
         )
     }
 }
@@ -322,25 +322,25 @@ private fun HorizontalStatRow(
     label: String,
     count: Int,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(label, style = MaterialTheme.typography.bodyMedium)
         Surface(
             color = color.copy(alpha = 0.1f),
             shape = androidx.compose.foundation.shape.CircleShape,
-            modifier = Modifier.padding(start = 8.dp)
+            modifier = Modifier.padding(start = 8.dp),
         ) {
             Text(
                 text = "$count días",
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 style = MaterialTheme.typography.labelLarge,
                 color = color,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         }
     }

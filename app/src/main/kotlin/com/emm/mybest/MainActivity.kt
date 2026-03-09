@@ -45,18 +45,18 @@ class MainActivity : ComponentActivity() {
                     navigationBarStyle = SystemBarStyle.auto(
                         DefaultLightScrim,
                         DefaultDarkScrim,
-                    ) { darkTheme }
+                    ) { darkTheme },
                 )
                 onDispose {}
             }
 
             MyBestTheme(
                 darkTheme = darkTheme,
-                dynamicColor = state.useDynamicColor
+                dynamicColor = state.useDynamicColor,
             ) {
                 AppNavigation(
                     intentAction = intentAction,
-                    onConsumeAction = { intentAction = null }
+                    onConsumeAction = { intentAction = null },
                 )
             }
         }
