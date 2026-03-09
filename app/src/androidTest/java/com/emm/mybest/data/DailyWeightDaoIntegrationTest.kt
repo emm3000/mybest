@@ -11,6 +11,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -61,5 +62,19 @@ class DailyWeightDaoIntegrationTest {
 
         dao.deleteByDate(day1)
         assertNull(dao.getByDate(day1))
+    }
+
+    @Test
+    fun delete_by_non_existing_date_keeps_data_unchanged() = runBlocking {
+        val existing = LocalDate(2026, 3, 11)
+        val missing = LocalDate(2026, 3, 12)
+        dao.upsert(DailyWeightEntity(id = "w1", date = existing, weight = 69.9f))
+
+        dao.deleteByDate(missing)
+
+        val all = dao.observeAllOrdered().first()
+        assertEquals(1, all.size)
+        assertEquals(existing, all.first().date)
+        assertTrue(all.first().weight > 0f)
     }
 }

@@ -11,6 +11,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -60,5 +61,31 @@ class DailyHabitDaoIntegrationTest {
         dao.deleteByDate(day)
 
         assertNull(dao.getByDate(day))
+    }
+
+    @Test
+    fun observeByDate_returns_null_when_day_has_no_entry() = runBlocking {
+        val missingDay = LocalDate(2026, 3, 20)
+
+        val result = dao.observeByDate(missingDay).first()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun upsert_replaces_existing_row_for_same_date() = runBlocking {
+        val day = LocalDate(2026, 3, 21)
+        dao.upsert(DailyHabitEntity(date = day, ateHealthy = false, didExercise = false, notes = "a"))
+        dao.upsert(DailyHabitEntity(date = day, ateHealthy = true, didExercise = true, notes = "b"))
+
+        val byDate = dao.getByDate(day)
+        val all = dao.observeAll().first()
+
+        assertNotNull(byDate)
+        assertEquals(true, byDate?.ateHealthy)
+        assertEquals(true, byDate?.didExercise)
+        assertEquals("b", byDate?.notes)
+        assertEquals(1, all.count { it.date == day })
+        assertTrue(all.isNotEmpty())
     }
 }

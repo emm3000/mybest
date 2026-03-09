@@ -11,6 +11,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -83,5 +84,18 @@ class ProgressPhotoDaoIntegrationTest {
         dao.deleteById("p4")
 
         assertNull(dao.getFirstByType(com.emm.mybest.data.entities.PhotoType.ABDOMEN))
+    }
+
+    @Test
+    fun empty_state_queries_return_empty_or_null() = runBlocking {
+        val all = dao.observeAll().first()
+        val byType = dao.observeByType(com.emm.mybest.data.entities.PhotoType.FACE).first()
+        val first = dao.getFirstByType(com.emm.mybest.data.entities.PhotoType.FACE)
+        val last = dao.getLastByType(com.emm.mybest.data.entities.PhotoType.FACE)
+
+        assertTrue(all.isEmpty())
+        assertTrue(byType.isEmpty())
+        assertNull(first)
+        assertNull(last)
     }
 }

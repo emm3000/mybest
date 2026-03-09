@@ -6,12 +6,14 @@ import com.emm.mybest.domain.models.Habit
 import com.emm.mybest.domain.models.HabitRecord
 import com.emm.mybest.domain.models.HabitType
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
@@ -90,5 +92,70 @@ class HabitRepositoryRoomIntegrationTest {
 
         repository.deleteHabit(updated)
         assertEquals(0, repository.getAllHabits().first().size)
+    }
+
+    @Test
+    fun insert_record_twice_for_same_habit_and_date_replaces_previous_record() = runBlocking {
+        val date = LocalDate(2026, 3, 12)
+        val habit = Habit(
+            id = "h3",
+            name = "Agua",
+            icon = "water",
+            color = 3,
+            category = "Salud",
+            type = HabitType.METRIC,
+            goalValue = 2f,
+            unit = "L",
+            isEnabled = true,
+            scheduledDays = setOf(DayOfWeek.WEDNESDAY),
+        )
+        repository.insertHabit(habit)
+
+        repository.insertRecord(
+            HabitRecord(
+                id = "r-old",
+                habitId = "h3",
+                date = date,
+                value = 1f,
+                isCompleted = false,
+                notes = "old",
+            ),
+        )
+        repository.insertRecord(
+            HabitRecord(
+                id = "r-new",
+                habitId = "h3",
+                date = date,
+                value = 2f,
+                isCompleted = true,
+                notes = "new",
+            ),
+        )
+
+        val row = repository.getHabitsWithRecordsForDate(date).first().firstOrNull()
+        assertNotNull(row)
+        assertEquals("r-new", row?.record?.id)
+        assertEquals(2f, row?.record?.value)
+        assertEquals(true, row?.record?.isCompleted)
+    }
+
+    @Test
+    fun querying_records_for_date_without_records_returns_habit_with_null_record() = runBlocking {
+        val date = LocalDate(2026, 3, 13)
+        val habit = Habit(
+            id = "h4",
+            name = "Respirar",
+            icon = "air",
+            color = 4,
+            category = "Wellness",
+            type = HabitType.BOOLEAN,
+            scheduledDays = setOf(DayOfWeek.THURSDAY),
+        )
+        repository.insertHabit(habit)
+
+        val row = repository.getHabitsWithRecordsForDate(date).first().firstOrNull()
+        assertNotNull(row)
+        assertEquals("h4", row?.habit?.id)
+        assertNull(row?.record)
     }
 }
