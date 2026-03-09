@@ -48,6 +48,19 @@ class AddPhotoViewModelTest {
     }
 
     @Test
+    fun `OnTypeSelected and OnRemovePhoto ignore invalid indexes`() {
+        val viewModel = AddPhotoViewModel(repository)
+        viewModel.onIntent(AddPhotoIntent.OnPhotosSelected(listOf("a.jpg")))
+
+        viewModel.onIntent(AddPhotoIntent.OnTypeSelected(8, PhotoType.BODY))
+        viewModel.onIntent(AddPhotoIntent.OnRemovePhoto(7))
+
+        assertEquals(1, viewModel.state.value.selectedPhotos.size)
+        assertEquals("a.jpg", viewModel.state.value.selectedPhotos.first().uri)
+        assertEquals(PhotoType.FACE, viewModel.state.value.selectedPhotos.first().type)
+    }
+
+    @Test
     fun `OnSaveClick emits error when there are no selected photos`() = runTest {
         val viewModel = AddPhotoViewModel(repository)
 
@@ -81,6 +94,22 @@ class AddPhotoViewModelTest {
         assertEquals(1, captured.captured.size)
         assertEquals("a.jpg", captured.captured.first().photoPath)
         assertEquals(PhotoType.BODY, captured.captured.first().type)
+        assertEquals(false, viewModel.state.value.isLoading)
+    }
+
+    @Test
+    fun `OnSaveClick error from repository emits ShowError`() = runTest {
+        coEvery { repository.savePhotos(any()) } throws IllegalStateException("save fail")
+        val viewModel = AddPhotoViewModel(repository)
+        viewModel.onIntent(AddPhotoIntent.OnPhotosSelected(listOf("a.jpg")))
+
+        viewModel.effect.test {
+            viewModel.onIntent(AddPhotoIntent.OnSaveClick)
+            advanceUntilIdle()
+
+            assertEquals(AddPhotoEffect.ShowError("Error al guardar: save fail"), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
         assertEquals(false, viewModel.state.value.isLoading)
     }
 }

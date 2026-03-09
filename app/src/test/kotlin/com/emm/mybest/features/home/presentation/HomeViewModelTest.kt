@@ -15,6 +15,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DayOfWeek
 import org.junit.Assert.assertEquals
@@ -83,6 +84,28 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun `navigation intents emit expected routes`() = runTest {
+        every { getHomeSummaryUseCase.invoke() } returns flowOf(
+            HomeSummary(emptyList(), null, 0f, 0),
+        )
+        val viewModel = HomeViewModel(getHomeSummaryUseCase, toggleHabitUseCase)
+
+        viewModel.effect.test {
+            viewModel.onIntent(HomeIntent.OnAddHabitClick)
+            assertEquals(HomeEffect.Navigate(Screen.AddHabit), awaitItem())
+            viewModel.onIntent(HomeIntent.OnAddPhotoClick)
+            assertEquals(HomeEffect.Navigate(Screen.AddPhoto), awaitItem())
+            viewModel.onIntent(HomeIntent.OnViewHistoryClick)
+            assertEquals(HomeEffect.Navigate(Screen.History), awaitItem())
+            viewModel.onIntent(HomeIntent.OnViewInsightsClick)
+            assertEquals(HomeEffect.Navigate(Screen.Insights), awaitItem())
+            viewModel.onIntent(HomeIntent.OnViewTimelineClick)
+            assertEquals(HomeEffect.Navigate(Screen.Timeline), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `ToggleHabit emits error effect when use case throws`() = runTest {
         val habitWithRecord = HabitWithRecord(
             habit = Habit(
@@ -108,5 +131,31 @@ class HomeViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
         coVerify(exactly = 1) { toggleHabitUseCase.invoke(any(), any()) }
+    }
+
+    @Test
+    fun `ToggleHabit success delegates without error effect`() = runTest {
+        val habitWithRecord = HabitWithRecord(
+            habit = Habit(
+                id = "h-2",
+                name = "Leer",
+                icon = "MenuBook",
+                color = 2,
+                category = "Mind",
+                type = HabitType.BOOLEAN,
+                scheduledDays = setOf(DayOfWeek.TUESDAY),
+            ),
+            record = null,
+        )
+        every { getHomeSummaryUseCase.invoke() } returns flowOf(
+            HomeSummary(emptyList(), null, 0f, 0),
+        )
+        coEvery { toggleHabitUseCase.invoke(any(), any()) } returns Unit
+        val viewModel = HomeViewModel(getHomeSummaryUseCase, toggleHabitUseCase)
+
+        viewModel.onIntent(HomeIntent.ToggleHabit(habitWithRecord))
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { toggleHabitUseCase.invoke(habitWithRecord, any()) }
     }
 }

@@ -11,7 +11,44 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  quality_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v5
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Run unit tests, detekt and JaCoCo report
+        run: ./gradlew testDebugUnitTest detekt jacocoTestReport --rerun-tasks
+
+      - name: Validate minimum coverage (70%)
+        run: |
+          MATCH=$(grep -o 'counter type="LINE" missed="[0-9]*" covered="[0-9]*"' app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml | tail -n 1)
+          MISSED=$(echo "$MATCH" | sed -E 's/.*missed="([0-9]+)".*/\1/')
+          COVERED=$(echo "$MATCH" | sed -E 's/.*covered="([0-9]+)".*/\1/')
+          TOTAL=$((MISSED+COVERED))
+          PCT=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN {printf "%.2f", (c/t)*100}')
+          echo "Coverage: ${PCT}% (${COVERED}/${TOTAL})"
+          awk -v pct="$PCT" 'BEGIN { exit (pct >= 70.0) ? 0 : 1 }'
+
+      - name: Upload JaCoCo reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-reports
+          path: |
+            app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+            app/build/reports/jacoco/jacocoTestReport/html
+
   upload_dev_apk:
+    needs: quality_checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code

@@ -60,4 +60,23 @@ class AddWeightViewModelTest {
         coVerify(exactly = 1) { repository.saveWeight(76.8f, "ok") }
         assertEquals(false, viewModel.state.value.isLoading)
     }
+
+    @Test
+    fun `OnSaveClick sends null note when blank and handles repository error`() = runTest {
+        coEvery { repository.saveWeight(any(), any()) } throws IllegalStateException("write fail")
+        val viewModel = AddWeightViewModel(repository)
+        viewModel.onIntent(AddWeightIntent.OnWeightChange("70.0"))
+        viewModel.onIntent(AddWeightIntent.OnNoteChange("   "))
+
+        viewModel.effect.test {
+            viewModel.onIntent(AddWeightIntent.OnSaveClick)
+            advanceUntilIdle()
+
+            assertEquals(AddWeightEffect.ShowError("Error al guardar: write fail"), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        coVerify(exactly = 1) { repository.saveWeight(70.0f, null) }
+        assertEquals(false, viewModel.state.value.isLoading)
+    }
 }
