@@ -1,5 +1,7 @@
 package com.emm.mybest.features.home.presentation
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
@@ -17,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HabitCard
+
+private const val HOME_PRIMARY_ACTIONS_SPACING = 12
 
 internal fun LazyListScope.homeHabitsSection(
     state: HomeState,
@@ -57,6 +61,35 @@ internal fun LazyListScope.homeHabitsSection(
     }
 }
 
+internal fun LazyListScope.homePrimaryActionsSection(
+    state: HomeState,
+    onIntent: (HomeIntent) -> Unit,
+) {
+    item {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(HOME_PRIMARY_ACTIONS_SPACING.dp),
+        ) {
+            Text(
+                text = "Acciones de hoy",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+            WeightQuickAction(
+                state = state,
+                onClick = { onIntent(HomeIntent.OnAddWeightClick) },
+            )
+            ProgressPhotoQuickAction(
+                state = state,
+                onClick = { onIntent(HomeIntent.OnAddPhotoClick) },
+            )
+            NewHabitQuickAction(
+                state = state,
+                onClick = { onIntent(HomeIntent.OnAddHabitClick) },
+            )
+        }
+    }
+}
+
 @Composable
 internal fun WeightQuickAction(
     state: HomeState,
@@ -79,13 +112,13 @@ internal fun NewHabitQuickAction(
     onClick: () -> Unit,
 ) {
     val subtitle = if (state.dailyHabits.isEmpty()) {
-        "Define tu primer hábito diario"
+        "Configura tu primer hábito para los próximos días"
     } else {
-        "Añade otro hábito a tu seguimiento"
+        "Crea otro hábito para tu rutina semanal"
     }
 
     QuickActionCard(
-        title = "Crear Hábito",
+        title = "Crear un hábito",
         subtitle = subtitle,
         icon = Icons.Rounded.CheckCircle,
         containerColor = MaterialTheme.colorScheme.secondaryContainer,

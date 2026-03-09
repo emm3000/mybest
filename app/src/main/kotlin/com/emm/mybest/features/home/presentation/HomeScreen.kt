@@ -90,7 +90,7 @@ internal fun HomeScreenContent(
                 .padding(paddingValues)
                 .fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
                 HomeHeader(modifier = Modifier.fillMaxWidth())
@@ -98,26 +98,7 @@ internal fun HomeScreenContent(
 
             homeHabitsSection(state = state, onIntent = onIntent)
 
-            item {
-                WeightQuickAction(
-                    state = state,
-                    onClick = { onIntent(HomeIntent.OnAddWeightClick) },
-                )
-            }
-
-            item {
-                NewHabitQuickAction(
-                    state = state,
-                    onClick = { onIntent(HomeIntent.OnAddHabitClick) },
-                )
-            }
-
-            item {
-                ProgressPhotoQuickAction(
-                    state = state,
-                    onClick = { onIntent(HomeIntent.OnAddPhotoClick) },
-                )
-            }
+            homePrimaryActionsSection(state = state, onIntent = onIntent)
 
             item {
                 SummaryCard(

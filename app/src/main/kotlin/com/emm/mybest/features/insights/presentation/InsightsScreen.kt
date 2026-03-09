@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.Compare
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,7 +29,6 @@ import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HAlert
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
-import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
 
@@ -58,19 +56,15 @@ fun InsightsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            HTopBar(
-                title = "Estadísticas",
-                actions = {
-                    HIconButton(
-                        icon = Icons.Rounded.Compare,
-                        contentDescription = "Comparar fotos",
-                        enabled = state.canComparePhotos,
-                        onClick = { viewModel.onIntent(InsightsIntent.OnCompareClick) },
-                    )
-                },
-            )
+            HTopBar(title = "Estadísticas")
         },
-    ) { padding -> InsightsBody(state = state, padding = padding) }
+    ) { padding ->
+        InsightsBody(
+            state = state,
+            padding = padding,
+            onCompareClick = { viewModel.onIntent(InsightsIntent.OnCompareClick) },
+        )
+    }
 }
 
 @Composable
@@ -94,6 +88,7 @@ private fun HandleInsightsEffects(
 private fun InsightsBody(
     state: InsightsState,
     padding: androidx.compose.foundation.layout.PaddingValues,
+    onCompareClick: () -> Unit,
 ) {
     val contentModifier = androidx.compose.ui.Modifier
         .padding(padding)
@@ -118,13 +113,18 @@ private fun InsightsBody(
                 modifier = contentModifier,
             )
         }
-        else -> InsightsDataContent(state = state, modifier = contentModifier)
+        else -> InsightsDataContent(
+            state = state,
+            onCompareClick = onCompareClick,
+            modifier = contentModifier,
+        )
     }
 }
 
 @Composable
 private fun InsightsDataContent(
     state: InsightsState,
+    onCompareClick: () -> Unit,
     modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
 ) {
     Column(
@@ -133,11 +133,14 @@ private fun InsightsDataContent(
     ) {
         WeightInsightsSection(state = state)
 
+        InsightsComparePhotosSection(
+            state = state,
+            onCompareClick = onCompareClick,
+        )
+
         InsightsSection(title = "Consistencia de Hábitos") {
             HabitStats(state)
         }
-
-        ComparePhotosAvailabilityNote(photoCount = state.photoCount)
     }
 }
 

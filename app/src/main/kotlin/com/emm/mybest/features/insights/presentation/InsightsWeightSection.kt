@@ -29,9 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.domain.models.WeightEntry
-import com.emm.mybest.ui.components.CardVariant
-import com.emm.mybest.ui.components.HAlert
-import com.emm.mybest.ui.components.HCard
 import java.util.Locale
 import kotlin.math.abs
 
@@ -74,22 +71,6 @@ internal fun WeightInsightsSection(
             }
         }
     }
-}
-
-@Composable
-internal fun ComparePhotosAvailabilityNote(
-    photoCount: Int,
-    modifier: Modifier = Modifier,
-) {
-    if (photoCount >= MIN_COMPARE_PHOTOS) {
-        return
-    }
-
-    HAlert(
-        title = "Comparación no disponible",
-        description = "Necesitas al menos 2 fotos de progreso para habilitar el comparador.",
-        modifier = modifier,
-    )
 }
 
 @Composable
@@ -137,9 +118,9 @@ private fun StatCard(
     containerColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    HCard(
+    com.emm.mybest.ui.components.HCard(
         modifier = modifier,
-        variant = CardVariant.Filled,
+        variant = com.emm.mybest.ui.components.CardVariant.Filled,
         cornerRadius = WEIGHT_SECTION_CORNER.dp,
         containerColor = containerColor,
     ) {
