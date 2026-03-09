@@ -87,23 +87,41 @@ jobs:
             app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
             app/build/reports/jacoco/jacocoTestReport/html
 
+      - name: Capture coverage summary
+        if: always()
+        id: coverage_summary
+        run: |
+          REPORT_PATH="app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+          COVERAGE=""
+          if [ -f "$REPORT_PATH" ]; then
+            if command -v xmllint >/dev/null 2>&1; then
+              MISSED=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@missed)' "$REPORT_PATH")
+              COVERED=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@covered)' "$REPORT_PATH")
+            else
+              MATCH=$(grep -o 'counter type="LINE" missed="[0-9]*" covered="[0-9]*"' "$REPORT_PATH" | tail -n 1)
+              MISSED=$(echo "$MATCH" | sed -E 's/.*missed="([0-9]+)".*/\1/')
+              COVERED=$(echo "$MATCH" | sed -E 's/.*covered="([0-9]+)".*/\1/')
+            fi
+            if [ -n "$MISSED" ] && [ -n "$COVERED" ]; then
+              TOTAL=$((MISSED + COVERED))
+              COVERAGE=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN { if (t == 0) print "0.00%"; else printf "%.2f%% (%d/%d)", (c/t)*100, c, t }')
+            fi
+          fi
+          echo "coverage=${COVERAGE}" >> "$GITHUB_OUTPUT"
+
       - name: Notify Telegram (quality checks)
         if: always()
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          if [ -z "${TELEGRAM_BOT_TOKEN}" ] || [ -z "${TELEGRAM_CHAT_ID}" ]; then
-            echo "Telegram secrets are not configured. Skipping notification."
-            exit 0
-          fi
-          MESSAGE="MyBest CI - quality_checks: ${{ job.status }}
-          Branch: ${{ github.ref_name }}
-          Commit: ${{ github.sha }}
-          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${MESSAGE}"
+        uses: ./.github/actions/telegram-notify
+        with:
+          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          pipeline: quality_checks
+          status: ${{ job.status }}
+          branch: ${{ github.ref_name }}
+          commit_sha: ${{ github.sha }}
+          commit_message: ${{ github.event.head_commit.message }}
+          run_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          coverage: ${{ steps.coverage_summary.outputs.coverage }}
 
   upload_dev_apk:
     needs: quality_checks
@@ -162,21 +180,29 @@ jobs:
           groups: Yolo
           file: ${{ steps.releaseApk.outputs.release }}
 
+      - name: Capture APK metadata
+        if: always()
+        id: apk_metadata
+        run: |
+          APK_PATH="${{ steps.releaseApk.outputs.release }}"
+          APK_SIZE=""
+          if [ -n "$APK_PATH" ] && [ -f "$APK_PATH" ]; then
+            APK_SIZE=$(du -h "$APK_PATH" | awk '{print $1}')
+          fi
+          echo "apk_size=${APK_SIZE}" >> "$GITHUB_OUTPUT"
+
       - name: Notify Telegram (upload apk)
         if: always()
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          if [ -z "${TELEGRAM_BOT_TOKEN}" ] || [ -z "${TELEGRAM_CHAT_ID}" ]; then
-            echo "Telegram secrets are not configured. Skipping notification."
-            exit 0
-          fi
-          MESSAGE="MyBest CI - upload_dev_apk: ${{ job.status }}
-          Branch: ${{ github.ref_name }}
-          Commit: ${{ github.sha }}
-          APK: ${{ steps.releaseApk.outputs.release }}
-          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${MESSAGE}"
+        uses: ./.github/actions/telegram-notify
+        with:
+          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          pipeline: upload_dev_apk
+          status: ${{ job.status }}
+          branch: ${{ github.ref_name }}
+          commit_sha: ${{ github.sha }}
+          commit_message: ${{ github.event.head_commit.message }}
+          run_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          variant: ${{ github.event_name == 'workflow_dispatch' && inputs.release_build && 'release' || 'qa' }}
+          apk_size: ${{ steps.apk_metadata.outputs.apk_size }}
+          apk_path: ${{ steps.releaseApk.outputs.release }}

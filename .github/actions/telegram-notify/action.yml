@@ -1,0 +1,114 @@
+name: Telegram Notify
+description: Send formatted Telegram notifications for CI jobs
+
+inputs:
+  bot_token:
+    description: Telegram bot token
+    required: false
+  chat_id:
+    description: Telegram chat id
+    required: false
+  pipeline:
+    description: Pipeline/job label
+    required: true
+  status:
+    description: Job status (success/failure/cancelled)
+    required: true
+  branch:
+    description: Git branch name
+    required: true
+  commit_sha:
+    description: Full commit SHA
+    required: true
+  commit_message:
+    description: Commit subject/message
+    required: false
+    default: ""
+  run_url:
+    description: GitHub Actions run URL
+    required: true
+  coverage:
+    description: Coverage summary
+    required: false
+    default: ""
+  variant:
+    description: Build variant (qa/release)
+    required: false
+    default: ""
+  apk_size:
+    description: APK size
+    required: false
+    default: ""
+  apk_path:
+    description: APK path
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        BOT_TOKEN="${{ inputs.bot_token }}"
+        CHAT_ID="${{ inputs.chat_id }}"
+        if [ -z "$BOT_TOKEN" ] || [ -z "$CHAT_ID" ]; then
+          echo "Telegram secrets are not configured. Skipping notification."
+          exit 0
+        fi
+
+        STATUS="${{ inputs.status }}"
+        PIPELINE="${{ inputs.pipeline }}"
+        BRANCH="${{ inputs.branch }}"
+        COMMIT_SHA="${{ inputs.commit_sha }}"
+        COMMIT_SHORT="${COMMIT_SHA:0:8}"
+        COMMIT_URL="https://github.com/${{ github.repository }}/commit/${COMMIT_SHA}"
+        RUN_URL="${{ inputs.run_url }}"
+        COMMIT_MSG="${{ inputs.commit_message }}"
+        COVERAGE="${{ inputs.coverage }}"
+        VARIANT="${{ inputs.variant }}"
+        APK_SIZE="${{ inputs.apk_size }}"
+        APK_PATH="${{ inputs.apk_path }}"
+
+        if [ -z "$COMMIT_MSG" ]; then
+          COMMIT_MSG="$(git log -1 --pretty=%s 2>/dev/null || echo "n/a")"
+        fi
+        COMMIT_MSG_ESCAPED="$(printf '%s' "$COMMIT_MSG" | sed -e 's/&/&amp;/g' -e 's/</&lt;/g' -e 's/>/&gt;/g')"
+        APK_PATH_ESCAPED="$(printf '%s' "$APK_PATH" | sed -e 's/&/&amp;/g' -e 's/</&lt;/g' -e 's/>/&gt;/g')"
+
+        ICON="⚪"
+        if [ "$STATUS" = "success" ]; then ICON="✅"; fi
+        if [ "$STATUS" = "failure" ]; then ICON="❌"; fi
+        if [ "$STATUS" = "cancelled" ]; then ICON="⏹️"; fi
+        if [ "$STATUS" = "success" ] && [ "$PIPELINE" = "upload_dev_apk" ]; then ICON="🚀"; fi
+
+        MESSAGE="<b>${ICON} MyBest CI · ${PIPELINE}</b>
+        <b>Status:</b> <code>${STATUS}</code>
+        <b>Branch:</b> <code>${BRANCH}</code>"
+
+        if [ -n "$COVERAGE" ]; then
+          MESSAGE="${MESSAGE}
+        <b>Coverage:</b> <code>${COVERAGE}</code>"
+        fi
+        if [ -n "$VARIANT" ]; then
+          MESSAGE="${MESSAGE}
+        <b>Variant:</b> <code>${VARIANT}</code>"
+        fi
+        if [ -n "$APK_SIZE" ]; then
+          MESSAGE="${MESSAGE}
+        <b>APK size:</b> <code>${APK_SIZE}</code>"
+        fi
+        if [ -n "$APK_PATH_ESCAPED" ]; then
+          MESSAGE="${MESSAGE}
+        <b>APK path:</b> <code>${APK_PATH_ESCAPED}</code>"
+        fi
+
+        MESSAGE="${MESSAGE}
+        <b>Commit:</b> <a href=\"${COMMIT_URL}\">${COMMIT_SHORT}</a>
+        <b>Message:</b> ${COMMIT_MSG_ESCAPED}
+        <b>Run:</b> <a href=\"${RUN_URL}\">Open workflow</a>"
+
+        curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+          --data-urlencode "chat_id=${CHAT_ID}" \
+          --data-urlencode "parse_mode=HTML" \
+          --data-urlencode "disable_web_page_preview=true" \
+          --data-urlencode "text=${MESSAGE}"
