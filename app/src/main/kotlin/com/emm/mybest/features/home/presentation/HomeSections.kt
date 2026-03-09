@@ -71,7 +71,7 @@ internal fun NewHabitQuickAction(
         icon = Icons.Rounded.CheckCircle,
         containerColor = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        iconColor = MaterialTheme.colorScheme.secondary,
+        iconColor = MaterialTheme.colorScheme.onSecondaryContainer,
         onClick = onClick,
     )
 }

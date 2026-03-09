@@ -6,13 +6,16 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
 import com.emm.mybest.core.navigation.Screen
 
@@ -33,6 +36,7 @@ fun HBottomNavigationBar(
     onNavItemClick: (Screen) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val cs = MaterialTheme.colorScheme
     val items = listOf(
         HBottomNavItem.Home,
         HBottomNavItem.History,
@@ -42,8 +46,9 @@ fun HBottomNavigationBar(
 
     NavigationBar(
         modifier = modifier,
-        containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
-        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
+        containerColor = cs.surfaceContainerHigh,
+        contentColor = cs.onSurface,
+        tonalElevation = 0.dp,
     ) {
         items.forEach { item ->
             val isSelected = currentRoute == item.screen
@@ -51,6 +56,13 @@ fun HBottomNavigationBar(
             NavigationBarItem(
                 selected = isSelected,
                 onClick = { onNavItemClick(item.screen) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = cs.primary,
+                    selectedTextColor = cs.onSurface,
+                    unselectedIconColor = cs.onSurfaceVariant,
+                    unselectedTextColor = cs.onSurfaceVariant,
+                    indicatorColor = cs.surface,
+                ),
                 icon = {
                     Icon(
                         imageVector = item.icon,

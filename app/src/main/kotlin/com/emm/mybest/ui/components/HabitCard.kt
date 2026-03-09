@@ -1,5 +1,6 @@
 package com.emm.mybest.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +19,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,55 +38,24 @@ fun HabitCard(
     modifier: Modifier = Modifier,
 ) {
     val isCompleted = record?.isCompleted ?: false
-    val currentOnToggle = androidx.compose.runtime.rememberUpdatedState(onToggle)
-    val dismissState = androidx.compose.material3.rememberSwipeToDismissBoxState()
-
-    LaunchedEffect(dismissState.currentValue) {
-        if (dismissState.currentValue != androidx.compose.material3.SwipeToDismissBoxValue.Settled) {
-            currentOnToggle.value()
-            dismissState.reset()
-        }
-    }
-
-    androidx.compose.material3.SwipeToDismissBox(
-        state = dismissState,
-        backgroundContent = {
-            HabitCardSwipeBackground(isCompleted = isCompleted)
-        },
-        modifier = modifier,
-    ) {
-        HCard(
-            modifier = Modifier.fillMaxWidth(),
-            variant = if (isCompleted) CardVariant.Outlined else CardVariant.Elevated,
-        ) {
-            HabitCardContent(
-                habit = habit,
-                record = record,
-                isCompleted = isCompleted,
-                onToggle = onToggle,
-            )
-        }
-    }
-}
-
-@Composable
-private fun HabitCardSwipeBackground(isCompleted: Boolean) {
     val cs = MaterialTheme.colorScheme
-    val backgroundColor = if (isCompleted) cs.errorContainer else cs.primaryContainer
-    val iconTint = if (isCompleted) cs.onErrorContainer else cs.onPrimaryContainer
+    val cardContainerColor = if (isCompleted) cs.surfaceContainerHigh else cs.surfaceContainer
+    val cardBorder = BorderStroke(
+        width = 1.dp,
+        color = if (isCompleted) cs.outline.copy(alpha = 0.45f) else cs.outlineVariant,
+    )
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .background(backgroundColor)
-            .padding(horizontal = 20.dp),
-        contentAlignment = Alignment.CenterStart,
+    HCard(
+        modifier = modifier,
+        variant = CardVariant.Filled,
+        containerColor = cardContainerColor,
+        border = cardBorder,
     ) {
-        Icon(
-            imageVector = completionIcon(isCompleted = isCompleted),
-            contentDescription = null,
-            tint = iconTint,
+        HabitCardContent(
+            habit = habit,
+            record = record,
+            isCompleted = isCompleted,
+            onToggle = onToggle,
         )
     }
 }

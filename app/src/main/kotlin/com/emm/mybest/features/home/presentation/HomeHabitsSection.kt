@@ -21,8 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.domain.models.HabitWithRecord
-import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
@@ -63,12 +61,12 @@ private fun HomeHabitsSection(
         )
 
         AnimatedContent(
-            targetState = state.homeHabitsContentState(),
+            targetState = state.homeHabitsContentKind(),
             label = "HomeHabitsContent",
-        ) { contentState ->
-            when (contentState) {
-                HomeHabitsContentState.Loading -> HomeHabitsLoadingContent()
-                HomeHabitsContentState.Empty -> {
+        ) { contentKind ->
+            when (contentKind) {
+                HomeHabitsContentKind.Loading -> HomeHabitsLoadingContent()
+                HomeHabitsContentKind.Empty -> {
                     HEmptyState(
                         title = "Sin hábitos para hoy",
                         description = "Crea un nuevo hábito para empezar a trackear tu progreso.",
@@ -82,9 +80,9 @@ private fun HomeHabitsSection(
                     )
                 }
 
-                is HomeHabitsContentState.Content -> {
+                HomeHabitsContentKind.Content -> {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        contentState.habits.forEach { habitWithRecord ->
+                        state.dailyHabits.forEach { habitWithRecord ->
                             HabitCard(
                                 habit = habitWithRecord.habit,
                                 record = habitWithRecord.record,
@@ -115,7 +113,6 @@ private fun HomeHabitsLoadingContent(modifier: Modifier = Modifier) {
 private fun HomeHabitSkeletonCard(modifier: Modifier = Modifier) {
     HCard(
         modifier = modifier,
-        variant = CardVariant.Elevated,
     ) {
         Row(
             modifier = Modifier
@@ -154,16 +151,14 @@ private fun HomeHabitSkeletonCard(modifier: Modifier = Modifier) {
     }
 }
 
-private fun HomeState.homeHabitsContentState(): HomeHabitsContentState {
-    if (isLoading) return HomeHabitsContentState.Loading
-    if (dailyHabits.isEmpty()) return HomeHabitsContentState.Empty
-    return HomeHabitsContentState.Content(dailyHabits)
+private fun HomeState.homeHabitsContentKind(): HomeHabitsContentKind {
+    if (isLoading) return HomeHabitsContentKind.Loading
+    if (dailyHabits.isEmpty()) return HomeHabitsContentKind.Empty
+    return HomeHabitsContentKind.Content
 }
 
-private sealed interface HomeHabitsContentState {
-    data object Loading : HomeHabitsContentState
-    data object Empty : HomeHabitsContentState
-    data class Content(
-        val habits: List<HabitWithRecord>,
-    ) : HomeHabitsContentState
+private sealed interface HomeHabitsContentKind {
+    data object Loading : HomeHabitsContentKind
+    data object Empty : HomeHabitsContentKind
+    data object Content : HomeHabitsContentKind
 }
