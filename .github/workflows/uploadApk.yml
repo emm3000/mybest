@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
@@ -17,6 +20,9 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v5
 
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v3
+
       - name: Set Up JDK
         uses: actions/setup-java@v5
         with:
@@ -27,11 +33,22 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Run unit tests, detekt and JaCoCo report
-        run: ./gradlew testDebugUnitTest detekt jacocoTestReport --rerun-tasks
+        run: ./gradlew testDebugUnitTest detekt jacocoTestReport
 
       - name: Validate minimum coverage (70%)
         run: |
-          MATCH=$(grep -o 'counter type="LINE" missed="[0-9]*" covered="[0-9]*"' app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml | tail -n 1)
+          REPORT_PATH="app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+          if [ ! -f "$REPORT_PATH" ]; then
+            echo "Coverage report not found at $REPORT_PATH"
+            exit 1
+          fi
+
+          MATCH=$(grep -o 'counter type="LINE" missed="[0-9]*" covered="[0-9]*"' "$REPORT_PATH" | tail -n 1)
+          if [ -z "$MATCH" ]; then
+            echo "Could not parse line coverage counters from $REPORT_PATH"
+            exit 1
+          fi
+
           MISSED=$(echo "$MATCH" | sed -E 's/.*missed="([0-9]+)".*/\1/')
           COVERED=$(echo "$MATCH" | sed -E 's/.*covered="([0-9]+)".*/\1/')
           TOTAL=$((MISSED+COVERED))
@@ -49,13 +66,14 @@ jobs:
 
   upload_dev_apk:
     needs: quality_checks
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
         uses: actions/checkout@v5
 
-      - name: Set current date as env variable
-        run: echo "date_today=$(date +'%Y-%m-%d-%H-%M-%S')" >> $GITHUB_ENV
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v3
 
       - name: Set Up JDK
         uses: actions/setup-java@v5
@@ -78,13 +96,19 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Get Release APK path
-        id: prodDebugPath
-        run: echo "release=$(find app/build/outputs/apk/release/*.apk)" >> $GITHUB_OUTPUT
+        id: releaseApk
+        run: |
+          APK_PATH=$(ls -1 app/build/outputs/apk/release/*.apk | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "No release APK found in app/build/outputs/apk/release"
+            exit 1
+          fi
+          echo "release=$APK_PATH" >> "$GITHUB_OUTPUT"
 
-      - name: upload DEBUG (APP DISTRIBUTION)
+      - name: Upload release APK to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{secrets.FIREBASE_RELEASE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: Yolo
-          file: ${{ steps.prodDebugPath.outputs.release }}
+          file: ${{ steps.releaseApk.outputs.release }}
