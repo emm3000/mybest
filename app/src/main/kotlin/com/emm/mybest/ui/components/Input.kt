@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -70,47 +71,59 @@ fun HInput(
 
     val cs = MaterialTheme.colorScheme
     val borderColor = inputBorderColor(isError = isError, isFocused = isFocused)
+    val ringColor = inputRingColor(isError = isError, isFocused = isFocused)
     val textColor = inputTextColor(enabled = enabled)
 
     Column(modifier = modifier) {
         InputLabelSection(label = label, isError = isError)
 
         // ── Field box ─────────────────────────────────────────────────────────
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultMinSize(minHeight = 40.dp)
                 .clip(MaterialTheme.shapes.small)
                 .border(
-                    width = 1.dp,
-                    color = borderColor,
+                    width = 2.dp,
+                    color = ringColor,
                     shape = MaterialTheme.shapes.small,
-                ),
-            enabled = enabled,
-            readOnly = readOnly,
-            singleLine = singleLine,
-            minLines = minLines,
-            maxLines = maxLines,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            visualTransformation = visualTransformation,
-            interactionSource = interactionSource,
-            textStyle = MaterialTheme.typography.bodyMedium.copy(color = textColor),
-            cursorBrush = SolidColor(cs.onSurface),
-            decorationBox = { innerTextField ->
-                HInputDecoration(
-                    value = value,
-                    placeholder = placeholder,
-                    leadingIcon = leadingIcon,
-                    trailingIcon = trailingIcon,
-                    singleLine = singleLine,
-                    innerTextField = innerTextField,
                 )
-            },
-
-        )
+                .padding(2.dp),
+        ) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 40.dp)
+                    .clip(MaterialTheme.shapes.small)
+                    .border(
+                        width = 1.dp,
+                        color = borderColor,
+                        shape = MaterialTheme.shapes.small,
+                    ),
+                enabled = enabled,
+                readOnly = readOnly,
+                singleLine = singleLine,
+                minLines = minLines,
+                maxLines = maxLines,
+                keyboardOptions = keyboardOptions,
+                keyboardActions = keyboardActions,
+                visualTransformation = visualTransformation,
+                interactionSource = interactionSource,
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = textColor),
+                cursorBrush = SolidColor(cs.onSurface),
+                decorationBox = { innerTextField ->
+                    HInputDecoration(
+                        value = value,
+                        placeholder = placeholder,
+                        leadingIcon = leadingIcon,
+                        trailingIcon = trailingIcon,
+                        singleLine = singleLine,
+                        innerTextField = innerTextField,
+                    )
+                },
+            )
+        }
 
         // ── Helper / error text ───────────────────────────────────────────────
         val helperText = errorMessage ?: supportingText
@@ -130,6 +143,21 @@ private fun inputBorderColor(isError: Boolean, isFocused: Boolean): androidx.com
         targetValue = targetColor,
         animationSpec = tween(durationMillis = 150),
         label = "input_border",
+    ).value
+}
+
+@Composable
+private fun inputRingColor(isError: Boolean, isFocused: Boolean): androidx.compose.ui.graphics.Color {
+    val cs = MaterialTheme.colorScheme
+    val targetColor = when {
+        isFocused && isError -> cs.error.copy(alpha = 0.25f)
+        isFocused -> cs.outline.copy(alpha = 0.45f)
+        else -> Color.Transparent
+    }
+    return animateColorAsState(
+        targetValue = targetColor,
+        animationSpec = tween(durationMillis = 120),
+        label = "input_ring",
     ).value
 }
 

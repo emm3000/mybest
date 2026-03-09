@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -13,18 +14,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +34,8 @@ import com.emm.mybest.ui.theme.MyBestTheme
 // ─── Variants ──────────────────────────────────────────────────────────────
 
 enum class ButtonVariant { Default, Destructive, Outline, Secondary, Ghost, Link }
+
+private const val BUTTON_DISABLED_ALPHA = 0.5f
 
 /**
  * Main button inspired by shadcn/ui.
@@ -73,77 +74,44 @@ private fun HButtonContainer(
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val cs = MaterialTheme.colorScheme
-    when (variant) {
-        ButtonVariant.Ghost -> TextButton(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = cs.onSurface,
-                disabledContentColor = cs.onSurface.copy(alpha = 0.38f),
-            ),
-            contentPadding = contentPadding,
-            content = content,
-        )
-        ButtonVariant.Link -> TextButton(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = cs.primary,
-                disabledContentColor = cs.onSurface.copy(alpha = 0.38f),
-            ),
-            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
-            content = content,
-        )
-        ButtonVariant.Outline -> OutlinedButton(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = cs.onSurface,
-                disabledContentColor = cs.onSurface.copy(alpha = 0.38f),
-            ),
-            border = BorderStroke(width = 1.dp, color = cs.outline),
-            contentPadding = contentPadding,
-            content = content,
-        )
-        else -> Button(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            colors = variant.defaultButtonColors(),
-            contentPadding = contentPadding,
+    val (containerColor, contentColor, borderColor) = buttonTokens(variant)
+    val finalContentPadding = if (variant == ButtonVariant.Link) {
+        PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    } else {
+        contentPadding
+    }
+
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.alpha(if (enabled) 1f else BUTTON_DISABLED_ALPHA),
+        color = containerColor,
+        contentColor = contentColor,
+        shape = MaterialTheme.shapes.small,
+        border = borderColor?.let { BorderStroke(1.dp, it) },
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+    ) {
+        Row(
+            modifier = Modifier.padding(finalContentPadding),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
             content = content,
         )
     }
 }
 
 @Composable
-private fun ButtonVariant.defaultButtonColors() = when (this) {
-    ButtonVariant.Default -> ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary,
-        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.38f),
-        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.38f),
-    )
-    ButtonVariant.Destructive -> ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.error,
-        contentColor = MaterialTheme.colorScheme.onError,
-        disabledContainerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.38f),
-        disabledContentColor = MaterialTheme.colorScheme.onError.copy(alpha = 0.38f),
-    )
-    ButtonVariant.Secondary -> ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-    )
-    ButtonVariant.Outline, ButtonVariant.Ghost, ButtonVariant.Link -> ButtonDefaults.buttonColors(
-        containerColor = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.primary,
-        disabledContainerColor = Color.Transparent,
-        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-    )
+private fun buttonTokens(variant: ButtonVariant): Triple<Color, Color, Color?> {
+    val cs = MaterialTheme.colorScheme
+    return when (variant) {
+        ButtonVariant.Default -> Triple(cs.primary, cs.onPrimary, null)
+        ButtonVariant.Destructive -> Triple(cs.error, cs.onError, null)
+        ButtonVariant.Secondary -> Triple(cs.secondaryContainer, cs.onSecondaryContainer, null)
+        ButtonVariant.Outline -> Triple(Color.Transparent, cs.onSurface, cs.outlineVariant)
+        ButtonVariant.Ghost -> Triple(Color.Transparent, cs.onSurface, null)
+        ButtonVariant.Link -> Triple(Color.Transparent, cs.primary, null)
+    }
 }
 
 @Composable

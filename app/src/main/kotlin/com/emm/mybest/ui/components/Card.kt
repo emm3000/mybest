@@ -42,7 +42,7 @@ fun HCard(
     val (defaultContainerColor, tonalElevation, defaultBorder) = cardTokens(variant)
     val finalContainerColor = containerColor ?: defaultContainerColor
     val finalBorder = border ?: defaultBorder
-    val finalShadowElevation = shadowElevation ?: if (variant == CardVariant.Elevated) 2.dp else 0.dp
+    val finalShadowElevation = shadowElevation ?: if (variant == CardVariant.Elevated) 1.dp else 0.dp
 
     if (onClick == null) {
         Surface(
@@ -74,7 +74,7 @@ fun HCard(
 private fun cardTokens(variant: CardVariant): Triple<Color, Dp, BorderStroke?> {
     val cs = MaterialTheme.colorScheme
     return when (variant) {
-        CardVariant.Elevated -> Triple(cs.surfaceContainerLow, 0.dp, null)
+        CardVariant.Elevated -> Triple(cs.surface, 0.dp, BorderStroke(1.dp, cs.outlineVariant))
         CardVariant.Filled -> Triple(cs.surfaceContainerHighest, 0.dp, null)
         CardVariant.Outlined -> Triple(cs.surface, 0.dp, BorderStroke(1.dp, cs.outlineVariant))
     }

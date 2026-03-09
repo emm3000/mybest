@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -65,6 +66,11 @@ fun <T> HSelect(
         animationSpec = tween(150),
         label = "select_border",
     )
+    val ringColor by animateColorAsState(
+        targetValue = if (isExpanded) cs.outline.copy(alpha = 0.45f) else Color.Transparent,
+        animationSpec = tween(120),
+        label = "select_ring",
+    )
 
     Column(modifier = modifier) {
         // ── Label ─────────────────────────────────────────────────────────────
@@ -90,31 +96,39 @@ fun <T> HSelect(
                 modifier = Modifier
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     .fillMaxWidth()
-                    .defaultMinSize(minHeight = 40.dp)
                     .clip(MaterialTheme.shapes.small)
-                    .border(1.dp, borderColor, MaterialTheme.shapes.small)
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                contentAlignment = Alignment.CenterStart,
+                    .border(2.dp, ringColor, MaterialTheme.shapes.small)
+                    .padding(2.dp),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = 40.dp)
+                        .clip(MaterialTheme.shapes.small)
+                        .border(1.dp, borderColor, MaterialTheme.shapes.small)
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    contentAlignment = Alignment.CenterStart,
                 ) {
-                    Text(
-                        text = displayText ?: placeholder,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = displayColor,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(18.dp)
-                            .rotate(if (isExpanded) SELECT_EXPANDED_ROTATION_DEGREES else 0f),
-                        tint = cs.onSurfaceVariant,
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = displayText ?: placeholder,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = displayColor,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .rotate(if (isExpanded) SELECT_EXPANDED_ROTATION_DEGREES else 0f),
+                            tint = cs.onSurfaceVariant,
+                        )
+                    }
                 }
             }
 

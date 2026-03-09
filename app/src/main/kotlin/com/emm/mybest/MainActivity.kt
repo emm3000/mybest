@@ -52,7 +52,6 @@ class MainActivity : ComponentActivity() {
 
             MyBestTheme(
                 darkTheme = darkTheme,
-                dynamicColor = state.useDynamicColor,
             ) {
                 AppNavigation(
                     intentAction = intentAction,
