@@ -13,6 +13,8 @@ import kotlinx.coroutines.launch
 data class AddWeightState(
     val weight: String = "",
     val note: String = "",
+    val weightError: String? = null,
+    val lastRecordedWeight: Float? = null,
     val isLoading: Boolean = false,
 )
 
@@ -37,10 +39,23 @@ class AddWeightViewModel(
     private val _effect = MutableSharedFlow<AddWeightEffect>()
     val effect = _effect.asSharedFlow()
 
+    init {
+        viewModelScope.launch {
+            weightRepository.getWeightProgress().collect { entries ->
+                _state.update { it.copy(lastRecordedWeight = entries.firstOrNull()?.weight) }
+            }
+        }
+    }
+
     fun onIntent(intent: AddWeightIntent) {
         when (intent) {
             is AddWeightIntent.OnWeightChange -> {
-                _state.update { it.copy(weight = intent.weight) }
+                _state.update {
+                    it.copy(
+                        weight = intent.weight,
+                        weightError = weightErrorFor(intent.weight),
+                    )
+                }
             }
             is AddWeightIntent.OnNoteChange -> {
                 _state.update { it.copy(note = intent.note) }
@@ -50,9 +65,16 @@ class AddWeightViewModel(
     }
 
     private fun saveWeight() {
-        val weightValue = _state.value.weight.toFloatOrNull()
+        val currentState = _state.value
+        val currentError = weightErrorFor(currentState.weight)
+        if (currentError != null) {
+            _state.update { it.copy(weightError = currentError) }
+            return
+        }
+
+        val weightValue = parseWeight(currentState.weight)
         if (weightValue == null) {
-            viewModelScope.launch { _effect.emit(AddWeightEffect.ShowError("Peso inválido")) }
+            _state.update { it.copy(weightError = INVALID_WEIGHT_MESSAGE) }
             return
         }
 
@@ -70,5 +92,24 @@ class AddWeightViewModel(
             }
             _state.update { it.copy(isLoading = false) }
         }
+    }
+
+    private fun parseWeight(input: String): Float? {
+        val normalized = input.replace(',', '.')
+        return normalized.toFloatOrNull()
+    }
+
+    private fun weightErrorFor(input: String): String? {
+        return when {
+            input.isBlank() -> null
+            !WEIGHT_INPUT_REGEX.matches(input) -> INVALID_WEIGHT_MESSAGE
+            input.endsWith('.') || input.endsWith(',') -> INVALID_WEIGHT_MESSAGE
+            else -> null
+        }
+    }
+
+    companion object {
+        private val WEIGHT_INPUT_REGEX = Regex("""^\d+([.,]\d{0,2})?$""")
+        private const val INVALID_WEIGHT_MESSAGE = "Ingresa un peso valido. Ejemplo: 72.4 o 72,4"
     }
 }

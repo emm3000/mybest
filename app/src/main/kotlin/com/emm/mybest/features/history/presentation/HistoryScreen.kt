@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Close
@@ -66,7 +65,6 @@ import com.emm.mybest.ui.components.HAlert
 import com.emm.mybest.ui.components.HAlertDialog
 import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.HEmptyState
-import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
@@ -85,7 +83,6 @@ private const val HISTORY_LOADING_GRID_HEIGHT = 320
 @Composable
 fun HistoryScreen(
     viewModel: HistoryViewModel,
-    onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
@@ -93,7 +90,6 @@ fun HistoryScreen(
     HistoryContent(
         modifier = modifier,
         state = state,
-        onBackClick = onBackClick,
         onIntent = viewModel::onIntent,
     )
 }
@@ -102,7 +98,6 @@ fun HistoryScreen(
 @Composable
 fun HistoryContent(
     state: HistoryState,
-    onBackClick: () -> Unit,
     onIntent: (HistoryIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -126,16 +121,7 @@ fun HistoryContent(
     Scaffold(
         modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
         topBar = {
-            HTopBar(
-                title = "Mi Progreso",
-                navigationIcon = {
-                    HIconButton(
-                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Atrás",
-                        onClick = onBackClick,
-                    )
-                },
-            )
+            HTopBar(title = "Historial")
         },
     ) { padding ->
         val contentModifier = Modifier
@@ -520,7 +506,6 @@ private fun HistoryScreenPreview() {
     MyBestTheme {
         HistoryContent(
             state = state,
-            onBackClick = {},
             onIntent = {},
         )
     }

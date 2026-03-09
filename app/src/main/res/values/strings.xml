@@ -8,6 +8,6 @@
     <string name="shortcut_add_photo_long">Añadir Foto</string>
     <string name="nav_home">Inicio</string>
     <string name="nav_history">Historial</string>
-    <string name="nav_insights">Análisis</string>
-    <string name="nav_timeline">Timeline</string>
+    <string name="nav_insights">Estadísticas</string>
+    <string name="nav_timeline">Línea de tiempo</string>
 </resources>

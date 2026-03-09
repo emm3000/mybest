@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.TrendingDown
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Compare
@@ -59,7 +58,6 @@ private const val INSIGHTS_RING_SIZE = 80
 @Composable
 fun InsightsScreen(
     viewModel: InsightsViewModel,
-    onBackClick: () -> Unit,
     onCompareClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -67,7 +65,6 @@ fun InsightsScreen(
 
     HandleInsightsEffects(
         viewModel = viewModel,
-        onBackClick = onBackClick,
         onCompareClick = onCompareClick,
     )
 
@@ -75,14 +72,7 @@ fun InsightsScreen(
         modifier = modifier,
         topBar = {
             HTopBar(
-                title = "Insights & Progreso",
-                navigationIcon = {
-                    HIconButton(
-                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Atrás",
-                        onClick = { viewModel.onIntent(InsightsIntent.OnBackClick) },
-                    )
-                },
+                title = "Estadísticas",
                 actions = {
                     HIconButton(
                         icon = Icons.Rounded.Compare,
@@ -98,16 +88,14 @@ fun InsightsScreen(
 @Composable
 private fun HandleInsightsEffects(
     viewModel: InsightsViewModel,
-    onBackClick: () -> Unit,
     onCompareClick: () -> Unit,
 ) {
-    val currentOnBackClick by androidx.compose.runtime.rememberUpdatedState(onBackClick)
     val currentOnCompareClick by androidx.compose.runtime.rememberUpdatedState(onCompareClick)
 
     androidx.compose.runtime.LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                InsightsEffect.NavigateBack -> currentOnBackClick()
+                InsightsEffect.NavigateBack -> Unit
                 InsightsEffect.NavigateToCompare -> currentOnCompareClick()
             }
         }

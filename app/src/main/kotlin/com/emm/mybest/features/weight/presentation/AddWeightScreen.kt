@@ -34,6 +34,7 @@ import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.coroutines.flow.collectLatest
+import java.util.Locale
 
 @Composable
 fun AddWeightScreen(
@@ -107,6 +108,10 @@ private fun AddWeightContent(
                 onValueChange = { onIntent(AddWeightIntent.OnWeightChange(it)) },
                 label = "Peso (kg)",
                 placeholder = "Ej: 72.4",
+                supportingText = state.lastRecordedWeight?.let {
+                    "Ultimo registro: ${String.format(Locale.getDefault(), "%.1f", it)} kg"
+                },
+                errorMessage = state.weightError,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 leadingIcon = { Icon(Icons.Rounded.Scale, contentDescription = null) },
@@ -131,7 +136,7 @@ private fun AddWeightContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = state.weight.isNotEmpty() && !state.isLoading,
+                enabled = state.weight.isNotBlank() && state.weightError == null && !state.isLoading,
                 isLoading = state.isLoading,
             )
         }
@@ -146,6 +151,7 @@ private fun AddWeightScreenPreview() {
             state = AddWeightState(
                 weight = "80.5",
                 note = "Después del entrenamiento",
+                lastRecordedWeight = 81.2f,
                 isLoading = false,
             ),
             snackbarHostState = remember { SnackbarHostState() },

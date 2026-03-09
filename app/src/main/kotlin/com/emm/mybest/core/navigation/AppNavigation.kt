@@ -167,7 +167,6 @@ private fun AppNavGraph(
             val viewModel: HistoryViewModel = koinViewModel()
             HistoryScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
                 modifier = Modifier,
             )
         }
@@ -176,7 +175,6 @@ private fun AppNavGraph(
             val viewModel: InsightsViewModel = koinViewModel()
             InsightsScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
                 onCompareClick = { navController.navigate(Screen.ComparePhotos) },
                 modifier = Modifier,
             )
@@ -195,7 +193,6 @@ private fun AppNavGraph(
             val viewModel: TimelineViewModel = koinViewModel()
             TimelineScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
                 modifier = Modifier,
             )
         }

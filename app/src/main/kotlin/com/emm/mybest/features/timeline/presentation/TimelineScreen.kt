@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -31,7 +30,6 @@ import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
-import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HTopBar
 
 private const val TIMELINE_PHOTO_HEIGHT_RATIO = 0.8f
@@ -40,34 +38,14 @@ private const val TIMELINE_PHOTO_HEIGHT_RATIO = 0.8f
 @Composable
 fun TimelineScreen(
     viewModel: TimelineViewModel,
-    onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
 
-    val currentOnBackClick by androidx.compose.runtime.rememberUpdatedState(onBackClick)
-
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                TimelineEffect.NavigateBack -> currentOnBackClick()
-            }
-        }
-    }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            HTopBar(
-                title = "Línea de Tiempo",
-                navigationIcon = {
-                    HIconButton(
-                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Regresar",
-                        onClick = { viewModel.onIntent(TimelineIntent.OnBackClick) },
-                    )
-                },
-            )
+            HTopBar(title = "Línea de tiempo")
         },
     ) { paddingValues ->
         TimelineContent(
