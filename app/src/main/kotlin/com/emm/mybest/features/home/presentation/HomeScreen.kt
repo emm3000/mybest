@@ -195,7 +195,7 @@ fun SummaryCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = if (state.isLoading) {
-                        "Cargando..."
+                        "Cargando... xD"
                     } else if (state.totalWeightLost > 0) {
                         "¡Has bajado ${String.format(java.util.Locale.getDefault(), "%.1f", state.totalWeightLost)} kg!"
                     } else {
