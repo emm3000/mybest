@@ -4,8 +4,10 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.emm.mybest.features.home.presentation.HomeIntent
+import com.emm.mybest.features.home.presentation.HomeScreenContent
+import com.emm.mybest.features.home.presentation.HomeState
 import com.emm.mybest.ui.theme.MyBestTheme
-import com.emm.mybest.viewmodel.HomeState
 import org.junit.Rule
 import org.junit.Test
 
@@ -18,7 +20,7 @@ class HomeScreenTest {
     fun homeScreen_displaysTitleAndSummary() {
         val state = HomeState(
             lastWeight = 70.0f,
-            habitsCompletedToday = 2,
+            totalWeightLost = 2.0f,
             totalPhotos = 5,
             isLoading = false
         )
@@ -27,10 +29,7 @@ class HomeScreenTest {
             MyBestTheme {
                 HomeScreenContent(
                     state = state,
-                    onAddWeightClick = {},
-                    onAddHabitClick = {},
-                    onAddPhotoClick = {},
-                    onViewHistoryClick = {}
+                    onIntent = {},
                 )
             }
         }
@@ -40,7 +39,7 @@ class HomeScreenTest {
         
         // Verify summary card content
         composeTestRule.onNodeWithText("Tu Progreso").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Has registrado 2 actividades hoy").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Toca para ver tus estadísticas").assertIsDisplayed()
     }
 
     @Test
@@ -49,17 +48,13 @@ class HomeScreenTest {
             MyBestTheme {
                 HomeScreenContent(
                     state = HomeState(),
-                    onAddWeightClick = {},
-                    onAddHabitClick = {},
-                    onAddPhotoClick = {},
-                    onViewHistoryClick = {}
+                    onIntent = {},
                 )
             }
         }
 
         composeTestRule.onNodeWithText("Registrar Peso").assertIsDisplayed()
         composeTestRule.onNodeWithText("Hábitos de Hoy").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Foto de Progreso").assertIsDisplayed()
     }
 
     @Test
@@ -69,10 +64,9 @@ class HomeScreenTest {
             MyBestTheme {
                 HomeScreenContent(
                     state = HomeState(),
-                    onAddWeightClick = { clicked = true },
-                    onAddHabitClick = {},
-                    onAddPhotoClick = {},
-                    onViewHistoryClick = {}
+                    onIntent = { intent ->
+                        if (intent is HomeIntent.OnAddWeightClick) clicked = true
+                    },
                 )
             }
         }
