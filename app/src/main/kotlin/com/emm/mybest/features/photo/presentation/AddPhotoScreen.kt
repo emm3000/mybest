@@ -3,7 +3,6 @@ package com.emm.mybest.features.photo.presentation
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.AddAPhoto
@@ -28,9 +26,7 @@ import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -56,9 +52,12 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HFilterChip
+import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HTopBar
+import com.emm.mybest.ui.components.IconButtonVariant
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -154,14 +153,18 @@ fun AddPhotoContent(
             HTopBar(
                 title = "Añadir Fotos",
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
-                    }
+                    HIconButton(
+                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = "Atrás",
+                        onClick = onBackClick,
+                    )
                 },
                 actions = {
-                    IconButton(onClick = { showBottomSheet = true }) {
-                        Icon(Icons.Rounded.AddAPhoto, contentDescription = "Añadir")
-                    }
+                    HIconButton(
+                        icon = Icons.Rounded.AddAPhoto,
+                        contentDescription = "Añadir",
+                        onClick = { showBottomSheet = true },
+                    )
                 },
             )
         },
@@ -274,7 +277,7 @@ private fun PhotoSourceBottomSheet(
     onCameraClick: () -> Unit,
     onGalleryClick: () -> Unit,
 ) {
-    ModalBottomSheet(
+    HBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
     ) {
@@ -330,21 +333,16 @@ fun PhotoCard(
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                 )
-                IconButton(
+                HIconButton(
+                    icon = Icons.Rounded.Delete,
+                    contentDescription = "Borrar",
                     onClick = onRemove,
+                    variant = IconButtonVariant.Destructive,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
-                        .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f), CircleShape)
                         .size(32.dp),
-                ) {
-                    Icon(
-                        Icons.Rounded.Delete,
-                        contentDescription = "Borrar",
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.onErrorContainer,
-                    )
-                }
+                )
             }
 
             var showTypeSelector by remember { mutableStateOf(false) }

@@ -18,8 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,6 +33,9 @@ import coil3.compose.AsyncImage
 import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
+import com.emm.mybest.ui.components.HIconButton
+import com.emm.mybest.ui.components.IconButtonVariant
+import com.emm.mybest.ui.theme.shadcnWhite
 
 private const val DAY_PHOTOS_GRID_COLUMNS = 3
 
@@ -110,7 +110,7 @@ internal fun DayPhotosSection(
                         contentScale = ContentScale.Crop,
                     )
                     Surface(
-                        color = Color.Black.copy(alpha = 0.6f),
+                        color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.6f),
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth(),
@@ -118,27 +118,23 @@ internal fun DayPhotosSection(
                         Text(
                             text = photo.type.toSpanishLabel(),
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.White,
+                            color = shadcnWhite,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(vertical = 2.dp),
                         )
                     }
                     if (isToday) {
-                        IconButton(
+                        HIconButton(
+                            icon = Icons.Rounded.Close,
+                            contentDescription = "Eliminar foto",
                             onClick = { onDeletePhoto(photo) },
+                            variant = IconButtonVariant.Destructive,
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(4.dp)
                                 .size(24.dp)
-                                .background(Color.Black.copy(alpha = 0.4f), CircleShape),
-                        ) {
-                            Icon(
-                                Icons.Rounded.Close,
-                                contentDescription = "Eliminar foto",
-                                tint = Color.White,
-                                modifier = Modifier.size(16.dp),
-                            )
-                        }
+                                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f), CircleShape),
+                        )
                     }
                 }
             }

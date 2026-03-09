@@ -19,10 +19,8 @@ class MainViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val isDarkModeFlow = MutableStateFlow<Boolean?>(null)
-    private val dynamicColorFlow = MutableStateFlow(true)
     private val preferencesRepository = mockk<UserPreferencesRepository> {
         every { isDarkMode } returns isDarkModeFlow
-        every { useDynamicColor } returns dynamicColorFlow
         every { notificationsEnabled } returns MutableStateFlow(true)
     }
 
@@ -31,13 +29,10 @@ class MainViewModelTest {
         val viewModel = MainViewModel(preferencesRepository)
 
         viewModel.state.test {
-            assertEquals(MainState(isDarkMode = null, useDynamicColor = true), awaitItem())
+            assertEquals(MainState(isDarkMode = null), awaitItem())
 
             isDarkModeFlow.value = true
-            assertEquals(MainState(isDarkMode = true, useDynamicColor = true), awaitItem())
-
-            dynamicColorFlow.value = false
-            assertEquals(MainState(isDarkMode = true, useDynamicColor = false), awaitItem())
+            assertEquals(MainState(isDarkMode = true), awaitItem())
 
             cancelAndIgnoreRemainingEvents()
         }

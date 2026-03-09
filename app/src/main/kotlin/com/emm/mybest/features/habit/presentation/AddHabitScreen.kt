@@ -22,7 +22,6 @@ import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -44,8 +43,10 @@ import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.narrowEs
 import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.ui.components.HButton
+import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSelect
+import com.emm.mybest.ui.components.HSelectableCard
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.coroutines.flow.collectLatest
@@ -99,15 +100,15 @@ private fun AddHabitContent(
             HTopBar(
                 title = "Nuevo Hábito",
                 navigationIcon = {
-                    IconButton(
+                    HIconButton(
+                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = "Atrás",
                         onClick = if (state.step > 1) {
                             { onIntent(AddHabitIntent.OnPreviousStep) }
                         } else {
                             onBackClick
                         },
-                    ) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
-                    }
+                    )
                 },
             )
         },
@@ -216,17 +217,16 @@ private fun IconCard(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    Surface(
+    HSelectableCard(
+        selected = isSelected,
         onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         modifier = Modifier.size(64.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             )
             if (isSelected) {
                 Icon(
@@ -304,17 +304,16 @@ private fun TypeCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    HSelectableCard(
+        selected = isSelected,
         onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         modifier = modifier.height(48.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             )
         }
@@ -375,17 +374,16 @@ private fun DayChip(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    Surface(
+    HSelectableCard(
+        selected = isSelected,
         onClick = onClick,
-        shape = MaterialTheme.shapes.small,
-        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
         modifier = Modifier.size(40.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = day.narrowEs(),
                 style = MaterialTheme.typography.labelMedium,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             )
         }

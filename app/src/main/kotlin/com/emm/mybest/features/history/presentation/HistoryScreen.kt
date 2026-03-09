@@ -31,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -63,7 +62,9 @@ import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.ui.components.AlertVariant
 import com.emm.mybest.ui.components.HAlert
 import com.emm.mybest.ui.components.HAlertDialog
+import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.HEmptyState
+import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
@@ -105,9 +106,8 @@ fun HistoryContent(
 ) {
     val selectedDate = state.selectedDate
     if (selectedDate != null) {
-        ModalBottomSheet(
+        HBottomSheet(
             onDismissRequest = { onIntent(HistoryIntent.OnDateDismiss) },
-            containerColor = MaterialTheme.colorScheme.surface,
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         ) {
             DayDetailContent(
@@ -127,9 +127,11 @@ fun HistoryContent(
             HTopBar(
                 title = "Mi Progreso",
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
-                    }
+                    HIconButton(
+                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = "Atrás",
+                        onClick = onBackClick,
+                    )
                 },
             )
         },

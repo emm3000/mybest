@@ -23,11 +23,10 @@ class UserPreferencesRepositoryImplTest {
     }
 
     @Test
-    fun `notifications and dynamic color are true by default`() = runTest {
+    fun `notifications are true by default`() = runTest {
         val repository = UserPreferencesRepositoryImpl(createStore(backgroundScope))
 
         assertEquals(true, repository.notificationsEnabled.first())
-        assertEquals(true, repository.useDynamicColor.first())
     }
 
     @Test
@@ -37,15 +36,6 @@ class UserPreferencesRepositoryImplTest {
         repository.updateDarkMode(enabled = true)
 
         assertEquals(true, repository.isDarkMode.first())
-    }
-
-    @Test
-    fun `updateDynamicColor persists and emits value`() = runTest {
-        val repository = UserPreferencesRepositoryImpl(createStore(backgroundScope))
-
-        repository.updateDynamicColor(enabled = false)
-
-        assertEquals(false, repository.useDynamicColor.first())
     }
 
     private fun createStore(scope: CoroutineScope) = PreferenceDataStoreFactory.create(

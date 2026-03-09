@@ -21,7 +21,6 @@ class UserPreferencesRepositoryImpl(
     private object PreferencesKeys {
         val DARK_MODE_ENABLED = booleanPreferencesKey("dark_mode_enabled")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
-        val DYNAMIC_COLOR_ENABLED = booleanPreferencesKey("dynamic_color_enabled")
     }
 
     override val isDarkMode: Flow<Boolean?> = dataStore.data.map { preferences ->
@@ -36,15 +35,5 @@ class UserPreferencesRepositoryImpl(
 
     override val notificationsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: true
-    }
-
-    override val useDynamicColor: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.DYNAMIC_COLOR_ENABLED] ?: true
-    }
-
-    override suspend fun updateDynamicColor(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.DYNAMIC_COLOR_ENABLED] = enabled
-        }
     }
 }

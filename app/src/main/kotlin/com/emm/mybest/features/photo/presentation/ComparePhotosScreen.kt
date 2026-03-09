@@ -27,7 +27,6 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -50,7 +49,9 @@ import com.emm.mybest.core.datetime.formatDdMmYy
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.HFilterChip
+import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HTopBar
+import com.emm.mybest.ui.theme.shadcnWhite
 import java.util.Locale
 
 private const val PHOTO_SELECTION_GRID_COLUMNS = 3
@@ -71,14 +72,18 @@ fun ComparePhotosScreen(
             HTopBar(
                 title = "Comparador de Progreso",
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
-                    }
+                    HIconButton(
+                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = "Atrás",
+                        onClick = onBackClick,
+                    )
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.onIntent(ComparePhotosIntent.ToggleSwap) }) {
-                        Icon(Icons.Rounded.SwapHoriz, contentDescription = "Intercambiar")
-                    }
+                    HIconButton(
+                        icon = Icons.Rounded.SwapHoriz,
+                        contentDescription = "Intercambiar",
+                        onClick = { viewModel.onIntent(ComparePhotosIntent.ToggleSwap) },
+                    )
                 },
             )
         },
@@ -187,13 +192,13 @@ fun ComparisonSlot(
                     contentScale = ContentScale.Crop,
                 )
                 Surface(
-                    color = Color.Black.copy(alpha = 0.6f),
+                    color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.6f),
                     shape = RoundedCornerShape(bottomEnd = 12.dp),
                     modifier = Modifier.align(Alignment.TopStart),
                 ) {
                     Text(
                         text = photo.date.formatDdMmYy(),
-                        color = Color.White,
+                        color = shadcnWhite,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     )

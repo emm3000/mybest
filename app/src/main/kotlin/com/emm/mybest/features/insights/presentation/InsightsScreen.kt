@@ -23,7 +23,6 @@ import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material.icons.rounded.North
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,6 +44,7 @@ import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HAlert
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
+import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
 
@@ -77,14 +77,18 @@ fun InsightsScreen(
             HTopBar(
                 title = "Insights & Progreso",
                 navigationIcon = {
-                    IconButton(onClick = { viewModel.onIntent(InsightsIntent.OnBackClick) }) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
-                    }
+                    HIconButton(
+                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = "Atrás",
+                        onClick = { viewModel.onIntent(InsightsIntent.OnBackClick) },
+                    )
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.onIntent(InsightsIntent.OnCompareClick) }) {
-                        Icon(Icons.Rounded.Compare, contentDescription = "Comparar fotos")
-                    }
+                    HIconButton(
+                        icon = Icons.Rounded.Compare,
+                        contentDescription = "Comparar fotos",
+                        onClick = { viewModel.onIntent(InsightsIntent.OnCompareClick) },
+                    )
                 },
             )
         },
@@ -296,6 +300,7 @@ private fun WeightChart(
     }
 
     val primaryColor = MaterialTheme.colorScheme.primary
+    val pointInnerColor = MaterialTheme.colorScheme.background
 
     Canvas(modifier = modifier) {
         val minWeight = weights.minOf { it.weight } - 2f
@@ -347,7 +352,7 @@ private fun WeightChart(
                 center = point,
             )
             drawCircle(
-                color = Color.White,
+                color = pointInnerColor,
                 radius = 2.dp.toPx(),
                 center = point,
             )
