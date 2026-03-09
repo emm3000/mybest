@@ -2,6 +2,7 @@ package com.emm.mybest.domain.usecase
 
 import com.emm.mybest.domain.models.InsightsData
 import com.emm.mybest.domain.repository.DailyHabitRepository
+import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -9,12 +10,14 @@ import kotlinx.coroutines.flow.combine
 class GetInsightsUseCase(
     private val weightRepository: WeightRepository,
     private val dailyHabitRepository: DailyHabitRepository,
+    private val photoRepository: PhotoRepository,
 ) {
     operator fun invoke(): Flow<InsightsData> {
         return combine(
             weightRepository.getWeightProgress(),
             dailyHabitRepository.getAllDailyHabits(),
-        ) { weights, habits ->
+            photoRepository.getAllPhotos(),
+        ) { weights, habits, photos ->
             val initialWeight = weights.firstOrNull()?.weight ?: 0f
             val currentWeight = weights.lastOrNull()?.weight ?: 0f
 
@@ -30,6 +33,7 @@ class GetInsightsUseCase(
                 initialWeight = initialWeight,
                 exerciseDays = habits.count { it.didExercise },
                 healthyEatingDays = habits.count { it.ateHealthy },
+                photoCount = photos.size,
             )
         }
     }

@@ -46,8 +46,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.YearMonthValue
@@ -55,7 +56,6 @@ import com.emm.mybest.core.datetime.currentDate
 import com.emm.mybest.core.datetime.formatEsMonthYear
 import com.emm.mybest.core.datetime.formatEsWeekdayDayMonth
 import com.emm.mybest.core.datetime.minusDays
-import com.emm.mybest.core.datetime.shortEs
 import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
@@ -68,7 +68,6 @@ import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 private const val CALENDAR_COLUMNS = 7
@@ -157,25 +156,11 @@ fun HistoryContent(
                         onMonthChange = { onIntent(HistoryIntent.OnMonthChange(it)) },
                     )
 
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        DayOfWeek.entries.forEach { dayOfWeek ->
-                            Text(
-                                text = dayOfWeek.shortEs(),
-                                modifier = Modifier.weight(1f),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-
-                    CalendarGrid(
-                        yearMonth = state.selectedMonth,
+                    HistoryMonthSection(
+                        selectedMonth = state.selectedMonth,
+                        monthlyData = state.monthlyData,
                         onDateClick = { onIntent(HistoryIntent.OnDateSelected(it)) },
-                        dayData = state.monthlyData,
                     )
-
-                    HistoryLegendSection()
                 }
             }
         }
@@ -281,6 +266,7 @@ fun DayCell(
     modifier: Modifier = Modifier,
 ) {
     val isToday = date == currentDate()
+    val dayContentDescription = buildDayCellDescription(date = date, summary = summary, isToday = isToday)
 
     Column(
         modifier = modifier
@@ -296,6 +282,9 @@ fun DayCell(
                 },
             )
             .clickable(onClick = onClick)
+            .semantics {
+                contentDescription = dayContentDescription
+            }
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -308,20 +297,7 @@ fun DayCell(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            modifier = Modifier.height(6.dp),
-        ) {
-            if (summary?.hasWeight == true) {
-                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
-            }
-            if (summary?.hasHabit == true) {
-                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondary))
-            }
-            if (summary?.hasPhoto == true) {
-                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.tertiary))
-            }
-        }
+        DayActivityIndicators(summary = summary)
         Spacer(modifier = Modifier.height(4.dp))
     }
 }

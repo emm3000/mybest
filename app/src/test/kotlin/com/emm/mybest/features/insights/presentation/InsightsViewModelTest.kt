@@ -31,6 +31,7 @@ class InsightsViewModelTest {
             initialWeight = 80f,
             exerciseDays = 10,
             healthyEatingDays = 8,
+            photoCount = 3,
         )
         every { getInsightsUseCase.invoke() } returns flowOf(expected)
 
@@ -45,6 +46,8 @@ class InsightsViewModelTest {
             assertEquals(expected.initialWeight, state.initialWeight)
             assertEquals(expected.exerciseDays, state.exerciseDays)
             assertEquals(expected.healthyEatingDays, state.healthyEatingDays)
+            assertEquals(expected.photoCount, state.photoCount)
+            assertEquals(true, state.canComparePhotos)
             assertEquals(false, state.isLoading)
             cancelAndIgnoreRemainingEvents()
         }
@@ -53,7 +56,7 @@ class InsightsViewModelTest {
     @Test
     fun `OnBackClick emits NavigateBack effect`() = runTest {
         every { getInsightsUseCase.invoke() } returns flowOf(
-            InsightsData(emptyList(), 0f, 0f, 0f, 0f, 0, 0),
+            InsightsData(emptyList(), 0f, 0f, 0f, 0f, 0, 0, 0),
         )
         val viewModel = InsightsViewModel(getInsightsUseCase)
 
@@ -67,7 +70,7 @@ class InsightsViewModelTest {
     @Test
     fun `OnCompareClick emits NavigateToCompare effect`() = runTest {
         every { getInsightsUseCase.invoke() } returns flowOf(
-            InsightsData(emptyList(), 0f, 0f, 0f, 0f, 0, 0),
+            InsightsData(emptyList(), 0f, 0f, 0f, 0f, 0, 0, 2),
         )
         val viewModel = InsightsViewModel(getInsightsUseCase)
 

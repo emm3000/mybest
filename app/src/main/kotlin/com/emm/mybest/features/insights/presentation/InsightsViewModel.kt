@@ -21,9 +21,17 @@ data class InsightsState(
     val initialWeight: Float = 0f,
     val exerciseDays: Int = 0,
     val healthyEatingDays: Int = 0,
+    val photoCount: Int = 0,
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
-)
+) {
+    val canComparePhotos: Boolean
+        get() = photoCount >= MIN_COMPARE_PHOTOS
+
+    private companion object {
+        private const val MIN_COMPARE_PHOTOS = 2
+    }
+}
 
 sealed class InsightsIntent {
     object OnBackClick : InsightsIntent()
@@ -52,6 +60,7 @@ class InsightsViewModel(
                 initialWeight = data.initialWeight,
                 exerciseDays = data.exerciseDays,
                 healthyEatingDays = data.healthyEatingDays,
+                photoCount = data.photoCount,
                 isLoading = false,
                 errorMessage = null,
             )

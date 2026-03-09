@@ -3,6 +3,7 @@ package com.emm.mybest.domain.usecase
 import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.repository.DailyHabitRepository
+import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import io.mockk.every
 import io.mockk.mockk
@@ -17,7 +18,8 @@ class GetInsightsUseCaseTest {
 
     private val weightRepository = mockk<WeightRepository>()
     private val dailyHabitRepository = mockk<DailyHabitRepository>()
-    private val useCase = GetInsightsUseCase(weightRepository, dailyHabitRepository)
+    private val photoRepository = mockk<PhotoRepository>()
+    private val useCase = GetInsightsUseCase(weightRepository, dailyHabitRepository, photoRepository)
 
     @Test
     fun `invoke calculates consistency and weight metrics`() = runTest {
@@ -41,6 +43,7 @@ class GetInsightsUseCaseTest {
         )
         every { weightRepository.getWeightProgress() } returns flowOf(weights)
         every { dailyHabitRepository.getAllDailyHabits() } returns flowOf(habits)
+        every { photoRepository.getAllPhotos() } returns flowOf(emptyList())
 
         val insights = useCase().single()
 
@@ -50,12 +53,14 @@ class GetInsightsUseCaseTest {
         assertEquals(2, insights.exerciseDays)
         assertEquals(1, insights.healthyEatingDays)
         assertEquals(0.75f, insights.habitConsistency)
+        assertEquals(0, insights.photoCount)
     }
 
     @Test
     fun `invoke returns zero consistency when there are no habits`() = runTest {
         every { weightRepository.getWeightProgress() } returns flowOf(emptyList())
         every { dailyHabitRepository.getAllDailyHabits() } returns flowOf(emptyList())
+        every { photoRepository.getAllPhotos() } returns flowOf(emptyList())
 
         val insights = useCase().single()
 
@@ -65,5 +70,6 @@ class GetInsightsUseCaseTest {
         assertEquals(0f, insights.totalWeightLost)
         assertEquals(0, insights.exerciseDays)
         assertEquals(0, insights.healthyEatingDays)
+        assertEquals(0, insights.photoCount)
     }
 }

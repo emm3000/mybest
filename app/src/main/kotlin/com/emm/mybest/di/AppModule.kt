@@ -55,7 +55,7 @@ val appModule = module {
     factory { GetDailyHabitsUseCase(get()) }
     factory { ToggleHabitUseCase(get()) }
     factory { GetHomeSummaryUseCase(get(), get(), get()) }
-    factory { GetInsightsUseCase(get(), get()) }
+    factory { GetInsightsUseCase(get(), get(), get()) }
 
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }

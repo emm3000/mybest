@@ -8,4 +8,5 @@ data class InsightsData(
     val initialWeight: Float,
     val exerciseDays: Int,
     val healthyEatingDays: Int,
+    val photoCount: Int,
 )

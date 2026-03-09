@@ -2,7 +2,6 @@ package com.emm.mybest.features.timeline.presentation
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -26,10 +25,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.core.datetime.formatEsLongDate
+import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
+import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
 
 private const val TIMELINE_PHOTO_HEIGHT_RATIO = 0.8f
@@ -64,8 +65,22 @@ fun TimelineContent(
     val contentModifier = modifier.fillMaxSize()
 
     if (state.isLoading) {
-        Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
-            androidx.compose.material3.CircularProgressIndicator()
+        Column(
+            modifier = contentModifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            HSkeleton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                cornerRadius = 24.dp,
+            )
+            HSkeleton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .size(width = 240.dp, height = 72.dp),
+                cornerRadius = 20.dp,
+            )
         }
         return
     }
@@ -115,7 +130,7 @@ fun TimelineContent(
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
-                        text = "Evolución: ${currentPhoto.type}",
+                        text = "Tipo: ${timelinePhotoTypeLabel(currentPhoto.type)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -144,9 +159,21 @@ fun PhotoPagerItem(
     ) {
         AsyncImage(
             model = photo.photoPath,
-            contentDescription = null,
+            contentDescription = "Foto de ${timelinePhotoTypeLabel(
+                photo.type,
+            ).lowercase()} del ${photo.date.formatEsLongDate()}",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
         )
     }
+}
+
+private fun timelinePhotoTypeLabel(type: PhotoType): String = when (type) {
+    PhotoType.FACE -> "Cara"
+    PhotoType.ABDOMEN -> "Abdomen"
+    PhotoType.BODY -> "Cuerpo"
+    PhotoType.BREAKFAST -> "Desayuno"
+    PhotoType.LUNCH -> "Almuerzo"
+    PhotoType.DINNER -> "Cena"
+    PhotoType.FOOD -> "Comida"
 }

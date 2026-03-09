@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
@@ -105,7 +106,7 @@ internal fun DayPhotosSection(
                 ) {
                     AsyncImage(
                         model = photo.photoPath,
-                        contentDescription = null,
+                        contentDescription = "Foto de ${photo.type.toSpanishLabel().lowercase()} del ${photo.date.formatEsLongDate()}",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
                     )
@@ -126,13 +127,13 @@ internal fun DayPhotosSection(
                     if (isToday) {
                         HIconButton(
                             icon = Icons.Rounded.Close,
-                            contentDescription = "Eliminar foto",
+                            contentDescription = "Eliminar foto de ${photo.type.toSpanishLabel().lowercase()}",
                             onClick = { onDeletePhoto(photo) },
                             variant = IconButtonVariant.Destructive,
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(4.dp)
-                                .size(24.dp)
+                                .size(40.dp)
                                 .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f), CircleShape),
                         )
                     }
