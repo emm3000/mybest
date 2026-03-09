@@ -21,7 +21,6 @@ import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.material.icons.rounded.WaterDrop
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.narrowEs
 import com.emm.mybest.domain.models.HabitType
+import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSelect
 import com.emm.mybest.ui.theme.MyBestTheme
@@ -140,7 +140,8 @@ private fun AddHabitContent(
                 }
             }
 
-            Button(
+            HButton(
+                text = if (state.step < ADD_HABIT_TOTAL_STEPS) "Continuar" else "Crear Hábito",
                 onClick = {
                     if (state.step < ADD_HABIT_TOTAL_STEPS) {
                         onIntent(AddHabitIntent.OnNextStep)
@@ -151,10 +152,9 @@ private fun AddHabitContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = MaterialTheme.shapes.medium,
-            ) {
-                Text(if (state.step < ADD_HABIT_TOTAL_STEPS) "Continuar" else "Crear Hábito")
-            }
+                enabled = !state.isLoading,
+                isLoading = state.isLoading,
+            )
         }
     }
 }

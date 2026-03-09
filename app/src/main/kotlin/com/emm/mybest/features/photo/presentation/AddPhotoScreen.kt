@@ -26,8 +26,6 @@ import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -60,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -255,26 +254,15 @@ private fun AddPhotoBody(
             }
         }
 
-        Button(
+        HButton(
+            text = "Guardar ${state.selectedPhotos.size} ${if (state.selectedPhotos.size == 1) "Foto" else "Fotos"}",
             onClick = { onIntent(AddPhotoIntent.OnSaveClick) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            shape = MaterialTheme.shapes.large,
             enabled = state.selectedPhotos.isNotEmpty() && !state.isLoading,
-        ) {
-            if (state.isLoading) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(24.dp),
-                )
-            } else {
-                Text(
-                    "Guardar ${state.selectedPhotos.size} ${if (state.selectedPhotos.size == 1) "Foto" else "Fotos"}",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
-        }
+            isLoading = state.isLoading,
+        )
     }
 }
 

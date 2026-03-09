@@ -7,18 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Scale
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -35,6 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.components.HButton
+import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.coroutines.flow.collectLatest
 
@@ -104,43 +102,38 @@ private fun AddWeightContent(
                 fontWeight = FontWeight.Bold,
             )
 
-            OutlinedTextField(
+            HInput(
                 value = state.weight,
                 onValueChange = { onIntent(AddWeightIntent.OnWeightChange(it)) },
-                label = { Text("Peso (kg)") },
+                label = "Peso (kg)",
+                placeholder = "Ej: 72.4",
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                leadingIcon = { Icon(Icons.Rounded.Scale, null) },
+                leadingIcon = { Icon(Icons.Rounded.Scale, contentDescription = null) },
                 singleLine = true,
             )
 
-            OutlinedTextField(
+            HInput(
                 value = state.note,
                 onValueChange = { onIntent(AddWeightIntent.OnNoteChange(it)) },
-                label = { Text("Nota (opcional)") },
+                label = "Nota (opcional)",
+                placeholder = "Ej: Después del entrenamiento",
                 modifier = Modifier.fillMaxWidth(),
+                singleLine = false,
                 minLines = 3,
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Button(
+            HButton(
+                text = "Guardar Registro",
                 onClick = { onIntent(AddWeightIntent.OnSaveClick) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = MaterialTheme.shapes.large,
                 enabled = state.weight.isNotEmpty() && !state.isLoading,
-            ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(24.dp),
-                    )
-                } else {
-                    Text("Guardar Registro", style = MaterialTheme.typography.titleMedium)
-                }
-            }
+                isLoading = state.isLoading,
+            )
         }
     }
 }
