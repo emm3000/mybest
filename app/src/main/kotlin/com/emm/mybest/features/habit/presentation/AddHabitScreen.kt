@@ -58,6 +58,15 @@ import kotlinx.datetime.DayOfWeek
 
 private const val ADD_HABIT_TOTAL_STEPS = 3
 private const val ADD_HABIT_ICON_GRID_COLUMNS = 4
+private val habitTypeDescriptions = mapOf(
+    HabitType.BOOLEAN to "Sí/No: marca si lo completaste hoy. Ejemplo: Meditar.",
+    HabitType.TIME to "Tiempo: define minutos diarios. Ejemplo: Leer 30 minutos.",
+    HabitType.METRIC to "Métrica: registra una cantidad objetivo. Ejemplo: Beber 8 vasos.",
+)
+private val habitGoalExamples = mapOf(
+    HabitType.TIME to "Ejemplo recomendado: 20 a 45 minutos por día.",
+    HabitType.METRIC to "Ejemplo recomendado: 8 vasos o 2 litros por día.",
+)
 
 private data class HabitIconOption(
     val value: String,
@@ -297,11 +306,19 @@ private fun StepTwo(
     state: AddHabitState,
     onIntent: (AddHabitIntent) -> Unit,
 ) {
+    val typeDescription = habitTypeDescriptions.getValue(state.type)
+    val goalExample = habitGoalExamples[state.type]
+
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Text(
             text = "¿Cómo medirás tu progreso?",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = typeDescription,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         Row(
@@ -328,7 +345,8 @@ private fun StepTwo(
                 value = state.goalValue,
                 onValueChange = { onIntent(AddHabitIntent.OnGoalValueChange(it)) },
                 label = if (state.type == HabitType.TIME) "Minutos al día" else "Valor objetivo",
-                placeholder = "Ej: 30",
+                placeholder = if (state.type == HabitType.TIME) "Ej: 30" else "Ej: 8",
+                supportingText = goalExample,
                 errorMessage = state.goalError,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -338,7 +356,7 @@ private fun StepTwo(
                     value = state.unit,
                     onValueChange = { onIntent(AddHabitIntent.OnUnitChange(it)) },
                     label = "Unidad",
-                    placeholder = "Ej: Vasos, Litros",
+                    placeholder = "Ej: vasos, km, paginas",
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
