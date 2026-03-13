@@ -23,6 +23,8 @@ data class ComparePhotosState(
     val selectedType: PhotoType? = null,
     val beforePhoto: ProgressPhoto? = null,
     val afterPhoto: ProgressPhoto? = null,
+    val totalPhotosCount: Int = 0,
+    val photoCountByType: Map<PhotoType, Int> = emptyMap(),
     val isLoading: Boolean = false,
 )
 
@@ -50,6 +52,7 @@ class ComparePhotosViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val state: StateFlow<ComparePhotosState> = combine(
+        photoRepository.getAllPhotos(),
         _selectedType.flatMapLatest { type ->
             if (type == null) {
                 photoRepository.getAllPhotos()
@@ -60,17 +63,20 @@ class ComparePhotosViewModel(
         _selectedType,
         _beforePhoto,
         _afterPhoto,
-    ) { photos, type, before, after ->
+    ) { allPhotos, photos, type, before, after ->
         val resolvedSelection = resolveComparisonSelection(
             photos = photos,
             before = before,
             after = after,
         )
+        val countByType = allPhotos.groupingBy { it.type }.eachCount()
         ComparePhotosState(
             photos = photos,
             selectedType = type,
             beforePhoto = resolvedSelection.before,
             afterPhoto = resolvedSelection.after,
+            totalPhotosCount = allPhotos.size,
+            photoCountByType = countByType,
             isLoading = false,
         )
     }.stateIn(

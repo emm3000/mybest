@@ -59,6 +59,9 @@ class ComparePhotosViewModelTest {
             assertEquals(null, loaded.selectedType)
             assertEquals(face, loaded.beforePhoto)
             assertEquals(body, loaded.afterPhoto)
+            assertEquals(2, loaded.totalPhotosCount)
+            assertEquals(1, loaded.photoCountByType[PhotoType.FACE])
+            assertEquals(1, loaded.photoCountByType[PhotoType.BODY])
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -84,6 +87,8 @@ class ComparePhotosViewModelTest {
             assertEquals(listOf(face), filtered.photos)
             assertEquals(face, filtered.beforePhoto)
             assertEquals(null, filtered.afterPhoto)
+            assertEquals(2, filtered.totalPhotosCount)
+            assertEquals(1, filtered.photoCountByType[PhotoType.FACE])
             cancelAndIgnoreRemainingEvents()
         }
     }

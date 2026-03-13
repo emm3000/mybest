@@ -153,6 +153,8 @@ private fun ComparePhotosContent(
 
         PhotoTypeSelector(
             selectedType = state.selectedType,
+            totalPhotosCount = state.totalPhotosCount,
+            photoCountByType = state.photoCountByType,
             onTypeChange = { onIntent(ComparePhotosIntent.OnTypeSelected(it)) },
         )
 
@@ -267,7 +269,8 @@ private fun ComparePhotosSelectionSection(
             }
         }
         state.photos.isEmpty() -> ComparePhotosEmptyState(
-            hasActiveFilter = state.selectedType != null,
+            selectedType = state.selectedType,
+            totalPhotosCount = state.totalPhotosCount,
             modifier = modifier,
         )
         else -> ComparePhotosGrid(

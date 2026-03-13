@@ -206,6 +206,8 @@ private fun ComparisonSlotFooter(
 @Composable
 internal fun PhotoTypeSelector(
     selectedType: PhotoType?,
+    totalPhotosCount: Int,
+    photoCountByType: Map<PhotoType, Int>,
     onTypeChange: (PhotoType?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -218,17 +220,16 @@ internal fun PhotoTypeSelector(
             HFilterChip(
                 selected = selectedType == null,
                 onClick = { onTypeChange(null) },
-                label = "Todas",
+                label = "Todas ($totalPhotosCount)",
             )
         }
         items(PhotoType.entries) { type ->
             val isSelected = type == selectedType
+            val count = photoCountByType[type] ?: 0
             HFilterChip(
                 selected = isSelected,
                 onClick = { onTypeChange(if (isSelected) null else type) },
-                label = type.name.lowercase().replaceFirstChar {
-                    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
-                },
+                label = "${getLabelForType(type)} ($count)",
             )
         }
     }
@@ -321,7 +322,8 @@ internal fun PhotoSelectionCard(
 
 @Composable
 internal fun ComparePhotosEmptyState(
-    hasActiveFilter: Boolean,
+    selectedType: PhotoType?,
+    totalPhotosCount: Int,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -339,8 +341,8 @@ internal fun ComparePhotosEmptyState(
                 tint = MaterialTheme.colorScheme.outline,
             )
             Text(
-                text = if (hasActiveFilter) {
-                    "No hay fotos del tipo seleccionado."
+                text = if (selectedType != null) {
+                    "No hay fotos de ${getLabelForType(selectedType).lowercase(Locale.getDefault())}."
                 } else {
                     "Aún no tienes fotos para comparar."
                 },
@@ -348,8 +350,10 @@ internal fun ComparePhotosEmptyState(
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = if (hasActiveFilter) {
-                    "Prueba otro filtro o agrega nuevas fotos."
+                text = if (selectedType != null && totalPhotosCount > 0) {
+                    "Cambia el filtro o agrega fotos de este tipo para poder compararlas."
+                } else if (selectedType != null) {
+                    "Aún no tienes fotos cargadas. Agrega fotos para habilitar comparación."
                 } else {
                     "Agrega fotos de progreso para empezar a comparar cambios."
                 },
