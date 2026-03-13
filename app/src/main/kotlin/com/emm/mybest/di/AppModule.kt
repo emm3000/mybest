@@ -3,6 +3,7 @@ package com.emm.mybest.di
 import androidx.room.Room
 import androidx.work.WorkManager
 import com.emm.mybest.data.AppDatabase
+import com.emm.mybest.data.BackupRepositoryImpl
 import com.emm.mybest.data.DailyHabitRepositoryImpl
 import com.emm.mybest.data.HabitRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
@@ -11,12 +12,14 @@ import com.emm.mybest.data.WeightRepositoryImpl
 import com.emm.mybest.data.reminder.HabitReminderSchedulerImpl
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.reminder.HabitReminderScheduler
+import com.emm.mybest.domain.repository.BackupRepository
 import com.emm.mybest.domain.repository.DailyHabitRepository
 import com.emm.mybest.domain.repository.HabitRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.domain.usecase.CreateHabitUseCase
+import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.GetDailyHabitsUseCase
 import com.emm.mybest.domain.usecase.GetHabitByIdUseCase
 import com.emm.mybest.domain.usecase.GetHomeSummaryUseCase
@@ -42,7 +45,7 @@ val appModule = module {
         Room.databaseBuilder(
             androidContext(),
             AppDatabase::class.java,
-            "my_best_db",
+            AppDatabase.DB_NAME,
         ).addMigrations(AppDatabase.MIGRATION_2_3)
             .fallbackToDestructiveMigration(false)
             .build()
@@ -56,6 +59,7 @@ val appModule = module {
     single<HabitRepository> { HabitRepositoryImpl(get(), get()) }
     single<WeightRepository> { WeightRepositoryImpl(get()) }
     single<PhotoRepository> { PhotoRepositoryImpl(get()) }
+    single<BackupRepository> { BackupRepositoryImpl(androidContext(), get()) }
 
     single<DailyHabitRepository> { DailyHabitRepositoryImpl(get()) }
     single { WorkManager.getInstance(androidContext()) }
@@ -66,6 +70,7 @@ val appModule = module {
     factory { ToggleHabitUseCase(get()) }
     factory { GetHomeSummaryUseCase(get(), get(), get()) }
     factory { GetInsightsUseCase(get(), get(), get()) }
+    factory { ExportDatabaseBackupUseCase(get()) }
     factory { GetHabitByIdUseCase(get()) }
     factory { UpdateHabitUseCase(get(), get()) }
 

@@ -37,6 +37,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun habitRecordDao(): HabitRecordDao
 
     companion object {
+        const val DB_NAME = "my_best_db"
+
         val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE daily_weight ADD COLUMN habit_id TEXT")
