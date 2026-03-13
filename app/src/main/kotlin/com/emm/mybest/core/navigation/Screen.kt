@@ -31,6 +31,9 @@ sealed interface Screen {
     @Serializable
     data object Timeline : Screen
 
+    @Serializable
+    data object ReminderSettings : Screen
+
     // Example with arguments (for later use or demonstration of the "arguments" part of the requirement)
     @Serializable
     data class HabitDetail(val habitId: String) : Screen

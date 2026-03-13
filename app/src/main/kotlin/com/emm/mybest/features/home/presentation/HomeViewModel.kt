@@ -35,6 +35,7 @@ sealed class HomeIntent {
     object OnAddWeightClick : HomeIntent()
     object OnAddHabitClick : HomeIntent()
     object OnAddPhotoClick : HomeIntent()
+    object OnReminderSettingsClick : HomeIntent()
     object OnViewHistoryClick : HomeIntent()
     object OnViewInsightsClick : HomeIntent()
     object OnViewTimelineClick : HomeIntent()
@@ -50,6 +51,16 @@ class HomeViewModel(
     getHomeSummaryUseCase: GetHomeSummaryUseCase,
     private val toggleHabitUseCase: ToggleHabitUseCase,
 ) : ViewModel() {
+
+    private val navigationRoutes: Map<HomeIntent, Screen> = mapOf(
+        HomeIntent.OnAddWeightClick to Screen.AddWeight,
+        HomeIntent.OnAddHabitClick to Screen.AddHabit,
+        HomeIntent.OnAddPhotoClick to Screen.AddPhoto,
+        HomeIntent.OnReminderSettingsClick to Screen.ReminderSettings,
+        HomeIntent.OnViewHistoryClick to Screen.History,
+        HomeIntent.OnViewInsightsClick to Screen.Insights,
+        HomeIntent.OnViewTimelineClick to Screen.Timeline,
+    )
 
     private val _effect = MutableSharedFlow<HomeEffect>()
     val effect = _effect.asSharedFlow()
@@ -78,15 +89,7 @@ class HomeViewModel(
     }
 
     private fun handleNavigationIntent(intent: HomeIntent) {
-        when (intent) {
-            HomeIntent.OnAddWeightClick -> emitNavigate(Screen.AddWeight)
-            HomeIntent.OnAddHabitClick -> emitNavigate(Screen.AddHabit)
-            HomeIntent.OnAddPhotoClick -> emitNavigate(Screen.AddPhoto)
-            HomeIntent.OnViewHistoryClick -> emitNavigate(Screen.History)
-            HomeIntent.OnViewInsightsClick -> emitNavigate(Screen.Insights)
-            HomeIntent.OnViewTimelineClick -> emitNavigate(Screen.Timeline)
-            else -> Unit
-        }
+        navigationRoutes[intent]?.let(::emitNavigate)
     }
 
     private fun emitNavigate(screen: Screen) {

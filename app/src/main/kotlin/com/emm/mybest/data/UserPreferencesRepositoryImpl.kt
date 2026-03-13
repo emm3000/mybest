@@ -36,4 +36,10 @@ class UserPreferencesRepositoryImpl(
     override val notificationsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: true
     }
+
+    override suspend fun updateNotificationsEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = enabled
+        }
+    }
 }

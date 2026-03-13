@@ -9,14 +9,19 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.emm.mybest.R
 import com.emm.mybest.core.datetime.currentDate
 import com.emm.mybest.data.AppDatabase
+import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.util.Locale
+
+private val Context.reminderDataStore by preferencesDataStore(name = USER_PREFERENCES_DATASTORE)
 
 class HabitReminderWorker(
     appContext: Context,
@@ -37,7 +42,7 @@ class HabitReminderWorker(
             habitId = habitId,
             isReminderDay = isReminderDay,
             isCompletedToday = isCompletedToday,
-            canPostNotifications = canPostNotifications(),
+            canPostNotifications = canPostNotifications() && areInAppRemindersEnabled(),
         )
         if (shouldNotify) {
             createReminderChannelIfNeeded()
@@ -103,6 +108,11 @@ class HabitReminderWorker(
         return NotificationManagerCompat.from(applicationContext).areNotificationsEnabled()
     }
 
+    private suspend fun areInAppRemindersEnabled(): Boolean {
+        val key = booleanPreferencesKey(NOTIFICATIONS_ENABLED_KEY)
+        return applicationContext.reminderDataStore.data.first()[key] ?: true
+    }
+
     private fun createReminderChannelIfNeeded() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -122,8 +132,11 @@ class HabitReminderWorker(
         const val KEY_SCHEDULED_DAYS = "scheduled_days"
         private const val CHANNEL_ID = "habit_reminders"
         private const val DATABASE_NAME = "my_best_db"
+        private const val NOTIFICATIONS_ENABLED_KEY = "notifications_enabled"
     }
 }
+
+private const val USER_PREFERENCES_DATASTORE = "user_preferences"
 
 internal fun shouldDispatchReminder(
     habitId: String?,

@@ -8,4 +8,6 @@ interface UserPreferencesRepository {
     val notificationsEnabled: Flow<Boolean>
 
     suspend fun updateDarkMode(enabled: Boolean)
+
+    suspend fun updateNotificationsEnabled(enabled: Boolean)
 }

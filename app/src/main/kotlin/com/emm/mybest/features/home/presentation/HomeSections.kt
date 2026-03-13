@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.MonitorWeight
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +40,9 @@ internal fun LazyListScope.homePrimaryActionsSection(
             NewHabitQuickAction(
                 state = state,
                 onClick = { onIntent(HomeIntent.OnAddHabitClick) },
+            )
+            ReminderSettingsQuickAction(
+                onClick = { onIntent(HomeIntent.OnReminderSettingsClick) },
             )
         }
     }
@@ -88,6 +92,21 @@ internal fun ProgressPhotoQuickAction(
         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
         iconColor = MaterialTheme.colorScheme.tertiary,
+        onClick = onClick,
+    )
+}
+
+@Composable
+internal fun ReminderSettingsQuickAction(
+    onClick: () -> Unit,
+) {
+    QuickActionCard(
+        title = "Configurar recordatorios",
+        subtitle = "Activa o pausa avisos preventivos por hábito",
+        icon = Icons.Rounded.NotificationsActive,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        iconColor = MaterialTheme.colorScheme.primary,
         onClick = onClick,
     )
 }

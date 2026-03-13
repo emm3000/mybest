@@ -29,6 +29,8 @@ import com.emm.mybest.features.photo.presentation.AddPhotoScreen
 import com.emm.mybest.features.photo.presentation.AddPhotoViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosScreen
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
+import com.emm.mybest.features.settings.presentation.ReminderSettingsScreen
+import com.emm.mybest.features.settings.presentation.ReminderSettingsViewModel
 import com.emm.mybest.features.timeline.presentation.TimelineScreen
 import com.emm.mybest.features.timeline.presentation.TimelineViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightScreen
@@ -215,6 +217,15 @@ private fun AppNavGraph(
             val viewModel: TimelineViewModel = koinViewModel()
             TimelineScreen(
                 viewModel = viewModel,
+                modifier = Modifier,
+            )
+        }
+
+        composable<Screen.ReminderSettings> {
+            val viewModel: ReminderSettingsViewModel = koinViewModel()
+            ReminderSettingsScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() },
                 modifier = Modifier,
             )
         }
