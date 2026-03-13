@@ -6,5 +6,6 @@ import kotlinx.datetime.LocalDate
 
 interface DailyHabitRepository {
     fun getAllDailyHabits(): Flow<List<DailyHabitSummary>>
+
     suspend fun deleteByDate(date: LocalDate)
 }

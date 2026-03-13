@@ -6,10 +6,12 @@ import kotlinx.datetime.LocalDate
 
 interface WeightRepository {
     fun getWeightProgress(): Flow<List<WeightEntry>>
+
     suspend fun saveWeight(
         weight: Float,
         note: String?,
         habitId: String? = null,
     )
+
     suspend fun deleteByDate(date: LocalDate)
 }

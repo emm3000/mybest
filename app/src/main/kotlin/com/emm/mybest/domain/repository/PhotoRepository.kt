@@ -7,7 +7,10 @@ import kotlinx.coroutines.flow.Flow
 
 interface PhotoRepository {
     fun getAllPhotos(): Flow<List<ProgressPhoto>>
+
     fun getPhotosByType(type: PhotoType): Flow<List<ProgressPhoto>>
+
     suspend fun savePhotos(photos: List<NewProgressPhoto>)
+
     suspend fun deletePhoto(photoId: String)
 }
