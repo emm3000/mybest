@@ -58,6 +58,7 @@ fun HabitCard(
             record = record,
             isCompleted = isCompleted,
             onToggle = onToggle,
+            isEditable = onClick != null,
         )
     }
 }
@@ -68,6 +69,7 @@ private fun HabitCardContent(
     record: HabitRecord?,
     isCompleted: Boolean,
     onToggle: () -> Unit,
+    isEditable: Boolean,
 ) {
     val cs = MaterialTheme.colorScheme
     Row(
@@ -82,6 +84,7 @@ private fun HabitCardContent(
             habit = habit,
             record = record,
             isCompleted = isCompleted,
+            isEditable = isEditable,
             modifier = Modifier.weight(1f),
         )
         CompletionToggle(
@@ -114,6 +117,7 @@ private fun HabitCardTexts(
     habit: Habit,
     record: HabitRecord?,
     isCompleted: Boolean,
+    isEditable: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val cs = MaterialTheme.colorScheme
@@ -129,6 +133,13 @@ private fun HabitCardTexts(
             style = MaterialTheme.typography.bodySmall,
             color = cs.onSurfaceVariant,
         )
+        if (isEditable) {
+            Text(
+                text = "Toca para editar",
+                style = MaterialTheme.typography.labelSmall,
+                color = cs.primary,
+            )
+        }
     }
 }
 
