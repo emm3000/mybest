@@ -49,8 +49,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Run unit tests, detekt and JaCoCo report
-        run: ./gradlew :app:detekt :app:jacocoTestReport
+      - name: Quality gate (detekt + unit tests + androidTest compile + JaCoCo)
+        run: ./gradlew :app:detekt :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :app:jacocoTestReport
 
       - name: Validate minimum coverage (70%)
         run: |
