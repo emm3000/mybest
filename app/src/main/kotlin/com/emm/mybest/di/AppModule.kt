@@ -1,13 +1,16 @@
 package com.emm.mybest.di
 
 import androidx.room.Room
+import androidx.work.WorkManager
 import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.DailyHabitRepositoryImpl
 import com.emm.mybest.data.HabitRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepositoryImpl
 import com.emm.mybest.data.WeightRepositoryImpl
+import com.emm.mybest.data.reminder.HabitReminderSchedulerImpl
 import com.emm.mybest.domain.media.MediaManager
+import com.emm.mybest.domain.reminder.HabitReminderScheduler
 import com.emm.mybest.domain.repository.DailyHabitRepository
 import com.emm.mybest.domain.repository.HabitRepository
 import com.emm.mybest.domain.repository.PhotoRepository
@@ -54,14 +57,16 @@ val appModule = module {
     single<PhotoRepository> { PhotoRepositoryImpl(get()) }
 
     single<DailyHabitRepository> { DailyHabitRepositoryImpl(get()) }
+    single { WorkManager.getInstance(androidContext()) }
+    single<HabitReminderScheduler> { HabitReminderSchedulerImpl(get()) }
 
-    factory { CreateHabitUseCase(get()) }
+    factory { CreateHabitUseCase(get(), get()) }
     factory { GetDailyHabitsUseCase(get()) }
     factory { ToggleHabitUseCase(get()) }
     factory { GetHomeSummaryUseCase(get(), get(), get()) }
     factory { GetInsightsUseCase(get(), get(), get()) }
     factory { GetHabitByIdUseCase(get()) }
-    factory { UpdateHabitUseCase(get()) }
+    factory { UpdateHabitUseCase(get(), get()) }
 
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
