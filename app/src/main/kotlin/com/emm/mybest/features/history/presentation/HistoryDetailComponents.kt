@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,6 +41,18 @@ import com.emm.mybest.ui.components.IconButtonVariant
 import com.emm.mybest.ui.theme.shadcnWhite
 
 private const val DAY_PHOTOS_GRID_COLUMNS = 3
+
+internal enum class DayTimelineEventType {
+    HABIT,
+    WEIGHT,
+    PHOTO,
+}
+
+internal data class DayTimelineEntry(
+    val type: DayTimelineEventType,
+    val sequence: Long,
+    val photo: ProgressPhoto? = null,
+)
 
 @Composable
 internal fun DayEmptyState(modifier: Modifier = Modifier) {
@@ -81,6 +95,109 @@ internal fun HabitDetailItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        },
+    )
+}
+
+@Composable
+internal fun DayTimelineSection(
+    summary: DaySummary,
+    isToday: Boolean,
+    onDeleteWeight: () -> Unit,
+    onDeleteHabit: () -> Unit,
+    onDeletePhoto: (ProgressPhoto) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val timeline = buildDayTimelineEntries(summary)
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = "Actividad del día",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        timeline.forEach { entry ->
+            when (entry.type) {
+                DayTimelineEventType.HABIT -> {
+                    summary.habit?.let { habit ->
+                        HabitDetailItem(
+                            habit = habit,
+                            isToday = isToday,
+                            onDeleteHabit = onDeleteHabit,
+                        )
+                    }
+                }
+
+                DayTimelineEventType.WEIGHT -> {
+                    WeightTimelineItem(summary = summary, isToday = isToday, onDeleteWeight = onDeleteWeight)
+                }
+
+                DayTimelineEventType.PHOTO -> {
+                    entry.photo?.let { photo ->
+                        PhotoTimelineItem(
+                            photo = photo,
+                            habitName = summary.photoHabitNames[photo.id],
+                            isToday = isToday,
+                            onDeletePhoto = onDeletePhoto,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeightTimelineItem(
+    summary: DaySummary,
+    isToday: Boolean,
+    onDeleteWeight: () -> Unit,
+) {
+    summary.weight?.let { weight ->
+        val weightSubtitle = listOfNotNull(
+            weight.note,
+            summary.weightHabitName?.let { "Relacionado con: $it" },
+        ).takeIf { it.isNotEmpty() }?.joinToString("\n")
+
+        DetailItem(
+            icon = Icons.Rounded.MonitorWeight,
+            color = MaterialTheme.colorScheme.primary,
+            title = "Peso: ${weight.weight} kg",
+            subtitle = weightSubtitle,
+            onDelete = if (isToday) onDeleteWeight else null,
+        )
+    }
+}
+
+@Composable
+private fun PhotoTimelineItem(
+    photo: ProgressPhoto,
+    habitName: String?,
+    isToday: Boolean,
+    onDeletePhoto: (ProgressPhoto) -> Unit,
+) {
+    DetailItem(
+        icon = Icons.Rounded.Image,
+        color = MaterialTheme.colorScheme.tertiary,
+        title = "Foto: ${photo.type.toSpanishLabel()}",
+        subtitle = habitName,
+        onDelete = if (isToday) {
+            { onDeletePhoto(photo) }
+        } else {
+            null
+        },
+        content = {
+            AsyncImage(
+                model = photo.photoPath,
+                contentDescription = "Foto de ${photo.type.toSpanishLabel().lowercase()}",
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .size(88.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop,
+            )
         },
     )
 }
@@ -168,4 +285,24 @@ private fun PhotoType.toSpanishLabel(): String = when (this) {
     PhotoType.LUNCH -> "Almuerzo"
     PhotoType.DINNER -> "Cena"
     PhotoType.FOOD -> "Comida"
+}
+
+internal fun buildDayTimelineEntries(summary: DaySummary): List<DayTimelineEntry> {
+    val entries = mutableListOf<DayTimelineEntry>()
+    summary.habit?.let {
+        entries.add(DayTimelineEntry(type = DayTimelineEventType.HABIT, sequence = 0))
+    }
+    summary.weight?.let {
+        entries.add(DayTimelineEntry(type = DayTimelineEventType.WEIGHT, sequence = 1))
+    }
+    summary.photos.sortedBy { it.createdAt }.forEachIndexed { index, photo ->
+        entries.add(
+            DayTimelineEntry(
+                type = DayTimelineEventType.PHOTO,
+                sequence = 1000L + index,
+                photo = photo,
+            ),
+        )
+    }
+    return entries.sortedBy { it.sequence }
 }

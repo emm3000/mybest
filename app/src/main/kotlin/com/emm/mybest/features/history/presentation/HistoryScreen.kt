@@ -28,7 +28,6 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.History
-import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -365,33 +364,11 @@ fun DayDetailContent(
         if (summary?.hasActivity != true) {
             DayEmptyState()
         } else {
-            summary.weight?.let { weight ->
-                val weightSubtitle = listOfNotNull(
-                    weight.note,
-                    summary.weightHabitName?.let { "Relacionado con: $it" },
-                ).takeIf { it.isNotEmpty() }?.joinToString("\n")
-
-                DetailItem(
-                    icon = Icons.Rounded.MonitorWeight,
-                    color = MaterialTheme.colorScheme.primary,
-                    title = "Peso: ${weight.weight} kg",
-                    subtitle = weightSubtitle,
-                    onDelete = if (isToday) onDeleteWeight else null,
-                )
-            }
-
-            summary.habit?.let { habit ->
-                HabitDetailItem(
-                    habit = habit,
-                    isToday = isToday,
-                    onDeleteHabit = onDeleteHabit,
-                )
-            }
-
-            DayPhotosSection(
-                photos = summary.photos,
-                photoHabitNames = summary.photoHabitNames,
+            DayTimelineSection(
+                summary = summary,
                 isToday = isToday,
+                onDeleteWeight = onDeleteWeight,
+                onDeleteHabit = onDeleteHabit,
                 onDeletePhoto = { photoToDelete = it },
             )
         }
