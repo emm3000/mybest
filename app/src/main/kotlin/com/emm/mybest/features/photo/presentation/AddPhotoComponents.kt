@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,6 +15,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.ui.components.CardVariant
+import com.emm.mybest.ui.components.HCard
 
 internal fun getLabelForType(type: PhotoType): String = when (type) {
     PhotoType.FACE -> "Cara"
@@ -34,10 +35,9 @@ internal fun HSourceOption(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    HCard(
         onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface,
+        variant = CardVariant.Outlined,
         modifier = modifier,
     ) {
         Row(

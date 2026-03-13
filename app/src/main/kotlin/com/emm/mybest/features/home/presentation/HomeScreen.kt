@@ -1,5 +1,6 @@
 package com.emm.mybest.features.home.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -235,10 +235,11 @@ fun QuickActionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    HCard(
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
-        color = containerColor,
+        cornerRadius = 24.dp,
+        variant = CardVariant.Filled,
+        containerColor = containerColor,
         modifier = modifier,
     ) {
         Row(
@@ -247,21 +248,28 @@ fun QuickActionCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Surface(
+            Box(
                 modifier = Modifier.size(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = iconColor.copy(alpha = 0.12f),
+                contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier = Modifier.padding(14.dp),
-                )
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(
+                            color = iconColor.copy(alpha = 0.12f),
+                            shape = RoundedCornerShape(16.dp),
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier = Modifier.padding(14.dp),
+                    )
+                }
             }
-
             Spacer(modifier = Modifier.width(16.dp))
-
             Column {
                 Text(
                     text = title,

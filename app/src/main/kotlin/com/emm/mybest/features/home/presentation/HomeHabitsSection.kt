@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,6 +25,7 @@ import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
+import com.emm.mybest.ui.components.HStatChip
 import com.emm.mybest.ui.components.HabitCard
 
 private const val HOME_HABIT_SKELETON_COUNT = 3
@@ -113,51 +113,21 @@ private fun HomeDailyProgressSummary(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        SummaryMetricCard(
-            title = "Pendientes",
+        HStatChip(
+            label = "Pendientes",
             value = pendingHabits.toString(),
             modifier = Modifier.weight(1f),
         )
-        SummaryMetricCard(
-            title = "Completados",
+        HStatChip(
+            label = "Completados",
             value = completedHabits.toString(),
             modifier = Modifier.weight(1f),
         )
-        SummaryMetricCard(
-            title = "Total",
+        HStatChip(
+            label = "Total",
             value = totalHabits.toString(),
             modifier = Modifier.weight(1f),
         )
-    }
-}
-
-@Composable
-private fun SummaryMetricCard(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
     }
 }
 

@@ -30,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.narrowEs
 import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.ui.components.HButton
+import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSelect
@@ -443,9 +443,9 @@ private fun StepThree(
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
         )
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            shape = MaterialTheme.shapes.medium,
+        HCard(
+            variant = com.emm.mybest.ui.components.CardVariant.Filled,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(

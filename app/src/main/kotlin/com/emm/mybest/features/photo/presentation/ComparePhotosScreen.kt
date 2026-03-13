@@ -21,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.components.HIconButton
+import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HTopBar
 import kotlinx.coroutines.flow.collectLatest
 
@@ -186,10 +186,10 @@ private fun CompareSelectionGuide(
     val afterReady = state.afterPhoto != null
     val chronologicalOrderInverted = isChronologicalOrderInverted(state)
 
-    Surface(
+    HCard(
         modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        variant = com.emm.mybest.ui.components.CardVariant.Filled,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
     ) {
         Column(
             modifier = Modifier.padding(12.dp),

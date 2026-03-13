@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,6 +35,7 @@ import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HIconButton
+import com.emm.mybest.ui.components.HSwitch
 import com.emm.mybest.ui.components.HTopBar
 import kotlinx.coroutines.flow.collectLatest
 
@@ -110,11 +110,12 @@ fun ReminderSettingsScreen(
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Switch(
+                    HSwitch(
                         checked = state.notificationsEnabled,
                         onCheckedChange = {
                             viewModel.onIntent(ReminderSettingsIntent.OnNotificationsToggle(it))
                         },
+                        contentDescription = "Alternar recordatorios",
                         modifier = Modifier.semantics {
                             role = Role.Switch
                             stateDescription = if (state.notificationsEnabled) "Recordatorios activos" else "Recordatorios pausados"

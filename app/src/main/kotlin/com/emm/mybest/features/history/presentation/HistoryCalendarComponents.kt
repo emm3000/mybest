@@ -26,6 +26,7 @@ import com.emm.mybest.core.datetime.formatEsMonthYear
 import com.emm.mybest.core.datetime.formatEsWeekdayDayMonth
 import com.emm.mybest.core.datetime.shortEs
 import com.emm.mybest.ui.components.HEmptyState
+import com.emm.mybest.ui.components.HStatChip
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
@@ -149,31 +150,11 @@ private fun SummaryMetricChip(
     value: String,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .clip(MaterialTheme.shapes.small)
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    }
+    HStatChip(
+        label = label,
+        value = value,
+        modifier = modifier,
+    )
 }
 
 @Composable

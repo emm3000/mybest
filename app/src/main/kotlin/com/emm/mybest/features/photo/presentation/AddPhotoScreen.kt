@@ -29,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -54,8 +53,11 @@ import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.HButton
+import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HFilterChip
 import com.emm.mybest.ui.components.HIconButton
+import com.emm.mybest.ui.components.HMediaCard
+import com.emm.mybest.ui.components.HMediaOverlayLabel
 import com.emm.mybest.ui.components.HSelect
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.components.IconButtonVariant
@@ -237,12 +239,12 @@ private fun AddPhotoBody(
         )
 
         if (state.selectedPhotos.isEmpty()) {
-            Surface(
+            HCard(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = MaterialTheme.shapes.large,
+                variant = com.emm.mybest.ui.components.CardVariant.Filled,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
             ) {
                 Column(
                     modifier = Modifier
@@ -368,18 +370,20 @@ fun PhotoCard(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceVariant,
+    HMediaCard(
         modifier = modifier,
-    ) {
-        Column {
-            Box(modifier = Modifier.height(160.dp).fillMaxWidth()) {
+        aspectRatio = 1f,
+        media = {
+            Box(modifier = Modifier.fillMaxSize()) {
                 AsyncImage(
                     model = uri,
                     contentDescription = selectedPhotoContentDescription(selectedType),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
+                )
+                HMediaOverlayLabel(
+                    text = getLabelForType(selectedType),
+                    align = Alignment.BottomStart,
                 )
                 HIconButton(
                     icon = Icons.Rounded.Delete,
@@ -392,7 +396,8 @@ fun PhotoCard(
                         .size(32.dp),
                 )
             }
-
+        },
+        footer = {
             Text(
                 text = "Tipo de foto",
                 style = MaterialTheme.typography.labelSmall,
@@ -414,8 +419,8 @@ fun PhotoCard(
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
+        },
+    )
 }
 
 private fun selectedPhotoContentDescription(type: PhotoType): String {

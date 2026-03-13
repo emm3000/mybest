@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,9 +19,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.components.CardVariant
+import com.emm.mybest.ui.components.HCard
 
 private const val HISTORY_LEGEND_DOT_SIZE = 8
-private const val HISTORY_LEGEND_SECTION_CORNER = 16
 
 @Composable
 fun LegendItem(
@@ -43,10 +42,10 @@ fun LegendItem(
 
 @Composable
 fun HistoryLegendSection(modifier: Modifier = Modifier) {
-    Surface(
+    HCard(
         modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-        shape = RoundedCornerShape(HISTORY_LEGEND_SECTION_CORNER.dp),
+        variant = CardVariant.Filled,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
     ) {
         Column(
             modifier = Modifier.padding(12.dp),

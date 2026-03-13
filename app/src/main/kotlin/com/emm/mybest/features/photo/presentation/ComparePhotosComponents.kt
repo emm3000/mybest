@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,7 +42,7 @@ import com.emm.mybest.core.datetime.formatDdMmYy
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.HFilterChip
-import com.emm.mybest.ui.theme.shadcnWhite
+import com.emm.mybest.ui.components.HMediaOverlayLabel
 import java.util.Locale
 
 @Composable
@@ -109,31 +108,15 @@ private fun ColumnScope.ComparisonSlotPhotoContent(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
             )
-            Surface(
-                color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.6f),
-                shape = RoundedCornerShape(bottomEnd = 12.dp),
-                modifier = Modifier.align(Alignment.TopStart),
-            ) {
-                Text(
-                    text = photo.date.formatDdMmYy(),
-                    color = shadcnWhite,
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                )
-            }
+            HMediaOverlayLabel(
+                text = photo.date.formatDdMmYy(),
+                align = Alignment.TopStart,
+            )
             if (isSelected) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(bottomStart = 12.dp),
-                    modifier = Modifier.align(Alignment.TopEnd),
-                ) {
-                    Text(
-                        text = "Activo",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    )
-                }
+                HMediaOverlayLabel(
+                    text = "Activo",
+                    align = Alignment.TopEnd,
+                )
             }
         } else {
             EmptyComparisonSlot()
@@ -168,9 +151,12 @@ private fun ComparisonSlotFooter(
     isSelected: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.fillMaxWidth(),
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+            ),
     ) {
         Column(
             modifier = Modifier
@@ -273,28 +259,10 @@ internal fun PhotoSelectionCard(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
         )
-        Surface(
-            color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f),
-            shape = RoundedCornerShape(topEnd = 12.dp),
-            modifier = Modifier.align(Alignment.BottomStart),
-        ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                Text(
-                    text = photo.date.formatDdMmYy(),
-                    color = shadcnWhite,
-                    style = MaterialTheme.typography.labelSmall,
-                )
-                Text(
-                    text = getLabelForType(photo.type),
-                    color = shadcnWhite,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Medium,
-                )
-            }
-        }
+        HMediaOverlayLabel(
+            text = "${photo.date.formatDdMmYy()} · ${getLabelForType(photo.type)}",
+            align = Alignment.BottomStart,
+        )
         if (isSelected) {
             Box(
                 modifier = Modifier
@@ -303,19 +271,10 @@ internal fun PhotoSelectionCard(
             )
         }
         selectionLabel?.let { label ->
-            Surface(
-                color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(bottomStart = 12.dp),
-                modifier = Modifier.align(Alignment.TopEnd),
-            ) {
-                Text(
-                    text = label,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                )
-            }
+            HMediaOverlayLabel(
+                text = label,
+                align = Alignment.TopEnd,
+            )
         }
     }
 }

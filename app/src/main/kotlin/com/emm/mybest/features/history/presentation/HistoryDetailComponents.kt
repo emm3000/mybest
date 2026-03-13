@@ -21,7 +21,6 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.core.datetime.formatEsLongDate
@@ -37,8 +35,8 @@ import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.HIconButton
+import com.emm.mybest.ui.components.HMediaOverlayLabel
 import com.emm.mybest.ui.components.IconButtonVariant
-import com.emm.mybest.ui.theme.shadcnWhite
 
 private const val DAY_PHOTOS_GRID_COLUMNS = 3
 
@@ -230,34 +228,12 @@ internal fun DayPhotosSection(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
                     )
-                    Surface(
-                        color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.6f),
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth(),
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text(
-                                text = photo.type.toSpanishLabel(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = shadcnWhite,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(top = 2.dp),
-                            )
-                            photoHabitNames[photo.id]?.let { habitName ->
-                                Text(
-                                    text = habitName,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = shadcnWhite.copy(alpha = 0.9f),
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(bottom = 2.dp),
-                                )
-                            }
-                        }
-                    }
+                    HMediaOverlayLabel(
+                        text = listOf(photo.type.toSpanishLabel(), photoHabitNames[photo.id])
+                            .filterNotNull()
+                            .joinToString(" · "),
+                        align = Alignment.BottomStart,
+                    )
                     if (isToday) {
                         HIconButton(
                             icon = Icons.Rounded.Close,

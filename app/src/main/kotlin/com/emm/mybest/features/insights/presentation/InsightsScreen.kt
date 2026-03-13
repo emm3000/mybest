@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +32,9 @@ import com.emm.mybest.ui.components.HAlert
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
+import com.emm.mybest.ui.components.HProgressRing
 import com.emm.mybest.ui.components.HSkeleton
+import com.emm.mybest.ui.components.StatChipVariant
 import com.emm.mybest.ui.components.HTopBar
 
 private const val INSIGHTS_SCREEN_PADDING = 16
@@ -288,23 +288,12 @@ private fun HabitStats(
         verticalArrangement = Arrangement.spacedBy(INSIGHTS_STATS_GAP.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                androidx.compose.ui.Modifier.size(INSIGHTS_RING_SIZE.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator(
-                    progress = { state.habitConsistency },
-                    modifier = androidx.compose.ui.Modifier.fillMaxSize(),
-                    strokeWidth = 8.dp,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.secondary,
-                    trackColor = androidx.compose.material3.MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                )
-                Text(
-                    text = "${(state.habitConsistency * 100).toInt()}%",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+            HProgressRing(
+                progress = state.habitConsistency,
+                size = INSIGHTS_RING_SIZE.dp,
+                strokeWidth = 8.dp,
+                showLabel = true,
+            )
             Spacer(androidx.compose.ui.Modifier.width(INSIGHTS_SECTION_SPACING.dp))
             Column {
                 Text("Consistencia General", fontWeight = FontWeight.Bold)
@@ -319,12 +308,12 @@ private fun HabitStats(
         HorizontalStatRow(
             label = "Días de Ejercicio",
             count = state.exerciseDays,
-            color = androidx.compose.material3.MaterialTheme.colorScheme.secondary,
+            variant = StatChipVariant.Secondary,
         )
         HorizontalStatRow(
             label = "Comida Saludable",
             count = state.healthyEatingDays,
-            color = androidx.compose.material3.MaterialTheme.colorScheme.tertiary,
+            variant = StatChipVariant.Tertiary,
         )
     }
 }

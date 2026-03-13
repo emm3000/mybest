@@ -30,7 +30,6 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -64,8 +63,11 @@ import com.emm.mybest.ui.components.AlertVariant
 import com.emm.mybest.ui.components.HAlert
 import com.emm.mybest.ui.components.HAlertDialog
 import com.emm.mybest.ui.components.HBottomSheet
+import com.emm.mybest.ui.components.HBadge
 import com.emm.mybest.ui.components.HEmptyState
+import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSkeleton
+import com.emm.mybest.ui.components.BadgeVariant
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.datetime.LocalDate
@@ -215,9 +217,11 @@ fun MonthSelector(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
-            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = "Mes anterior")
-        }
+        HIconButton(
+            icon = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
+            contentDescription = "Mes anterior",
+            onClick = { onMonthChange(currentMonth.minusMonths(1)) },
+        )
 
         Text(
             text = currentMonth.formatEsMonthYear(),
@@ -225,9 +229,11 @@ fun MonthSelector(
             fontWeight = FontWeight.Bold,
         )
 
-        IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
-            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = "Mes siguiente")
-        }
+        HIconButton(
+            icon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            contentDescription = "Mes siguiente",
+            onClick = { onMonthChange(currentMonth.plusMonths(1)) },
+        )
     }
 }
 
@@ -356,9 +362,11 @@ fun DayDetailContent(
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
             )
-            IconButton(onClick = onClose) {
-                Icon(Icons.Rounded.Close, contentDescription = "Cerrar")
-            }
+            HIconButton(
+                icon = Icons.Rounded.Close,
+                contentDescription = "Cerrar",
+                onClick = onClose,
+            )
         }
 
         if (summary?.hasActivity != true) {
@@ -412,13 +420,12 @@ fun DetailItem(
         }
         if (onDelete != null) {
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Rounded.Delete,
-                    contentDescription = "Eliminar",
-                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
-                )
-            }
+            HIconButton(
+                icon = Icons.Rounded.Delete,
+                contentDescription = "Eliminar",
+                onClick = onDelete,
+                variant = com.emm.mybest.ui.components.IconButtonVariant.Destructive,
+            )
         }
     }
 }
@@ -428,18 +435,11 @@ fun HChip(
     text: String,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    HBadge(
+        label = text,
+        variant = BadgeVariant.Secondary,
         modifier = modifier,
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        shape = CircleShape,
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-        )
-    }
+    )
 }
 
 @Preview(showBackground = true)

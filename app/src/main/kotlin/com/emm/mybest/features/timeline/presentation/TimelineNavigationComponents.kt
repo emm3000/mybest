@@ -19,10 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,6 +39,8 @@ import com.emm.mybest.core.datetime.formatDdMmYy
 import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.HFilterChip
+import com.emm.mybest.ui.components.HIconButton
+import com.emm.mybest.ui.components.HMediaOverlayLabel
 
 internal enum class DateJumpDirection {
     PREVIOUS,
@@ -72,28 +71,22 @@ internal fun TimelineDateJumpRow(
                 fontWeight = FontWeight.Bold,
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
+                HIconButton(
+                    icon = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
+                    contentDescription = "Fecha anterior",
                     onClick = {
                         resolveDateJumpTarget(dates, selectedDate, DateJumpDirection.PREVIOUS)?.let(onDateSelected)
                     },
                     enabled = resolveDateJumpTarget(dates, selectedDate, DateJumpDirection.PREVIOUS) != null,
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
-                        contentDescription = "Fecha anterior",
-                    )
-                }
-                IconButton(
+                )
+                HIconButton(
+                    icon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                    contentDescription = "Fecha siguiente",
                     onClick = {
                         resolveDateJumpTarget(dates, selectedDate, DateJumpDirection.NEXT)?.let(onDateSelected)
                     },
                     enabled = resolveDateJumpTarget(dates, selectedDate, DateJumpDirection.NEXT) != null,
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                        contentDescription = "Fecha siguiente",
-                    )
-                }
+                )
             }
         }
         LazyRow(
@@ -202,38 +195,20 @@ private fun TimelineThumbnailCard(
             modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.Crop,
         )
-        Surface(
-            color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth(),
-        ) {
-            Text(
-                text = photo.date.formatDdMmYy(),
-                color = MaterialTheme.colorScheme.onPrimary,
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            )
-        }
+        HMediaOverlayLabel(
+            text = photo.date.formatDdMmYy(),
+            align = Alignment.BottomStart,
+        )
         if (isSelected) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)),
             )
-            Surface(
-                color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(bottomStart = 12.dp),
-                modifier = Modifier.align(Alignment.TopEnd),
-            ) {
-                Text(
-                    text = "Actual",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                )
-            }
+            HMediaOverlayLabel(
+                text = "Actual",
+                align = Alignment.TopEnd,
+            )
         }
     }
 }

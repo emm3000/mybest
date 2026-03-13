@@ -15,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -90,7 +89,6 @@ private fun HabitCardContent(
         CompletionToggle(
             isCompleted = isCompleted,
             onToggle = onToggle,
-            tint = if (isCompleted) cs.primary else cs.outline,
         )
     }
 }
@@ -147,15 +145,12 @@ private fun HabitCardTexts(
 private fun CompletionToggle(
     isCompleted: Boolean,
     onToggle: () -> Unit,
-    tint: Color,
 ) {
-    IconButton(onClick = onToggle) {
-        Icon(
-            imageVector = completionIcon(isCompleted = isCompleted),
-            contentDescription = completionLabel(isCompleted = isCompleted),
-            tint = tint,
-        )
-    }
+    HIconButton(
+        icon = completionIcon(isCompleted = isCompleted),
+        contentDescription = completionLabel(isCompleted = isCompleted),
+        onClick = onToggle,
+    )
 }
 
 private fun completionIcon(isCompleted: Boolean) = if (isCompleted) {
