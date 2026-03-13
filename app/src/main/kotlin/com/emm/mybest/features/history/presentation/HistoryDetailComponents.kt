@@ -88,10 +88,13 @@ internal fun HabitDetailItem(
 @Composable
 internal fun DayPhotosSection(
     photos: List<ProgressPhoto>,
+    photoHabitNames: Map<String, String>,
     isToday: Boolean,
     onDeletePhoto: (ProgressPhoto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (photos.isEmpty()) return
+
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Fotos del día", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         LazyVerticalGrid(
@@ -116,13 +119,27 @@ internal fun DayPhotosSection(
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth(),
                     ) {
-                        Text(
-                            text = photo.type.toSpanishLabel(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = shadcnWhite,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(vertical = 2.dp),
-                        )
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = photo.type.toSpanishLabel(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = shadcnWhite,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(top = 2.dp),
+                            )
+                            photoHabitNames[photo.id]?.let { habitName ->
+                                Text(
+                                    text = habitName,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = shadcnWhite.copy(alpha = 0.9f),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(bottom = 2.dp),
+                                )
+                            }
+                        }
                     }
                     if (isToday) {
                         HIconButton(

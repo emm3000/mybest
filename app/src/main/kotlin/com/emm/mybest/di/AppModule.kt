@@ -70,7 +70,7 @@ val appModule = module {
     viewModel { AddWeightViewModel(get(), get()) }
     viewModel { AddHabitViewModel(get(), get(), get()) }
     viewModel { AddPhotoViewModel(get(), get()) }
-    viewModel { HistoryViewModel(get(), get(), get()) }
+    viewModel { HistoryViewModel(get(), get(), get(), get()) }
     viewModel { InsightsViewModel(get()) }
     viewModel { ComparePhotosViewModel(get()) }
     viewModel { TimelineViewModel(get()) }

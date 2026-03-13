@@ -356,11 +356,16 @@ fun DayDetailContent(
             DayEmptyState()
         } else {
             summary.weight?.let { weight ->
+                val weightSubtitle = listOfNotNull(
+                    weight.note,
+                    summary.weightHabitName?.let { "Relacionado con: $it" },
+                ).takeIf { it.isNotEmpty() }?.joinToString("\n")
+
                 DetailItem(
                     icon = Icons.Rounded.MonitorWeight,
                     color = MaterialTheme.colorScheme.primary,
                     title = "Peso: ${weight.weight} kg",
-                    subtitle = weight.note,
+                    subtitle = weightSubtitle,
                     onDelete = if (isToday) onDeleteWeight else null,
                 )
             }
@@ -373,13 +378,12 @@ fun DayDetailContent(
                 )
             }
 
-            if (summary.photos.isNotEmpty()) {
-                DayPhotosSection(
-                    photos = summary.photos,
-                    isToday = isToday,
-                    onDeletePhoto = { photoToDelete = it },
-                )
-            }
+            DayPhotosSection(
+                photos = summary.photos,
+                photoHabitNames = summary.photoHabitNames,
+                isToday = isToday,
+                onDeletePhoto = { photoToDelete = it },
+            )
         }
     }
 }

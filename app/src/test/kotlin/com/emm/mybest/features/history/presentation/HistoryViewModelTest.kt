@@ -3,10 +3,13 @@ package com.emm.mybest.features.history.presentation
 import app.cash.turbine.test
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.DailyHabitSummary
+import com.emm.mybest.domain.models.Habit
+import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.repository.DailyHabitRepository
+import com.emm.mybest.domain.repository.HabitRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.testing.MainDispatcherRule
@@ -18,6 +21,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -32,6 +36,7 @@ class HistoryViewModelTest {
     private val weightRepository = mockk<WeightRepository>()
     private val habitRepository = mockk<DailyHabitRepository>()
     private val photoRepository = mockk<PhotoRepository>()
+    private val allHabitsRepository = mockk<HabitRepository>()
 
     @Test
     fun `state aggregates data by date`() = runTest {
@@ -43,10 +48,32 @@ class HistoryViewModelTest {
             listOf(DailyHabitSummary(date, ateHealthy = true, didExercise = false, notes = null)),
         )
         every { photoRepository.getAllPhotos() } returns flowOf(
-            listOf(ProgressPhoto("p1", date = date, type = PhotoType.BODY, photoPath = "/tmp/p1.jpg", createdAt = 1L)),
+            listOf(
+                ProgressPhoto(
+                    "p1",
+                    habitId = "h-1",
+                    date = date,
+                    type = PhotoType.BODY,
+                    photoPath = "/tmp/p1.jpg",
+                    createdAt = 1L,
+                ),
+            ),
+        )
+        every { allHabitsRepository.getAllHabits() } returns flowOf(
+            listOf(
+                Habit(
+                    id = "h-1",
+                    name = "Entrenar",
+                    icon = "FitnessCenter",
+                    color = 1,
+                    category = "Salud",
+                    type = HabitType.BOOLEAN,
+                    scheduledDays = setOf(DayOfWeek.MONDAY),
+                ),
+            ),
         )
 
-        val viewModel = HistoryViewModel(weightRepository, habitRepository, photoRepository)
+        val viewModel = HistoryViewModel(weightRepository, habitRepository, photoRepository, allHabitsRepository)
         viewModel.state.test {
             assertEquals(true, awaitItem().isLoading)
             val loaded = awaitItem()
@@ -55,6 +82,7 @@ class HistoryViewModelTest {
             assertEquals(77f, summary?.weight?.weight)
             assertEquals(true, summary?.habit?.ateHealthy)
             assertEquals(1, summary?.photos?.size)
+            assertEquals("Entrenar", summary?.photoHabitNames?.get("p1"))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -64,8 +92,9 @@ class HistoryViewModelTest {
         every { weightRepository.getWeightProgress() } returns flowOf(emptyList())
         every { habitRepository.getAllDailyHabits() } returns flowOf(emptyList())
         every { photoRepository.getAllPhotos() } returns flowOf(emptyList())
+        every { allHabitsRepository.getAllHabits() } returns flowOf(emptyList())
 
-        val viewModel = HistoryViewModel(weightRepository, habitRepository, photoRepository)
+        val viewModel = HistoryViewModel(weightRepository, habitRepository, photoRepository, allHabitsRepository)
         val targetMonth = YearMonthValue(2026, 2)
         val targetDate = LocalDate(2026, 2, 20)
 
@@ -88,11 +117,12 @@ class HistoryViewModelTest {
         every { weightRepository.getWeightProgress() } returns flowOf(emptyList())
         every { habitRepository.getAllDailyHabits() } returns flowOf(emptyList())
         every { photoRepository.getAllPhotos() } returns flowOf(emptyList())
+        every { allHabitsRepository.getAllHabits() } returns flowOf(emptyList())
         coEvery { weightRepository.deleteByDate(any()) } returns Unit
         coEvery { habitRepository.deleteByDate(any()) } returns Unit
         coEvery { photoRepository.deletePhoto(any()) } returns Unit
 
-        val viewModel = HistoryViewModel(weightRepository, habitRepository, photoRepository)
+        val viewModel = HistoryViewModel(weightRepository, habitRepository, photoRepository, allHabitsRepository)
         viewModel.onIntent(HistoryIntent.OnDeleteWeight(date))
         viewModel.onIntent(HistoryIntent.OnDeleteHabit(date))
         viewModel.onIntent(HistoryIntent.OnDeletePhoto("p-1"))
