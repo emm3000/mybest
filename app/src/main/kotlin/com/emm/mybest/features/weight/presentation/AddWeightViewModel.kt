@@ -2,6 +2,8 @@ package com.emm.mybest.features.weight.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.domain.models.Habit
+import com.emm.mybest.domain.repository.HabitRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +15,8 @@ import kotlinx.coroutines.launch
 data class AddWeightState(
     val weight: String = "",
     val note: String = "",
+    val availableHabits: List<Habit> = emptyList(),
+    val selectedHabitId: String? = null,
     val weightError: String? = null,
     val lastRecordedWeight: Float? = null,
     val isLoading: Boolean = false,
@@ -21,6 +25,7 @@ data class AddWeightState(
 sealed class AddWeightIntent {
     data class OnWeightChange(val weight: String) : AddWeightIntent()
     data class OnNoteChange(val note: String) : AddWeightIntent()
+    data class OnHabitSelected(val habitId: String?) : AddWeightIntent()
     object OnSaveClick : AddWeightIntent()
 }
 
@@ -31,6 +36,7 @@ sealed class AddWeightEffect {
 
 class AddWeightViewModel(
     private val weightRepository: WeightRepository,
+    private val habitRepository: HabitRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddWeightState())
@@ -43,6 +49,11 @@ class AddWeightViewModel(
         viewModelScope.launch {
             weightRepository.getWeightProgress().collect { entries ->
                 _state.update { it.copy(lastRecordedWeight = entries.firstOrNull()?.weight) }
+            }
+        }
+        viewModelScope.launch {
+            habitRepository.getAllHabits().collect { habits ->
+                _state.update { it.copy(availableHabits = habits.filter(Habit::isEnabled)) }
             }
         }
     }
@@ -59,6 +70,9 @@ class AddWeightViewModel(
             }
             is AddWeightIntent.OnNoteChange -> {
                 _state.update { it.copy(note = intent.note) }
+            }
+            is AddWeightIntent.OnHabitSelected -> {
+                _state.update { it.copy(selectedHabitId = intent.habitId) }
             }
             AddWeightIntent.OnSaveClick -> saveWeight()
         }
@@ -84,6 +98,7 @@ class AddWeightViewModel(
                 weightRepository.saveWeight(
                     weight = weightValue,
                     note = _state.value.note.takeIf { it.isNotBlank() },
+                    habitId = _state.value.selectedHabitId,
                 )
             }.onSuccess {
                 _effect.emit(AddWeightEffect.NavigateBack)

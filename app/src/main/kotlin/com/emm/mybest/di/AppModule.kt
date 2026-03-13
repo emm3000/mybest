@@ -67,7 +67,7 @@ val appModule = module {
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
     viewModel { HomeViewModel(get(), get()) }
-    viewModel { AddWeightViewModel(get()) }
+    viewModel { AddWeightViewModel(get(), get()) }
     viewModel { AddHabitViewModel(get(), get(), get()) }
     viewModel { AddPhotoViewModel(get()) }
     viewModel { HistoryViewModel(get(), get(), get()) }
