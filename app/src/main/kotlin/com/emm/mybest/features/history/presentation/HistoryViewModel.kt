@@ -17,7 +17,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 
 data class DaySummary(
     val date: LocalDate,
@@ -36,6 +38,7 @@ data class DaySummary(
 data class HistoryState(
     val selectedMonth: YearMonthValue = YearMonthValue.now(),
     val monthlyData: Map<LocalDate, DaySummary> = emptyMap(),
+    val weekSummary: HistoryWeekSummary = HistoryWeekSummary(),
     val monthSummary: HistoryMonthSummary = HistoryMonthSummary(),
     val selectedDate: LocalDate? = null,
     val isLoading: Boolean = false,
@@ -87,6 +90,7 @@ class HistoryViewModel(
             selectedMonth = base.month,
             selectedDate = base.selectedDate,
             monthlyData = monthlyData,
+            weekSummary = buildWeekSummary(base.month, base.selectedDate, monthlyData),
             monthSummary = buildMonthSummary(base.month, monthlyData),
             isLoading = false,
             errorMessage = null,
@@ -170,6 +174,15 @@ data class HistoryMonthSummary(
     val photoDays: Int = 0,
 )
 
+data class HistoryWeekSummary(
+    val startDate: LocalDate? = null,
+    val endDate: LocalDate? = null,
+    val activityDays: Int = 0,
+    val weightDays: Int = 0,
+    val habitDays: Int = 0,
+    val photoDays: Int = 0,
+)
+
 private data class BaseHistoryData(
     val month: YearMonthValue,
     val selectedDate: LocalDate?,
@@ -188,5 +201,30 @@ private fun buildMonthSummary(
         weightDays = monthDays.count(DaySummary::hasWeight),
         habitDays = monthDays.count(DaySummary::hasHabit),
         photoDays = monthDays.count(DaySummary::hasPhoto),
+    )
+}
+
+private fun buildWeekSummary(
+    selectedMonth: YearMonthValue,
+    selectedDate: LocalDate?,
+    monthlyData: Map<LocalDate, DaySummary>,
+): HistoryWeekSummary {
+    val anchorDate = selectedDate ?: monthlyData.keys
+        .filter { YearMonthValue.from(it) == selectedMonth }
+        .maxOrNull()
+        ?: selectedMonth.atDay(1)
+    val weekStart = anchorDate.plus(DatePeriod(days = -anchorDate.dayOfWeek.ordinal))
+    val weekEnd = weekStart.plus(DatePeriod(days = 6))
+    val weekDays = monthlyData.values.filter { summary ->
+        summary.date >= weekStart && summary.date <= weekEnd
+    }
+
+    return HistoryWeekSummary(
+        startDate = weekStart,
+        endDate = weekEnd,
+        activityDays = weekDays.count(DaySummary::hasActivity),
+        weightDays = weekDays.count(DaySummary::hasWeight),
+        habitDays = weekDays.count(DaySummary::hasHabit),
+        photoDays = weekDays.count(DaySummary::hasPhoto),
     )
 }

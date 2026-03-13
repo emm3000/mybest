@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.YearMonthValue
+import com.emm.mybest.core.datetime.formatDdMmYy
 import com.emm.mybest.core.datetime.formatEsMonthYear
 import com.emm.mybest.core.datetime.formatEsWeekdayDayMonth
 import com.emm.mybest.core.datetime.shortEs
@@ -87,6 +88,58 @@ internal fun HistoryMonthSummarySection(
             value = summary.photoDays.toString(),
             modifier = Modifier.weight(1f),
         )
+    }
+}
+
+@Composable
+internal fun HistoryWeekSummarySection(
+    summary: HistoryWeekSummary,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = "Resumen semanal",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+        val rangeText = if (summary.startDate != null && summary.endDate != null) {
+            "Semana: ${summary.startDate.formatDdMmYy()} - ${summary.endDate.formatDdMmYy()}"
+        } else {
+            "Semana sin rango disponible"
+        }
+        Text(
+            text = rangeText,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            SummaryMetricChip(
+                label = "Activos",
+                value = summary.activityDays.toString(),
+                modifier = Modifier.weight(1f),
+            )
+            SummaryMetricChip(
+                label = "Peso",
+                value = summary.weightDays.toString(),
+                modifier = Modifier.weight(1f),
+            )
+            SummaryMetricChip(
+                label = "Hábitos",
+                value = summary.habitDays.toString(),
+                modifier = Modifier.weight(1f),
+            )
+            SummaryMetricChip(
+                label = "Fotos",
+                value = summary.photoDays.toString(),
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 

@@ -87,28 +87,52 @@ class HistoryViewModelTest {
             assertEquals(1, loaded.monthSummary.weightDays)
             assertEquals(1, loaded.monthSummary.habitDays)
             assertEquals(1, loaded.monthSummary.photoDays)
+            assertEquals(LocalDate(2026, 3, 2), loaded.weekSummary.startDate)
+            assertEquals(LocalDate(2026, 3, 8), loaded.weekSummary.endDate)
+            assertEquals(1, loaded.weekSummary.activityDays)
+            assertEquals(1, loaded.weekSummary.weightDays)
+            assertEquals(1, loaded.weekSummary.habitDays)
+            assertEquals(1, loaded.weekSummary.photoDays)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
     fun `OnMonthChange and OnDateSelected update state`() = runTest {
-        every { weightRepository.getWeightProgress() } returns flowOf(emptyList())
-        every { habitRepository.getAllDailyHabits() } returns flowOf(emptyList())
+        val firstWeekDate = LocalDate(2026, 2, 3)
+        val thirdWeekDate = LocalDate(2026, 2, 20)
+        every { weightRepository.getWeightProgress() } returns flowOf(
+            listOf(
+                WeightEntry("w1", firstWeekDate, 77f),
+                WeightEntry("w2", thirdWeekDate, 76f),
+            ),
+        )
+        every { habitRepository.getAllDailyHabits() } returns flowOf(
+            listOf(DailyHabitSummary(firstWeekDate, ateHealthy = true, didExercise = false, notes = null)),
+        )
         every { photoRepository.getAllPhotos() } returns flowOf(emptyList())
         every { allHabitsRepository.getAllHabits() } returns flowOf(emptyList())
 
         val viewModel = HistoryViewModel(weightRepository, habitRepository, photoRepository, allHabitsRepository)
         val targetMonth = YearMonthValue(2026, 2)
-        val targetDate = LocalDate(2026, 2, 20)
+        val targetDate = thirdWeekDate
 
         viewModel.state.test {
             awaitItem() // loading
             awaitItem() // initial
             viewModel.onIntent(HistoryIntent.OnMonthChange(targetMonth))
-            assertEquals(targetMonth, awaitItem().selectedMonth)
+            val monthState = awaitItem()
+            assertEquals(targetMonth, monthState.selectedMonth)
+            assertEquals(LocalDate(2026, 2, 16), monthState.weekSummary.startDate)
+            assertEquals(LocalDate(2026, 2, 22), monthState.weekSummary.endDate)
             viewModel.onIntent(HistoryIntent.OnDateSelected(targetDate))
-            assertEquals(targetDate, awaitItem().selectedDate)
+            val selectedState = awaitItem()
+            assertEquals(targetDate, selectedState.selectedDate)
+            assertEquals(LocalDate(2026, 2, 16), selectedState.weekSummary.startDate)
+            assertEquals(LocalDate(2026, 2, 22), selectedState.weekSummary.endDate)
+            assertEquals(1, selectedState.weekSummary.activityDays)
+            assertEquals(1, selectedState.weekSummary.weightDays)
+            assertEquals(0, selectedState.weekSummary.habitDays)
             viewModel.onIntent(HistoryIntent.OnDateDismiss)
             assertEquals(null, awaitItem().selectedDate)
             cancelAndIgnoreRemainingEvents()
