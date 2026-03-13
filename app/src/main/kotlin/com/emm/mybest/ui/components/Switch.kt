@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,6 +73,7 @@ fun HSwitch(
 
     Box(
         modifier = modifier
+            .minimumInteractiveComponentSize()
             .alpha(if (enabled) 1f else SWITCH_DISABLED_ALPHA)
             .semantics {
                 role = Role.Switch

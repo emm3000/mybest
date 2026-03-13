@@ -32,7 +32,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -60,14 +59,14 @@ import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.ui.components.AlertVariant
+import com.emm.mybest.ui.components.BadgeVariant
 import com.emm.mybest.ui.components.HAlert
 import com.emm.mybest.ui.components.HAlertDialog
-import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.HBadge
+import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSkeleton
-import com.emm.mybest.ui.components.BadgeVariant
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
 import kotlinx.datetime.LocalDate

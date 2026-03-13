@@ -14,7 +14,6 @@ import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +34,7 @@ import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HIconButton
+import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.HSwitch
 import com.emm.mybest.ui.components.HTopBar
 import kotlinx.coroutines.flow.collectLatest
@@ -86,7 +86,7 @@ fun ReminderSettingsScreen(
                 },
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { HSnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier

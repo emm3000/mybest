@@ -19,7 +19,6 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,8 +32,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HCard
+import com.emm.mybest.ui.components.HIconButton
+import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.HTopBar
 import kotlinx.coroutines.flow.collectLatest
 
@@ -62,7 +62,7 @@ fun ComparePhotosScreen(
 
     Scaffold(
         modifier = modifier,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { HSnackbarHost(snackbarHostState) },
         topBar = {
             HTopBar(
                 title = "Comparar fotos de progreso",

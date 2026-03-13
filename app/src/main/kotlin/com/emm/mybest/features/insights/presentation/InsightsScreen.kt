@@ -34,8 +34,8 @@ import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HProgressRing
 import com.emm.mybest.ui.components.HSkeleton
-import com.emm.mybest.ui.components.StatChipVariant
 import com.emm.mybest.ui.components.HTopBar
+import com.emm.mybest.ui.components.StatChipVariant
 
 private const val INSIGHTS_SCREEN_PADDING = 16
 private const val INSIGHTS_SECTION_SPACING = 16

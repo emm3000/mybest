@@ -24,7 +24,6 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +42,7 @@ import com.emm.mybest.core.navigation.Screen
 import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HSkeleton
+import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.theme.MyBestTheme
 
 @Composable
@@ -84,7 +84,7 @@ internal fun HomeScreenContent(
     Scaffold(
         modifier = modifier.fillMaxSize().consumeWindowInsets(WindowInsets.safeContent),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { HSnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
