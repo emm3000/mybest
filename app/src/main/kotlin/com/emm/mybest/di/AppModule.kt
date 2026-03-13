@@ -24,6 +24,7 @@ import com.emm.mybest.domain.usecase.GetDailyHabitsUseCase
 import com.emm.mybest.domain.usecase.GetHabitByIdUseCase
 import com.emm.mybest.domain.usecase.GetHomeSummaryUseCase
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
+import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.ToggleHabitUseCase
 import com.emm.mybest.domain.usecase.UpdateHabitUseCase
 import com.emm.mybest.features.habit.presentation.AddHabitViewModel
@@ -71,6 +72,7 @@ val appModule = module {
     factory { GetHomeSummaryUseCase(get(), get(), get()) }
     factory { GetInsightsUseCase(get(), get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
+    factory { RestoreDatabaseBackupUseCase(get()) }
     factory { GetHabitByIdUseCase(get()) }
     factory { UpdateHabitUseCase(get(), get()) }
 
