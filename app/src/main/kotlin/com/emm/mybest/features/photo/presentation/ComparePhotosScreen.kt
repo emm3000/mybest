@@ -64,7 +64,7 @@ fun ComparePhotosScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             HTopBar(
-                title = "Comparador de Progreso",
+                title = "Comparar fotos de progreso",
                 navigationIcon = {
                     HIconButton(
                         icon = Icons.AutoMirrored.Rounded.ArrowBack,

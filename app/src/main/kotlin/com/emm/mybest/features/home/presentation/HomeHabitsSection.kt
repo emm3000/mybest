@@ -71,7 +71,7 @@ private fun HomeHabitsSection(
                 HomeHabitsContentKind.Empty -> {
                     HEmptyState(
                         title = "Sin hábitos para hoy",
-                        description = "Crea un nuevo hábito para empezar a trackear tu progreso.",
+                        description = "Crea un nuevo hábito para empezar a dar seguimiento a tu progreso.",
                         icon = Icons.Rounded.CheckCircle,
                         action = {
                             HButton(

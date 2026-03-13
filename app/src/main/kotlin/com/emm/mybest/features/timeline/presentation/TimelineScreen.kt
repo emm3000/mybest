@@ -91,8 +91,8 @@ fun TimelineContent(
 
     if (state.photosByDate.isEmpty()) {
         HEmptyState(
-            title = "Sin recuerdos aún",
-            description = "Tus fotos de progreso aparecerán aquí para que veas tu evolución.",
+            title = "Sin evidencia visual aún",
+            description = "Tus fotos de progreso aparecerán aquí para ayudarte a revisar tu avance por hábitos.",
             icon = Icons.Rounded.PhotoCamera,
             modifier = contentModifier,
         )

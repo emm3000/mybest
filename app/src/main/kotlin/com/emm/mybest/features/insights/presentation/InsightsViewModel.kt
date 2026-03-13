@@ -68,7 +68,7 @@ class InsightsViewModel(
             emit(
                 InsightsState(
                     isLoading = false,
-                    errorMessage = throwable.message ?: "No se pudo cargar la información de insights.",
+                    errorMessage = throwable.message ?: "No se pudo cargar la información de estadísticas.",
                 ),
             )
         }.stateIn(

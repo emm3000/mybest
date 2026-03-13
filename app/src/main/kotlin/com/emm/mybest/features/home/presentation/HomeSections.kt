@@ -50,7 +50,7 @@ internal fun WeightQuickAction(
     onClick: () -> Unit,
 ) {
     QuickActionCard(
-        title = "Registrar Peso",
+        title = "Registrar peso",
         subtitle = homeWeightSubtitle(state),
         icon = Icons.Rounded.MonitorWeight,
         containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -82,7 +82,7 @@ internal fun ProgressPhotoQuickAction(
     onClick: () -> Unit,
 ) {
     QuickActionCard(
-        title = "Foto de Progreso",
+        title = "Registrar foto de progreso",
         subtitle = homeProgressPhotoSubtitle(state),
         icon = Icons.Rounded.AddAPhoto,
         containerColor = MaterialTheme.colorScheme.tertiaryContainer,

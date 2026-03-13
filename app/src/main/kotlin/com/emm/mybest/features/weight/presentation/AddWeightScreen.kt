@@ -79,7 +79,7 @@ private fun AddWeightContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             HTopBar(
-                title = "Registrar Peso",
+                title = "Registrar peso",
                 navigationIcon = {
                     HIconButton(
                         icon = Icons.AutoMirrored.Rounded.ArrowBack,

@@ -56,7 +56,7 @@ fun InsightsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            HTopBar(title = "Estadísticas")
+            HTopBar(title = "Estadísticas de hábitos")
         },
     ) { padding ->
         InsightsBody(
@@ -99,7 +99,7 @@ private fun InsightsBody(
         state.isLoading -> InsightsLoadingState(modifier = contentModifier)
         state.errorMessage != null -> {
             HAlert(
-                title = "No se pudieron cargar los insights",
+                title = "No se pudieron cargar las estadísticas",
                 description = state.errorMessage,
                 variant = AlertVariant.Destructive,
                 modifier = contentModifier,
@@ -107,8 +107,8 @@ private fun InsightsBody(
         }
         state.weightHistory.isEmpty() && state.exerciseDays == 0 && state.healthyEatingDays == 0 -> {
             HEmptyState(
-                title = "Sin datos para insights",
-                description = "Registra peso y hábitos para ver tu progreso en esta pantalla.",
+                title = "Sin datos para estadísticas",
+                description = "Registra hábitos y evidencia para ver tu progreso en esta pantalla.",
                 icon = Icons.Rounded.BarChart,
                 modifier = contentModifier,
             )
