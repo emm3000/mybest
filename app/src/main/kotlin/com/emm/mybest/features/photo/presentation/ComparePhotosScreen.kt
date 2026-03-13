@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -114,6 +115,14 @@ private fun ComparePhotosContent(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         )
 
+        CompareSelectionGuide(
+            state = state,
+            selectingForBefore = selectingForBefore,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        )
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -163,6 +172,78 @@ private fun ComparePhotosContent(
                 .fillMaxWidth(),
         )
     }
+}
+
+@Composable
+private fun CompareSelectionGuide(
+    state: ComparePhotosState,
+    selectingForBefore: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val beforeReady = state.beforePhoto != null
+    val afterReady = state.afterPhoto != null
+    val chronologicalOrderInverted = isChronologicalOrderInverted(state)
+
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = "Guía rápida",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = selectionStepLabel(
+                    step = 1,
+                    slot = "ANTES",
+                    ready = beforeReady,
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = if (beforeReady) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = selectionStepLabel(
+                    step = 2,
+                    slot = "DESPUÉS",
+                    ready = afterReady,
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = if (afterReady) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = activeStepLabel(selectingForBefore),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+            if (chronologicalOrderInverted) {
+                Text(
+                    text = "El orden temporal está invertido. Usa el botón intercambiar.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        }
+    }
+}
+
+private fun selectionStepLabel(step: Int, slot: String, ready: Boolean): String {
+    val status = if (ready) "Seleccionado" else "Pendiente"
+    return "$step) $slot: $status"
+}
+
+private fun activeStepLabel(selectingForBefore: Boolean): String =
+    "Paso activo: ${if (selectingForBefore) "ANTES" else "DESPUÉS"}"
+
+private fun isChronologicalOrderInverted(state: ComparePhotosState): Boolean {
+    val beforePhoto = state.beforePhoto ?: return false
+    val afterPhoto = state.afterPhoto ?: return false
+    return beforePhoto.createdAt > afterPhoto.createdAt
 }
 
 @Composable
