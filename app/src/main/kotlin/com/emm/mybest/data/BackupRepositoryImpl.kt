@@ -60,14 +60,16 @@ class BackupRepositoryImpl(
         FileInputStream(file).use { input ->
             val header = ByteArray(SQLITE_HEADER_LENGTH)
             val read = input.read(header)
-            check(read == SQLITE_HEADER_LENGTH) { "Invalid backup header length" }
-            val headerText = header.toString(Charsets.UTF_8)
-            check(headerText.startsWith(SQLITE_HEADER_PREFIX)) { "Invalid SQLite backup file" }
+            check(isValidSqliteHeader(header, read)) { "Invalid SQLite backup file" }
         }
     }
-
-    companion object {
-        private const val SQLITE_HEADER_LENGTH = 16
-        private const val SQLITE_HEADER_PREFIX = "SQLite format 3"
-    }
 }
+
+internal fun isValidSqliteHeader(headerBytes: ByteArray, bytesRead: Int): Boolean {
+    if (bytesRead != SQLITE_HEADER_LENGTH) return false
+    val headerText = headerBytes.toString(Charsets.UTF_8)
+    return headerText.startsWith(SQLITE_HEADER_PREFIX)
+}
+
+private const val SQLITE_HEADER_LENGTH = 16
+private const val SQLITE_HEADER_PREFIX = "SQLite format 3"
