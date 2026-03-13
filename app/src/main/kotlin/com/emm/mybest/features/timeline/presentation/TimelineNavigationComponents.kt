@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,6 +16,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,6 +43,11 @@ import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.HFilterChip
 
+internal enum class DateJumpDirection {
+    PREVIOUS,
+    NEXT,
+}
+
 @Composable
 internal fun TimelineDateJumpRow(
     dates: List<kotlinx.datetime.LocalDate>,
@@ -48,12 +59,43 @@ internal fun TimelineDateJumpRow(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = "Saltar por fecha",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 24.dp),
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "Saltar por fecha",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = {
+                        resolveDateJumpTarget(dates, selectedDate, DateJumpDirection.PREVIOUS)?.let(onDateSelected)
+                    },
+                    enabled = resolveDateJumpTarget(dates, selectedDate, DateJumpDirection.PREVIOUS) != null,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
+                        contentDescription = "Fecha anterior",
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        resolveDateJumpTarget(dates, selectedDate, DateJumpDirection.NEXT)?.let(onDateSelected)
+                    },
+                    enabled = resolveDateJumpTarget(dates, selectedDate, DateJumpDirection.NEXT) != null,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        contentDescription = "Fecha siguiente",
+                    )
+                }
+            }
+        }
         LazyRow(
             contentPadding = PaddingValues(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -66,6 +108,19 @@ internal fun TimelineDateJumpRow(
                 )
             }
         }
+    }
+}
+
+internal fun resolveDateJumpTarget(
+    dates: List<kotlinx.datetime.LocalDate>,
+    selectedDate: kotlinx.datetime.LocalDate,
+    direction: DateJumpDirection,
+): kotlinx.datetime.LocalDate? {
+    if (dates.isEmpty()) return null
+    val selectedIndex = dates.indexOf(selectedDate).takeIf { it >= 0 } ?: return dates.firstOrNull()
+    return when (direction) {
+        DateJumpDirection.PREVIOUS -> dates.getOrNull(selectedIndex - 1)
+        DateJumpDirection.NEXT -> dates.getOrNull(selectedIndex + 1)
     }
 }
 
