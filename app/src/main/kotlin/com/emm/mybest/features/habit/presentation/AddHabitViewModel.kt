@@ -32,6 +32,7 @@ data class AddHabitState(
     val isLoading: Boolean = false,
     val nameError: String? = null,
     val goalError: String? = null,
+    val unitError: String? = null,
     val scheduledDaysError: String? = null,
 )
 
@@ -86,9 +87,15 @@ class AddHabitViewModel(
             is AddHabitIntent.OnNameChange -> _state.update { it.copy(name = intent.name, nameError = null) }
             is AddHabitIntent.OnIconChange -> _state.update { it.copy(icon = intent.icon) }
             is AddHabitIntent.OnCategoryChange -> _state.update { it.copy(category = intent.category) }
-            is AddHabitIntent.OnTypeChange -> _state.update { it.copy(type = intent.type) }
+            is AddHabitIntent.OnTypeChange -> _state.update {
+                it.copy(
+                    type = intent.type,
+                    goalError = null,
+                    unitError = null,
+                )
+            }
             is AddHabitIntent.OnGoalValueChange -> _state.update { it.copy(goalValue = intent.value, goalError = null) }
-            is AddHabitIntent.OnUnitChange -> _state.update { it.copy(unit = intent.unit) }
+            is AddHabitIntent.OnUnitChange -> _state.update { it.copy(unit = intent.unit, unitError = null) }
             else -> Unit
         }
     }
@@ -104,15 +111,23 @@ class AddHabitViewModel(
                     _state.update { it.copy(nameError = validation.errorMessage) }
                 }
             }
-            2 -> {
-                val validation = HabitValidator.validateGoal(currentState.type, currentState.goalValue.toFloatOrNull())
-                if (validation.isValid) {
-                    _state.update { it.copy(step = 3) }
-                } else {
-                    _state.update { it.copy(goalError = validation.errorMessage) }
-                }
-            }
+            2 -> handleStepTwoValidation(currentState)
         }
+    }
+
+    private fun handleStepTwoValidation(currentState: AddHabitState) {
+        val validation = HabitValidator.validateGoal(currentState.type, currentState.goalValue.toFloatOrNull())
+        if (!validation.isValid) {
+            _state.update { it.copy(goalError = validation.errorMessage, unitError = null) }
+            return
+        }
+
+        if (currentState.type == HabitType.METRIC && currentState.unit.isBlank()) {
+            _state.update { it.copy(unitError = "Ingresa la unidad de medida") }
+            return
+        }
+
+        _state.update { it.copy(step = 3, goalError = null, unitError = null) }
     }
 
     private fun toggleDay(day: DayOfWeek) {

@@ -357,6 +357,7 @@ private fun StepTwo(
                     onValueChange = { onIntent(AddHabitIntent.OnUnitChange(it)) },
                     label = "Unidad",
                     placeholder = "Ej: vasos, km, paginas",
+                    errorMessage = state.unitError,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

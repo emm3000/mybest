@@ -44,6 +44,7 @@ class AddHabitViewModelTest {
         assertEquals(false, state.isLoading)
         assertNull(state.nameError)
         assertNull(state.goalError)
+        assertNull(state.unitError)
         assertNull(state.scheduledDaysError)
     }
 
@@ -91,6 +92,21 @@ class AddHabitViewModelTest {
 
         assertEquals(2, viewModel.state.value.step)
         assertEquals("El objetivo debe ser mayor a 0", viewModel.state.value.goalError)
+    }
+
+    @Test
+    fun `OnNextStep from step 2 stays when metric unit is missing`() {
+        viewModel.onIntent(AddHabitIntent.OnNameChange("Hidratacion"))
+        viewModel.onIntent(AddHabitIntent.OnNextStep)
+        viewModel.onIntent(AddHabitIntent.OnTypeChange(HabitType.METRIC))
+        viewModel.onIntent(AddHabitIntent.OnGoalValueChange("8"))
+        viewModel.onIntent(AddHabitIntent.OnUnitChange(""))
+
+        viewModel.onIntent(AddHabitIntent.OnNextStep)
+
+        assertEquals(2, viewModel.state.value.step)
+        assertEquals("Ingresa la unidad de medida", viewModel.state.value.unitError)
+        assertNull(viewModel.state.value.goalError)
     }
 
     @Test
