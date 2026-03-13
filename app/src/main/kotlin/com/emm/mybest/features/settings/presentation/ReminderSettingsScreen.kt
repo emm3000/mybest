@@ -1,5 +1,7 @@
 package com.emm.mybest.features.settings.presentation
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -20,7 +24,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.CardVariant
+import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HTopBar
@@ -34,11 +40,22 @@ fun ReminderSettingsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val backupExportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
+    ) { uri ->
+        uri?.let { viewModel.onIntent(ReminderSettingsIntent.OnExportBackup(it.toString())) }
+    }
+    val backupImportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        uri?.let { viewModel.onIntent(ReminderSettingsIntent.OnImportBackup(it.toString())) }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is ReminderSettingsEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+                is ReminderSettingsEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
             }
         }
     }
@@ -90,6 +107,44 @@ fun ReminderSettingsScreen(
                         onCheckedChange = {
                             viewModel.onIntent(ReminderSettingsIntent.OnNotificationsToggle(it))
                         },
+                    )
+                }
+            }
+            HCard(
+                modifier = Modifier.fillMaxWidth(),
+                variant = CardVariant.Filled,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = "Backup y restore",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = "Exporta tu base de datos o importa un backup válido en formato SQLite.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    HButton(
+                        text = "Exportar backup",
+                        onClick = {
+                            backupExportLauncher.launch("mybest-backup.db")
+                        },
+                        leadingIcon = Icons.Rounded.Download,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    HButton(
+                        text = "Importar backup",
+                        onClick = {
+                            backupImportLauncher.launch(arrayOf("*/*"))
+                        },
+                        leadingIcon = Icons.Rounded.Upload,
+                        variant = ButtonVariant.Secondary,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }

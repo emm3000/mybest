@@ -87,6 +87,6 @@ val appModule = module {
     viewModel { InsightsViewModel(get()) }
     viewModel { ComparePhotosViewModel(get()) }
     viewModel { TimelineViewModel(get()) }
-    viewModel { ReminderSettingsViewModel(get()) }
+    viewModel { ReminderSettingsViewModel(get(), get(), get()) }
     viewModel { MainViewModel(get()) }
 }
