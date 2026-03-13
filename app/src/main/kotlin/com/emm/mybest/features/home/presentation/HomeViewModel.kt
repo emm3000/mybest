@@ -21,7 +21,13 @@ data class HomeState(
     val totalWeightLost: Float = 0f,
     val totalPhotos: Int = 0,
     val isLoading: Boolean = false,
-)
+) {
+    val completedHabitsCount: Int
+        get() = dailyHabits.count { it.record?.isCompleted == true }
+
+    val pendingHabitsCount: Int
+        get() = (dailyHabits.size - completedHabitsCount).coerceAtLeast(0)
+}
 
 sealed class HomeIntent {
     data class ToggleHabit(val habitWithRecord: HabitWithRecord) : HomeIntent()
@@ -35,6 +41,7 @@ sealed class HomeIntent {
 
 sealed class HomeEffect {
     data class ShowError(val message: String) : HomeEffect()
+    data class ShowSuccess(val message: String) : HomeEffect()
     data class Navigate(val route: Screen) : HomeEffect()
 }
 
@@ -83,6 +90,12 @@ class HomeViewModel(
         viewModelScope.launch {
             try {
                 toggleHabitUseCase(habitWithRecord, currentDate())
+                val successMessage = if (habitWithRecord.record?.isCompleted == true) {
+                    "Hábito marcado como pendiente"
+                } else {
+                    "Hábito completado"
+                }
+                _effect.emit(HomeEffect.ShowSuccess(successMessage))
             } catch (
                 e:
                 @Suppress("TooGenericExceptionCaught")

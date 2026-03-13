@@ -61,6 +61,7 @@ fun HomeScreen(
             when (effect) {
                 is HomeEffect.Navigate -> currentOnNavigate(effect.route)
                 is HomeEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+                is HomeEffect.ShowSuccess -> snackbarHostState.showSnackbar(effect.message)
             }
         }
     }

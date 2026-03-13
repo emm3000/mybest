@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -59,6 +60,7 @@ private fun HomeHabitsSection(
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
         )
+        HomeDailyProgressSummary(state = state)
 
         AnimatedContent(
             targetState = state.homeHabitsContentKind(),
@@ -93,6 +95,67 @@ private fun HomeHabitsSection(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun HomeDailyProgressSummary(
+    state: HomeState,
+    modifier: Modifier = Modifier,
+) {
+    val totalHabits = state.dailyHabits.size
+    val completedHabits = state.completedHabitsCount
+    val pendingHabits = state.pendingHabitsCount
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        SummaryMetricCard(
+            title = "Pendientes",
+            value = pendingHabits.toString(),
+            modifier = Modifier.weight(1f),
+        )
+        SummaryMetricCard(
+            title = "Completados",
+            value = completedHabits.toString(),
+            modifier = Modifier.weight(1f),
+        )
+        SummaryMetricCard(
+            title = "Total",
+            value = totalHabits.toString(),
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun SummaryMetricCard(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
         }
     }
 }

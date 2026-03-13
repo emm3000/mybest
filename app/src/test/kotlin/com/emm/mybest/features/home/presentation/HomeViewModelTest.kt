@@ -3,6 +3,7 @@ package com.emm.mybest.features.home.presentation
 import app.cash.turbine.test
 import com.emm.mybest.core.navigation.Screen
 import com.emm.mybest.domain.models.Habit
+import com.emm.mybest.domain.models.HabitRecord
 import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.domain.models.HabitWithRecord
 import com.emm.mybest.domain.models.HomeSummary
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -153,9 +155,47 @@ class HomeViewModelTest {
         coEvery { toggleHabitUseCase.invoke(any(), any()) } returns Unit
         val viewModel = HomeViewModel(getHomeSummaryUseCase, toggleHabitUseCase)
 
-        viewModel.onIntent(HomeIntent.ToggleHabit(habitWithRecord))
+        viewModel.effect.test {
+            viewModel.onIntent(HomeIntent.ToggleHabit(habitWithRecord))
+            assertEquals(HomeEffect.ShowSuccess("Hábito completado"), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
         advanceUntilIdle()
+        coVerify(exactly = 1) { toggleHabitUseCase.invoke(habitWithRecord, any()) }
+    }
 
+    @Test
+    fun `ToggleHabit success emits pending message when completed habit is unchecked`() = runTest {
+        val habitWithRecord = HabitWithRecord(
+            habit = Habit(
+                id = "h-3",
+                name = "Correr",
+                icon = "DirectionsRun",
+                color = 3,
+                category = "Deporte",
+                type = HabitType.BOOLEAN,
+                scheduledDays = setOf(DayOfWeek.WEDNESDAY),
+            ),
+            record = HabitRecord(
+                id = "r-1",
+                habitId = "h-3",
+                date = LocalDate(2026, 3, 12),
+                value = 1f,
+                isCompleted = true,
+            ),
+        )
+        every { getHomeSummaryUseCase.invoke() } returns flowOf(
+            HomeSummary(emptyList(), null, 0f, 0),
+        )
+        coEvery { toggleHabitUseCase.invoke(any(), any()) } returns Unit
+        val viewModel = HomeViewModel(getHomeSummaryUseCase, toggleHabitUseCase)
+
+        viewModel.effect.test {
+            viewModel.onIntent(HomeIntent.ToggleHabit(habitWithRecord))
+            assertEquals(HomeEffect.ShowSuccess("Hábito marcado como pendiente"), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        advanceUntilIdle()
         coVerify(exactly = 1) { toggleHabitUseCase.invoke(habitWithRecord, any()) }
     }
 }
