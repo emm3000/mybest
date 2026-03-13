@@ -183,9 +183,10 @@ internal fun HistoryMonthSection(
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val hasActivityInSelectedMonth = monthlyData.values.any { summary ->
-        summary.hasActivity && YearMonthValue.from(summary.date) == selectedMonth
-    }
+    val hasActivityInSelectedMonth = hasActivityInSelectedMonth(
+        selectedMonth = selectedMonth,
+        monthlyData = monthlyData,
+    )
 
     if (hasActivityInSelectedMonth) {
         Row(modifier = modifier.fillMaxWidth()) {
@@ -215,6 +216,13 @@ internal fun HistoryMonthSection(
             modifier = modifier.fillMaxWidth(),
         )
     }
+}
+
+internal fun hasActivityInSelectedMonth(
+    selectedMonth: YearMonthValue,
+    monthlyData: Map<LocalDate, DaySummary>,
+): Boolean = monthlyData.values.any { summary ->
+    summary.hasActivity && YearMonthValue.from(summary.date) == selectedMonth
 }
 
 @Composable

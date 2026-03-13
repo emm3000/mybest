@@ -1,5 +1,6 @@
 package com.emm.mybest.features.history.presentation
 
+import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
@@ -54,5 +55,42 @@ class HistoryCalendarComponentsTest {
 
         assertTrue(description.contains("Intensidad: media"))
         assertTrue(description.contains("Actividad registrada: hábitos, fotos"))
+    }
+
+    @Test
+    fun `hasActivityInSelectedMonth returns false when month has no activity`() {
+        val selectedMonth = YearMonthValue(2026, 3)
+        val otherMonthDate = LocalDate(2026, 2, 10)
+        val data = mapOf(
+            otherMonthDate to DaySummary(
+                date = otherMonthDate,
+                habit = DailyHabitSummary(
+                    date = otherMonthDate,
+                    ateHealthy = true,
+                    didExercise = false,
+                    notes = null,
+                ),
+            ),
+        )
+
+        val result = hasActivityInSelectedMonth(selectedMonth, data)
+
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `hasActivityInSelectedMonth returns true when month contains activity`() {
+        val selectedMonth = YearMonthValue(2026, 3)
+        val date = LocalDate(2026, 3, 10)
+        val data = mapOf(
+            date to DaySummary(
+                date = date,
+                weight = WeightEntry("w1", date, 71f),
+            ),
+        )
+
+        val result = hasActivityInSelectedMonth(selectedMonth, data)
+
+        assertEquals(true, result)
     }
 }
