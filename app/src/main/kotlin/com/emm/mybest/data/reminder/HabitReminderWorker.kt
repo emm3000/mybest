@@ -9,9 +9,12 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.room.Room
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.emm.mybest.R
+import com.emm.mybest.core.datetime.currentDate
+import com.emm.mybest.data.AppDatabase
 import java.time.LocalDate
 import java.util.Locale
 
@@ -24,9 +27,18 @@ class HabitReminderWorker(
         val habitId = inputData.getString(KEY_HABIT_ID)
         val habitName = inputData.getString(KEY_HABIT_NAME).orEmpty().ifBlank { "Tu hábito" }
         val scheduledDays = parseScheduledDays(inputData.getString(KEY_SCHEDULED_DAYS))
-        val shouldNotify = habitId != null &&
-            isTodayInScheduledDays(scheduledDays) &&
-            canPostNotifications()
+        val isReminderDay = isTodayInScheduledDays(scheduledDays)
+        val isCompletedToday = if (habitId != null) {
+            isHabitCompletedToday(habitId)
+        } else {
+            false
+        }
+        val shouldNotify = shouldDispatchReminder(
+            habitId = habitId,
+            isReminderDay = isReminderDay,
+            isCompletedToday = isCompletedToday,
+            canPostNotifications = canPostNotifications(),
+        )
         if (shouldNotify) {
             createReminderChannelIfNeeded()
 
@@ -41,6 +53,24 @@ class HabitReminderWorker(
             NotificationManagerCompat.from(applicationContext).notify(habitId.hashCode(), notification)
         }
         return Result.success()
+    }
+
+    private suspend fun isHabitCompletedToday(habitId: String): Boolean {
+        val database = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            DATABASE_NAME,
+        ).addMigrations(AppDatabase.MIGRATION_2_3)
+            .fallbackToDestructiveMigration(false)
+            .build()
+
+        return try {
+            database.habitRecordDao()
+                .getRecordForDate(habitId, currentDate())
+                ?.isCompleted == true
+        } finally {
+            database.close()
+        }
     }
 
     private fun isTodayInScheduledDays(scheduledDays: Set<String>): Boolean {
@@ -91,5 +121,16 @@ class HabitReminderWorker(
         const val KEY_HABIT_NAME = "habit_name"
         const val KEY_SCHEDULED_DAYS = "scheduled_days"
         private const val CHANNEL_ID = "habit_reminders"
+        private const val DATABASE_NAME = "my_best_db"
     }
 }
+
+internal fun shouldDispatchReminder(
+    habitId: String?,
+    isReminderDay: Boolean,
+    isCompletedToday: Boolean,
+    canPostNotifications: Boolean,
+): Boolean = habitId != null &&
+    isReminderDay &&
+    !isCompletedToday &&
+    canPostNotifications
