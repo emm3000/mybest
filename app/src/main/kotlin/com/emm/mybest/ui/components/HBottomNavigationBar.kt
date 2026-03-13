@@ -46,8 +46,8 @@ fun HBottomNavigationBar(
 
     NavigationBar(
         modifier = modifier,
-        containerColor = cs.surfaceContainerHigh,
-        contentColor = cs.onSurface,
+        containerColor = cs.surface,
+        contentColor = cs.onSurfaceVariant,
         tonalElevation = 0.dp,
     ) {
         items.forEach { item ->
@@ -57,11 +57,11 @@ fun HBottomNavigationBar(
                 selected = isSelected,
                 onClick = { onNavItemClick(item.screen) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = cs.primary,
-                    selectedTextColor = cs.onSurface,
+                    selectedIconColor = cs.onPrimaryContainer,
+                    selectedTextColor = cs.onPrimaryContainer,
                     unselectedIconColor = cs.onSurfaceVariant,
                     unselectedTextColor = cs.onSurfaceVariant,
-                    indicatorColor = cs.surface,
+                    indicatorColor = cs.primaryContainer,
                 ),
                 icon = {
                     Icon(
