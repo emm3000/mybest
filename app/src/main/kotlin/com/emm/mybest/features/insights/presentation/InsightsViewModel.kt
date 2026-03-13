@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 data class InsightsState(
     val weightHistory: List<WeightEntry> = emptyList(),
+    val periodLabel: String = "",
     val habitConsistency: Float = 0f,
     val totalWeightLost: Float = 0f,
     val currentWeight: Float = 0f,
@@ -59,6 +60,7 @@ class InsightsViewModel(
         .map { data ->
             InsightsState(
                 weightHistory = data.weightEntries,
+                periodLabel = data.periodLabel,
                 habitConsistency = data.habitConsistency,
                 totalWeightLost = data.totalWeightLost,
                 currentWeight = data.currentWeight,

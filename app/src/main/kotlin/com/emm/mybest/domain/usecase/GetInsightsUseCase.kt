@@ -1,5 +1,6 @@
 package com.emm.mybest.domain.usecase
 
+import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.domain.models.InsightsData
 import com.emm.mybest.domain.models.InsightsRecommendation
 import com.emm.mybest.domain.models.InsightsRecommendationAction
@@ -8,6 +9,7 @@ import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.datetime.LocalDate
 
 private const val LOW_CONSISTENCY_THRESHOLD = 0.4f
 
@@ -34,9 +36,17 @@ class GetInsightsUseCase(
                 photoCount = photos.size,
                 hasWeightTrend = weights.size >= 2,
             )
+            val periodLabel = buildPeriodLabel(
+                dates = buildList {
+                    addAll(weights.map { it.date })
+                    addAll(habits.map { it.date })
+                    addAll(photos.map { it.date })
+                },
+            )
 
             InsightsData(
                 weightEntries = weights,
+                periodLabel = periodLabel,
                 habitConsistency = consistency,
                 totalWeightLost = initialWeight - currentWeight,
                 currentWeight = currentWeight,
@@ -47,6 +57,16 @@ class GetInsightsUseCase(
                 recommendation = recommendation,
             )
         }
+    }
+}
+
+private fun buildPeriodLabel(dates: List<LocalDate>): String {
+    val start = dates.minOrNull() ?: return "Sin periodo disponible aún."
+    val end = dates.maxOrNull() ?: return "Sin periodo disponible aún."
+    return if (start == end) {
+        "Datos del ${start.formatEsLongDate()}"
+    } else {
+        "Datos del ${start.formatEsLongDate()} al ${end.formatEsLongDate()}"
     }
 }
 

@@ -145,9 +145,16 @@ private fun InsightsDataContent(
         modifier = modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(INSIGHTS_SECTION_SPACING.dp),
     ) {
+        Text(
+            text = state.periodLabel,
+            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+            color = androidx.compose.material3.MaterialTheme.colorScheme.outline,
+        )
+
         state.recommendation?.let { recommendation ->
             RecommendationSection(
                 recommendation = recommendation,
+                periodLabel = state.periodLabel,
                 onActionClick = onRecommendationActionClick,
             )
         }
@@ -156,6 +163,7 @@ private fun InsightsDataContent(
 
         InsightsComparePhotosSection(
             state = state,
+            periodLabel = state.periodLabel,
             onCompareClick = onCompareClick,
         )
 
@@ -168,6 +176,7 @@ private fun InsightsDataContent(
 @Composable
 private fun RecommendationSection(
     recommendation: InsightsRecommendation,
+    periodLabel: String,
     onActionClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -185,6 +194,11 @@ private fun RecommendationSection(
                 text = recommendation.description,
                 style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                 color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = periodLabel,
+                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.outline,
             )
             Text(
                 text = "Siguiente paso: ${recommendation.actionLabel}",
@@ -295,7 +309,7 @@ private fun HabitStats(
             Column {
                 Text("Consistencia General", fontWeight = FontWeight.Bold)
                 Text(
-                    "Basado en todos tus registros",
+                    state.periodLabel,
                     style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                     color = androidx.compose.material3.MaterialTheme.colorScheme.outline,
                 )

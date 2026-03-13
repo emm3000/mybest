@@ -16,6 +16,7 @@ data class InsightsRecommendation(
 
 data class InsightsData(
     val weightEntries: List<WeightEntry>,
+    val periodLabel: String,
     val habitConsistency: Float,
     val totalWeightLost: Float,
     val currentWeight: Float,

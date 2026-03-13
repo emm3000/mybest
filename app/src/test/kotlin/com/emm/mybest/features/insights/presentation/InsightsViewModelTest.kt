@@ -27,6 +27,7 @@ class InsightsViewModelTest {
     fun `state maps insights data from use case`() = runTest {
         val expected = InsightsData(
             weightEntries = emptyList(),
+            periodLabel = "Datos del 1 de marzo, 2026 al 8 de marzo, 2026",
             habitConsistency = 0.75f,
             totalWeightLost = 4f,
             currentWeight = 76f,
@@ -48,6 +49,7 @@ class InsightsViewModelTest {
             assertEquals(true, awaitItem().isLoading)
             val state = awaitItem()
             assertEquals(expected.weightEntries, state.weightHistory)
+            assertEquals(expected.periodLabel, state.periodLabel)
             assertEquals(expected.habitConsistency, state.habitConsistency)
             assertEquals(expected.totalWeightLost, state.totalWeightLost)
             assertEquals(expected.currentWeight, state.currentWeight)
@@ -67,6 +69,7 @@ class InsightsViewModelTest {
         every { getInsightsUseCase.invoke() } returns flowOf(
             InsightsData(
                 emptyList(),
+                "Sin periodo disponible aún.",
                 0f,
                 0f,
                 0f,
@@ -91,6 +94,7 @@ class InsightsViewModelTest {
         every { getInsightsUseCase.invoke() } returns flowOf(
             InsightsData(
                 emptyList(),
+                "Sin periodo disponible aún.",
                 0f,
                 0f,
                 0f,
@@ -115,6 +119,7 @@ class InsightsViewModelTest {
         every { getInsightsUseCase.invoke() } returns flowOf(
             InsightsData(
                 emptyList(),
+                "Datos del 1 de marzo, 2026 al 2 de marzo, 2026",
                 0.5f,
                 1f,
                 79f,

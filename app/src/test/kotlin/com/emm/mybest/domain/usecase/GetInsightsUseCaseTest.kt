@@ -50,6 +50,7 @@ class GetInsightsUseCaseTest {
 
         assertEquals(83f, insights.initialWeight)
         assertEquals(80f, insights.currentWeight)
+        assertEquals("Datos del 1 de marzo, 2026 al 8 de marzo, 2026", insights.periodLabel)
         assertEquals(3f, insights.totalWeightLost)
         assertEquals(2, insights.exerciseDays)
         assertEquals(1, insights.healthyEatingDays)
@@ -70,6 +71,7 @@ class GetInsightsUseCaseTest {
         assertEquals(0f, insights.habitConsistency)
         assertEquals(0f, insights.currentWeight)
         assertEquals(0f, insights.initialWeight)
+        assertEquals("Sin periodo disponible aún.", insights.periodLabel)
         assertEquals(0f, insights.totalWeightLost)
         assertEquals(0, insights.exerciseDays)
         assertEquals(0, insights.healthyEatingDays)

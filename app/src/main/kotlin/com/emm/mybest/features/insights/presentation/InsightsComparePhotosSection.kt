@@ -14,6 +14,7 @@ import com.emm.mybest.ui.components.HButton
 @Composable
 internal fun InsightsComparePhotosSection(
     state: InsightsState,
+    periodLabel: String,
     onCompareClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -32,6 +33,11 @@ internal fun InsightsComparePhotosSection(
                 },
                 style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                 color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            androidx.compose.material3.Text(
+                text = periodLabel,
+                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.outline,
             )
             HButton(
                 text = if (state.canComparePhotos) "Abrir comparador" else "Comparador no disponible",
