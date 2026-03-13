@@ -25,6 +25,7 @@ class WeightRepositoryImplTest {
             id = "w1",
             date = LocalDate(2026, 3, 8),
             weight = 71.3f,
+            habitId = "habit-1",
             note = "ok",
         )
         every { dao.observeAllOrdered() } returns flowOf(listOf(entity))
@@ -34,6 +35,7 @@ class WeightRepositoryImplTest {
         assertEquals(1, result.size)
         assertEquals("w1", result.first().id)
         assertEquals(71.3f, result.first().weight)
+        assertEquals("habit-1", result.first().habitId)
         assertEquals("ok", result.first().note)
     }
 
@@ -42,11 +44,12 @@ class WeightRepositoryImplTest {
         val saved = slot<DailyWeightEntity>()
         coEvery { dao.upsert(capture(saved)) } returns Unit
 
-        repository.saveWeight(weight = 80.2f, note = "after lunch")
+        repository.saveWeight(weight = 80.2f, note = "after lunch", habitId = "habit-2")
 
         coVerify(exactly = 1) { dao.upsert(any()) }
         assertEquals(80.2f, saved.captured.weight)
         assertEquals("after lunch", saved.captured.note)
+        assertEquals("habit-2", saved.captured.habitId)
     }
 
     @Test
