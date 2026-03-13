@@ -12,6 +12,7 @@ import java.util.UUID
     tableName = "progress_photo",
     indices = [
         Index(value = ["habit_record_id"]),
+        Index(value = ["habit_id"]),
         Index(value = ["type"]),
     ],
     foreignKeys = [
@@ -30,6 +31,9 @@ data class ProgressPhotoEntity(
 
     @ColumnInfo(name = "habit_record_id")
     val habitRecordId: String? = null, // Making it nullable for now to support old photos
+
+    @ColumnInfo(name = "habit_id")
+    val habitId: String? = null,
 
     @ColumnInfo(name = "date")
     val date: LocalDate,

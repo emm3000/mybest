@@ -23,11 +23,13 @@ class WeightRepositoryImpl(
     override suspend fun saveWeight(
         weight: Float,
         note: String?,
+        habitId: String?,
     ) {
         dao.upsert(
             DailyWeightEntity(
                 date = currentDate(),
                 weight = weight,
+                habitId = habitId,
                 note = note,
             ),
         )

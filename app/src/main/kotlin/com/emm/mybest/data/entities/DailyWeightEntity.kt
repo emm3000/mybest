@@ -11,6 +11,7 @@ import java.util.UUID
     tableName = "daily_weight",
     indices = [
         Index(value = ["date"], unique = true),
+        Index(value = ["habit_id"]),
     ],
 )
 data class DailyWeightEntity(
@@ -23,6 +24,9 @@ data class DailyWeightEntity(
 
     @ColumnInfo(name = "weight")
     val weight: Float,
+
+    @ColumnInfo(name = "habit_id")
+    val habitId: String? = null,
 
     @ColumnInfo(name = "photo_path")
     val photoPath: String? = null,

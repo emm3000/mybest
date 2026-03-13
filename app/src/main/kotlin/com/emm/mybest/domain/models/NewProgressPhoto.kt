@@ -6,5 +6,6 @@ import kotlinx.datetime.LocalDate
 data class NewProgressPhoto(
     val photoPath: String,
     val type: PhotoType,
+    val habitId: String? = null,
     val date: LocalDate = currentDate(),
 )
