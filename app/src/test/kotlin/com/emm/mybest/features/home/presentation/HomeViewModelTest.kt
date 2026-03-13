@@ -103,6 +103,8 @@ class HomeViewModelTest {
             assertEquals(HomeEffect.Navigate(Screen.Insights), awaitItem())
             viewModel.onIntent(HomeIntent.OnViewTimelineClick)
             assertEquals(HomeEffect.Navigate(Screen.Timeline), awaitItem())
+            viewModel.onIntent(HomeIntent.OnEditHabitClick("habit-1"))
+            assertEquals(HomeEffect.Navigate(Screen.EditHabit("habit-1")), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

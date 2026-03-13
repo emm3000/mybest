@@ -89,6 +89,7 @@ private fun HomeHabitsSection(
                                 habit = habitWithRecord.habit,
                                 record = habitWithRecord.record,
                                 onToggle = { onIntent(HomeIntent.ToggleHabit(habitWithRecord)) },
+                                onClick = { onIntent(HomeIntent.OnEditHabitClick(habitWithRecord.habit.id)) },
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }

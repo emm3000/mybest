@@ -31,6 +31,7 @@ data class HomeState(
 
 sealed class HomeIntent {
     data class ToggleHabit(val habitWithRecord: HabitWithRecord) : HomeIntent()
+    data class OnEditHabitClick(val habitId: String) : HomeIntent()
     object OnAddWeightClick : HomeIntent()
     object OnAddHabitClick : HomeIntent()
     object OnAddPhotoClick : HomeIntent()
@@ -71,12 +72,20 @@ class HomeViewModel(
     fun onIntent(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.ToggleHabit -> toggleHabit(intent.habitWithRecord)
+            is HomeIntent.OnEditHabitClick -> emitNavigate(Screen.EditHabit(intent.habitId))
+            else -> handleNavigationIntent(intent)
+        }
+    }
+
+    private fun handleNavigationIntent(intent: HomeIntent) {
+        when (intent) {
             HomeIntent.OnAddWeightClick -> emitNavigate(Screen.AddWeight)
             HomeIntent.OnAddHabitClick -> emitNavigate(Screen.AddHabit)
             HomeIntent.OnAddPhotoClick -> emitNavigate(Screen.AddPhoto)
             HomeIntent.OnViewHistoryClick -> emitNavigate(Screen.History)
             HomeIntent.OnViewInsightsClick -> emitNavigate(Screen.Insights)
             HomeIntent.OnViewTimelineClick -> emitNavigate(Screen.Timeline)
+            else -> Unit
         }
     }
 

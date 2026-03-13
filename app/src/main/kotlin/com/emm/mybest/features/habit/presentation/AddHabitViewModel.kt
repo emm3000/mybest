@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.Habit
 import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.domain.usecase.CreateHabitUseCase
+import com.emm.mybest.domain.usecase.GetHabitByIdUseCase
+import com.emm.mybest.domain.usecase.UpdateHabitUseCase
 import com.emm.mybest.domain.validation.HabitValidator
 import com.emm.mybest.ui.theme.shadcnPrimary
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,6 +19,7 @@ import kotlinx.datetime.DayOfWeek
 import java.util.UUID
 
 data class AddHabitState(
+    val editingHabitId: String? = null,
     val step: Int = 1,
     // Step 1
     val name: String = "",
@@ -34,7 +37,10 @@ data class AddHabitState(
     val goalError: String? = null,
     val unitError: String? = null,
     val scheduledDaysError: String? = null,
-)
+) {
+    val isEditMode: Boolean
+        get() = editingHabitId != null
+}
 
 sealed class AddHabitIntent {
     // Nav
@@ -54,6 +60,7 @@ sealed class AddHabitIntent {
     // Step 3
     data class OnDayToggle(val day: DayOfWeek) : AddHabitIntent()
 
+    data class LoadHabitForEdit(val habitId: String) : AddHabitIntent()
     object OnSaveClick : AddHabitIntent()
 }
 
@@ -64,6 +71,8 @@ sealed class AddHabitEffect {
 
 class AddHabitViewModel(
     private val createHabitUseCase: CreateHabitUseCase,
+    private val getHabitByIdUseCase: GetHabitByIdUseCase,
+    private val updateHabitUseCase: UpdateHabitUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddHabitState())
@@ -77,6 +86,7 @@ class AddHabitViewModel(
             AddHabitIntent.OnNextStep -> handleNextStep()
             AddHabitIntent.OnPreviousStep -> _state.update { it.copy(step = (it.step - 1).coerceAtLeast(1)) }
             is AddHabitIntent.OnDayToggle -> toggleDay(intent.day)
+            is AddHabitIntent.LoadHabitForEdit -> loadHabitForEdit(intent.habitId)
             AddHabitIntent.OnSaveClick -> saveHabit()
             else -> handleFormFieldIntent(intent)
         }
@@ -142,7 +152,8 @@ class AddHabitViewModel(
     }
 
     private fun saveHabit() {
-        if (_state.value.scheduledDays.isEmpty()) {
+        val currentState = _state.value
+        if (currentState.scheduledDays.isEmpty()) {
             _state.update {
                 it.copy(scheduledDaysError = "Selecciona al menos un día para este hábito")
             }
@@ -153,23 +164,55 @@ class AddHabitViewModel(
             _state.update { it.copy(isLoading = true) }
             runCatching {
                 val habit = Habit(
-                    id = UUID.randomUUID().toString(),
-                    name = _state.value.name,
-                    icon = _state.value.icon,
+                    id = currentState.editingHabitId ?: UUID.randomUUID().toString(),
+                    name = currentState.name,
+                    icon = currentState.icon,
                     color = shadcnPrimary.hashCode(), // Using theme color
-                    category = _state.value.category,
-                    type = _state.value.type,
-                    goalValue = _state.value.goalValue.toFloatOrNull(),
-                    unit = _state.value.unit,
-                    scheduledDays = _state.value.scheduledDays,
+                    category = currentState.category,
+                    type = currentState.type,
+                    goalValue = currentState.goalValue.toFloatOrNull(),
+                    unit = currentState.unit,
+                    scheduledDays = currentState.scheduledDays,
                 )
-                createHabitUseCase(habit)
+                if (currentState.isEditMode) {
+                    updateHabitUseCase(habit)
+                } else {
+                    createHabitUseCase(habit)
+                }
             }.onSuccess {
                 _effect.emit(AddHabitEffect.NavigateBack)
             }.onFailure { error ->
                 _effect.emit(AddHabitEffect.ShowError("Error al guardar: ${error.message}"))
             }
             _state.update { it.copy(isLoading = false) }
+        }
+    }
+
+    private fun loadHabitForEdit(habitId: String) {
+        if (_state.value.editingHabitId == habitId) return
+
+        viewModelScope.launch {
+            val habit = getHabitByIdUseCase(habitId)
+            if (habit == null) {
+                _effect.emit(AddHabitEffect.ShowError("No se encontró el hábito para editar"))
+                return@launch
+            }
+            _state.update {
+                it.copy(
+                    editingHabitId = habit.id,
+                    name = habit.name,
+                    icon = habit.icon,
+                    category = habit.category,
+                    type = habit.type,
+                    goalValue = habit.goalValue?.toString().orEmpty(),
+                    unit = habit.unit.orEmpty(),
+                    scheduledDays = habit.scheduledDays,
+                    nameError = null,
+                    goalError = null,
+                    unitError = null,
+                    scheduledDaysError = null,
+                )
+            }
         }
     }
 }

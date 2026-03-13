@@ -14,6 +14,9 @@ sealed interface Screen {
     data object AddHabit : Screen
 
     @Serializable
+    data class EditHabit(val habitId: String) : Screen
+
+    @Serializable
     data object AddPhoto : Screen
 
     @Serializable

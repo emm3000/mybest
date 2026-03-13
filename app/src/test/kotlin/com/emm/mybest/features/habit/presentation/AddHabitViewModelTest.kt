@@ -4,6 +4,8 @@ import app.cash.turbine.test
 import com.emm.mybest.domain.models.Habit
 import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.domain.usecase.CreateHabitUseCase
+import com.emm.mybest.domain.usecase.GetHabitByIdUseCase
+import com.emm.mybest.domain.usecase.UpdateHabitUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -26,11 +28,13 @@ class AddHabitViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val createHabitUseCase: CreateHabitUseCase = mockk(relaxed = true)
+    private val getHabitByIdUseCase: GetHabitByIdUseCase = mockk(relaxed = true)
+    private val updateHabitUseCase: UpdateHabitUseCase = mockk(relaxed = true)
     private lateinit var viewModel: AddHabitViewModel
 
     @Before
     fun setup() {
-        viewModel = AddHabitViewModel(createHabitUseCase)
+        viewModel = AddHabitViewModel(createHabitUseCase, getHabitByIdUseCase, updateHabitUseCase)
     }
 
     @Test
@@ -195,5 +199,30 @@ class AddHabitViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
         assertEquals(false, viewModel.state.value.isLoading)
+    }
+
+    @Test
+    fun `OnSaveClick in edit mode calls update use case`() = runTest {
+        val existingHabit = Habit(
+            id = "habit-1",
+            name = "Leer",
+            icon = "FitnessCenter",
+            color = 1,
+            category = "Mente",
+            type = HabitType.TIME,
+            goalValue = 30f,
+            unit = "min",
+            scheduledDays = DayOfWeek.entries.toSet(),
+        )
+        coEvery { getHabitByIdUseCase.invoke("habit-1") } returns existingHabit
+        coEvery { updateHabitUseCase.invoke(any()) } returns Unit
+
+        viewModel.onIntent(AddHabitIntent.LoadHabitForEdit("habit-1"))
+        advanceUntilIdle()
+        viewModel.onIntent(AddHabitIntent.OnSaveClick)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { updateHabitUseCase.invoke(any()) }
+        coVerify(exactly = 0) { createHabitUseCase.invoke(any()) }
     }
 }

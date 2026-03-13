@@ -35,6 +35,7 @@ fun HabitCard(
     habit: Habit,
     record: HabitRecord?,
     onToggle: () -> Unit,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val isCompleted = record?.isCompleted ?: false
@@ -50,6 +51,7 @@ fun HabitCard(
         variant = CardVariant.Filled,
         containerColor = cardContainerColor,
         border = cardBorder,
+        onClick = onClick,
     ) {
         HabitCardContent(
             habit = habit,

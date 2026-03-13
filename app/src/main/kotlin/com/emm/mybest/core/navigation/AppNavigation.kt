@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.emm.mybest.features.habit.presentation.AddHabitScreen
 import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
@@ -148,6 +149,18 @@ private fun AppNavGraph(
             val viewModel: AddHabitViewModel = koinViewModel()
             AddHabitScreen(
                 viewModel = viewModel,
+                initialHabitId = null,
+                onBackClick = { navController.popBackStack() },
+                modifier = Modifier,
+            )
+        }
+
+        composable<Screen.EditHabit> { backStackEntry ->
+            val route = backStackEntry.toRoute<Screen.EditHabit>()
+            val viewModel: AddHabitViewModel = koinViewModel()
+            AddHabitScreen(
+                viewModel = viewModel,
+                initialHabitId = route.habitId,
                 onBackClick = { navController.popBackStack() },
                 modifier = Modifier,
             )

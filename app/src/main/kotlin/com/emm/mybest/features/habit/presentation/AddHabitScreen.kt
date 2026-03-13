@@ -67,6 +67,15 @@ private val habitGoalExamples = mapOf(
     HabitType.TIME to "Ejemplo recomendado: 20 a 45 minutos por día.",
     HabitType.METRIC to "Ejemplo recomendado: 8 vasos o 2 litros por día.",
 )
+private val dayAccessibilityLabels = mapOf(
+    DayOfWeek.MONDAY to "Lunes",
+    DayOfWeek.TUESDAY to "Martes",
+    DayOfWeek.WEDNESDAY to "Miercoles",
+    DayOfWeek.THURSDAY to "Jueves",
+    DayOfWeek.FRIDAY to "Viernes",
+    DayOfWeek.SATURDAY to "Sabado",
+    DayOfWeek.SUNDAY to "Domingo",
+)
 
 private data class HabitIconOption(
     val value: String,
@@ -84,6 +93,7 @@ private val addHabitIconOptions = listOf(
 @Composable
 fun AddHabitScreen(
     viewModel: AddHabitViewModel,
+    initialHabitId: String?,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -99,6 +109,12 @@ fun AddHabitScreen(
                     snackbarHostState.showSnackbar(effect.message)
                 }
             }
+        }
+    }
+
+    LaunchedEffect(initialHabitId) {
+        if (initialHabitId != null) {
+            viewModel.onIntent(AddHabitIntent.LoadHabitForEdit(initialHabitId))
         }
     }
 
@@ -124,7 +140,7 @@ private fun AddHabitContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             HTopBar(
-                title = "Nuevo Hábito",
+                title = if (state.isEditMode) "Editar hábito" else "Nuevo hábito",
                 navigationIcon = {
                     HIconButton(
                         icon = Icons.AutoMirrored.Rounded.ArrowBack,
@@ -167,7 +183,7 @@ private fun AddHabitContent(
             }
 
             HButton(
-                text = if (state.step < ADD_HABIT_TOTAL_STEPS) "Continuar" else "Crear Hábito",
+                text = addHabitPrimaryActionText(state),
                 onClick = {
                     if (state.step < ADD_HABIT_TOTAL_STEPS) {
                         onIntent(AddHabitIntent.OnNextStep)
@@ -455,7 +471,7 @@ private fun DayChip(
         modifier = Modifier
             .size(40.dp)
             .semantics {
-                contentDescription = day.accessibilityLabelEs()
+                contentDescription = dayAccessibilityLabels.getValue(day)
             },
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -469,12 +485,7 @@ private fun DayChip(
     }
 }
 
-private fun DayOfWeek.accessibilityLabelEs(): String = when (this) {
-    DayOfWeek.MONDAY -> "Lunes"
-    DayOfWeek.TUESDAY -> "Martes"
-    DayOfWeek.WEDNESDAY -> "Miercoles"
-    DayOfWeek.THURSDAY -> "Jueves"
-    DayOfWeek.FRIDAY -> "Viernes"
-    DayOfWeek.SATURDAY -> "Sabado"
-    DayOfWeek.SUNDAY -> "Domingo"
+private fun addHabitPrimaryActionText(state: AddHabitState): String {
+    if (state.step < ADD_HABIT_TOTAL_STEPS) return "Continuar"
+    return if (state.isEditMode) "Guardar cambios" else "Crear hábito"
 }

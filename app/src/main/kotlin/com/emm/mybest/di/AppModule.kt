@@ -15,9 +15,11 @@ import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.domain.usecase.CreateHabitUseCase
 import com.emm.mybest.domain.usecase.GetDailyHabitsUseCase
+import com.emm.mybest.domain.usecase.GetHabitByIdUseCase
 import com.emm.mybest.domain.usecase.GetHomeSummaryUseCase
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.domain.usecase.ToggleHabitUseCase
+import com.emm.mybest.domain.usecase.UpdateHabitUseCase
 import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeViewModel
@@ -56,13 +58,15 @@ val appModule = module {
     factory { ToggleHabitUseCase(get()) }
     factory { GetHomeSummaryUseCase(get(), get(), get()) }
     factory { GetInsightsUseCase(get(), get(), get()) }
+    factory { GetHabitByIdUseCase(get()) }
+    factory { UpdateHabitUseCase(get()) }
 
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
     viewModel { HomeViewModel(get(), get()) }
     viewModel { AddWeightViewModel(get()) }
-    viewModel { AddHabitViewModel(get()) }
+    viewModel { AddHabitViewModel(get(), get(), get()) }
     viewModel { AddPhotoViewModel(get()) }
     viewModel { HistoryViewModel(get(), get(), get()) }
     viewModel { InsightsViewModel(get()) }
