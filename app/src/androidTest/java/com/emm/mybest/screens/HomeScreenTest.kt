@@ -57,8 +57,9 @@ class HomeScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithText("Registrar Peso").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Crear Hábito").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Registrar peso").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Crear un hábito").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Configurar recordatorios").assertIsDisplayed()
     }
 
     @Test
@@ -76,7 +77,45 @@ class HomeScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithText("Registrar Peso").performClick()
+        composeTestRule.onNodeWithText("Registrar peso").performClick()
+        assert(clicked)
+    }
+
+    @Test
+    fun homeScreen_clickSummaryCard_triggersInsightsCallback() {
+        var clicked = false
+        composeTestRule.setContent {
+            MyBestTheme {
+                HomeScreenContent(
+                    state = HomeState(),
+                    onIntent = { intent ->
+                        if (intent is HomeIntent.OnViewInsightsClick) clicked = true
+                    },
+                    snackbarHostState = remember { SnackbarHostState() },
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Tu Progreso").performClick()
+        assert(clicked)
+    }
+
+    @Test
+    fun homeScreen_clickReminderQuickAction_triggersCallback() {
+        var clicked = false
+        composeTestRule.setContent {
+            MyBestTheme {
+                HomeScreenContent(
+                    state = HomeState(),
+                    onIntent = { intent ->
+                        if (intent is HomeIntent.OnReminderSettingsClick) clicked = true
+                    },
+                    snackbarHostState = remember { SnackbarHostState() },
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Configurar recordatorios").performClick()
         assert(clicked)
     }
 }
