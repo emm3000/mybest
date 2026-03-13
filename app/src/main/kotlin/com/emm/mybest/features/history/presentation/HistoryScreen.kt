@@ -1,6 +1,7 @@
 package com.emm.mybest.features.history.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -271,20 +272,19 @@ fun DayCell(
     modifier: Modifier = Modifier,
 ) {
     val isToday = date == currentDate()
+    val intensity = resolveDayIntensity(summary)
+    val backgroundColor = dayIntensityColor(intensity)
     val dayContentDescription = buildDayCellDescription(date = date, summary = summary, isToday = isToday)
 
     Column(
         modifier = modifier
             .aspectRatio(DAY_CELL_ASPECT_RATIO)
             .clip(RoundedCornerShape(12.dp))
-            .background(
-                if (isToday) {
-                    MaterialTheme.colorScheme.primaryContainer.copy(
-                        alpha = 0.3f,
-                    )
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                },
+            .background(backgroundColor)
+            .border(
+                width = 1.dp,
+                color = if (isToday) MaterialTheme.colorScheme.primary.copy(alpha = 0.45f) else Color.Transparent,
+                shape = RoundedCornerShape(12.dp),
             )
             .clickable(onClick = onClick)
             .semantics {

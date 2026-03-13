@@ -65,6 +65,14 @@ fun HistoryLegendSection(modifier: Modifier = Modifier) {
                 LegendItem(color = MaterialTheme.colorScheme.secondary, text = "Hábitos")
                 LegendItem(color = MaterialTheme.colorScheme.tertiary, text = "Fotos")
             }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                LegendItem(color = dayIntensityColor(DayIntensity.LOW), text = "Baja")
+                LegendItem(color = dayIntensityColor(DayIntensity.MEDIUM), text = "Media")
+                LegendItem(color = dayIntensityColor(DayIntensity.HIGH), text = "Alta")
+            }
         }
     }
 }

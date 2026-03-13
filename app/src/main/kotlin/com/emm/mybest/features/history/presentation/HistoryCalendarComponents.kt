@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,6 +27,36 @@ import com.emm.mybest.core.datetime.shortEs
 import com.emm.mybest.ui.components.HEmptyState
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+
+internal enum class DayIntensity(val label: String) {
+    NONE("Sin actividad"),
+    LOW("Baja"),
+    MEDIUM("Media"),
+    HIGH("Alta"),
+}
+
+internal fun resolveDayIntensity(summary: DaySummary?): DayIntensity {
+    val score = listOfNotNull(
+        summary?.hasWeight?.takeIf { it },
+        summary?.hasHabit?.takeIf { it },
+        summary?.hasPhoto?.takeIf { it },
+    ).size
+
+    return when (score) {
+        0 -> DayIntensity.NONE
+        1 -> DayIntensity.LOW
+        2 -> DayIntensity.MEDIUM
+        else -> DayIntensity.HIGH
+    }
+}
+
+@Composable
+internal fun dayIntensityColor(intensity: DayIntensity): Color = when (intensity) {
+    DayIntensity.NONE -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f)
+    DayIntensity.LOW -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+    DayIntensity.MEDIUM -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f)
+    DayIntensity.HIGH -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.55f)
+}
 
 @Composable
 internal fun HistoryMonthSummarySection(
@@ -181,11 +212,13 @@ internal fun buildDayCellDescription(
     }.joinToString(", ")
 
     return buildString {
+        val intensity = resolveDayIntensity(summary)
         if (isToday) {
             append("Hoy. ")
         }
         append(date.formatEsWeekdayDayMonth())
         append(". ")
+        append("Intensidad: ${intensity.label.lowercase()}. ")
         if (activitySummary.isNotBlank()) {
             append("Actividad registrada: ")
             append(activitySummary)
