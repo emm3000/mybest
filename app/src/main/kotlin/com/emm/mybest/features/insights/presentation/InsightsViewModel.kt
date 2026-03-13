@@ -2,6 +2,7 @@ package com.emm.mybest.features.insights.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.domain.models.InsightsRecommendation
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,6 +23,7 @@ data class InsightsState(
     val exerciseDays: Int = 0,
     val healthyEatingDays: Int = 0,
     val photoCount: Int = 0,
+    val recommendation: InsightsRecommendation? = null,
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
 ) {
@@ -61,6 +63,7 @@ class InsightsViewModel(
                 exerciseDays = data.exerciseDays,
                 healthyEatingDays = data.healthyEatingDays,
                 photoCount = data.photoCount,
+                recommendation = data.recommendation,
                 isLoading = false,
                 errorMessage = null,
             )

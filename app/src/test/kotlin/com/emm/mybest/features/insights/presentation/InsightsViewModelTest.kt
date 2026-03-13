@@ -2,6 +2,7 @@ package com.emm.mybest.features.insights.presentation
 
 import app.cash.turbine.test
 import com.emm.mybest.domain.models.InsightsData
+import com.emm.mybest.domain.models.InsightsRecommendation
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.every
@@ -32,6 +33,11 @@ class InsightsViewModelTest {
             exerciseDays = 10,
             healthyEatingDays = 8,
             photoCount = 3,
+            recommendation = InsightsRecommendation(
+                title = "Mantén el ritmo",
+                description = "Texto",
+                actionLabel = "Acción",
+            ),
         )
         every { getInsightsUseCase.invoke() } returns flowOf(expected)
 
@@ -47,6 +53,7 @@ class InsightsViewModelTest {
             assertEquals(expected.exerciseDays, state.exerciseDays)
             assertEquals(expected.healthyEatingDays, state.healthyEatingDays)
             assertEquals(expected.photoCount, state.photoCount)
+            assertEquals(expected.recommendation.title, state.recommendation?.title)
             assertEquals(true, state.canComparePhotos)
             assertEquals(false, state.isLoading)
             cancelAndIgnoreRemainingEvents()
@@ -56,7 +63,17 @@ class InsightsViewModelTest {
     @Test
     fun `OnBackClick emits NavigateBack effect`() = runTest {
         every { getInsightsUseCase.invoke() } returns flowOf(
-            InsightsData(emptyList(), 0f, 0f, 0f, 0f, 0, 0, 0),
+            InsightsData(
+                emptyList(),
+                0f,
+                0f,
+                0f,
+                0f,
+                0,
+                0,
+                0,
+                InsightsRecommendation("x", "y", "z"),
+            ),
         )
         val viewModel = InsightsViewModel(getInsightsUseCase)
 
@@ -70,7 +87,17 @@ class InsightsViewModelTest {
     @Test
     fun `OnCompareClick emits NavigateToCompare effect`() = runTest {
         every { getInsightsUseCase.invoke() } returns flowOf(
-            InsightsData(emptyList(), 0f, 0f, 0f, 0f, 0, 0, 2),
+            InsightsData(
+                emptyList(),
+                0f,
+                0f,
+                0f,
+                0f,
+                0,
+                0,
+                2,
+                InsightsRecommendation("x", "y", "z"),
+            ),
         )
         val viewModel = InsightsViewModel(getInsightsUseCase)
 

@@ -54,6 +54,7 @@ class GetInsightsUseCaseTest {
         assertEquals(1, insights.healthyEatingDays)
         assertEquals(0.75f, insights.habitConsistency)
         assertEquals(0, insights.photoCount)
+        assertEquals("Registra evidencia visual", insights.recommendation.title)
     }
 
     @Test
@@ -71,5 +72,6 @@ class GetInsightsUseCaseTest {
         assertEquals(0, insights.exerciseDays)
         assertEquals(0, insights.healthyEatingDays)
         assertEquals(0, insights.photoCount)
+        assertEquals("Refuerza la constancia", insights.recommendation.title)
     }
 }

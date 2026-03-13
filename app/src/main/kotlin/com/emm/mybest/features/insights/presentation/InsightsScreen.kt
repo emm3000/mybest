@@ -131,6 +131,10 @@ private fun InsightsDataContent(
         modifier = modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(INSIGHTS_SECTION_SPACING.dp),
     ) {
+        state.recommendation?.let { recommendation ->
+            RecommendationSection(recommendation = recommendation)
+        }
+
         WeightInsightsSection(state = state)
 
         InsightsComparePhotosSection(
@@ -140,6 +144,35 @@ private fun InsightsDataContent(
 
         InsightsSection(title = "Consistencia de Hábitos") {
             HabitStats(state)
+        }
+    }
+}
+
+@Composable
+private fun RecommendationSection(
+    recommendation: com.emm.mybest.domain.models.InsightsRecommendation,
+    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
+) {
+    InsightsSection(
+        title = "Recomendación de la semana",
+        modifier = modifier,
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = recommendation.title,
+                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = recommendation.description,
+                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Siguiente paso: ${recommendation.actionLabel}",
+                style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
