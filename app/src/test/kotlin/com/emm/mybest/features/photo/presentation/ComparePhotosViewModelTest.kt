@@ -163,6 +163,59 @@ class ComparePhotosViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun `selecting same photo for before slot emits error and keeps selection`() = runTest {
+        every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
+        every { repository.getPhotosByType(any()) } returns flowOf(listOf(face))
+        val viewModel = ComparePhotosViewModel(repository)
+
+        viewModel.state.test {
+            awaitItem()
+            val initialLoaded = awaitItem()
+            assertEquals(face, initialLoaded.beforePhoto)
+            assertEquals(body, initialLoaded.afterPhoto)
+
+            viewModel.effect.test {
+                viewModel.onIntent(ComparePhotosIntent.OnBeforePhotoSelected(body))
+                advanceUntilIdle()
+
+                assertEquals(
+                    ComparePhotosEffect.ShowError("Elige una foto distinta para ANTES."),
+                    awaitItem(),
+                )
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            assertEquals(face, viewModel.state.value.beforePhoto)
+            assertEquals(body, viewModel.state.value.afterPhoto)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `OnTypeSelected with no matches keeps filter and clears comparison pair`() = runTest {
+        every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
+        every { repository.getPhotosByType(PhotoType.DINNER) } returns flowOf(emptyList())
+        val viewModel = ComparePhotosViewModel(repository)
+
+        viewModel.state.test {
+            awaitItem()
+            awaitItem()
+
+            viewModel.onIntent(ComparePhotosIntent.OnTypeSelected(PhotoType.DINNER))
+            val filtered = awaitState {
+                it.selectedType == PhotoType.DINNER &&
+                    it.photos.isEmpty() &&
+                    it.beforePhoto == null &&
+                    it.afterPhoto == null
+            }
+
+            assertEquals(2, filtered.totalPhotosCount)
+            assertEquals(0, filtered.photoCountByType[PhotoType.DINNER] ?: 0)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }
 
 private suspend fun ReceiveTurbine<ComparePhotosState>.awaitState(
