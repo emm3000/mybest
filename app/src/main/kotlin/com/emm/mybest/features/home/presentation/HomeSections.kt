@@ -24,7 +24,7 @@ internal fun LazyListScope.homePrimaryActionsSection(
             verticalArrangement = Arrangement.spacedBy(HOME_PRIMARY_ACTIONS_SPACING.dp),
         ) {
             Text(
-                text = "Acciones de hoy",
+                text = "Acciones de apoyo",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
             )
@@ -94,7 +94,7 @@ internal fun ProgressPhotoQuickAction(
 
 private fun homeWeightSubtitle(state: HomeState): String {
     if (state.isLoading) return "Cargando tu último registro"
-    return state.lastWeight?.let { "Último: $it kg" } ?: "Sigue tu evolución física"
+    return state.lastWeight?.let { "Último registro: $it kg" } ?: "Evidencia tu avance con este dato"
 }
 
 private fun homeNewHabitSubtitle(state: HomeState): String {
@@ -108,5 +108,5 @@ private fun homeNewHabitSubtitle(state: HomeState): String {
 
 private fun homeProgressPhotoSubtitle(state: HomeState): String {
     if (state.isLoading) return "Cargando tu historial visual"
-    return "Total: ${state.totalPhotos} fotos"
+    return "Evidencias registradas: ${state.totalPhotos} fotos"
 }
