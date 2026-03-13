@@ -22,11 +22,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.domain.models.InsightsRecommendation
+import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.ui.components.AlertVariant
+import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HAlert
+import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
@@ -44,13 +49,15 @@ private const val INSIGHTS_RING_SIZE = 80
 fun InsightsScreen(
     viewModel: InsightsViewModel,
     onCompareClick: () -> Unit,
-    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
+    onRecommendationAction: (InsightsRecommendationAction) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
 
     HandleInsightsEffects(
         viewModel = viewModel,
         onCompareClick = onCompareClick,
+        onRecommendationAction = onRecommendationAction,
     )
 
     Scaffold(
@@ -63,6 +70,7 @@ fun InsightsScreen(
             state = state,
             padding = padding,
             onCompareClick = { viewModel.onIntent(InsightsIntent.OnCompareClick) },
+            onRecommendationActionClick = { viewModel.onIntent(InsightsIntent.OnRecommendationActionClick) },
         )
     }
 }
@@ -71,14 +79,17 @@ fun InsightsScreen(
 private fun HandleInsightsEffects(
     viewModel: InsightsViewModel,
     onCompareClick: () -> Unit,
+    onRecommendationAction: (InsightsRecommendationAction) -> Unit,
 ) {
     val currentOnCompareClick by androidx.compose.runtime.rememberUpdatedState(onCompareClick)
+    val currentOnRecommendationAction by androidx.compose.runtime.rememberUpdatedState(onRecommendationAction)
 
     androidx.compose.runtime.LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 InsightsEffect.NavigateBack -> Unit
                 InsightsEffect.NavigateToCompare -> currentOnCompareClick()
+                is InsightsEffect.NavigateByRecommendation -> currentOnRecommendationAction(effect.action)
             }
         }
     }
@@ -89,6 +100,7 @@ private fun InsightsBody(
     state: InsightsState,
     padding: androidx.compose.foundation.layout.PaddingValues,
     onCompareClick: () -> Unit,
+    onRecommendationActionClick: () -> Unit,
 ) {
     val contentModifier = androidx.compose.ui.Modifier
         .padding(padding)
@@ -116,6 +128,7 @@ private fun InsightsBody(
         else -> InsightsDataContent(
             state = state,
             onCompareClick = onCompareClick,
+            onRecommendationActionClick = onRecommendationActionClick,
             modifier = contentModifier,
         )
     }
@@ -125,14 +138,18 @@ private fun InsightsBody(
 private fun InsightsDataContent(
     state: InsightsState,
     onCompareClick: () -> Unit,
-    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
+    onRecommendationActionClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(INSIGHTS_SECTION_SPACING.dp),
     ) {
         state.recommendation?.let { recommendation ->
-            RecommendationSection(recommendation = recommendation)
+            RecommendationSection(
+                recommendation = recommendation,
+                onActionClick = onRecommendationActionClick,
+            )
         }
 
         WeightInsightsSection(state = state)
@@ -150,8 +167,9 @@ private fun InsightsDataContent(
 
 @Composable
 private fun RecommendationSection(
-    recommendation: com.emm.mybest.domain.models.InsightsRecommendation,
-    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
+    recommendation: InsightsRecommendation,
+    onActionClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     InsightsSection(
         title = "Recomendación de la semana",
@@ -173,13 +191,19 @@ private fun RecommendationSection(
                 style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
                 color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
             )
+            HButton(
+                text = recommendation.actionLabel,
+                onClick = onActionClick,
+                modifier = Modifier.fillMaxWidth(),
+                variant = ButtonVariant.Secondary,
+            )
         }
     }
 }
 
 @Composable
 private fun InsightsLoadingState(
-    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
@@ -217,7 +241,7 @@ private fun InsightsLoadingState(
 @Composable
 internal fun InsightsSection(
     title: String,
-    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     Column(modifier = modifier) {
@@ -243,7 +267,7 @@ internal fun InsightsSection(
 @Composable
 private fun HabitStats(
     state: InsightsState,
-    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,

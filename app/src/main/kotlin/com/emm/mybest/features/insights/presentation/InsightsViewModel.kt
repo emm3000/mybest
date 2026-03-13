@@ -3,6 +3,7 @@ package com.emm.mybest.features.insights.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.InsightsRecommendation
+import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,11 +39,13 @@ data class InsightsState(
 sealed class InsightsIntent {
     object OnBackClick : InsightsIntent()
     object OnCompareClick : InsightsIntent()
+    object OnRecommendationActionClick : InsightsIntent()
 }
 
 sealed class InsightsEffect {
     object NavigateBack : InsightsEffect()
     object NavigateToCompare : InsightsEffect()
+    data class NavigateByRecommendation(val action: InsightsRecommendationAction) : InsightsEffect()
 }
 
 class InsightsViewModel(
@@ -85,6 +88,11 @@ class InsightsViewModel(
             when (intent) {
                 InsightsIntent.OnBackClick -> _effect.emit(InsightsEffect.NavigateBack)
                 InsightsIntent.OnCompareClick -> _effect.emit(InsightsEffect.NavigateToCompare)
+                InsightsIntent.OnRecommendationActionClick -> {
+                    state.value.recommendation?.let { recommendation ->
+                        _effect.emit(InsightsEffect.NavigateByRecommendation(recommendation.action))
+                    }
+                }
             }
         }
     }

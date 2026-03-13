@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.features.habit.presentation.AddHabitScreen
 import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
@@ -189,6 +190,14 @@ private fun AppNavGraph(
             InsightsScreen(
                 viewModel = viewModel,
                 onCompareClick = { navController.navigate(Screen.ComparePhotos) },
+                onRecommendationAction = { action ->
+                    when (action) {
+                        InsightsRecommendationAction.PRIORITIZE_HABIT -> navController.navigate(Screen.AddHabit)
+                        InsightsRecommendationAction.ADJUST_WEIGHT_PLAN -> navController.navigate(Screen.AddWeight)
+                        InsightsRecommendationAction.ADD_PROGRESS_PHOTO -> navController.navigate(Screen.AddPhoto)
+                        InsightsRecommendationAction.KEEP_ROUTINE -> navController.navigate(Screen.Home)
+                    }
+                },
                 modifier = Modifier,
             )
         }

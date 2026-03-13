@@ -1,6 +1,7 @@
 package com.emm.mybest.domain.usecase
 
 import com.emm.mybest.domain.models.DailyHabitSummary
+import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.repository.DailyHabitRepository
 import com.emm.mybest.domain.repository.PhotoRepository
@@ -55,6 +56,7 @@ class GetInsightsUseCaseTest {
         assertEquals(0.75f, insights.habitConsistency)
         assertEquals(0, insights.photoCount)
         assertEquals("Registra evidencia visual", insights.recommendation.title)
+        assertEquals(InsightsRecommendationAction.ADD_PROGRESS_PHOTO, insights.recommendation.action)
     }
 
     @Test
@@ -73,5 +75,6 @@ class GetInsightsUseCaseTest {
         assertEquals(0, insights.healthyEatingDays)
         assertEquals(0, insights.photoCount)
         assertEquals("Refuerza la constancia", insights.recommendation.title)
+        assertEquals(InsightsRecommendationAction.PRIORITIZE_HABIT, insights.recommendation.action)
     }
 }

@@ -2,6 +2,7 @@ package com.emm.mybest.domain.usecase
 
 import com.emm.mybest.domain.models.InsightsData
 import com.emm.mybest.domain.models.InsightsRecommendation
+import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.domain.repository.DailyHabitRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
@@ -60,24 +61,28 @@ private fun buildRecommendation(
             title = "Refuerza la constancia",
             description = "Completa al menos 1 hábito diario esta semana para recuperar ritmo.",
             actionLabel = "Prioriza un hábito clave",
+            action = InsightsRecommendationAction.PRIORITIZE_HABIT,
         )
 
         hasWeightTrend && totalWeightLost <= 0f -> InsightsRecommendation(
             title = "Ajusta tu plan semanal",
             description = "No hay mejora reciente de peso. Ajusta alimentación o entrenamiento 3 días esta semana.",
             actionLabel = "Define un ajuste concreto",
+            action = InsightsRecommendationAction.ADJUST_WEIGHT_PLAN,
         )
 
         photoCount < 2 -> InsightsRecommendation(
             title = "Registra evidencia visual",
             description = "Añade al menos 2 fotos por semana para comparar cambios reales.",
             actionLabel = "Sube una foto hoy",
+            action = InsightsRecommendationAction.ADD_PROGRESS_PHOTO,
         )
 
         else -> InsightsRecommendation(
             title = "Mantén el ritmo",
             description = "Tu progreso es consistente. Conserva tu rutina y registra evidencia cada semana.",
             actionLabel = "Sostén la rutina actual",
+            action = InsightsRecommendationAction.KEEP_ROUTINE,
         )
     }
 }
