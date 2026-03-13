@@ -56,6 +56,7 @@ import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HFilterChip
 import com.emm.mybest.ui.components.HIconButton
+import com.emm.mybest.ui.components.HSelect
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.components.IconButtonVariant
 import com.emm.mybest.ui.theme.MyBestTheme
@@ -225,6 +226,16 @@ private fun AddPhotoBody(
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        HSelect(
+            items = state.availableHabits,
+            selectedItem = state.availableHabits.firstOrNull { it.id == state.selectedHabitId },
+            onItemSelect = { onIntent(AddPhotoIntent.OnHabitSelected(it.id)) },
+            label = "Hábito relacionado (opcional)",
+            itemLabel = { it.name },
+            placeholder = "Sin hábito específico",
+            modifier = Modifier.fillMaxWidth(),
+        )
+
         if (state.selectedPhotos.isEmpty()) {
             Surface(
                 modifier = Modifier

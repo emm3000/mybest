@@ -2,8 +2,10 @@ package com.emm.mybest.features.photo.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.domain.models.Habit
 import com.emm.mybest.domain.models.NewProgressPhoto
 import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.domain.repository.HabitRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +21,8 @@ data class SelectedPhoto(
 
 data class AddPhotoState(
     val selectedPhotos: List<SelectedPhoto> = emptyList(),
+    val availableHabits: List<Habit> = emptyList(),
+    val selectedHabitId: String? = null,
     val isLoading: Boolean = false,
 )
 
@@ -26,6 +30,7 @@ sealed class AddPhotoIntent {
     data class OnPhotosSelected(val uris: List<String>) : AddPhotoIntent()
     data class OnTypeSelected(val index: Int, val type: PhotoType) : AddPhotoIntent()
     data class OnRemovePhoto(val index: Int) : AddPhotoIntent()
+    data class OnHabitSelected(val habitId: String?) : AddPhotoIntent()
     object OnSaveClick : AddPhotoIntent()
 }
 
@@ -36,6 +41,7 @@ sealed class AddPhotoEffect {
 
 class AddPhotoViewModel(
     private val photoRepository: PhotoRepository,
+    private val habitRepository: HabitRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddPhotoState())
@@ -43,6 +49,14 @@ class AddPhotoViewModel(
 
     private val _effect = MutableSharedFlow<AddPhotoEffect>()
     val effect = _effect.asSharedFlow()
+
+    init {
+        viewModelScope.launch {
+            habitRepository.getAllHabits().collect { habits ->
+                _state.update { it.copy(availableHabits = habits.filter(Habit::isEnabled)) }
+            }
+        }
+    }
 
     fun onIntent(intent: AddPhotoIntent) {
         when (intent) {
@@ -70,6 +84,9 @@ class AddPhotoViewModel(
                     s.copy(selectedPhotos = newList)
                 }
             }
+            is AddPhotoIntent.OnHabitSelected -> {
+                _state.update { it.copy(selectedHabitId = intent.habitId) }
+            }
             AddPhotoIntent.OnSaveClick -> savePhotos()
         }
     }
@@ -88,6 +105,7 @@ class AddPhotoViewModel(
                     NewProgressPhoto(
                         type = photo.type,
                         photoPath = photo.uri,
+                        habitId = _state.value.selectedHabitId,
                     )
                 }
                 photoRepository.savePhotos(newPhotos)
