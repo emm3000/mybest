@@ -25,6 +25,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.CardVariant
@@ -110,6 +115,10 @@ fun ReminderSettingsScreen(
                         onCheckedChange = {
                             viewModel.onIntent(ReminderSettingsIntent.OnNotificationsToggle(it))
                         },
+                        modifier = Modifier.semantics {
+                            role = Role.Switch
+                            stateDescription = if (state.notificationsEnabled) "Recordatorios activos" else "Recordatorios pausados"
+                        },
                     )
                 }
             }
@@ -165,6 +174,7 @@ private fun SettingsSectionCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
             )
             Text(
                 text = description,
