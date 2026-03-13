@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.components.ButtonVariant
@@ -31,6 +33,11 @@ import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HTopBar
 import kotlinx.coroutines.flow.collectLatest
+
+private const val SETTINGS_SCREEN_PADDING = 16
+private const val SETTINGS_SECTION_SPACING = 12
+private const val SETTINGS_CARD_PADDING = 16
+private const val SETTINGS_CARD_CONTENT_SPACING = 8
 
 @Composable
 fun ReminderSettingsScreen(
@@ -80,26 +87,22 @@ fun ReminderSettingsScreen(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(SETTINGS_SCREEN_PADDING.dp),
+            verticalArrangement = Arrangement.spacedBy(SETTINGS_SECTION_SPACING.dp),
         ) {
-            HCard(
+            SettingsSectionCard(
                 modifier = Modifier.fillMaxWidth(),
-                variant = CardVariant.Filled,
+                title = "Recordatorios preventivos",
+                description = "Activa notificaciones para recibir recordatorios de hábitos pendientes en días programados.",
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "Recordatorios preventivos",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Text(
-                        text = "Activa notificaciones para recibir recordatorios de hábitos pendientes en días programados.",
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = if (state.notificationsEnabled) "Activos" else "Pausados",
+                        style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Switch(
@@ -110,25 +113,15 @@ fun ReminderSettingsScreen(
                     )
                 }
             }
-            HCard(
+            SettingsSectionCard(
                 modifier = Modifier.fillMaxWidth(),
-                variant = CardVariant.Filled,
+                title = "Backup y restore",
+                description = "Exporta tu base de datos o importa un backup válido en formato SQLite.",
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(SETTINGS_CARD_CONTENT_SPACING.dp),
                 ) {
-                    Text(
-                        text = "Backup y restore",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Text(
-                        text = "Exporta tu base de datos o importa un backup válido en formato SQLite.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                     HButton(
                         text = "Exportar backup",
                         onClick = {
@@ -148,6 +141,37 @@ fun ReminderSettingsScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SettingsSectionCard(
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    HCard(
+        modifier = modifier,
+        variant = CardVariant.Filled,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(SETTINGS_CARD_PADDING.dp),
+            verticalArrangement = Arrangement.spacedBy(SETTINGS_CARD_CONTENT_SPACING.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            content()
         }
     }
 }
