@@ -83,6 +83,10 @@ class HistoryViewModelTest {
             assertEquals(true, summary?.habit?.ateHealthy)
             assertEquals(1, summary?.photos?.size)
             assertEquals("Entrenar", summary?.photoHabitNames?.get("p1"))
+            assertEquals(1, loaded.monthSummary.activityDays)
+            assertEquals(1, loaded.monthSummary.weightDays)
+            assertEquals(1, loaded.monthSummary.habitDays)
+            assertEquals(1, loaded.monthSummary.photoDays)
             cancelAndIgnoreRemainingEvents()
         }
     }

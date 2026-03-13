@@ -36,6 +36,7 @@ data class DaySummary(
 data class HistoryState(
     val selectedMonth: YearMonthValue = YearMonthValue.now(),
     val monthlyData: Map<LocalDate, DaySummary> = emptyMap(),
+    val monthSummary: HistoryMonthSummary = HistoryMonthSummary(),
     val selectedDate: LocalDate? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
@@ -81,10 +82,12 @@ class HistoryViewModel(
         habitRepository.getAllHabits(),
     ) { base, allHabits ->
         val habitNameById = allHabits.associate { it.id to it.name }
+        val monthlyData = transformToDaySummary(base.weights, base.habits, base.photos, habitNameById)
         HistoryState(
             selectedMonth = base.month,
             selectedDate = base.selectedDate,
-            monthlyData = transformToDaySummary(base.weights, base.habits, base.photos, habitNameById),
+            monthlyData = monthlyData,
+            monthSummary = buildMonthSummary(base.month, monthlyData),
             isLoading = false,
             errorMessage = null,
         )
@@ -160,6 +163,13 @@ class HistoryViewModel(
     }
 }
 
+data class HistoryMonthSummary(
+    val activityDays: Int = 0,
+    val weightDays: Int = 0,
+    val habitDays: Int = 0,
+    val photoDays: Int = 0,
+)
+
 private data class BaseHistoryData(
     val month: YearMonthValue,
     val selectedDate: LocalDate?,
@@ -167,3 +177,16 @@ private data class BaseHistoryData(
     val habits: List<DailyHabitSummary>,
     val photos: List<ProgressPhoto>,
 )
+
+private fun buildMonthSummary(
+    selectedMonth: YearMonthValue,
+    monthlyData: Map<LocalDate, DaySummary>,
+): HistoryMonthSummary {
+    val monthDays = monthlyData.values.filter { YearMonthValue.from(it.date) == selectedMonth }
+    return HistoryMonthSummary(
+        activityDays = monthDays.count(DaySummary::hasActivity),
+        weightDays = monthDays.count(DaySummary::hasWeight),
+        habitDays = monthDays.count(DaySummary::hasHabit),
+        photoDays = monthDays.count(DaySummary::hasPhoto),
+    )
+}

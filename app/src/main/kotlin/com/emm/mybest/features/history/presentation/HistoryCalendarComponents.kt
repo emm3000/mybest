@@ -3,6 +3,7 @@ package com.emm.mybest.features.history.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.YearMonthValue
@@ -24,6 +26,71 @@ import com.emm.mybest.core.datetime.shortEs
 import com.emm.mybest.ui.components.HEmptyState
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+
+@Composable
+internal fun HistoryMonthSummarySection(
+    summary: HistoryMonthSummary,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        SummaryMetricChip(
+            label = "Activos",
+            value = summary.activityDays.toString(),
+            modifier = Modifier.weight(1f),
+        )
+        SummaryMetricChip(
+            label = "Peso",
+            value = summary.weightDays.toString(),
+            modifier = Modifier.weight(1f),
+        )
+        SummaryMetricChip(
+            label = "Hábitos",
+            value = summary.habitDays.toString(),
+            modifier = Modifier.weight(1f),
+        )
+        SummaryMetricChip(
+            label = "Fotos",
+            value = summary.photoDays.toString(),
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun SummaryMetricChip(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
 
 @Composable
 internal fun HistoryMonthSection(

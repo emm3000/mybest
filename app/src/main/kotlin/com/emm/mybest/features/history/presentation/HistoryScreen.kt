@@ -156,6 +156,11 @@ fun HistoryContent(
                         onMonthChange = { onIntent(HistoryIntent.OnMonthChange(it)) },
                     )
 
+                    HistoryMonthSummarySection(
+                        summary = state.monthSummary,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+
                     HistoryMonthSection(
                         selectedMonth = state.selectedMonth,
                         monthlyData = state.monthlyData,
