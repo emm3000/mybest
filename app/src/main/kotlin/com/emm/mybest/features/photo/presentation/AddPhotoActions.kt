@@ -23,21 +23,15 @@ internal fun handleCameraAction(
     permissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
     onPermissionGranted: () -> Unit,
 ) {
-    when {
-        ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
-            onPermissionGranted()
-        }
-
-        (context as? Activity)?.let {
-            ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
-        } == true -> {
-            permissionLauncher.launch(Manifest.permission.CAMERA)
-        }
-
-        else -> {
-            permissionLauncher.launch(Manifest.permission.CAMERA)
-        }
+    val hasCameraPermission = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.CAMERA,
+    ) == PackageManager.PERMISSION_GRANTED
+    if (hasCameraPermission) {
+        onPermissionGranted()
+        return
     }
+    permissionLauncher.launch(Manifest.permission.CAMERA)
 }
 
 private fun openAppSettings(context: android.content.Context) {

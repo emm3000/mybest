@@ -1,5 +1,6 @@
 package com.emm.mybest.features.photo.presentation
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,10 +64,10 @@ import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.components.IconButtonVariant
 import com.emm.mybest.ui.theme.MyBestTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.launch
 
 @Composable
 fun AddPhotoScreen(
@@ -105,56 +107,13 @@ fun AddPhotoContent(
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
-    var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
-
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents(),
-    ) { uris: List<Uri> ->
-        handleGallerySelection(
-            uris = uris,
-            context = context,
-            scope = scope,
-            onIntent = onIntent,
-        )
-    }
-
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-    ) { success ->
-        handleCameraCaptureResult(success = success, tempPhotoUri = tempPhotoUri, onIntent = onIntent)
-    }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-    ) { isGranted ->
-        handleCameraPermissionResult(
-            isGranted = isGranted,
-            context = context,
-            scope = scope,
-            snackbarHostState = snackbarHostState,
-            mediaManager = mediaManager,
-            onLaunchCamera = { uri ->
-                tempPhotoUri = uri
-                cameraLauncher.launch(uri)
-            },
-        )
-    }
-
-    val launchCamera = {
-        handleCameraAction(
-            context = context,
-            permissionLauncher = permissionLauncher,
-            onPermissionGranted = {
-                val uri = mediaManager.generatePhotoUri()
-                tempPhotoUri = uri
-                cameraLauncher.launch(uri)
-            },
-        )
-    }
-
-    val launchGallery = {
-        galleryLauncher.launch("image/*")
-    }
+    val inputHandlers = rememberPhotoInputHandlers(
+        context = context,
+        scope = scope,
+        snackbarHostState = snackbarHostState,
+        mediaManager = mediaManager,
+        onIntent = onIntent,
+    )
 
     LaunchedEffect(Unit) {
         effect.collectLatest { effect ->
@@ -192,8 +151,8 @@ fun AddPhotoContent(
             state = state,
             contentPadding = padding,
             onIntent = onIntent,
-            onUseCameraClick = launchCamera,
-            onPickFromGalleryClick = launchGallery,
+            onUseCameraClick = inputHandlers.launchCamera,
+            onPickFromGalleryClick = inputHandlers.launchGallery,
         )
     }
 
@@ -203,11 +162,86 @@ fun AddPhotoContent(
             onDismiss = { showBottomSheet = false },
             onCameraClick = {
                 showBottomSheet = false
-                launchCamera()
+                inputHandlers.launchCamera()
             },
             onGalleryClick = {
                 showBottomSheet = false
-                launchGallery()
+                inputHandlers.launchGallery()
+            },
+        )
+    }
+}
+
+@Stable
+private data class PhotoInputHandlers(
+    val launchCamera: () -> Unit,
+    val launchGallery: () -> Unit,
+)
+
+@Composable
+private fun rememberPhotoInputHandlers(
+    context: Context,
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState,
+    mediaManager: MediaManager,
+    onIntent: (AddPhotoIntent) -> Unit,
+): PhotoInputHandlers {
+    var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetMultipleContents(),
+    ) { uris: List<Uri> ->
+        handleGallerySelection(
+            uris = uris,
+            context = context,
+            scope = scope,
+            onIntent = onIntent,
+        )
+    }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+    ) { success ->
+        handleCameraCaptureResult(
+            success = success,
+            tempPhotoUri = tempPhotoUri,
+            onIntent = onIntent,
+        )
+    }
+
+    val launchCameraWithUri: (Uri) -> Unit = remember(cameraLauncher) {
+        {
+                uri ->
+            tempPhotoUri = uri
+            cameraLauncher.launch(uri)
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        handleCameraPermissionResult(
+            isGranted = isGranted,
+            context = context,
+            scope = scope,
+            snackbarHostState = snackbarHostState,
+            mediaManager = mediaManager,
+            onLaunchCamera = launchCameraWithUri,
+        )
+    }
+
+    return remember(galleryLauncher, permissionLauncher, launchCameraWithUri) {
+        PhotoInputHandlers(
+            launchCamera = {
+                handleCameraAction(
+                    context = context,
+                    permissionLauncher = permissionLauncher,
+                    onPermissionGranted = {
+                        launchCameraWithUri(mediaManager.generatePhotoUri())
+                    },
+                )
+            },
+            launchGallery = {
+                galleryLauncher.launch("image/*")
             },
         )
     }

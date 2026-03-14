@@ -94,18 +94,20 @@ class ComparePhotosViewModel(
                 _afterPhoto.value = null
             }
             is ComparePhotosIntent.OnBeforePhotoSelected -> {
-                if (state.value.afterPhoto?.id == intent.photo.id) {
-                    showError("Elige una foto distinta para ANTES.")
-                } else {
-                    _beforePhoto.value = intent.photo
-                }
+                handlePhotoSelection(
+                    selectedPhoto = intent.photo,
+                    conflictingPhoto = state.value.afterPhoto,
+                    errorMessage = "Elige una foto distinta para ANTES.",
+                    onSelectionAccepted = { _beforePhoto.value = it },
+                )
             }
             is ComparePhotosIntent.OnAfterPhotoSelected -> {
-                if (state.value.beforePhoto?.id == intent.photo.id) {
-                    showError("Elige una foto distinta para DESPUÉS.")
-                } else {
-                    _afterPhoto.value = intent.photo
-                }
+                handlePhotoSelection(
+                    selectedPhoto = intent.photo,
+                    conflictingPhoto = state.value.beforePhoto,
+                    errorMessage = "Elige una foto distinta para DESPUÉS.",
+                    onSelectionAccepted = { _afterPhoto.value = it },
+                )
             }
             ComparePhotosIntent.ToggleSwap -> {
                 val currentSelection = state.value
@@ -119,6 +121,19 @@ class ComparePhotosViewModel(
         viewModelScope.launch {
             _effect.emit(ComparePhotosEffect.ShowError(message))
         }
+    }
+
+    private fun handlePhotoSelection(
+        selectedPhoto: ProgressPhoto,
+        conflictingPhoto: ProgressPhoto?,
+        errorMessage: String,
+        onSelectionAccepted: (ProgressPhoto) -> Unit,
+    ) {
+        if (conflictingPhoto?.id == selectedPhoto.id) {
+            showError(errorMessage)
+            return
+        }
+        onSelectionAccepted(selectedPhoto)
     }
 }
 

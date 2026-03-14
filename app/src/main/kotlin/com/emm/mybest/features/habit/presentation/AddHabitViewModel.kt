@@ -111,18 +111,20 @@ class AddHabitViewModel(
     }
 
     private fun handleNextStep() {
-        val currentState = _state.value
+        val currentState: AddHabitState = _state.value
         when (currentState.step) {
-            1 -> {
-                val validation = HabitValidator.validateName(currentState.name)
-                if (validation.isValid) {
-                    _state.update { it.copy(step = 2) }
-                } else {
-                    _state.update { it.copy(nameError = validation.errorMessage) }
-                }
-            }
+            1 -> handleStepOneValidation(currentState)
             2 -> handleStepTwoValidation(currentState)
         }
+    }
+
+    private fun handleStepOneValidation(currentState: AddHabitState) {
+        val validation = HabitValidator.validateName(currentState.name)
+        if (!validation.isValid) {
+            _state.update { it.copy(nameError = validation.errorMessage) }
+            return
+        }
+        _state.update { it.copy(step = 2) }
     }
 
     private fun handleStepTwoValidation(currentState: AddHabitState) {
@@ -174,11 +176,7 @@ class AddHabitViewModel(
                     unit = currentState.unit,
                     scheduledDays = currentState.scheduledDays,
                 )
-                if (currentState.isEditMode) {
-                    updateHabitUseCase(habit)
-                } else {
-                    createHabitUseCase(habit)
-                }
+                saveHabitByMode(habit = habit, isEditMode = currentState.isEditMode)
             }.onSuccess {
                 _effect.emit(AddHabitEffect.NavigateBack)
             }.onFailure { error ->
@@ -186,6 +184,10 @@ class AddHabitViewModel(
             }
             _state.update { it.copy(isLoading = false) }
         }
+    }
+
+    private suspend fun saveHabitByMode(habit: Habit, isEditMode: Boolean) {
+        if (isEditMode) updateHabitUseCase(habit) else createHabitUseCase(habit)
     }
 
     private fun loadHabitForEdit(habitId: String) {

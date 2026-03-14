@@ -45,6 +45,7 @@ class HabitReminderWorker(
             canPostNotifications = canPostNotifications() && areInAppRemindersEnabled(),
         )
         if (shouldNotify) {
+            val safeHabitId = habitId ?: return Result.success()
             createReminderChannelIfNeeded()
 
             val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
@@ -55,9 +56,27 @@ class HabitReminderWorker(
                 .setAutoCancel(true)
                 .build()
 
-            NotificationManagerCompat.from(applicationContext).notify(habitId.hashCode(), notification)
+            notifyReminderSafely(habitId = safeHabitId, notification = notification)
         }
         return Result.success()
+    }
+
+    private fun notifyReminderSafely(
+        habitId: String,
+        notification: android.app.Notification,
+    ) {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        runCatching {
+            NotificationManagerCompat.from(applicationContext).notify(habitId.hashCode(), notification)
+        }
     }
 
     private suspend fun isHabitCompletedToday(habitId: String): Boolean {
@@ -98,14 +117,16 @@ class HabitReminderWorker(
     }
 
     private fun canPostNotifications(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val permissionGranted = ContextCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.POST_NOTIFICATIONS,
-            ) == PackageManager.PERMISSION_GRANTED
-            if (!permissionGranted) return false
-        }
+        if (!hasNotificationPermissionGranted()) return false
         return NotificationManagerCompat.from(applicationContext).areNotificationsEnabled()
+    }
+
+    private fun hasNotificationPermissionGranted(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
+        return ContextCompat.checkSelfPermission(
+            applicationContext,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private suspend fun areInAppRemindersEnabled(): Boolean {
