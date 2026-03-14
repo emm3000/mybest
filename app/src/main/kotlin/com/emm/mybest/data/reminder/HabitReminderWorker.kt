@@ -84,8 +84,7 @@ class HabitReminderWorker(
             applicationContext,
             AppDatabase::class.java,
             DATABASE_NAME,
-        ).addMigrations(AppDatabase.MIGRATION_2_3)
-            .fallbackToDestructiveMigration(false)
+        ).fallbackToDestructiveMigration(dropAllTables = true)
             .build()
 
         return try {

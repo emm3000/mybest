@@ -2,6 +2,7 @@ package com.emm.mybest.features.habit.presentation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.Restaurant
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.Icon
@@ -46,13 +48,14 @@ import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.narrowEs
 import com.emm.mybest.domain.models.HabitType
 import com.emm.mybest.ui.components.HButton
-import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSelect
 import com.emm.mybest.ui.components.HSelectableCard
 import com.emm.mybest.ui.components.HSnackbarHost
+import com.emm.mybest.ui.components.HSwitch
 import com.emm.mybest.ui.components.HTopBar
+import com.emm.mybest.ui.components.ReminderTimePickerDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.datetime.DayOfWeek
 
@@ -438,24 +441,62 @@ private fun StepThree(
             )
         }
 
-        Text(
-            text = "Programacion semanal",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-        )
-        HCard(
-            variant = com.emm.mybest.ui.components.CardVariant.Filled,
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        Row(
             modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "Los dias seleccionados definen cuando aparecera este habito en " +
-                    "tu seguimiento diario. Los recordatorios automaticos aun no estan disponibles.",
+                text = "Recordatorio diario",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(16.dp),
+            )
+            HSwitch(
+                checked = state.reminderEnabled,
+                onCheckedChange = { onIntent(AddHabitIntent.OnReminderEnabledToggle(it)) },
+                contentDescription = "Activar recordatorio diario",
             )
         }
+
+        if (state.reminderEnabled) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onIntent(AddHabitIntent.OnTimePickerOpen) }
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Hora del recordatorio",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = "%02d:%02d".format(state.reminderHour, state.reminderMinute),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Icon(
+                        imageVector = Icons.Rounded.Schedule,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+        }
+    }
+
+    if (state.showTimePicker) {
+        ReminderTimePickerDialog(
+            initialHour = state.reminderHour,
+            initialMinute = state.reminderMinute,
+            onConfirm = { h, m -> onIntent(AddHabitIntent.OnTimePickerConfirm(h, m)) },
+            onDismiss = { onIntent(AddHabitIntent.OnTimePickerDismiss) },
+        )
     }
 }
 

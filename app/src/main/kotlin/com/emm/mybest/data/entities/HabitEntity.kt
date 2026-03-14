@@ -40,6 +40,15 @@ data class HabitEntity(
     @ColumnInfo(name = "is_enabled")
     val isEnabled: Boolean = true,
 
+    @ColumnInfo(name = "reminder_enabled")
+    val reminderEnabled: Boolean = true,
+
+    @ColumnInfo(name = "reminder_hour")
+    val reminderHour: Int? = null,
+
+    @ColumnInfo(name = "reminder_minute")
+    val reminderMinute: Int? = null,
+
     // Frequency as a simple JSON string or comma-separated days for now
     // Example: "1,2,3,4,5,6,7" for every day, "1,3,5" for Mon/Wed/Fri
     @ColumnInfo(name = "scheduled_days")

@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
+import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -26,16 +27,24 @@ class ReminderSettingsViewModelTest {
     private val preferencesRepository = mockk<UserPreferencesRepository>()
     private val exportUseCase = mockk<ExportDatabaseBackupUseCase>()
     private val restoreUseCase = mockk<RestoreDatabaseBackupUseCase>()
+    private val updateDefaultReminderTimeUseCase = mockk<UpdateDefaultReminderTimeUseCase>()
 
     @Test
     fun `state maps notifications preference`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(false)
+        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
         every { preferencesRepository.isDarkMode } returns flowOf(null)
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
-        val viewModel = ReminderSettingsViewModel(preferencesRepository, exportUseCase, restoreUseCase)
+        coEvery { updateDefaultReminderTimeUseCase.invoke(any(), any()) } returns Unit
+        val viewModel = ReminderSettingsViewModel(
+            preferencesRepository,
+            exportUseCase,
+            restoreUseCase,
+            updateDefaultReminderTimeUseCase,
+        )
 
         viewModel.state.test {
             awaitItem()
@@ -47,12 +56,19 @@ class ReminderSettingsViewModelTest {
     @Test
     fun `OnNotificationsToggle updates preference`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(true)
+        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
         every { preferencesRepository.isDarkMode } returns flowOf(null)
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
-        val viewModel = ReminderSettingsViewModel(preferencesRepository, exportUseCase, restoreUseCase)
+        coEvery { updateDefaultReminderTimeUseCase.invoke(any(), any()) } returns Unit
+        val viewModel = ReminderSettingsViewModel(
+            preferencesRepository,
+            exportUseCase,
+            restoreUseCase,
+            updateDefaultReminderTimeUseCase,
+        )
 
         viewModel.onIntent(ReminderSettingsIntent.OnNotificationsToggle(false))
         advanceUntilIdle()
@@ -63,12 +79,19 @@ class ReminderSettingsViewModelTest {
     @Test
     fun `OnExportBackup invokes export use case`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(true)
+        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
         every { preferencesRepository.isDarkMode } returns flowOf(null)
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
-        val viewModel = ReminderSettingsViewModel(preferencesRepository, exportUseCase, restoreUseCase)
+        coEvery { updateDefaultReminderTimeUseCase.invoke(any(), any()) } returns Unit
+        val viewModel = ReminderSettingsViewModel(
+            preferencesRepository,
+            exportUseCase,
+            restoreUseCase,
+            updateDefaultReminderTimeUseCase,
+        )
 
         viewModel.onIntent(ReminderSettingsIntent.OnExportBackup("content://backup"))
         advanceUntilIdle()
@@ -79,16 +102,44 @@ class ReminderSettingsViewModelTest {
     @Test
     fun `OnImportBackup invokes restore use case`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(true)
+        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
         every { preferencesRepository.isDarkMode } returns flowOf(null)
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
-        val viewModel = ReminderSettingsViewModel(preferencesRepository, exportUseCase, restoreUseCase)
+        coEvery { updateDefaultReminderTimeUseCase.invoke(any(), any()) } returns Unit
+        val viewModel = ReminderSettingsViewModel(
+            preferencesRepository,
+            exportUseCase,
+            restoreUseCase,
+            updateDefaultReminderTimeUseCase,
+        )
 
         viewModel.onIntent(ReminderSettingsIntent.OnImportBackup("content://backup"))
         advanceUntilIdle()
 
         coVerify(exactly = 1) { restoreUseCase.invoke("content://backup") }
+    }
+
+    @Test
+    fun `OnDefaultReminderTimeChange invokes update use case`() = runTest {
+        every { preferencesRepository.notificationsEnabled } returns flowOf(true)
+        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
+        coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
+        coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
+        coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
+        coEvery { updateDefaultReminderTimeUseCase.invoke(any(), any()) } returns Unit
+        val viewModel = ReminderSettingsViewModel(
+            preferencesRepository,
+            exportUseCase,
+            restoreUseCase,
+            updateDefaultReminderTimeUseCase,
+        )
+
+        viewModel.onIntent(ReminderSettingsIntent.OnDefaultReminderTimeChange(7, 30))
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { updateDefaultReminderTimeUseCase.invoke(7, 30) }
     }
 }

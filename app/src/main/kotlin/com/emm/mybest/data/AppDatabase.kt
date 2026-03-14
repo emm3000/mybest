@@ -3,8 +3,6 @@ package com.emm.mybest.data
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.emm.mybest.data.entities.Converters
 import com.emm.mybest.data.entities.DailyHabitDao
 import com.emm.mybest.data.entities.DailyHabitEntity
@@ -25,7 +23,7 @@ import com.emm.mybest.data.entities.ProgressPhotoEntity
         HabitEntity::class,
         HabitRecordEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -38,14 +36,5 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         const val DB_NAME = "my_best_db"
-
-        val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE daily_weight ADD COLUMN habit_id TEXT")
-                db.execSQL("ALTER TABLE progress_photo ADD COLUMN habit_id TEXT")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_daily_weight_habit_id ON daily_weight(habit_id)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_progress_photo_habit_id ON progress_photo(habit_id)")
-            }
-        }
     }
 }

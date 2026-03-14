@@ -22,6 +22,9 @@ fun HabitEntity.toDomain(): Habit = Habit(
     goalValue = goalValue,
     unit = unit,
     isEnabled = isEnabled,
+    reminderEnabled = reminderEnabled,
+    reminderHour = reminderHour,
+    reminderMinute = reminderMinute,
     scheduledDays = scheduledDays
         .split(",")
         .filter { it.isNotBlank() }
@@ -48,6 +51,9 @@ fun Habit.toEntity(): HabitEntity = HabitEntity(
     goalValue = goalValue,
     unit = unit,
     isEnabled = isEnabled,
+    reminderEnabled = reminderEnabled,
+    reminderHour = reminderHour,
+    reminderMinute = reminderMinute,
     scheduledDays = scheduledDays.joinToString(",") { (it.ordinal + 1).toString() },
     createdAt = createdAt,
 )

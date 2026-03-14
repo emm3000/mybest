@@ -3,20 +3,25 @@ package com.emm.mybest.features.habit.presentation
 import app.cash.turbine.test
 import com.emm.mybest.domain.models.Habit
 import com.emm.mybest.domain.models.HabitType
+import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.CreateHabitUseCase
 import com.emm.mybest.domain.usecase.GetHabitByIdUseCase
 import com.emm.mybest.domain.usecase.UpdateHabitUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DayOfWeek
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -30,15 +35,23 @@ class AddHabitViewModelTest {
     private val createHabitUseCase: CreateHabitUseCase = mockk(relaxed = true)
     private val getHabitByIdUseCase: GetHabitByIdUseCase = mockk(relaxed = true)
     private val updateHabitUseCase: UpdateHabitUseCase = mockk(relaxed = true)
+    private val userPreferencesRepository: UserPreferencesRepository = mockk(relaxed = true)
     private lateinit var viewModel: AddHabitViewModel
 
     @Before
     fun setup() {
-        viewModel = AddHabitViewModel(createHabitUseCase, getHabitByIdUseCase, updateHabitUseCase)
+        every { userPreferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
+        viewModel = AddHabitViewModel(
+            createHabitUseCase,
+            getHabitByIdUseCase,
+            updateHabitUseCase,
+            userPreferencesRepository,
+        )
     }
 
     @Test
-    fun `initial state has expected defaults`() {
+    fun `initial state has expected defaults`() = runTest {
+        advanceUntilIdle()
         val state = viewModel.state.value
 
         assertEquals(1, state.step)
@@ -50,6 +63,10 @@ class AddHabitViewModelTest {
         assertNull(state.goalError)
         assertNull(state.unitError)
         assertNull(state.scheduledDaysError)
+        assertTrue(state.reminderEnabled)
+        assertEquals(20, state.reminderHour)
+        assertEquals(0, state.reminderMinute)
+        assertFalse(state.showTimePicker)
     }
 
     @Test
@@ -224,5 +241,107 @@ class AddHabitViewModelTest {
 
         coVerify(exactly = 1) { updateHabitUseCase.invoke(any()) }
         coVerify(exactly = 0) { createHabitUseCase.invoke(any()) }
+    }
+
+    @Test
+    fun `OnReminderEnabledToggle sets reminderEnabled and preserves time`() {
+        viewModel.onIntent(AddHabitIntent.OnTimePickerConfirm(8, 30))
+        viewModel.onIntent(AddHabitIntent.OnReminderEnabledToggle(false))
+
+        val state = viewModel.state.value
+        assertFalse(state.reminderEnabled)
+        assertEquals(8, state.reminderHour)
+        assertEquals(30, state.reminderMinute)
+    }
+
+    @Test
+    fun `OnTimePickerConfirm updates hour and minute and closes picker`() {
+        viewModel.onIntent(AddHabitIntent.OnTimePickerOpen)
+        viewModel.onIntent(AddHabitIntent.OnTimePickerConfirm(7, 45))
+
+        val state = viewModel.state.value
+        assertEquals(7, state.reminderHour)
+        assertEquals(45, state.reminderMinute)
+        assertFalse(state.showTimePicker)
+    }
+
+    @Test
+    fun `OnTimePickerOpen opens picker`() {
+        viewModel.onIntent(AddHabitIntent.OnTimePickerOpen)
+
+        assertTrue(viewModel.state.value.showTimePicker)
+    }
+
+    @Test
+    fun `OnTimePickerDismiss closes picker without changing time`() {
+        viewModel.onIntent(AddHabitIntent.OnTimePickerOpen)
+        viewModel.onIntent(AddHabitIntent.OnTimePickerConfirm(8, 0))
+        viewModel.onIntent(AddHabitIntent.OnTimePickerOpen)
+        viewModel.onIntent(AddHabitIntent.OnTimePickerDismiss)
+
+        val state = viewModel.state.value
+        assertFalse(state.showTimePicker)
+        assertEquals(8, state.reminderHour)
+    }
+
+    @Test
+    fun `OnSaveClick passes reminder fields to use case`() = runTest {
+        val capturedHabit = slot<Habit>()
+        coEvery { createHabitUseCase.invoke(capture(capturedHabit)) } returns Unit
+
+        viewModel.onIntent(AddHabitIntent.OnNameChange("Cardio"))
+        viewModel.onIntent(AddHabitIntent.OnTimePickerConfirm(8, 30))
+        viewModel.onIntent(AddHabitIntent.OnReminderEnabledToggle(true))
+
+        viewModel.effect.test {
+            viewModel.onIntent(AddHabitIntent.OnSaveClick)
+            advanceUntilIdle()
+            awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(true, capturedHabit.captured.reminderEnabled)
+        assertEquals(8, capturedHabit.captured.reminderHour)
+        assertEquals(30, capturedHabit.captured.reminderMinute)
+    }
+
+    @Test
+    fun `OnSaveClick with reminderEnabled=false passes false but retains time`() = runTest {
+        val capturedHabit = slot<Habit>()
+        coEvery { createHabitUseCase.invoke(capture(capturedHabit)) } returns Unit
+
+        viewModel.onIntent(AddHabitIntent.OnNameChange("Yoga"))
+        viewModel.onIntent(AddHabitIntent.OnTimePickerConfirm(8, 30))
+        viewModel.onIntent(AddHabitIntent.OnReminderEnabledToggle(false))
+
+        viewModel.effect.test {
+            viewModel.onIntent(AddHabitIntent.OnSaveClick)
+            advanceUntilIdle()
+            awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertFalse(capturedHabit.captured.reminderEnabled)
+        assertEquals(8, capturedHabit.captured.reminderHour)
+        assertEquals(30, capturedHabit.captured.reminderMinute)
+    }
+
+    @Test
+    fun `OnSaveClick without custom reminder time persists null and uses global default`() = runTest {
+        val capturedHabit = slot<Habit>()
+        coEvery { createHabitUseCase.invoke(capture(capturedHabit)) } returns Unit
+
+        viewModel.onIntent(AddHabitIntent.OnNameChange("Caminar"))
+
+        viewModel.effect.test {
+            viewModel.onIntent(AddHabitIntent.OnSaveClick)
+            advanceUntilIdle()
+            awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(true, capturedHabit.captured.reminderEnabled)
+        assertNull(capturedHabit.captured.reminderHour)
+        assertNull(capturedHabit.captured.reminderMinute)
     }
 }

@@ -18,6 +18,9 @@ data class Habit(
     val goalValue: Float? = null,
     val unit: String? = null,
     val isEnabled: Boolean = true,
+    val reminderEnabled: Boolean = true,
+    val reminderHour: Int? = null,
+    val reminderMinute: Int? = null,
     val scheduledDays: Set<DayOfWeek>,
     val createdAt: Long = System.currentTimeMillis(),
 )

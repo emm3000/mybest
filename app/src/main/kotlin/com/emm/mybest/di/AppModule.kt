@@ -26,6 +26,7 @@ import com.emm.mybest.domain.usecase.GetHomeSummaryUseCase
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.ToggleHabitUseCase
+import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
 import com.emm.mybest.domain.usecase.UpdateHabitUseCase
 import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
@@ -47,8 +48,7 @@ val appModule = module {
             androidContext(),
             AppDatabase::class.java,
             AppDatabase.DB_NAME,
-        ).addMigrations(AppDatabase.MIGRATION_2_3)
-            .fallbackToDestructiveMigration(false)
+        ).fallbackToDestructiveMigration(dropAllTables = true)
             .build()
     }
 
@@ -64,7 +64,7 @@ val appModule = module {
 
     single<DailyHabitRepository> { DailyHabitRepositoryImpl(get()) }
     single { WorkManager.getInstance(androidContext()) }
-    single<HabitReminderScheduler> { HabitReminderSchedulerImpl(get()) }
+    single<HabitReminderScheduler> { HabitReminderSchedulerImpl(get(), get()) }
 
     factory { CreateHabitUseCase(get(), get()) }
     factory { GetDailyHabitsUseCase(get()) }
@@ -75,18 +75,19 @@ val appModule = module {
     factory { RestoreDatabaseBackupUseCase(get()) }
     factory { GetHabitByIdUseCase(get()) }
     factory { UpdateHabitUseCase(get(), get()) }
+    factory { UpdateDefaultReminderTimeUseCase(get(), get(), get()) }
 
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
     viewModel { HomeViewModel(get(), get()) }
     viewModel { AddWeightViewModel(get(), get()) }
-    viewModel { AddHabitViewModel(get(), get(), get()) }
+    viewModel { AddHabitViewModel(get(), get(), get(), get()) }
     viewModel { AddPhotoViewModel(get(), get()) }
     viewModel { HistoryViewModel(get(), get(), get(), get()) }
     viewModel { InsightsViewModel(get()) }
     viewModel { ComparePhotosViewModel(get()) }
     viewModel { TimelineViewModel(get()) }
-    viewModel { ReminderSettingsViewModel(get(), get(), get()) }
+    viewModel { ReminderSettingsViewModel(get(), get(), get(), get()) }
     viewModel { MainViewModel(get()) }
 }

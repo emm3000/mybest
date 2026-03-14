@@ -2,6 +2,7 @@ package com.emm.mybest.features.settings.presentation
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Upload
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -37,6 +40,7 @@ import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.HSwitch
 import com.emm.mybest.ui.components.HTopBar
+import com.emm.mybest.ui.components.ReminderTimePickerDialog
 import kotlinx.coroutines.flow.collectLatest
 
 private const val SETTINGS_SCREEN_PADDING = 16
@@ -95,62 +99,132 @@ fun ReminderSettingsScreen(
                 .padding(SETTINGS_SCREEN_PADDING.dp),
             verticalArrangement = Arrangement.spacedBy(SETTINGS_SECTION_SPACING.dp),
         ) {
-            SettingsSectionCard(
+            NotificationPreferenceSection(
+                notificationsEnabled = state.notificationsEnabled,
+                onNotificationsToggle = {
+                    viewModel.onIntent(ReminderSettingsIntent.OnNotificationsToggle(it))
+                },
+            )
+            DefaultReminderTimeSection(
+                state = state,
+                onOpenPicker = {
+                    viewModel.onIntent(ReminderSettingsIntent.OnDefaultTimePickerOpen)
+                },
+                onTimeConfirm = { h, m ->
+                    viewModel.onIntent(ReminderSettingsIntent.OnDefaultReminderTimeChange(h, m))
+                },
+                onDismissPicker = {
+                    viewModel.onIntent(ReminderSettingsIntent.OnDefaultTimePickerDismiss)
+                },
+            )
+            BackupSection(
+                onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
+                onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun NotificationPreferenceSection(
+    notificationsEnabled: Boolean,
+    onNotificationsToggle: (Boolean) -> Unit,
+) {
+    SettingsSectionCard(
+        modifier = Modifier.fillMaxWidth(),
+        title = "Recordatorios preventivos",
+        description = "Activa notificaciones para recibir recordatorios de hábitos pendientes en días programados.",
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = if (notificationsEnabled) "Activos" else "Pausados",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            HSwitch(
+                checked = notificationsEnabled,
+                onCheckedChange = onNotificationsToggle,
+                contentDescription = "Alternar recordatorios",
+                modifier = Modifier.semantics {
+                    role = Role.Switch
+                    stateDescription = if (notificationsEnabled) "Recordatorios activos" else "Recordatorios pausados"
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun DefaultReminderTimeSection(
+    state: ReminderSettingsState,
+    onOpenPicker: () -> Unit,
+    onTimeConfirm: (Int, Int) -> Unit,
+    onDismissPicker: () -> Unit,
+) {
+    SettingsSectionCard(
+        modifier = Modifier.fillMaxWidth(),
+        title = "Hora por defecto",
+        description = "Hora de recordatorio para hábitos sin hora personalizada.",
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onOpenPicker),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "%02d:%02d".format(state.defaultReminderHour, state.defaultReminderMinute),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Icon(
+                imageVector = Icons.Rounded.Schedule,
+                contentDescription = "Cambiar hora por defecto",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+    if (state.showDefaultTimePicker) {
+        ReminderTimePickerDialog(
+            initialHour = state.defaultReminderHour,
+            initialMinute = state.defaultReminderMinute,
+            onConfirm = onTimeConfirm,
+            onDismiss = onDismissPicker,
+        )
+    }
+}
+
+@Composable
+private fun BackupSection(
+    onExportClick: () -> Unit,
+    onImportClick: () -> Unit,
+) {
+    SettingsSectionCard(
+        modifier = Modifier.fillMaxWidth(),
+        title = "Backup y restore",
+        description = "Exporta tu base de datos o importa un backup válido en formato SQLite.",
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(SETTINGS_CARD_CONTENT_SPACING.dp),
+        ) {
+            HButton(
+                text = "Exportar backup",
+                onClick = onExportClick,
+                leadingIcon = Icons.Rounded.Download,
                 modifier = Modifier.fillMaxWidth(),
-                title = "Recordatorios preventivos",
-                description = "Activa notificaciones para recibir recordatorios de hábitos pendientes en días programados.",
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text(
-                        text = if (state.notificationsEnabled) "Activos" else "Pausados",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    HSwitch(
-                        checked = state.notificationsEnabled,
-                        onCheckedChange = {
-                            viewModel.onIntent(ReminderSettingsIntent.OnNotificationsToggle(it))
-                        },
-                        contentDescription = "Alternar recordatorios",
-                        modifier = Modifier.semantics {
-                            role = Role.Switch
-                            stateDescription = if (state.notificationsEnabled) "Recordatorios activos" else "Recordatorios pausados"
-                        },
-                    )
-                }
-            }
-            SettingsSectionCard(
+            )
+            HButton(
+                text = "Importar backup",
+                onClick = onImportClick,
+                leadingIcon = Icons.Rounded.Upload,
+                variant = ButtonVariant.Secondary,
                 modifier = Modifier.fillMaxWidth(),
-                title = "Backup y restore",
-                description = "Exporta tu base de datos o importa un backup válido en formato SQLite.",
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(SETTINGS_CARD_CONTENT_SPACING.dp),
-                ) {
-                    HButton(
-                        text = "Exportar backup",
-                        onClick = {
-                            backupExportLauncher.launch("mybest-backup.db")
-                        },
-                        leadingIcon = Icons.Rounded.Download,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    HButton(
-                        text = "Importar backup",
-                        onClick = {
-                            backupImportLauncher.launch(arrayOf("*/*"))
-                        },
-                        leadingIcon = Icons.Rounded.Upload,
-                        variant = ButtonVariant.Secondary,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
+            )
         }
     }
 }

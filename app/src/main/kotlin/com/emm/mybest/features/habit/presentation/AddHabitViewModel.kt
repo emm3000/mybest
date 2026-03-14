@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.Habit
 import com.emm.mybest.domain.models.HabitType
+import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.CreateHabitUseCase
 import com.emm.mybest.domain.usecase.GetHabitByIdUseCase
 import com.emm.mybest.domain.usecase.UpdateHabitUseCase
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
@@ -21,16 +23,18 @@ import java.util.UUID
 data class AddHabitState(
     val editingHabitId: String? = null,
     val step: Int = 1,
-    // Step 1
     val name: String = "",
     val icon: String = "FitnessCenter",
     val category: String = "Salud",
-    // Step 2
     val type: HabitType = HabitType.BOOLEAN,
     val goalValue: String = "",
     val unit: String = "",
-    // Step 3
     val scheduledDays: Set<DayOfWeek> = DayOfWeek.entries.toSet(),
+    val reminderEnabled: Boolean = true,
+    val reminderHour: Int = 20,
+    val reminderMinute: Int = 0,
+    val reminderUsesDefaultTime: Boolean = true,
+    val showTimePicker: Boolean = false,
 
     val isLoading: Boolean = false,
     val nameError: String? = null,
@@ -43,22 +47,23 @@ data class AddHabitState(
 }
 
 sealed class AddHabitIntent {
-    // Nav
     object OnNextStep : AddHabitIntent()
     object OnPreviousStep : AddHabitIntent()
 
-    // Step 1
     data class OnNameChange(val name: String) : AddHabitIntent()
     data class OnIconChange(val icon: String) : AddHabitIntent()
     data class OnCategoryChange(val category: String) : AddHabitIntent()
 
-    // Step 2
     data class OnTypeChange(val type: HabitType) : AddHabitIntent()
     data class OnGoalValueChange(val value: String) : AddHabitIntent()
     data class OnUnitChange(val unit: String) : AddHabitIntent()
 
-    // Step 3
     data class OnDayToggle(val day: DayOfWeek) : AddHabitIntent()
+
+    object OnTimePickerOpen : AddHabitIntent()
+    object OnTimePickerDismiss : AddHabitIntent()
+    data class OnReminderEnabledToggle(val enabled: Boolean) : AddHabitIntent()
+    data class OnTimePickerConfirm(val hour: Int, val minute: Int) : AddHabitIntent()
 
     data class LoadHabitForEdit(val habitId: String) : AddHabitIntent()
     object OnSaveClick : AddHabitIntent()
@@ -73,6 +78,7 @@ class AddHabitViewModel(
     private val createHabitUseCase: CreateHabitUseCase,
     private val getHabitByIdUseCase: GetHabitByIdUseCase,
     private val updateHabitUseCase: UpdateHabitUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddHabitState())
@@ -81,7 +87,22 @@ class AddHabitViewModel(
     private val _effect = MutableSharedFlow<AddHabitEffect>()
     val effect = _effect.asSharedFlow()
 
+    init {
+        viewModelScope.launch {
+            val (h, m) = userPreferencesRepository.defaultReminderTime.first()
+            _state.update { current ->
+                if (current.editingHabitId != null || !current.reminderUsesDefaultTime) {
+                    current
+                } else {
+                    current.copy(reminderHour = h, reminderMinute = m)
+                }
+            }
+        }
+    }
+
     fun onIntent(intent: AddHabitIntent) {
+        if (handleReminderIntent(intent)) return
+
         when (intent) {
             AddHabitIntent.OnNextStep -> handleNextStep()
             AddHabitIntent.OnPreviousStep -> _state.update { it.copy(step = (it.step - 1).coerceAtLeast(1)) }
@@ -90,6 +111,24 @@ class AddHabitViewModel(
             AddHabitIntent.OnSaveClick -> saveHabit()
             else -> handleFormFieldIntent(intent)
         }
+    }
+
+    private fun handleReminderIntent(intent: AddHabitIntent): Boolean {
+        when (intent) {
+            AddHabitIntent.OnTimePickerOpen -> _state.update { it.copy(showTimePicker = true) }
+            AddHabitIntent.OnTimePickerDismiss -> _state.update { it.copy(showTimePicker = false) }
+            is AddHabitIntent.OnReminderEnabledToggle -> _state.update { it.copy(reminderEnabled = intent.enabled) }
+            is AddHabitIntent.OnTimePickerConfirm -> _state.update {
+                it.copy(
+                    reminderHour = intent.hour,
+                    reminderMinute = intent.minute,
+                    reminderUsesDefaultTime = false,
+                    showTimePicker = false,
+                )
+            }
+            else -> return false
+        }
+        return true
     }
 
     private fun handleFormFieldIntent(intent: AddHabitIntent) {
@@ -169,12 +208,15 @@ class AddHabitViewModel(
                     id = currentState.editingHabitId ?: UUID.randomUUID().toString(),
                     name = currentState.name,
                     icon = currentState.icon,
-                    color = shadcnPrimary.hashCode(), // Using theme color
+                    color = shadcnPrimary.hashCode(),
                     category = currentState.category,
                     type = currentState.type,
                     goalValue = currentState.goalValue.toFloatOrNull(),
                     unit = currentState.unit,
                     scheduledDays = currentState.scheduledDays,
+                    reminderEnabled = currentState.reminderEnabled,
+                    reminderHour = if (currentState.reminderUsesDefaultTime) null else currentState.reminderHour,
+                    reminderMinute = if (currentState.reminderUsesDefaultTime) null else currentState.reminderMinute,
                 )
                 saveHabitByMode(habit = habit, isEditMode = currentState.isEditMode)
             }.onSuccess {
@@ -209,6 +251,10 @@ class AddHabitViewModel(
                     goalValue = habit.goalValue?.toString().orEmpty(),
                     unit = habit.unit.orEmpty(),
                     scheduledDays = habit.scheduledDays,
+                    reminderEnabled = habit.reminderEnabled,
+                    reminderUsesDefaultTime = habit.reminderHour == null && habit.reminderMinute == null,
+                    reminderHour = habit.reminderHour ?: it.reminderHour,
+                    reminderMinute = habit.reminderMinute ?: it.reminderMinute,
                     nameError = null,
                     goalError = null,
                     unitError = null,
