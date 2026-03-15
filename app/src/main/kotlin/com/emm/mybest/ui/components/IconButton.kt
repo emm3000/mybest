@@ -1,8 +1,14 @@
 package com.emm.mybest.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -12,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.theme.MyBestTheme
 
 enum class IconButtonVariant { Ghost, Outline, Destructive }
 
@@ -56,6 +64,61 @@ fun HIconButton(
                 contentDescription = contentDescription,
                 tint = iconColor,
             )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HIconButtonPreview() {
+    MyBestTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                HIconButton(
+                    icon = Icons.Default.Add,
+                    contentDescription = "Ghost",
+                    onClick = {},
+                    variant = IconButtonVariant.Ghost,
+                )
+                HIconButton(
+                    icon = Icons.Default.Add,
+                    contentDescription = "Outline",
+                    onClick = {},
+                    variant = IconButtonVariant.Outline,
+                )
+                HIconButton(
+                    icon = Icons.Default.Add,
+                    contentDescription = "Destructive",
+                    onClick = {},
+                    variant = IconButtonVariant.Destructive,
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                HIconButton(
+                    icon = Icons.Default.Add,
+                    contentDescription = "Ghost Disabled",
+                    onClick = {},
+                    variant = IconButtonVariant.Ghost,
+                    enabled = false,
+                )
+                HIconButton(
+                    icon = Icons.Default.Add,
+                    contentDescription = "Outline Disabled",
+                    onClick = {},
+                    variant = IconButtonVariant.Outline,
+                    enabled = false,
+                )
+                HIconButton(
+                    icon = Icons.Default.Add,
+                    contentDescription = "Destructive Disabled",
+                    onClick = {},
+                    variant = IconButtonVariant.Destructive,
+                    enabled = false,
+                )
+            }
         }
     }
 }
