@@ -102,6 +102,10 @@ kotlin {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 tasks.withType<Test>().configureEach {
     extensions.configure(JacocoTaskExtension::class.java) {
         isIncludeNoLocationClasses = true

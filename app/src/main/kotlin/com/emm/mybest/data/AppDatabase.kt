@@ -23,8 +23,8 @@ import com.emm.mybest.data.entities.ProgressPhotoEntity
         HabitEntity::class,
         HabitRecordEntity::class,
     ],
-    version = 4,
-    exportSchema = false,
+    version = 1,
+    exportSchema = true,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {

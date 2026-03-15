@@ -48,8 +48,7 @@ val appModule = module {
             androidContext(),
             AppDatabase::class.java,
             AppDatabase.DB_NAME,
-        ).fallbackToDestructiveMigration(dropAllTables = true)
-            .build()
+        ).build()
     }
 
     single { get<AppDatabase>().dailyHabitDao() }
