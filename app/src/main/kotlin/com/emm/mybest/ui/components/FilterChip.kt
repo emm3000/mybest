@@ -13,11 +13,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.StarlinkTextStyles
 
 private const val FILTER_CHIP_DISABLED_ALPHA = 0.5f
 
@@ -30,9 +32,13 @@ fun HFilterChip(
     enabled: Boolean = true,
 ) {
     val cs = MaterialTheme.colorScheme
-    val containerColor = if (selected) cs.secondaryContainer else cs.background
-    val contentColor = if (selected) cs.onSecondaryContainer else cs.onSurface
-    val borderColor = if (selected) cs.outline else cs.outlineVariant
+    val containerColor = if (selected) cs.onSurface else Color.Transparent
+    val contentColor = if (selected) cs.surface else cs.onSurface
+    val border = if (selected) {
+        null
+    } else {
+        BorderStroke(1.dp, cs.outlineVariant)
+    }
 
     Surface(
         onClick = onClick,
@@ -48,13 +54,13 @@ fun HFilterChip(
         shape = MaterialTheme.shapes.small,
         color = containerColor,
         contentColor = contentColor,
-        border = BorderStroke(1.dp, borderColor),
+        border = border,
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
     ) {
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
+            text = label.uppercase(),
+            style = StarlinkTextStyles.chipLabel,
             modifier = Modifier.padding(
                 PaddingValues(horizontal = 12.dp, vertical = 8.dp),
             ),
@@ -71,7 +77,7 @@ fun HFilterChip(
 @Composable
 private fun HFilterChipPreview() {
     MyBestTheme {
-        Surface {
+        androidx.compose.material3.Surface {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),

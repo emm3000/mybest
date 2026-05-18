@@ -1,6 +1,6 @@
 package com.emm.mybest.ui.components
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.StarlinkTextStyles
 
 enum class StatChipVariant { Neutral, Primary, Secondary, Tertiary, Success, Destructive }
 
@@ -33,96 +34,83 @@ fun HStatChip(
     compact: Boolean = false,
 ) {
     val cs = MaterialTheme.colorScheme
-    val (containerColor, valueColor, labelColor) = statChipTokens(variant)
+    val valueColor = statChipValueColor(variant)
+    val borderColor = cs.outlineVariant
 
     if (compact) {
-        Row(
-            modifier = modifier
-                .background(
-                    color = containerColor,
-                    shape = CircleShape,
-                )
-                .padding(horizontal = 12.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Surface(
+            modifier = modifier,
+            shape = CircleShape,
+            color = Color.Transparent,
+            contentColor = cs.onSurface,
+            border = BorderStroke(1.dp, borderColor),
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
         ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = valueColor,
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = labelColor.copy(alpha = 0.95f),
-            )
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = valueColor,
+                )
+                Text(
+                    text = label.uppercase(),
+                    style = StarlinkTextStyles.chipLabel,
+                    color = cs.onSurfaceVariant,
+                )
+            }
         }
         return
     }
 
-    Column(
-        modifier = modifier
-            .background(
-                color = containerColor,
-                shape = RoundedCornerShape(8.dp),
-            )
-            .padding(horizontal = 10.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(8.dp),
+        color = Color.Transparent,
+        contentColor = cs.onSurface,
+        border = BorderStroke(1.dp, borderColor),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
     ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = valueColor,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = labelColor,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        Column(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = valueColor,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Text(
+                text = label.uppercase(),
+                style = StarlinkTextStyles.chipLabel,
+                color = cs.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 
 @Composable
-private fun statChipTokens(variant: StatChipVariant): Triple<Color, Color, Color> {
+private fun statChipValueColor(variant: StatChipVariant): Color {
     val cs = MaterialTheme.colorScheme
     return when (variant) {
-        StatChipVariant.Neutral -> Triple(
-            cs.surfaceContainerLow,
-            cs.onSurface,
-            cs.onSurfaceVariant,
-        )
-        StatChipVariant.Primary -> Triple(
-            cs.primaryContainer,
-            cs.onPrimaryContainer,
-            cs.onPrimaryContainer.copy(alpha = 0.85f),
-        )
-        StatChipVariant.Secondary -> Triple(
-            cs.secondaryContainer,
-            cs.onSecondaryContainer,
-            cs.onSecondaryContainer.copy(alpha = 0.85f),
-        )
-        StatChipVariant.Tertiary -> Triple(
-            cs.tertiaryContainer,
-            cs.onTertiaryContainer,
-            cs.onTertiaryContainer.copy(alpha = 0.85f),
-        )
-        StatChipVariant.Success -> Triple(
-            cs.tertiaryContainer,
-            cs.onTertiaryContainer,
-            cs.onTertiaryContainer.copy(alpha = 0.85f),
-        )
-        StatChipVariant.Destructive -> Triple(
-            cs.errorContainer,
-            cs.onErrorContainer,
-            cs.onErrorContainer.copy(alpha = 0.85f),
-        )
+        StatChipVariant.Neutral -> cs.onSurface
+        StatChipVariant.Primary -> cs.onSurface
+        StatChipVariant.Secondary -> cs.onSurface
+        StatChipVariant.Tertiary -> cs.tertiary
+        StatChipVariant.Success -> cs.tertiary
+        StatChipVariant.Destructive -> cs.error
     }
 }
 
@@ -130,7 +118,7 @@ private fun statChipTokens(variant: StatChipVariant): Triple<Color, Color, Color
 @Composable
 private fun HStatChipPreview() {
     MyBestTheme {
-        Surface {
+        androidx.compose.material3.Surface {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),

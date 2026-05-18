@@ -1,22 +1,27 @@
 package com.emm.mybest.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.StarlinkTextStyles
 
 // ─── Variants ──────────────────────────────────────────────────────────────
 
@@ -34,44 +39,46 @@ fun HBadge(
     modifier: Modifier = Modifier,
     variant: BadgeVariant = BadgeVariant.Default,
 ) {
-    val (containerColor, contentColor) = badgeColors(variant)
+    val cs = MaterialTheme.colorScheme
+    val dotColor = badgeDotColor(variant)
 
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(100.dp),
-        color = containerColor,
-        contentColor = contentColor,
-        border = if (variant == BadgeVariant.Outline) {
-            BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline,
-            )
-        } else {
-            null
-        },
+        color = Color.Transparent,
+        contentColor = cs.onSurface,
+        border = BorderStroke(
+            width = 1.dp,
+            color = cs.outlineVariant,
+        ),
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+        Row(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
-        )
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(color = dotColor, shape = CircleShape),
+            )
+            Text(
+                text = label.uppercase(),
+                style = StarlinkTextStyles.chipLabel,
+            )
+        }
     }
 }
 
 @Composable
-private fun badgeColors(variant: BadgeVariant): Pair<Color, Color> {
+private fun badgeDotColor(variant: BadgeVariant): Color {
     val cs = MaterialTheme.colorScheme
     return when (variant) {
-        // Default → primary (black bg, white text)
-        BadgeVariant.Default -> cs.primary to cs.onPrimary
-        // Secondary → muted gray bg
-        BadgeVariant.Secondary -> cs.surfaceContainerHighest to cs.onSurface
-        // Destructive → error container (soft red)
-        BadgeVariant.Destructive -> cs.errorContainer to cs.onErrorContainer
-        // Outline → transparent + foreground text
-        BadgeVariant.Outline -> Color.Transparent to cs.onSurface
-        // Success → tertiary (green in new theme)
-        BadgeVariant.Success -> cs.tertiaryContainer to cs.onTertiaryContainer
+        BadgeVariant.Default -> cs.onSurface
+        BadgeVariant.Secondary -> cs.onSurface
+        BadgeVariant.Destructive -> cs.error
+        BadgeVariant.Outline -> cs.onSurface
+        BadgeVariant.Success -> cs.tertiary
     }
 }
 
@@ -81,7 +88,7 @@ private fun badgeColors(variant: BadgeVariant): Pair<Color, Color> {
 @Composable
 private fun HBadgeVariantsPreview() {
     MyBestTheme {
-        Surface {
+        androidx.compose.material3.Surface {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

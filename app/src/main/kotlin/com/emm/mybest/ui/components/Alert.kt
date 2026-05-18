@@ -1,12 +1,13 @@
 package com.emm.mybest.ui.components
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,23 +22,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.theme.MyBestTheme
-import com.emm.mybest.ui.theme.shadcnDarkOnWarningContainer
-import com.emm.mybest.ui.theme.shadcnDarkWarning
-import com.emm.mybest.ui.theme.shadcnDarkWarningContainer
-import com.emm.mybest.ui.theme.shadcnOnWarningContainer
-import com.emm.mybest.ui.theme.shadcnWarning
-import com.emm.mybest.ui.theme.shadcnWarningContainer
+import com.emm.mybest.ui.theme.StarlinkTextStyles
 
 // ─── Variants ──────────────────────────────────────────────────────────────
 
@@ -57,45 +49,61 @@ fun HAlert(
     description: String? = null,
     icon: ImageVector? = null,
 ) {
-    val (bg, contentColor, iconColor) = alertTokens(variant)
+    val cs = MaterialTheme.colorScheme
+    val barColor = alertBarColor(variant)
 
-    val animBg by animateColorAsState(targetValue = bg, label = "alert_bg")
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(animBg)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        color = cs.surface,
+        contentColor = cs.onSurface,
+        border = BorderStroke(1.dp, cs.outlineVariant),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
     ) {
-        Row(verticalAlignment = Alignment.Top) {
-            val resolvedIcon = icon ?: when (variant) {
-                AlertVariant.Destructive -> Icons.Default.Warning
-                AlertVariant.Warning -> Icons.Default.Warning
-                else -> Icons.Default.Info
-            }
-            Icon(
-                imageVector = resolvedIcon,
-                contentDescription = null,
-                tint = iconColor,
+        Row(
+            modifier = Modifier.height(androidx.compose.ui.unit.Dp.Unspecified),
+            verticalAlignment = Alignment.Top,
+        ) {
+            // Leading 2dp vertical accent bar
+            Box(
                 modifier = Modifier
-                    .size(16.dp)
-                    .padding(top = 1.dp),
+                    .width(2.dp)
+                    .fillMaxHeight()
+                    .background(barColor),
             )
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = contentColor,
+            Row(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.Top,
+            ) {
+                val resolvedIcon = icon ?: when (variant) {
+                    AlertVariant.Destructive -> Icons.Default.Warning
+                    AlertVariant.Warning -> Icons.Default.Warning
+                    else -> Icons.Default.Info
+                }
+                Icon(
+                    imageVector = resolvedIcon,
+                    contentDescription = null,
+                    tint = barColor,
+                    modifier = Modifier
+                        .size(16.dp)
+                        .padding(top = 1.dp),
                 )
-                if (description != null) {
-                    Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.width(12.dp))
+                Column {
                     Text(
-                        text = description,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = contentColor.copy(alpha = 0.85f),
+                        text = title.uppercase(),
+                        style = StarlinkTextStyles.sectionLabel,
+                        color = cs.onSurface,
                     )
+                    if (description != null) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = cs.onSurface,
+                        )
+                    }
                 }
             }
         }
@@ -103,30 +111,13 @@ fun HAlert(
 }
 
 @Composable
-private fun alertTokens(variant: AlertVariant): Triple<Color, Color, Color> {
+private fun alertBarColor(variant: AlertVariant): Color {
     val cs = MaterialTheme.colorScheme
-    val isDark = cs.background.luminance() < 0.5f
     return when (variant) {
-        AlertVariant.Default -> Triple(
-            cs.surfaceContainerHigh,
-            cs.onSurface,
-            cs.onSurfaceVariant,
-        )
-        AlertVariant.Destructive -> Triple(
-            cs.errorContainer,
-            cs.onErrorContainer,
-            cs.error,
-        )
-        AlertVariant.Warning -> Triple(
-            if (isDark) shadcnDarkWarningContainer else shadcnWarningContainer,
-            if (isDark) shadcnDarkOnWarningContainer else shadcnOnWarningContainer,
-            if (isDark) shadcnDarkWarning else shadcnWarning,
-        )
-        AlertVariant.Success -> Triple(
-            cs.tertiaryContainer,
-            cs.onTertiaryContainer,
-            cs.tertiary,
-        )
+        AlertVariant.Default -> cs.onSurfaceVariant
+        AlertVariant.Destructive -> cs.error
+        AlertVariant.Warning -> cs.onSurface
+        AlertVariant.Success -> cs.tertiary
     }
 }
 
