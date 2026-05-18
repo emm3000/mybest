@@ -59,9 +59,10 @@ class HistoryViewModel(
     private val dailyHabitRepository: DailyHabitRepository,
     private val photoRepository: PhotoRepository,
     private val habitRepository: HabitRepository,
+    initialMonth: YearMonthValue = YearMonthValue.now(),
 ) : ViewModel() {
 
-    private val _selectedMonth = MutableStateFlow(YearMonthValue.now())
+    private val _selectedMonth = MutableStateFlow(initialMonth)
     private val _selectedDate = MutableStateFlow<LocalDate?>(null)
 
     private val baseData = combine(

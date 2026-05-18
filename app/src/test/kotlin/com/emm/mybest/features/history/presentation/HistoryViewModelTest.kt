@@ -73,7 +73,13 @@ class HistoryViewModelTest {
             ),
         )
 
-        val viewModel = HistoryViewModel(weightRepository, habitRepository, photoRepository, allHabitsRepository)
+        val viewModel = HistoryViewModel(
+            weightRepository,
+            habitRepository,
+            photoRepository,
+            allHabitsRepository,
+            initialMonth = YearMonthValue(2026, 3),
+        )
         viewModel.state.test {
             assertEquals(true, awaitItem().isLoading)
             val loaded = awaitItem()
