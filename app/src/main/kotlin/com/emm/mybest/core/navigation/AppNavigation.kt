@@ -15,14 +15,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.features.diet.presentation.MealPlanScreen
 import com.emm.mybest.features.diet.presentation.MealPlanViewModel
 import com.emm.mybest.features.exercise.presentation.ExercisePlanScreen
 import com.emm.mybest.features.exercise.presentation.ExercisePlanViewModel
-import com.emm.mybest.features.habit.presentation.AddHabitScreen
-import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeScreen
@@ -114,7 +111,6 @@ private fun HandleIntentAction(
         if (intentAction == null) return@LaunchedEffect
         when (intentAction) {
             "com.emm.mybest.ACTION_ADD_WEIGHT" -> navController.navigate(Screen.AddWeight)
-            "com.emm.mybest.ACTION_ADD_HABIT" -> navController.navigate(Screen.AddHabit)
             "com.emm.mybest.ACTION_ADD_PHOTO" -> navController.navigate(Screen.AddPhoto)
         }
         currentOnConsumeAction()
@@ -152,27 +148,6 @@ private fun AppNavGraph(
             )
         }
 
-        composable<Screen.AddHabit> {
-            val viewModel: AddHabitViewModel = koinViewModel()
-            AddHabitScreen(
-                viewModel = viewModel,
-                initialHabitId = null,
-                onBackClick = { navController.popBackStack() },
-                modifier = Modifier,
-            )
-        }
-
-        composable<Screen.EditHabit> { backStackEntry ->
-            val route = backStackEntry.toRoute<Screen.EditHabit>()
-            val viewModel: AddHabitViewModel = koinViewModel()
-            AddHabitScreen(
-                viewModel = viewModel,
-                initialHabitId = route.habitId,
-                onBackClick = { navController.popBackStack() },
-                modifier = Modifier,
-            )
-        }
-
         composable<Screen.AddPhoto> {
             val viewModel: AddPhotoViewModel = koinViewModel()
             AddPhotoScreen(
@@ -198,7 +173,6 @@ private fun AppNavGraph(
                 onCompareClick = { navController.navigate(Screen.ComparePhotos) },
                 onRecommendationAction = { action ->
                     when (action) {
-                        InsightsRecommendationAction.PRIORITIZE_HABIT -> navController.navigate(Screen.AddHabit)
                         InsightsRecommendationAction.ADJUST_WEIGHT_PLAN -> navController.navigate(Screen.AddWeight)
                         InsightsRecommendationAction.ADD_PROGRESS_PHOTO -> navController.navigate(Screen.AddPhoto)
                         InsightsRecommendationAction.KEEP_ROUTINE -> navController.navigate(Screen.Home)

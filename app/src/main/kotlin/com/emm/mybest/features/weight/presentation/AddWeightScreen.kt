@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HInput
-import com.emm.mybest.ui.components.HSelect
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
@@ -127,16 +126,6 @@ private fun AddWeightContent(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = false,
                 minLines = 3,
-            )
-
-            HSelect(
-                items = state.availableHabits,
-                selectedItem = state.availableHabits.firstOrNull { it.id == state.selectedHabitId },
-                onItemSelect = { onIntent(AddWeightIntent.OnHabitSelected(it.id)) },
-                label = "Hábito relacionado (opcional)",
-                itemLabel = { it.name },
-                placeholder = "Sin hábito específico",
-                modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.weight(1f))

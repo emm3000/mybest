@@ -47,7 +47,6 @@ import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
 import com.emm.mybest.domain.usecase.exercise.UpsertExerciseRoutineUseCase
 import com.emm.mybest.features.diet.presentation.MealPlanViewModel
 import com.emm.mybest.features.exercise.presentation.ExercisePlanViewModel
-import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeViewModel
 import com.emm.mybest.features.insights.presentation.InsightsViewModel
@@ -95,12 +94,12 @@ val appModule = module {
     factory { GetDailyHabitsUseCase(get()) }
     factory { ToggleHabitUseCase(get()) }
     factory { GetHomeSummaryUseCase(get(), get(), get()) }
-    factory { GetInsightsUseCase(get(), get(), get()) }
+    factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
     factory { RestoreDatabaseBackupUseCase(get()) }
     factory { GetHabitByIdUseCase(get()) }
     factory { UpdateHabitUseCase(get(), get()) }
-    factory { UpdateDefaultReminderTimeUseCase(get(), get(), get()) }
+    factory { UpdateDefaultReminderTimeUseCase(get()) }
 
     // Diet use cases
     factory { GetWeeklyMealPlanUseCase(get()) }
@@ -119,10 +118,9 @@ val appModule = module {
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
     viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
-    viewModel { AddWeightViewModel(get(), get()) }
-    viewModel { AddHabitViewModel(get(), get(), get(), get()) }
-    viewModel { AddPhotoViewModel(get(), get()) }
-    viewModel { HistoryViewModel(get(), get(), get(), get()) }
+    viewModel { AddWeightViewModel(get()) }
+    viewModel { AddPhotoViewModel(get()) }
+    viewModel { HistoryViewModel(get(), get()) }
     viewModel { InsightsViewModel(get()) }
     viewModel { ComparePhotosViewModel(get()) }
     viewModel { TimelineViewModel(get()) }

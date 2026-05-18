@@ -10,7 +10,6 @@ interface WeightRepository {
     suspend fun saveWeight(
         weight: Float,
         note: String?,
-        habitId: String? = null,
     )
 
     suspend fun deleteByDate(date: LocalDate)

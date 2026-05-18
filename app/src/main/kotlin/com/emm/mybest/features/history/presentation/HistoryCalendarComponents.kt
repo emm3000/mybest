@@ -40,14 +40,12 @@ internal enum class DayIntensity(val label: String) {
 internal fun resolveDayIntensity(summary: DaySummary?): DayIntensity {
     val score = listOfNotNull(
         summary?.hasWeight?.takeIf { it },
-        summary?.hasHabit?.takeIf { it },
         summary?.hasPhoto?.takeIf { it },
     ).size
 
     return when (score) {
         0 -> DayIntensity.NONE
         1 -> DayIntensity.LOW
-        2 -> DayIntensity.MEDIUM
         else -> DayIntensity.HIGH
     }
 }
@@ -77,11 +75,6 @@ internal fun HistoryMonthSummarySection(
         SummaryMetricChip(
             label = "Peso",
             value = summary.weightDays.toString(),
-            modifier = Modifier.weight(1f),
-        )
-        SummaryMetricChip(
-            label = "Hábitos",
-            value = summary.habitDays.toString(),
             modifier = Modifier.weight(1f),
         )
         SummaryMetricChip(
@@ -128,11 +121,6 @@ internal fun HistoryWeekSummarySection(
             SummaryMetricChip(
                 label = "Peso",
                 value = summary.weightDays.toString(),
-                modifier = Modifier.weight(1f),
-            )
-            SummaryMetricChip(
-                label = "Hábitos",
-                value = summary.habitDays.toString(),
                 modifier = Modifier.weight(1f),
             )
             SummaryMetricChip(
@@ -223,14 +211,6 @@ internal fun DayActivityIndicators(
                     .background(MaterialTheme.colorScheme.primary),
             )
         }
-        if (summary?.hasHabit == true) {
-            Box(
-                modifier = Modifier
-                    .size(6.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondary),
-            )
-        }
         if (summary?.hasPhoto == true) {
             Box(
                 modifier = Modifier
@@ -249,7 +229,6 @@ internal fun buildDayCellDescription(
 ): String {
     val activitySummary = buildList {
         if (summary?.hasWeight == true) add("peso")
-        if (summary?.hasHabit == true) add("hábitos")
         if (summary?.hasPhoto == true) add("fotos")
     }.joinToString(", ")
 

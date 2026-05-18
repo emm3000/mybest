@@ -4,12 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -19,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,18 +29,14 @@ import com.emm.mybest.ui.components.HAlert
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
-import com.emm.mybest.ui.components.HProgressRing
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
-import com.emm.mybest.ui.components.StatChipVariant
 
 private const val INSIGHTS_SCREEN_PADDING = 16
 private const val INSIGHTS_SECTION_SPACING = 16
 private const val INSIGHTS_SECTION_CORNER = 20
 private const val INSIGHTS_SECTION_CONTENT_PADDING = 16
 private const val INSIGHTS_CHART_HEIGHT = 250
-private const val INSIGHTS_STATS_GAP = 16
-private const val INSIGHTS_RING_SIZE = 80
 
 @Composable
 fun InsightsScreen(
@@ -63,7 +56,7 @@ fun InsightsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            HTopBar(title = "Estadísticas de hábitos")
+            HTopBar(title = "Estadísticas")
         },
     ) { padding ->
         InsightsBody(
@@ -117,10 +110,10 @@ private fun InsightsBody(
                 modifier = contentModifier,
             )
         }
-        state.weightHistory.isEmpty() && state.exerciseDays == 0 && state.healthyEatingDays == 0 -> {
+        state.weightHistory.isEmpty() && state.photoCount == 0 -> {
             HEmptyState(
                 title = "Sin datos para estadísticas",
-                description = "Registra hábitos y evidencia para ver tu progreso en esta pantalla.",
+                description = "Registra peso y fotos para ver tu progreso en esta pantalla.",
                 icon = Icons.Rounded.BarChart,
                 modifier = contentModifier,
             )
@@ -166,10 +159,6 @@ private fun InsightsDataContent(
             periodLabel = state.periodLabel,
             onCompareClick = onCompareClick,
         )
-
-        InsightsSection(title = "Consistencia de Hábitos") {
-            HabitStats(state)
-        }
     }
 }
 
@@ -275,45 +264,5 @@ internal fun InsightsSection(
                 content()
             }
         }
-    }
-}
-
-@Composable
-private fun HabitStats(
-    state: InsightsState,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(INSIGHTS_STATS_GAP.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            HProgressRing(
-                progress = state.habitConsistency,
-                size = INSIGHTS_RING_SIZE.dp,
-                strokeWidth = 8.dp,
-                showLabel = true,
-            )
-            Spacer(androidx.compose.ui.Modifier.width(INSIGHTS_SECTION_SPACING.dp))
-            Column {
-                Text("Consistencia General", fontWeight = FontWeight.Bold)
-                Text(
-                    state.periodLabel,
-                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.outline,
-                )
-            }
-        }
-
-        HorizontalStatRow(
-            label = "Días de Ejercicio",
-            count = state.exerciseDays,
-            variant = StatChipVariant.Secondary,
-        )
-        HorizontalStatRow(
-            label = "Comida Saludable",
-            count = state.healthyEatingDays,
-            variant = StatChipVariant.Tertiary,
-        )
     }
 }

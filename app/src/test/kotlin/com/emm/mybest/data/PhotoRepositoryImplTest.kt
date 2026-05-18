@@ -39,7 +39,6 @@ class PhotoRepositoryImplTest {
         assertEquals(1, result.size)
         assertEquals("p1", result.first().id)
         assertEquals(PhotoType.FACE, result.first().type)
-        assertEquals("habit-1", result.first().habitId)
         assertEquals("/tmp/face.jpg", result.first().photoPath)
     }
 
@@ -71,7 +70,6 @@ class PhotoRepositoryImplTest {
                 photoPath = "/tmp/a.jpg",
                 type = PhotoType.ABDOMEN,
                 date = LocalDate(2026, 3, 7),
-                habitId = "habit-2",
             ),
             NewProgressPhoto(
                 photoPath = "/tmp/b.jpg",
@@ -85,7 +83,6 @@ class PhotoRepositoryImplTest {
         coVerify(exactly = 1) { dao.insertAll(any()) }
         assertEquals(2, captured.captured.size)
         assertEquals(DataPhotoType.ABDOMEN, captured.captured[0].type)
-        assertEquals("habit-2", captured.captured[0].habitId)
         assertEquals("/tmp/a.jpg", captured.captured[0].photoPath)
         assertEquals(LocalDate(2026, 3, 8), captured.captured[1].date)
     }

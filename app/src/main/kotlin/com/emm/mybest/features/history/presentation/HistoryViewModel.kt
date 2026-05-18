@@ -3,11 +3,8 @@ package com.emm.mybest.features.history.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.YearMonthValue
-import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
-import com.emm.mybest.domain.repository.DailyHabitRepository
-import com.emm.mybest.domain.repository.HabitRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,15 +21,11 @@ import kotlinx.datetime.plus
 data class DaySummary(
     val date: LocalDate,
     val weight: WeightEntry? = null,
-    val weightHabitName: String? = null,
-    val habit: DailyHabitSummary? = null,
     val photos: List<ProgressPhoto> = emptyList(),
-    val photoHabitNames: Map<String, String> = emptyMap(),
 ) {
     val hasWeight: Boolean get() = weight != null
-    val hasHabit: Boolean get() = habit != null
     val hasPhoto: Boolean get() = photos.isNotEmpty()
-    val hasActivity: Boolean get() = hasWeight || hasHabit || hasPhoto
+    val hasActivity: Boolean get() = hasWeight || hasPhoto
 }
 
 data class HistoryState(
@@ -50,49 +43,31 @@ sealed class HistoryIntent {
     data class OnDateSelected(val date: LocalDate) : HistoryIntent()
     object OnDateDismiss : HistoryIntent()
     data class OnDeleteWeight(val date: LocalDate) : HistoryIntent()
-    data class OnDeleteHabit(val date: LocalDate) : HistoryIntent()
     data class OnDeletePhoto(val photoId: String) : HistoryIntent()
 }
 
 class HistoryViewModel(
     private val weightRepository: WeightRepository,
-    private val dailyHabitRepository: DailyHabitRepository,
     private val photoRepository: PhotoRepository,
-    private val habitRepository: HabitRepository,
     initialMonth: YearMonthValue = YearMonthValue.now(),
 ) : ViewModel() {
 
     private val _selectedMonth = MutableStateFlow(initialMonth)
     private val _selectedDate = MutableStateFlow<LocalDate?>(null)
 
-    private val baseData = combine(
+    val state: StateFlow<HistoryState> = combine(
         _selectedMonth,
         _selectedDate,
         weightRepository.getWeightProgress(),
-        dailyHabitRepository.getAllDailyHabits(),
         photoRepository.getAllPhotos(),
-    ) { month, selectedDate, weights, habits, photos ->
-        BaseHistoryData(
-            month = month,
-            selectedDate = selectedDate,
-            weights = weights,
-            habits = habits,
-            photos = photos,
-        )
-    }
-
-    val state: StateFlow<HistoryState> = combine(
-        baseData,
-        habitRepository.getAllHabits(),
-    ) { base, allHabits ->
-        val habitNameById = allHabits.associate { it.id to it.name }
-        val monthlyData = transformToDaySummary(base.weights, base.habits, base.photos, habitNameById)
+    ) { month, selectedDate, weights, photos ->
+        val monthlyData = transformToDaySummary(weights, photos)
         HistoryState(
-            selectedMonth = base.month,
-            selectedDate = base.selectedDate,
+            selectedMonth = month,
+            selectedDate = selectedDate,
             monthlyData = monthlyData,
-            weekSummary = buildWeekSummary(base.month, base.selectedDate, monthlyData),
-            monthSummary = buildMonthSummary(base.month, monthlyData),
+            weekSummary = buildWeekSummary(month, selectedDate, monthlyData),
+            monthSummary = buildMonthSummary(month, monthlyData),
             isLoading = false,
             errorMessage = null,
         )
@@ -119,9 +94,6 @@ class HistoryViewModel(
             is HistoryIntent.OnDeleteWeight -> viewModelScope.launch {
                 weightRepository.deleteByDate(intent.date)
             }
-            is HistoryIntent.OnDeleteHabit -> viewModelScope.launch {
-                dailyHabitRepository.deleteByDate(intent.date)
-            }
             is HistoryIntent.OnDeletePhoto -> viewModelScope.launch {
                 photoRepository.deletePhoto(intent.photoId)
             }
@@ -130,38 +102,20 @@ class HistoryViewModel(
 
     private fun transformToDaySummary(
         weights: List<WeightEntry>,
-        habits: List<DailyHabitSummary>,
         photos: List<ProgressPhoto>,
-        habitNameById: Map<String, String>,
     ): Map<LocalDate, DaySummary> {
         val days = mutableMapOf<LocalDate, DaySummary>()
 
         weights.forEach { w ->
             val current = days.getOrPut(w.date) { DaySummary(w.date) }
-            days[w.date] = current.copy(
-                weight = w,
-                weightHabitName = w.habitId?.let(habitNameById::get),
-            )
-        }
-
-        habits.forEach { h ->
-            val current = days.getOrPut(h.date) { DaySummary(h.date) }
-            days[h.date] = current.copy(habit = h)
+            days[w.date] = current.copy(weight = w)
         }
 
         photos.forEach { p ->
             val current = days.getOrPut(p.date) { DaySummary(p.date) }
             val currentPhotos = current.photos.toMutableList()
             currentPhotos.add(p)
-            val currentPhotoHabitNames = current.photoHabitNames.toMutableMap()
-            val habitName = p.habitId?.let(habitNameById::get)
-            if (habitName != null) {
-                currentPhotoHabitNames[p.id] = habitName
-            }
-            days[p.date] = current.copy(
-                photos = currentPhotos,
-                photoHabitNames = currentPhotoHabitNames,
-            )
+            days[p.date] = current.copy(photos = currentPhotos)
         }
 
         return days.toMap()
@@ -171,7 +125,6 @@ class HistoryViewModel(
 data class HistoryMonthSummary(
     val activityDays: Int = 0,
     val weightDays: Int = 0,
-    val habitDays: Int = 0,
     val photoDays: Int = 0,
 )
 
@@ -180,16 +133,7 @@ data class HistoryWeekSummary(
     val endDate: LocalDate? = null,
     val activityDays: Int = 0,
     val weightDays: Int = 0,
-    val habitDays: Int = 0,
     val photoDays: Int = 0,
-)
-
-private data class BaseHistoryData(
-    val month: YearMonthValue,
-    val selectedDate: LocalDate?,
-    val weights: List<WeightEntry>,
-    val habits: List<DailyHabitSummary>,
-    val photos: List<ProgressPhoto>,
 )
 
 private fun buildMonthSummary(
@@ -200,7 +144,6 @@ private fun buildMonthSummary(
     return HistoryMonthSummary(
         activityDays = monthDays.count(DaySummary::hasActivity),
         weightDays = monthDays.count(DaySummary::hasWeight),
-        habitDays = monthDays.count(DaySummary::hasHabit),
         photoDays = monthDays.count(DaySummary::hasPhoto),
     )
 }
@@ -225,7 +168,6 @@ private fun buildWeekSummary(
         endDate = weekEnd,
         activityDays = weekDays.count(DaySummary::hasActivity),
         weightDays = weekDays.count(DaySummary::hasWeight),
-        habitDays = weekDays.count(DaySummary::hasHabit),
         photoDays = weekDays.count(DaySummary::hasPhoto),
     )
 }

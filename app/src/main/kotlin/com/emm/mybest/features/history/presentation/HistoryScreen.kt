@@ -54,7 +54,6 @@ import com.emm.mybest.core.datetime.currentDate
 import com.emm.mybest.core.datetime.formatEsMonthYear
 import com.emm.mybest.core.datetime.formatEsWeekdayDayMonth
 import com.emm.mybest.core.datetime.minusDays
-import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
@@ -112,7 +111,6 @@ fun HistoryContent(
                 summary = state.monthlyData[selectedDate],
                 onClose = { onIntent(HistoryIntent.OnDateDismiss) },
                 onDeleteWeight = { onIntent(HistoryIntent.OnDeleteWeight(selectedDate)) },
-                onDeleteHabit = { onIntent(HistoryIntent.OnDeleteHabit(selectedDate)) },
                 onDeletePhoto = { onIntent(HistoryIntent.OnDeletePhoto(it)) },
             )
         }
@@ -322,7 +320,6 @@ fun DayDetailContent(
     summary: DaySummary?,
     onClose: () -> Unit,
     onDeleteWeight: () -> Unit,
-    onDeleteHabit: () -> Unit,
     onDeletePhoto: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -375,7 +372,6 @@ fun DayDetailContent(
                 summary = summary,
                 isToday = isToday,
                 onDeleteWeight = onDeleteWeight,
-                onDeleteHabit = onDeleteHabit,
                 onDeletePhoto = { photoToDelete = it },
             )
         }
@@ -451,7 +447,6 @@ private fun HistoryScreenPreview() {
         today to DaySummary(
             date = today,
             weight = WeightEntry(id = "w1", date = today, weight = 75.5f, note = "Post entrenamiento"),
-            habit = DailyHabitSummary(date = today, ateHealthy = true, didExercise = true, notes = "Buen día"),
             photos = listOf(
                 ProgressPhoto(id = "p1", date = today, type = PhotoType.BODY, photoPath = "", createdAt = 0L),
                 ProgressPhoto(id = "p2", date = today, type = PhotoType.ABDOMEN, photoPath = "", createdAt = 0L),
@@ -460,7 +455,6 @@ private fun HistoryScreenPreview() {
         today.minusDays(1) to DaySummary(
             date = today.minusDays(1),
             weight = WeightEntry(id = "w2", date = today.minusDays(1), weight = 76.0f),
-            habit = DailyHabitSummary(date = today.minusDays(1), ateHealthy = false, didExercise = true, notes = null),
         ),
     )
 

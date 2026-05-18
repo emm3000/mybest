@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +15,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.MonitorWeight
@@ -31,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.core.datetime.formatEsLongDate
-import com.emm.mybest.domain.models.DailyHabitSummary
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.HIconButton
@@ -41,7 +38,6 @@ import com.emm.mybest.ui.components.IconButtonVariant
 private const val DAY_PHOTOS_GRID_COLUMNS = 3
 
 internal enum class DayTimelineEventType {
-    HABIT,
     WEIGHT,
     PHOTO,
 }
@@ -69,40 +65,10 @@ internal fun DayEmptyState(modifier: Modifier = Modifier) {
 }
 
 @Composable
-internal fun HabitDetailItem(
-    habit: DailyHabitSummary,
-    isToday: Boolean,
-    onDeleteHabit: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    DetailItem(
-        icon = Icons.Rounded.CheckCircle,
-        color = MaterialTheme.colorScheme.secondary,
-        title = "Hábitos",
-        onDelete = if (isToday) onDeleteHabit else null,
-        modifier = modifier,
-        content = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (habit.ateHealthy) HChip("Comida Sana")
-                if (habit.didExercise) HChip("Ejercicio")
-            }
-            habit.notes?.let {
-                Text(
-                    it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        },
-    )
-}
-
-@Composable
 internal fun DayTimelineSection(
     summary: DaySummary,
     isToday: Boolean,
     onDeleteWeight: () -> Unit,
-    onDeleteHabit: () -> Unit,
     onDeletePhoto: (ProgressPhoto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -118,16 +84,6 @@ internal fun DayTimelineSection(
         )
         timeline.forEach { entry ->
             when (entry.type) {
-                DayTimelineEventType.HABIT -> {
-                    summary.habit?.let { habit ->
-                        HabitDetailItem(
-                            habit = habit,
-                            isToday = isToday,
-                            onDeleteHabit = onDeleteHabit,
-                        )
-                    }
-                }
-
                 DayTimelineEventType.WEIGHT -> {
                     WeightTimelineItem(summary = summary, isToday = isToday, onDeleteWeight = onDeleteWeight)
                 }
@@ -136,7 +92,6 @@ internal fun DayTimelineSection(
                     entry.photo?.let { photo ->
                         PhotoTimelineItem(
                             photo = photo,
-                            habitName = summary.photoHabitNames[photo.id],
                             isToday = isToday,
                             onDeletePhoto = onDeletePhoto,
                         )
@@ -154,16 +109,11 @@ private fun WeightTimelineItem(
     onDeleteWeight: () -> Unit,
 ) {
     summary.weight?.let { weight ->
-        val weightSubtitle = listOfNotNull(
-            weight.note,
-            summary.weightHabitName?.let { "Relacionado con: $it" },
-        ).takeIf { it.isNotEmpty() }?.joinToString("\n")
-
         DetailItem(
             icon = Icons.Rounded.MonitorWeight,
             color = MaterialTheme.colorScheme.primary,
             title = "Peso: ${weight.weight} kg",
-            subtitle = weightSubtitle,
+            subtitle = weight.note,
             onDelete = if (isToday) onDeleteWeight else null,
         )
     }
@@ -172,7 +122,6 @@ private fun WeightTimelineItem(
 @Composable
 private fun PhotoTimelineItem(
     photo: ProgressPhoto,
-    habitName: String?,
     isToday: Boolean,
     onDeletePhoto: (ProgressPhoto) -> Unit,
 ) {
@@ -180,7 +129,6 @@ private fun PhotoTimelineItem(
         icon = Icons.Rounded.Image,
         color = MaterialTheme.colorScheme.tertiary,
         title = "Foto: ${photo.type.toSpanishLabel()}",
-        subtitle = habitName,
         onDelete = if (isToday) {
             { onDeletePhoto(photo) }
         } else {
@@ -203,7 +151,6 @@ private fun PhotoTimelineItem(
 @Composable
 internal fun DayPhotosSection(
     photos: List<ProgressPhoto>,
-    photoHabitNames: Map<String, String>,
     isToday: Boolean,
     onDeletePhoto: (ProgressPhoto) -> Unit,
     modifier: Modifier = Modifier,
@@ -229,9 +176,7 @@ internal fun DayPhotosSection(
                         contentScale = ContentScale.Crop,
                     )
                     HMediaOverlayLabel(
-                        text = listOf(photo.type.toSpanishLabel(), photoHabitNames[photo.id])
-                            .filterNotNull()
-                            .joinToString(" · "),
+                        text = photo.type.toSpanishLabel(),
                         align = Alignment.BottomStart,
                     )
                     if (isToday) {
@@ -265,9 +210,6 @@ private fun PhotoType.toSpanishLabel(): String = when (this) {
 
 internal fun buildDayTimelineEntries(summary: DaySummary): List<DayTimelineEntry> {
     val entries = mutableListOf<DayTimelineEntry>()
-    summary.habit?.let {
-        entries.add(DayTimelineEntry(type = DayTimelineEventType.HABIT, sequence = 0))
-    }
     summary.weight?.let {
         entries.add(DayTimelineEntry(type = DayTimelineEventType.WEIGHT, sequence = 1))
     }

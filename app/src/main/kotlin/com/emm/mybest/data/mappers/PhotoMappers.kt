@@ -8,8 +8,6 @@ import com.emm.mybest.data.entities.PhotoType as DataPhotoType
 
 fun ProgressPhotoEntity.toDomain(): ProgressPhoto = ProgressPhoto(
     id = id,
-    habitRecordId = habitRecordId,
-    habitId = habitId,
     date = date,
     type = type.toDomain(),
     photoPath = photoPath,
@@ -17,7 +15,6 @@ fun ProgressPhotoEntity.toDomain(): ProgressPhoto = ProgressPhoto(
 )
 
 fun NewProgressPhoto.toEntity(): ProgressPhotoEntity = ProgressPhotoEntity(
-    habitId = habitId,
     date = date,
     type = type.toData(),
     photoPath = photoPath,

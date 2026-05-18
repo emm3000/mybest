@@ -4,34 +4,25 @@ import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.domain.models.InsightsData
 import com.emm.mybest.domain.models.InsightsRecommendation
 import com.emm.mybest.domain.models.InsightsRecommendationAction
-import com.emm.mybest.domain.repository.DailyHabitRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.datetime.LocalDate
 
-private const val LOW_CONSISTENCY_THRESHOLD = 0.4f
-
 class GetInsightsUseCase(
     private val weightRepository: WeightRepository,
-    private val dailyHabitRepository: DailyHabitRepository,
     private val photoRepository: PhotoRepository,
 ) {
     operator fun invoke(): Flow<InsightsData> {
         return combine(
             weightRepository.getWeightProgress(),
-            dailyHabitRepository.getAllDailyHabits(),
             photoRepository.getAllPhotos(),
-        ) { weights, habits, photos ->
+        ) { weights, photos ->
             val initialWeight = weights.firstOrNull()?.weight ?: 0f
             val currentWeight = weights.lastOrNull()?.weight ?: 0f
 
-            val totalHabits = habits.size * 2
-            val completedHabits = habits.count { it.didExercise } + habits.count { it.ateHealthy }
-            val consistency = if (totalHabits > 0) completedHabits.toFloat() / totalHabits else 0f
             val recommendation = buildRecommendation(
-                consistency = consistency,
                 totalWeightLost = initialWeight - currentWeight,
                 photoCount = photos.size,
                 hasWeightTrend = weights.size >= 2,
@@ -39,7 +30,6 @@ class GetInsightsUseCase(
             val periodLabel = buildPeriodLabel(
                 dates = buildList {
                     addAll(weights.map { it.date })
-                    addAll(habits.map { it.date })
                     addAll(photos.map { it.date })
                 },
             )
@@ -47,12 +37,9 @@ class GetInsightsUseCase(
             InsightsData(
                 weightEntries = weights,
                 periodLabel = periodLabel,
-                habitConsistency = consistency,
                 totalWeightLost = initialWeight - currentWeight,
                 currentWeight = currentWeight,
                 initialWeight = initialWeight,
-                exerciseDays = habits.count { it.didExercise },
-                healthyEatingDays = habits.count { it.ateHealthy },
                 photoCount = photos.size,
                 recommendation = recommendation,
             )
@@ -71,19 +58,11 @@ private fun buildPeriodLabel(dates: List<LocalDate>): String {
 }
 
 private fun buildRecommendation(
-    consistency: Float,
     totalWeightLost: Float,
     photoCount: Int,
     hasWeightTrend: Boolean,
 ): InsightsRecommendation {
     return when {
-        consistency < LOW_CONSISTENCY_THRESHOLD -> InsightsRecommendation(
-            title = "Refuerza la constancia",
-            description = "Completa al menos 1 hábito diario esta semana para recuperar ritmo.",
-            actionLabel = "Prioriza un hábito clave",
-            action = InsightsRecommendationAction.PRIORITIZE_HABIT,
-        )
-
         hasWeightTrend && totalWeightLost <= 0f -> InsightsRecommendation(
             title = "Ajusta tu plan semanal",
             description = "No hay mejora reciente de peso. Ajusta alimentación o entrenamiento 3 días esta semana.",

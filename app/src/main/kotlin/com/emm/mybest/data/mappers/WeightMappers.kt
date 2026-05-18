@@ -7,7 +7,6 @@ fun DailyWeightEntity.toDomain(): WeightEntry = WeightEntry(
     id = id,
     date = date,
     weight = weight,
-    habitId = habitId,
     photoPath = photoPath,
     note = note,
 )
