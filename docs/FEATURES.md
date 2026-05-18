@@ -1,35 +1,45 @@
-# MyBest - Feature Map
+# MyBest — Feature Map
 
-## 1. Home
-- Daily summary.
-- Quick actions to add weight, habit, and photo.
-- Habit toggle from main list.
+## 1. Home (Diario)
+- Día actual + 5 toggles de cumplimiento (4 comidas + 1 ejercicio).
+- Plan del día visible (descripción de cada comida + rutina) tomado del plan semanal.
+- Hero metric: ratio cumplido (ej. 3/5).
+- CTAs: registrar peso, tomar foto, editar plan de dieta, editar plan de ejercicio.
 
-## 2. Habits
-- Multi-step create/edit flow.
-- Supports `BOOLEAN`, `TIME`, and `METRIC` habit types.
-- Weekly scheduling per habit.
+## 2. Plan de Dieta (semanal)
+- 7 días × 4 slots de comida (`BREAKFAST`, `LUNCH`, `DINNER`, `SNACK`).
+- Editor: tap en una comida → bottom sheet con descripción editable.
+- Plantilla recurrente (no por semana específica).
 
-## 3. Photos
-- Capture from camera or select from gallery.
-- Persist selected photos and optional habit relation.
-- Compare photos by type with before/after selection.
+## 3. Plan de Ejercicio (semanal)
+- 7 días × 1 rutina por día (texto libre).
+- Editor: tap en un día → bottom sheet con la rutina editable.
 
-## 4. Weight
-- Register daily weight values.
-- Show latest value and progress indicators.
+## 4. Peso
+- Registro diario.
+- Visible en Home como CTA "registrar peso".
+- Recordatorio matinal configurable (ver §7).
 
-## 5. History and Timeline
-- Day and month activity aggregation.
-- Visual timeline navigation for progress photos.
-- Deletion actions for current-day records where allowed.
+## 5. Fotos de progreso
+- Dos tipos: `TRUNK` (tronco) y `FACE` (cara).
+- Capture desde cámara o galería.
+- Timeline y comparación antes/después por tipo.
 
 ## 6. Insights
-- Habit consistency metrics.
-- Weight trend and total delta.
-- Access to photo comparison when enough data exists.
+- Peso: delta total, peso inicial vs actual, gráfica.
+- Contador de fotos.
+- Una recomendación derivada (`ADJUST_WEIGHT_PLAN`, `ADD_PROGRESS_PHOTO`, `KEEP_ROUTINE`).
 
-## 7. Settings and Reminders
-- Enable/disable reminder preference.
-- Backup export/import using SAF.
-- Worker-based reminders with runtime notification permission handling.
+## 7. Recordatorio matinal de peso
+- Configurable desde Settings (sin default forzado — hasta que el usuario elija una hora, no se agenda nada).
+- Notificación local diaria a la hora elegida con CTA → AddWeight.
+- Cancelable apagando el toggle (llama a `WeightReminderScheduler.cancel()`).
+
+## 8. Historial y Timeline
+- Calendario con días que tienen registros (peso, fotos).
+- Timeline de fotos de progreso por tipo.
+
+## 9. Settings
+- Hora del recordatorio de peso.
+- Acceso al plan de dieta y al plan de ejercicio.
+- Backup export/import (SAF).

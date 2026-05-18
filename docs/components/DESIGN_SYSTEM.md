@@ -75,7 +75,7 @@ Fuente de verdad: `app/src/main/kotlin/com/emm/mybest/ui/theme/Type.kt` y `TextS
 | Token M3          | Tamaño   | Peso       | Line height | Letter spacing | Uso en MyBest                                        |
 |-------------------|----------|------------|-------------|----------------|------------------------------------------------------|
 | `displayLarge`    | 56sp     | Bold       | 64sp        | −1.5sp         | Métricas hero: peso actual, delta grande             |
-| `displayMedium`   | 40sp     | Bold       | 48sp        | −1.0sp         | Métricas secundarias: contadores de racha, delta     |
+| `displayMedium`   | 40sp     | Bold       | 48sp        | −1.0sp         | Métricas secundarias: ratio de cumplimiento, delta   |
 | `displaySmall`    | 32sp     | SemiBold   | 40sp        | −0.5sp         | Métricas auxiliares; contador de paginación          |
 | `headlineLarge`   | 32sp     | ExtraBold  | 40sp        | −0.5sp         | Reservado                                            |
 | `headlineMedium`  | 28sp     | Bold       | 36sp        | −0.25sp        | Reservado                                            |
@@ -206,7 +206,7 @@ Anillo de progreso circular dibujado en `Canvas`.
 
 ### Cuándo usar el acento cian (`starlinkAccent` / `cs.tertiary`)
 - Máximo **1 elemento por pantalla** con acento cian.
-- Reservado a: métricas de progreso positivo (racha, completados), dot de estado "Success" en `HBadge`, barra de `HAlert.Success`.
+- Reservado a: métricas de progreso positivo (compliance ratio, completados), dot de estado "Success" en `HBadge`, barra de `HAlert.Success`.
 - No usar en texto de cuerpo, labels de sección ni decoración.
 
 ### Cuándo NO usar uppercase

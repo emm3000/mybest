@@ -19,18 +19,37 @@
 - Repository persists/reads through Room or platform services.
 
 ## 4. Main Modules
-- Habits: create/update/toggle daily habits.
-- Photos: add photos, classify by type, compare before/after.
-- Weight: register and read progress.
+- Home: daily compliance toggles (4 meals + 1 exercise), plan display, primary CTAs.
+- Diet Plan: weekly meal plan editor (7 days × 4 meal slots).
+- Exercise Plan: weekly exercise routine editor (7 days × 1 routine).
+- Photos: add progress photos (TRUNK/FACE), timeline, before/after comparison.
+- Weight: register daily weight values.
 - History/Timeline/Insights: aggregate and visualize progress.
-- Settings: reminders and backup/restore flows.
+- Settings: weight reminder, diet/exercise plan access, backup/restore flows.
 
-## 5. Quality Rules
+## 5. Persistence
+Room database v4 (`my_best_db`). Active tables:
+
+| Table                   | Description                                      |
+|-------------------------|--------------------------------------------------|
+| `daily_weight`          | One row per day with weight value                |
+| `progress_photo`        | Progress photos with `PhotoType` (TRUNK / FACE)  |
+| `meal_plan_entries`     | Weekly recurring meal plan (day × meal slot)     |
+| `exercise_plan_entries` | Weekly recurring exercise routines (day × routine) |
+| `meal_compliance`       | Daily meal toggle state per `MealType`           |
+| `exercise_compliance`   | Daily exercise toggle state                      |
+
+Migrations:
+- `1 → 2`: AutoMigration (Room).
+- `2 → 3`: Manual — removes habit tables (`habits`, `habit_records`, `daily_habit`) and strips habit FK columns from `progress_photo` and `daily_weight`.
+- `3 → 4`: Manual — unifies legacy `ABDOMEN`/`BODY` photo types into `TRUNK` and removes meal-photo entries.
+
+## 6. Quality Rules
 - Prefer early return for validation and guard clauses.
 - Keep conditional depth low and avoid callback chains in composables.
 - Keep business logic in use cases and viewmodels, not in UI widgets.
 
-## 6. Visual Design
+## 7. Visual Design
 The UI follows the Starlink Mono design system (see `docs/components/DESIGN_SYSTEM.md`).
 Key constraints for contributors:
 - Dark-first: do not branch on `isSystemInDarkTheme()`; the theme is forced dark.
