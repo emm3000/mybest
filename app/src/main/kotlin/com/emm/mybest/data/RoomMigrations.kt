@@ -3,6 +3,16 @@ package com.emm.mybest.data
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // 1) Delete meal-photo entries (BREAKFAST, LUNCH, DINNER, FOOD) — obsolete after
+        //    diet moved to a checkbox-based compliance model.
+        db.execSQL("DELETE FROM progress_photo WHERE type NOT IN ('FACE', 'ABDOMEN', 'BODY', 'TRUNK')")
+        // 2) Unify ABDOMEN and BODY into TRUNK.
+        db.execSQL("UPDATE progress_photo SET type = 'TRUNK' WHERE type IN ('ABDOMEN', 'BODY')")
+    }
+}
+
 val MIGRATION_2_3 = object : Migration(2, 3) {
     override fun migrate(db: SupportSQLiteDatabase) {
         // 1) Recreate progress_photo without habit_record_id FK, habit_record_id column,

@@ -199,13 +199,8 @@ internal fun DayPhotosSection(
 }
 
 private fun PhotoType.toSpanishLabel(): String = when (this) {
+    PhotoType.TRUNK -> "Tronco"
     PhotoType.FACE -> "Cara"
-    PhotoType.ABDOMEN -> "Abdomen"
-    PhotoType.BODY -> "Cuerpo"
-    PhotoType.BREAKFAST -> "Desayuno"
-    PhotoType.LUNCH -> "Almuerzo"
-    PhotoType.DINNER -> "Cena"
-    PhotoType.FOOD -> "Comida"
 }
 
 internal fun buildDayTimelineEntries(summary: DaySummary): List<DayTimelineEntry> {

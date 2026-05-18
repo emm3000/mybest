@@ -7,6 +7,7 @@ import com.emm.mybest.data.BackupRepositoryImpl
 import com.emm.mybest.data.ComplianceRepositoryImpl
 import com.emm.mybest.data.ExercisePlanRepositoryImpl
 import com.emm.mybest.data.MIGRATION_2_3
+import com.emm.mybest.data.MIGRATION_3_4
 import com.emm.mybest.data.MealPlanRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepositoryImpl
@@ -55,7 +56,7 @@ val appModule = module {
             androidContext(),
             AppDatabase::class.java,
             AppDatabase.DB_NAME,
-        ).addMigrations(MIGRATION_2_3).build()
+        ).addMigrations(MIGRATION_2_3, MIGRATION_3_4).build()
     }
 
     single { get<AppDatabase>().dailyWeightDao() }

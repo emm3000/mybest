@@ -51,7 +51,7 @@ class ProgressPhotoDaoIntegrationTest {
         val body = ProgressPhotoEntity(
             id = "p3",
             date = LocalDate(2026, 3, 8),
-            type = com.emm.mybest.data.entities.PhotoType.BODY,
+            type = com.emm.mybest.data.entities.PhotoType.TRUNK,
             photoPath = "/tmp/3.jpg",
         )
         dao.insertAll(listOf(older, newer, body))
@@ -75,15 +75,15 @@ class ProgressPhotoDaoIntegrationTest {
         val photo = ProgressPhotoEntity(
             id = "p4",
             date = LocalDate(2026, 3, 10),
-            type = com.emm.mybest.data.entities.PhotoType.ABDOMEN,
+            type = com.emm.mybest.data.entities.PhotoType.TRUNK,
             photoPath = "/tmp/4.jpg",
         )
         dao.insert(photo)
-        assertNotNull(dao.getFirstByType(com.emm.mybest.data.entities.PhotoType.ABDOMEN))
+        assertNotNull(dao.getFirstByType(com.emm.mybest.data.entities.PhotoType.TRUNK))
 
         dao.deleteById("p4")
 
-        assertNull(dao.getFirstByType(com.emm.mybest.data.entities.PhotoType.ABDOMEN))
+        assertNull(dao.getFirstByType(com.emm.mybest.data.entities.PhotoType.TRUNK))
     }
 
     @Test

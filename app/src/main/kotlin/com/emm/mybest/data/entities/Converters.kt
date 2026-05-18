@@ -15,5 +15,8 @@ class Converters {
     fun fromPhotoType(type: PhotoType): String = type.name
 
     @TypeConverter
-    fun toPhotoType(value: String): PhotoType = value.let(PhotoType::valueOf)
+    fun toPhotoType(value: String): PhotoType = when (value) {
+        "FACE" -> PhotoType.FACE
+        else -> PhotoType.TRUNK
+    }
 }

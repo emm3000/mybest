@@ -1,11 +1,6 @@
 package com.emm.mybest.domain.models
 
 enum class PhotoType {
+    TRUNK,
     FACE,
-    ABDOMEN,
-    BODY,
-    BREAKFAST,
-    LUNCH,
-    DINNER,
-    FOOD,
 }

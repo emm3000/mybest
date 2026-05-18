@@ -49,13 +49,13 @@ class DataMappersTest {
     fun `new progress photo maps to entity`() {
         val input = NewProgressPhoto(
             photoPath = "/tmp/new.jpg",
-            type = PhotoType.BODY,
+            type = PhotoType.TRUNK,
             date = LocalDate(2026, 3, 8),
         )
 
         val entity = input.toEntity()
 
-        assertEquals(com.emm.mybest.data.entities.PhotoType.BODY, entity.type)
+        assertEquals(com.emm.mybest.data.entities.PhotoType.TRUNK, entity.type)
         assertEquals("/tmp/new.jpg", entity.photoPath)
         assertEquals(LocalDate(2026, 3, 8), entity.date)
     }

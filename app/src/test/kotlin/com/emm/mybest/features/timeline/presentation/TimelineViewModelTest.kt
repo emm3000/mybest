@@ -29,8 +29,8 @@ class TimelineViewModelTest {
         val dayTwo = LocalDate(2026, 3, 9)
         val photos = listOf(
             ProgressPhoto("p1", date = dayOne, type = PhotoType.FACE, photoPath = "/tmp/1", createdAt = 1L),
-            ProgressPhoto("p2", date = dayOne, type = PhotoType.BODY, photoPath = "/tmp/2", createdAt = 2L),
-            ProgressPhoto("p3", date = dayTwo, type = PhotoType.BODY, photoPath = "/tmp/3", createdAt = 3L),
+            ProgressPhoto("p2", date = dayOne, type = PhotoType.TRUNK, photoPath = "/tmp/2", createdAt = 2L),
+            ProgressPhoto("p3", date = dayTwo, type = PhotoType.TRUNK, photoPath = "/tmp/3", createdAt = 3L),
         )
         every { repository.getAllPhotos() } returns flowOf(photos)
         val viewModel = TimelineViewModel(repository)

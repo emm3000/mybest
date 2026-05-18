@@ -34,15 +34,15 @@ class ComparePhotosViewModelTest {
     private val body = ProgressPhoto(
         id = "p-body",
         date = LocalDate(2026, 3, 8),
-        type = PhotoType.BODY,
+        type = PhotoType.TRUNK,
         photoPath = "/tmp/body.jpg",
         createdAt = 2L,
     )
-    private val dinner = ProgressPhoto(
-        id = "p-dinner",
+    private val trunk2 = ProgressPhoto(
+        id = "p-trunk2",
         date = LocalDate(2026, 3, 9),
-        type = PhotoType.DINNER,
-        photoPath = "/tmp/dinner.jpg",
+        type = PhotoType.TRUNK,
+        photoPath = "/tmp/trunk2.jpg",
         createdAt = 3L,
     )
 
@@ -61,7 +61,7 @@ class ComparePhotosViewModelTest {
             assertEquals(body, loaded.afterPhoto)
             assertEquals(2, loaded.totalPhotosCount)
             assertEquals(1, loaded.photoCountByType[PhotoType.FACE])
-            assertEquals(1, loaded.photoCountByType[PhotoType.BODY])
+            assertEquals(1, loaded.photoCountByType[PhotoType.TRUNK])
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -70,7 +70,7 @@ class ComparePhotosViewModelTest {
     fun `OnTypeSelected filters photos and preselects available comparison pair`() = runTest {
         every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
         every { repository.getPhotosByType(PhotoType.FACE) } returns flowOf(listOf(face))
-        every { repository.getPhotosByType(PhotoType.BODY) } returns flowOf(listOf(body))
+        every { repository.getPhotosByType(PhotoType.TRUNK) } returns flowOf(listOf(body))
         val viewModel = ComparePhotosViewModel(repository)
 
         viewModel.state.test {
@@ -95,23 +95,23 @@ class ComparePhotosViewModelTest {
 
     @Test
     fun `selection keeps manual choices while they remain available`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(listOf(face, body, dinner))
-        every { repository.getPhotosByType(any()) } returns flowOf(listOf(face, body, dinner))
+        every { repository.getAllPhotos() } returns flowOf(listOf(face, body, trunk2))
+        every { repository.getPhotosByType(any()) } returns flowOf(listOf(face, body, trunk2))
         val viewModel = ComparePhotosViewModel(repository)
 
         viewModel.state.test {
             awaitItem()
-            awaitState { it.beforePhoto == face && it.afterPhoto == dinner }
+            awaitState { it.beforePhoto == face && it.afterPhoto == trunk2 }
 
             viewModel.onIntent(ComparePhotosIntent.OnAfterPhotoSelected(body))
             awaitState { it.beforePhoto == face && it.afterPhoto == body }
 
-            viewModel.onIntent(ComparePhotosIntent.OnBeforePhotoSelected(dinner))
+            viewModel.onIntent(ComparePhotosIntent.OnBeforePhotoSelected(trunk2))
 
             val manualSelection = awaitState {
-                it.beforePhoto == dinner && it.afterPhoto == body
+                it.beforePhoto == trunk2 && it.afterPhoto == body
             }
-            assertEquals(dinner, manualSelection.beforePhoto)
+            assertEquals(trunk2, manualSelection.beforePhoto)
             assertEquals(body, manualSelection.afterPhoto)
             cancelAndIgnoreRemainingEvents()
         }
@@ -195,24 +195,26 @@ class ComparePhotosViewModelTest {
 
     @Test
     fun `OnTypeSelected with no matches keeps filter and clears comparison pair`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
-        every { repository.getPhotosByType(PhotoType.DINNER) } returns flowOf(emptyList())
+        // Repo contains only FACE photos — TRUNK count is 0.
+        val face2 = face.copy(id = "p-face2", createdAt = 4L)
+        every { repository.getAllPhotos() } returns flowOf(listOf(face, face2))
+        every { repository.getPhotosByType(PhotoType.TRUNK) } returns flowOf(emptyList())
         val viewModel = ComparePhotosViewModel(repository)
 
         viewModel.state.test {
             awaitItem()
             awaitItem()
 
-            viewModel.onIntent(ComparePhotosIntent.OnTypeSelected(PhotoType.DINNER))
+            viewModel.onIntent(ComparePhotosIntent.OnTypeSelected(PhotoType.TRUNK))
             val filtered = awaitState {
-                it.selectedType == PhotoType.DINNER &&
+                it.selectedType == PhotoType.TRUNK &&
                     it.photos.isEmpty() &&
                     it.beforePhoto == null &&
                     it.afterPhoto == null
             }
 
             assertEquals(2, filtered.totalPhotosCount)
-            assertEquals(0, filtered.photoCountByType[PhotoType.DINNER] ?: 0)
+            assertEquals(0, filtered.photoCountByType[PhotoType.TRUNK] ?: 0)
             cancelAndIgnoreRemainingEvents()
         }
     }

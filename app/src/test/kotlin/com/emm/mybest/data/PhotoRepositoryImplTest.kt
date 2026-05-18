@@ -46,17 +46,17 @@ class PhotoRepositoryImplTest {
         val entity = ProgressPhotoEntity(
             id = "p2",
             date = LocalDate(2026, 3, 8),
-            type = DataPhotoType.BODY,
+            type = DataPhotoType.TRUNK,
             photoPath = "/tmp/body.jpg",
             createdAt = 999L,
         )
-        every { dao.observeByType(DataPhotoType.BODY) } returns flowOf(listOf(entity))
+        every { dao.observeByType(DataPhotoType.TRUNK) } returns flowOf(listOf(entity))
 
-        val result = repository.getPhotosByType(PhotoType.BODY).first()
+        val result = repository.getPhotosByType(PhotoType.TRUNK).first()
 
         assertEquals(1, result.size)
         assertEquals("p2", result.first().id)
-        assertEquals(PhotoType.BODY, result.first().type)
+        assertEquals(PhotoType.TRUNK, result.first().type)
         assertEquals("/tmp/body.jpg", result.first().photoPath)
     }
 
@@ -67,7 +67,7 @@ class PhotoRepositoryImplTest {
         val photos = listOf(
             NewProgressPhoto(
                 photoPath = "/tmp/a.jpg",
-                type = PhotoType.ABDOMEN,
+                type = PhotoType.TRUNK,
                 date = LocalDate(2026, 3, 7),
             ),
             NewProgressPhoto(
@@ -81,7 +81,7 @@ class PhotoRepositoryImplTest {
 
         coVerify(exactly = 1) { dao.insertAll(any()) }
         assertEquals(2, captured.captured.size)
-        assertEquals(DataPhotoType.ABDOMEN, captured.captured[0].type)
+        assertEquals(DataPhotoType.TRUNK, captured.captured[0].type)
         assertEquals("/tmp/a.jpg", captured.captured[0].photoPath)
         assertEquals(LocalDate(2026, 3, 8), captured.captured[1].date)
     }

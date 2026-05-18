@@ -217,11 +217,6 @@ fun PhotoPagerItem(
 }
 
 internal fun timelinePhotoTypeLabel(type: PhotoType): String = when (type) {
+    PhotoType.TRUNK -> "Tronco"
     PhotoType.FACE -> "Cara"
-    PhotoType.ABDOMEN -> "Abdomen"
-    PhotoType.BODY -> "Cuerpo"
-    PhotoType.BREAKFAST -> "Desayuno"
-    PhotoType.LUNCH -> "Almuerzo"
-    PhotoType.DINNER -> "Cena"
-    PhotoType.FOOD -> "Comida"
 }

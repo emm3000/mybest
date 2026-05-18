@@ -20,5 +20,12 @@ fun NewProgressPhoto.toEntity(): ProgressPhotoEntity = ProgressPhotoEntity(
     photoPath = photoPath,
 )
 
-fun DataPhotoType.toDomain(): PhotoType = PhotoType.valueOf(name)
-fun PhotoType.toData(): DataPhotoType = DataPhotoType.valueOf(name)
+fun DataPhotoType.toDomain(): PhotoType = when (this) {
+    DataPhotoType.FACE -> PhotoType.FACE
+    DataPhotoType.TRUNK -> PhotoType.TRUNK
+}
+
+fun PhotoType.toData(): DataPhotoType = when (this) {
+    PhotoType.FACE -> DataPhotoType.FACE
+    PhotoType.TRUNK -> DataPhotoType.TRUNK
+}

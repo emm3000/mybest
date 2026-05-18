@@ -448,8 +448,8 @@ private fun HistoryScreenPreview() {
             date = today,
             weight = WeightEntry(id = "w1", date = today, weight = 75.5f, note = "Post entrenamiento"),
             photos = listOf(
-                ProgressPhoto(id = "p1", date = today, type = PhotoType.BODY, photoPath = "", createdAt = 0L),
-                ProgressPhoto(id = "p2", date = today, type = PhotoType.ABDOMEN, photoPath = "", createdAt = 0L),
+                ProgressPhoto(id = "p1", date = today, type = PhotoType.TRUNK, photoPath = "", createdAt = 0L),
+                ProgressPhoto(id = "p2", date = today, type = PhotoType.FACE, photoPath = "", createdAt = 0L),
             ),
         ),
         today.minusDays(1) to DaySummary(
