@@ -16,10 +16,4 @@ class Converters {
 
     @TypeConverter
     fun toPhotoType(value: String): PhotoType = value.let(PhotoType::valueOf)
-
-    @TypeConverter
-    fun fromHabitType(type: HabitType): String = type.name
-
-    @TypeConverter
-    fun toHabitType(value: String): HabitType = value.let(HabitType::valueOf)
 }

@@ -11,18 +11,7 @@
             android:targetPackage="com.emm.mybest"
             android:targetClass="com.emm.mybest.MainActivity" />
     </shortcut>
-    <shortcut
-        android:shortcutId="add_habit"
-        android:enabled="true"
-        android:icon="@mipmap/ic_habit"
-        android:shortcutShortLabel="@string/shortcut_add_habit_short"
-        android:shortcutLongLabel="@string/shortcut_add_habit_long">
-        <intent
-            android:action="com.emm.mybest.ACTION_ADD_HABIT"
-            android:targetPackage="com.emm.mybest"
-            android:targetClass="com.emm.mybest.MainActivity" />
-    </shortcut>
-    <shortcut
+<shortcut
         android:shortcutId="add_photo"
         android:enabled="true"
         android:icon="@mipmap/ic_camera"

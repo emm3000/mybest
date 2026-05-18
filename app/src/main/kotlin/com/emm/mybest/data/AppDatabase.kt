@@ -5,18 +5,12 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.emm.mybest.data.entities.Converters
-import com.emm.mybest.data.entities.DailyHabitDao
-import com.emm.mybest.data.entities.DailyHabitEntity
 import com.emm.mybest.data.entities.DailyWeightDao
 import com.emm.mybest.data.entities.DailyWeightEntity
 import com.emm.mybest.data.entities.ExerciseComplianceDao
 import com.emm.mybest.data.entities.ExerciseComplianceEntity
 import com.emm.mybest.data.entities.ExercisePlanDao
 import com.emm.mybest.data.entities.ExercisePlanEntryEntity
-import com.emm.mybest.data.entities.HabitDao
-import com.emm.mybest.data.entities.HabitEntity
-import com.emm.mybest.data.entities.HabitRecordDao
-import com.emm.mybest.data.entities.HabitRecordEntity
 import com.emm.mybest.data.entities.MealComplianceDao
 import com.emm.mybest.data.entities.MealComplianceEntity
 import com.emm.mybest.data.entities.MealPlanDao
@@ -26,17 +20,14 @@ import com.emm.mybest.data.entities.ProgressPhotoEntity
 
 @Database(
     entities = [
-        DailyHabitEntity::class,
         DailyWeightEntity::class,
         ProgressPhotoEntity::class,
-        HabitEntity::class,
-        HabitRecordEntity::class,
         MealPlanEntryEntity::class,
         ExercisePlanEntryEntity::class,
         MealComplianceEntity::class,
         ExerciseComplianceEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -44,11 +35,8 @@ import com.emm.mybest.data.entities.ProgressPhotoEntity
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun dailyHabitDao(): DailyHabitDao
     abstract fun dailyWeightDao(): DailyWeightDao
     abstract fun progressPhotoDao(): ProgressPhotoDao
-    abstract fun habitDao(): HabitDao
-    abstract fun habitRecordDao(): HabitRecordDao
     abstract fun mealPlanDao(): MealPlanDao
     abstract fun exercisePlanDao(): ExercisePlanDao
     abstract fun mealComplianceDao(): MealComplianceDao

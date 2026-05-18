@@ -25,7 +25,6 @@ class WeightRepositoryImplTest {
             id = "w1",
             date = LocalDate(2026, 3, 8),
             weight = 71.3f,
-            habitId = "habit-1",
             note = "ok",
         )
         every { dao.observeAllOrdered() } returns flowOf(listOf(entity))

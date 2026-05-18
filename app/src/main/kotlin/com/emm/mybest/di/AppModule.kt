@@ -5,9 +5,8 @@ import androidx.work.WorkManager
 import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.BackupRepositoryImpl
 import com.emm.mybest.data.ComplianceRepositoryImpl
-import com.emm.mybest.data.DailyHabitRepositoryImpl
 import com.emm.mybest.data.ExercisePlanRepositoryImpl
-import com.emm.mybest.data.HabitRepositoryImpl
+import com.emm.mybest.data.MIGRATION_2_3
 import com.emm.mybest.data.MealPlanRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepositoryImpl
@@ -16,28 +15,18 @@ import com.emm.mybest.data.entities.ExerciseComplianceDao
 import com.emm.mybest.data.entities.ExercisePlanDao
 import com.emm.mybest.data.entities.MealComplianceDao
 import com.emm.mybest.data.entities.MealPlanDao
-import com.emm.mybest.data.reminder.HabitReminderSchedulerImpl
 import com.emm.mybest.domain.media.MediaManager
-import com.emm.mybest.domain.reminder.HabitReminderScheduler
 import com.emm.mybest.domain.repository.BackupRepository
 import com.emm.mybest.domain.repository.ComplianceRepository
-import com.emm.mybest.domain.repository.DailyHabitRepository
 import com.emm.mybest.domain.repository.ExercisePlanRepository
-import com.emm.mybest.domain.repository.HabitRepository
 import com.emm.mybest.domain.repository.MealPlanRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.repository.WeightRepository
-import com.emm.mybest.domain.usecase.CreateHabitUseCase
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
-import com.emm.mybest.domain.usecase.GetDailyHabitsUseCase
-import com.emm.mybest.domain.usecase.GetHabitByIdUseCase
-import com.emm.mybest.domain.usecase.GetHomeSummaryUseCase
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
-import com.emm.mybest.domain.usecase.ToggleHabitUseCase
 import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
-import com.emm.mybest.domain.usecase.UpdateHabitUseCase
 import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
@@ -66,39 +55,27 @@ val appModule = module {
             androidContext(),
             AppDatabase::class.java,
             AppDatabase.DB_NAME,
-        ).build()
+        ).addMigrations(MIGRATION_2_3).build()
     }
 
-    single { get<AppDatabase>().dailyHabitDao() }
     single { get<AppDatabase>().dailyWeightDao() }
     single { get<AppDatabase>().progressPhotoDao() }
-    single { get<AppDatabase>().habitDao() }
-    single { get<AppDatabase>().habitRecordDao() }
     single<MealPlanDao> { get<AppDatabase>().mealPlanDao() }
     single<ExercisePlanDao> { get<AppDatabase>().exercisePlanDao() }
     single<MealComplianceDao> { get<AppDatabase>().mealComplianceDao() }
     single<ExerciseComplianceDao> { get<AppDatabase>().exerciseComplianceDao() }
-    single<HabitRepository> { HabitRepositoryImpl(get(), get()) }
     single<WeightRepository> { WeightRepositoryImpl(get()) }
     single<PhotoRepository> { PhotoRepositoryImpl(get()) }
     single<BackupRepository> { BackupRepositoryImpl(androidContext(), get()) }
 
-    single<DailyHabitRepository> { DailyHabitRepositoryImpl(get()) }
     single<MealPlanRepository> { MealPlanRepositoryImpl(get()) }
     single<ExercisePlanRepository> { ExercisePlanRepositoryImpl(get()) }
     single<ComplianceRepository> { ComplianceRepositoryImpl(get(), get()) }
     single { WorkManager.getInstance(androidContext()) }
-    single<HabitReminderScheduler> { HabitReminderSchedulerImpl(get(), get()) }
 
-    factory { CreateHabitUseCase(get(), get()) }
-    factory { GetDailyHabitsUseCase(get()) }
-    factory { ToggleHabitUseCase(get()) }
-    factory { GetHomeSummaryUseCase(get(), get(), get()) }
     factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
     factory { RestoreDatabaseBackupUseCase(get()) }
-    factory { GetHabitByIdUseCase(get()) }
-    factory { UpdateHabitUseCase(get(), get()) }
     factory { UpdateDefaultReminderTimeUseCase(get()) }
 
     // Diet use cases

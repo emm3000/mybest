@@ -27,7 +27,6 @@ class PhotoRepositoryImplTest {
         val entity = ProgressPhotoEntity(
             id = "p1",
             date = LocalDate(2026, 3, 8),
-            habitId = "habit-1",
             type = DataPhotoType.FACE,
             photoPath = "/tmp/face.jpg",
             createdAt = 123L,
