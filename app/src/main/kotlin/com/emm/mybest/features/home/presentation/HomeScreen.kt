@@ -1,77 +1,60 @@
 package com.emm.mybest.features.home.presentation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.FitnessCenter
+import androidx.compose.material.icons.rounded.Restaurant
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.core.datetime.currentDate
-import com.emm.mybest.core.navigation.Screen
+import com.emm.mybest.domain.models.MealType
+import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.CardVariant
+import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
-import com.emm.mybest.ui.components.HSkeleton
-import com.emm.mybest.ui.components.HSnackbarHost
+import com.emm.mybest.ui.components.HProgressBar
+import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.ui.theme.StarlinkTextStyles
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel,
-    onNavigate: (Screen) -> Unit,
     modifier: Modifier = Modifier,
+    onWeightClick: () -> Unit,
+    onPhotoClick: () -> Unit,
+    onMealPlanClick: () -> Unit,
+    onExercisePlanClick: () -> Unit,
+    viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    val currentOnNavigate by androidx.compose.runtime.rememberUpdatedState(onNavigate)
-
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                is HomeEffect.Navigate -> currentOnNavigate(effect.route)
-                is HomeEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
-                is HomeEffect.ShowSuccess -> snackbarHostState.showSnackbar(effect.message)
-            }
-        }
-    }
-
     HomeScreenContent(
         modifier = modifier,
         state = state,
-        onIntent = viewModel::onIntent,
-        snackbarHostState = snackbarHostState,
+        onIntent = viewModel::handle,
+        onWeightClick = onWeightClick,
+        onPhotoClick = onPhotoClick,
+        onMealPlanClick = onMealPlanClick,
+        onExercisePlanClick = onExercisePlanClick,
     )
 }
 
@@ -79,33 +62,39 @@ fun HomeScreen(
 internal fun HomeScreenContent(
     state: HomeState,
     onIntent: (HomeIntent) -> Unit,
+    onWeightClick: () -> Unit,
+    onPhotoClick: () -> Unit,
+    onMealPlanClick: () -> Unit,
+    onExercisePlanClick: () -> Unit,
     modifier: Modifier = Modifier,
-    snackbarHostState: SnackbarHostState,
 ) {
     Scaffold(
-        modifier = modifier.fillMaxSize().consumeWindowInsets(WindowInsets.safeContent),
+        modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { HSnackbarHost(snackbarHostState) },
+        topBar = { HTopBar(title = "Hoy") },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
+                .consumeWindowInsets(paddingValues)
                 .padding(paddingValues)
                 .fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            item { HomeDayHeroCard(state = state, modifier = Modifier.fillMaxWidth()) }
+            item { HomeMealSection(state = state, onIntent = onIntent, modifier = Modifier.fillMaxWidth()) }
+            item { HomeExerciseSection(state = state, onIntent = onIntent, modifier = Modifier.fillMaxWidth()) }
             item {
-                HomeHeader(modifier = Modifier.fillMaxWidth())
+                HomeEditorsRow(
+                    onMealPlanClick = onMealPlanClick,
+                    onExercisePlanClick = onExercisePlanClick,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
-
-            homeHabitsSection(state = state, onIntent = onIntent)
-
-            homePrimaryActionsSection(state = state, onIntent = onIntent)
-
             item {
-                SummaryCard(
-                    state = state,
-                    onClick = { onIntent(HomeIntent.OnViewInsightsClick) },
+                HomePrimaryCtaSection(
+                    onWeightClick = onWeightClick,
+                    onPhotoClick = onPhotoClick,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -113,187 +102,208 @@ internal fun HomeScreenContent(
     }
 }
 
+// ── Hero card ────────────────────────────────────────────────────────────────
+
 @Composable
-fun HomeHeader(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+private fun HomeDayHeroCard(state: HomeState, modifier: Modifier = Modifier) {
+    HCard(modifier = modifier, variant = CardVariant.Outlined) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = "${state.dayOfWeek.longEs().uppercase()} · ${state.today.formatShortMonthDay()}",
+                style = StarlinkTextStyles.sectionLabel,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "${state.completedCount}/${state.totalCount}",
+                style = MaterialTheme.typography.displayMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "CUMPLIDO",
+                style = StarlinkTextStyles.sectionLabel,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            HProgressBar(
+                progress = state.completionRatio,
+                height = 2.dp,
+                indicatorColor = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+// ── Meals section ────────────────────────────────────────────────────────────
+
+@Composable
+private fun HomeMealSection(
+    state: HomeState,
+    onIntent: (HomeIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HCard(modifier = modifier, variant = CardVariant.Outlined) {
+        Column(modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {
+            HomeSectionHeader(
+                label = "COMIDAS",
+                icon = {
+                    Icon(
+                        Icons.Rounded.Restaurant,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            state.mealRows.forEach { row ->
+                HomePlanRow(
+                    label = row.type.labelEs(),
+                    description = row.description,
+                    done = row.done,
+                    onCheckedChange = { done -> onIntent(HomeIntent.ToggleMeal(row.type, done)) },
+                )
+            }
+        }
+    }
+}
+
+// ── Exercise section ─────────────────────────────────────────────────────────
+
+@Composable
+private fun HomeExerciseSection(
+    state: HomeState,
+    onIntent: (HomeIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HCard(modifier = modifier, variant = CardVariant.Outlined) {
+        Column(modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {
+            HomeSectionHeader(
+                label = "EJERCICIO",
+                icon = {
+                    Icon(
+                        Icons.Rounded.FitnessCenter,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            HomePlanRow(
+                label = "EJERCICIO",
+                description = state.exerciseRoutine,
+                done = state.exerciseDone,
+                onCheckedChange = { done -> onIntent(HomeIntent.ToggleExercise(done)) },
+                emptyPlaceholder = "Sin rutina",
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+// ── Shared composables ────────────────────────────────────────────────────────
+
+@Composable
+private fun HomeSectionHeader(
+    label: String,
+    icon: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        icon()
         Text(
-            text = "Mi Mejor Versión",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Text(
-            text = "Hoy es ${currentDate()}",
-            style = MaterialTheme.typography.bodyMedium,
+            text = label,
+            style = StarlinkTextStyles.sectionLabel,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
 @Composable
-fun SummaryCard(
-    state: HomeState,
-    onClick: () -> Unit,
+private fun HomePlanRow(
+    label: String,
+    description: String,
+    done: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    emptyPlaceholder: String = "Sin plan",
 ) {
-    HCard(
-        modifier = modifier.height(160.dp),
-        onClick = onClick,
-        variant = CardVariant.Filled,
-        cornerRadius = 28.dp,
-        containerColor = MaterialTheme.colorScheme.primary,
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .align(Alignment.CenterStart),
-            ) {
-                if (state.isLoading) {
-                    SummaryCardLoadingState()
-                } else {
-                    Text(
-                        text = "Tu Progreso".uppercase(),
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                        style = StarlinkTextStyles.sectionLabel,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = progressHeadline(state.totalWeightLost),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.displayMedium,
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Toca para ver tus estadísticas",
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-            }
-            Icon(
-                Icons.Rounded.BarChart,
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(24.dp)
-                    .size(64.dp),
-                tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f),
+        Checkbox(checked = done, onCheckedChange = onCheckedChange)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = StarlinkTextStyles.chipLabel,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            val hasContent = description.isNotEmpty()
+            Text(
+                text = if (hasContent) description else emptyPlaceholder,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (hasContent) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
 }
 
-@Composable
-private fun SummaryCardLoadingState() {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        HSkeleton(
-            modifier = Modifier
-                .width(100.dp)
-                .height(16.dp),
-            cornerRadius = 8.dp,
-        )
-        HSkeleton(
-            modifier = Modifier
-                .width(180.dp)
-                .height(36.dp),
-            cornerRadius = 12.dp,
-        )
-        HSkeleton(
-            modifier = Modifier
-                .width(150.dp)
-                .height(14.dp),
-            cornerRadius = 8.dp,
-        )
-    }
-}
-
-private fun progressHeadline(totalWeightLost: Float): String {
-    if (totalWeightLost <= 0f) {
-        return "¡Vas muy bien!"
-    }
-
-    val formattedWeight = String.format(
-        java.util.Locale.getDefault(),
-        "%.1f",
-        totalWeightLost,
-    )
-    return "¡Has bajado $formattedWeight kg!"
-}
+// ── Editor CTAs ──────────────────────────────────────────────────────────────
 
 @Composable
-fun QuickActionCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    containerColor: Color,
-    contentColor: Color,
-    iconColor: Color,
-    onClick: () -> Unit,
+private fun HomeEditorsRow(
+    onMealPlanClick: () -> Unit,
+    onExercisePlanClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    HCard(
-        onClick = onClick,
-        cornerRadius = 24.dp,
-        variant = CardVariant.Filled,
-        containerColor = containerColor,
-        modifier = modifier,
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(20.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier.size(56.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(
-                            color = iconColor.copy(alpha = 0.12f),
-                            shape = RoundedCornerShape(16.dp),
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = iconColor,
-                        modifier = Modifier.padding(14.dp),
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = contentColor,
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = contentColor.copy(alpha = 0.8f),
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Icon(
-                imageVector = Icons.Rounded.ChevronRight,
-                contentDescription = null,
-                tint = contentColor.copy(alpha = 0.5f),
-            )
-        }
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        HButton(
+            text = "EDITAR DIETA",
+            onClick = onMealPlanClick,
+            variant = ButtonVariant.Outline,
+            leadingIcon = Icons.Rounded.Restaurant,
+            modifier = Modifier.weight(1f),
+        )
+        HButton(
+            text = "EDITAR RUTINA",
+            onClick = onExercisePlanClick,
+            variant = ButtonVariant.Outline,
+            leadingIcon = Icons.Rounded.FitnessCenter,
+            modifier = Modifier.weight(1f),
+        )
     }
 }
+
+// ── Primary CTAs ─────────────────────────────────────────────────────────────
+
+@Composable
+private fun HomePrimaryCtaSection(
+    onWeightClick: () -> Unit,
+    onPhotoClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        HButton(text = "REGISTRAR PESO", onClick = onWeightClick, modifier = Modifier.fillMaxWidth())
+        HButton(
+            text = "TOMAR FOTO",
+            onClick = onPhotoClick,
+            variant = ButtonVariant.Secondary,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+// ── Preview ──────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true)
 @Composable
@@ -301,12 +311,17 @@ private fun HomeScreenPreview() {
     MyBestTheme {
         HomeScreenContent(
             state = HomeState(
-                lastWeight = 75.5f,
-                totalPhotos = 12,
                 isLoading = false,
+                mealRows = MealType.entries.map { MealRow(it, "", false) },
+                completedCount = 2,
+                totalCount = 5,
+                completionRatio = 0.4f,
             ),
             onIntent = {},
-            snackbarHostState = remember { SnackbarHostState() },
+            onWeightClick = {},
+            onPhotoClick = {},
+            onMealPlanClick = {},
+            onExercisePlanClick = {},
         )
     }
 }

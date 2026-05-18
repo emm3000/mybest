@@ -118,7 +118,7 @@ val appModule = module {
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
-    viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
     viewModel { AddWeightViewModel(get(), get()) }
     viewModel { AddHabitViewModel(get(), get(), get(), get()) }
     viewModel { AddPhotoViewModel(get(), get()) }

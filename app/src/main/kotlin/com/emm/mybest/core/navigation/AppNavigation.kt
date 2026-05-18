@@ -26,7 +26,6 @@ import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeScreen
-import com.emm.mybest.features.home.presentation.HomeViewModel
 import com.emm.mybest.features.insights.presentation.InsightsScreen
 import com.emm.mybest.features.insights.presentation.InsightsViewModel
 import com.emm.mybest.features.photo.presentation.AddPhotoScreen
@@ -135,10 +134,11 @@ private fun AppNavGraph(
             .padding(innerPadding),
     ) {
         composable<Screen.Home> {
-            val viewModel: HomeViewModel = koinViewModel()
             HomeScreen(
-                viewModel = viewModel,
-                onNavigate = { screen -> navController.navigate(screen) },
+                onWeightClick = { navController.navigate(Screen.AddWeight) },
+                onPhotoClick = { navController.navigate(Screen.AddPhoto) },
+                onMealPlanClick = { navController.navigate(Screen.MealPlan) },
+                onExercisePlanClick = { navController.navigate(Screen.ExercisePlan) },
                 modifier = Modifier,
             )
         }

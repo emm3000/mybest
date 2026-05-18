@@ -2,123 +2,101 @@ package com.emm.mybest.features.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emm.mybest.core.datetime.currentDate
-import com.emm.mybest.core.navigation.Screen
-import com.emm.mybest.domain.models.HabitWithRecord
-import com.emm.mybest.domain.usecase.GetHomeSummaryUseCase
-import com.emm.mybest.domain.usecase.ToggleHabitUseCase
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
+import com.emm.mybest.domain.models.MealType
+import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
+import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
+import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
+import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
+import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
+
+data class MealRow(
+    val type: MealType,
+    val description: String,
+    val done: Boolean,
+)
 
 data class HomeState(
-    val dailyHabits: List<HabitWithRecord> = emptyList(),
-    val lastWeight: Float? = null,
-    val totalWeightLost: Float = 0f,
-    val totalPhotos: Int = 0,
-    val isLoading: Boolean = false,
-) {
-    val completedHabitsCount: Int
-        get() = dailyHabits.count { it.record?.isCompleted == true }
+    val isLoading: Boolean = true,
+    val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+    val dayOfWeek: DayOfWeek = Clock.System.todayIn(TimeZone.currentSystemDefault()).dayOfWeek,
+    val mealRows: List<MealRow> = emptyList(),
+    val exerciseRoutine: String = "",
+    val exerciseDone: Boolean = false,
+    val completionRatio: Float = 0f,
+    val completedCount: Int = 0,
+    val totalCount: Int = MealType.entries.size + 1,
+)
 
-    val pendingHabitsCount: Int
-        get() = (dailyHabits.size - completedHabitsCount).coerceAtLeast(0)
-}
-
-sealed class HomeIntent {
-    data class ToggleHabit(val habitWithRecord: HabitWithRecord) : HomeIntent()
-    data class OnEditHabitClick(val habitId: String) : HomeIntent()
-    object OnAddWeightClick : HomeIntent()
-    object OnAddHabitClick : HomeIntent()
-    object OnAddPhotoClick : HomeIntent()
-    object OnReminderSettingsClick : HomeIntent()
-    object OnViewHistoryClick : HomeIntent()
-    object OnViewInsightsClick : HomeIntent()
-    object OnViewTimelineClick : HomeIntent()
-}
-
-sealed class HomeEffect {
-    data class ShowError(val message: String) : HomeEffect()
-    data class ShowSuccess(val message: String) : HomeEffect()
-    data class Navigate(val route: Screen) : HomeEffect()
+sealed interface HomeIntent {
+    data class ToggleMeal(val type: MealType, val done: Boolean) : HomeIntent
+    data class ToggleExercise(val done: Boolean) : HomeIntent
 }
 
 class HomeViewModel(
-    getHomeSummaryUseCase: GetHomeSummaryUseCase,
-    private val toggleHabitUseCase: ToggleHabitUseCase,
+    private val observeDailyCompliance: ObserveDailyComplianceUseCase,
+    private val toggleMeal: ToggleMealComplianceUseCase,
+    private val toggleExercise: ToggleExerciseComplianceUseCase,
+    private val getMealPlan: GetWeeklyMealPlanUseCase,
+    private val getExercisePlan: GetWeeklyExercisePlanUseCase,
+    clock: Clock = Clock.System,
 ) : ViewModel() {
 
-    private val navigationRoutes: Map<HomeIntent, Screen> = mapOf(
-        HomeIntent.OnAddWeightClick to Screen.AddWeight,
-        HomeIntent.OnAddHabitClick to Screen.AddHabit,
-        HomeIntent.OnAddPhotoClick to Screen.AddPhoto,
-        HomeIntent.OnReminderSettingsClick to Screen.ReminderSettings,
-        HomeIntent.OnViewHistoryClick to Screen.History,
-        HomeIntent.OnViewInsightsClick to Screen.Insights,
-        HomeIntent.OnViewTimelineClick to Screen.Timeline,
-    )
+    private val today: LocalDate = clock.todayIn(TimeZone.currentSystemDefault())
+    private val todayDow: DayOfWeek = today.dayOfWeek
 
-    private val _effect = MutableSharedFlow<HomeEffect>()
-    val effect = _effect.asSharedFlow()
+    private val _state = MutableStateFlow(HomeState(isLoading = true, today = today, dayOfWeek = todayDow))
+    val state: StateFlow<HomeState> = _state.asStateFlow()
 
-    val state: StateFlow<HomeState> = getHomeSummaryUseCase()
-        .map { summary ->
+    init {
+        combine(
+            getMealPlan(),
+            getExercisePlan(),
+            observeDailyCompliance(today),
+        ) { mealPlan, exPlan, compliance ->
+            val rows = MealType.entries.map { type ->
+                MealRow(
+                    type = type,
+                    description = mealPlan.entryFor(todayDow, type)?.description.orEmpty(),
+                    done = compliance.mealsDone[type] ?: false,
+                )
+            }
+            val routine = exPlan.forDay(todayDow)?.routine.orEmpty()
+            val completedCount = rows.count { it.done } + if (compliance.exerciseDone) 1 else 0
             HomeState(
-                dailyHabits = summary.dailyHabits,
-                lastWeight = summary.latestWeight,
-                totalWeightLost = summary.totalWeightLost,
-                totalPhotos = summary.totalPhotos,
                 isLoading = false,
+                today = today,
+                dayOfWeek = todayDow,
+                mealRows = rows,
+                exerciseRoutine = routine,
+                exerciseDone = compliance.exerciseDone,
+                completionRatio = compliance.completionRatio,
+                completedCount = completedCount,
             )
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(FLOW_STOP_TIMEOUT),
-            initialValue = HomeState(isLoading = true),
-        )
+        }
+            .onEach { _state.value = it }
+            .launchIn(viewModelScope)
+    }
 
-    fun onIntent(intent: HomeIntent) {
+    fun handle(intent: HomeIntent) {
         when (intent) {
-            is HomeIntent.ToggleHabit -> toggleHabit(intent.habitWithRecord)
-            is HomeIntent.OnEditHabitClick -> emitNavigate(Screen.EditHabit(intent.habitId))
-            else -> handleNavigationIntent(intent)
-        }
-    }
-
-    private fun handleNavigationIntent(intent: HomeIntent) {
-        navigationRoutes[intent]?.let(::emitNavigate)
-    }
-
-    private fun emitNavigate(screen: Screen) {
-        viewModelScope.launch {
-            _effect.emit(HomeEffect.Navigate(screen))
-        }
-    }
-
-    private fun toggleHabit(habitWithRecord: HabitWithRecord) {
-        viewModelScope.launch {
-            try {
-                toggleHabitUseCase(habitWithRecord, currentDate())
-                val successMessage = if (habitWithRecord.record?.isCompleted == true) {
-                    "Hábito marcado como pendiente"
-                } else {
-                    "Hábito completado"
-                }
-                _effect.emit(HomeEffect.ShowSuccess(successMessage))
-            } catch (
-                e:
-                @Suppress("TooGenericExceptionCaught")
-                Exception,
-            ) {
-                _effect.emit(HomeEffect.ShowError(e.message ?: "Error al actualizar hábito"))
+            is HomeIntent.ToggleMeal -> viewModelScope.launch {
+                toggleMeal(today, intent.type, intent.done)
+            }
+            is HomeIntent.ToggleExercise -> viewModelScope.launch {
+                toggleExercise(today, intent.done)
             }
         }
-    }
-
-    companion object {
-        private const val FLOW_STOP_TIMEOUT = 5000L
     }
 }
