@@ -9,6 +9,10 @@ import com.emm.mybest.data.HabitRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepositoryImpl
 import com.emm.mybest.data.WeightRepositoryImpl
+import com.emm.mybest.data.entities.ExerciseComplianceDao
+import com.emm.mybest.data.entities.ExercisePlanDao
+import com.emm.mybest.data.entities.MealComplianceDao
+import com.emm.mybest.data.entities.MealPlanDao
 import com.emm.mybest.data.reminder.HabitReminderSchedulerImpl
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.reminder.HabitReminderScheduler
@@ -56,6 +60,10 @@ val appModule = module {
     single { get<AppDatabase>().progressPhotoDao() }
     single { get<AppDatabase>().habitDao() }
     single { get<AppDatabase>().habitRecordDao() }
+    single<MealPlanDao> { get<AppDatabase>().mealPlanDao() }
+    single<ExercisePlanDao> { get<AppDatabase>().exercisePlanDao() }
+    single<MealComplianceDao> { get<AppDatabase>().mealComplianceDao() }
+    single<ExerciseComplianceDao> { get<AppDatabase>().exerciseComplianceDao() }
     single<HabitRepository> { HabitRepositoryImpl(get(), get()) }
     single<WeightRepository> { WeightRepositoryImpl(get()) }
     single<PhotoRepository> { PhotoRepositoryImpl(get()) }

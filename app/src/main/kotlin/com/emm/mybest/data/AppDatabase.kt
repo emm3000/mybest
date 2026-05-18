@@ -1,5 +1,6 @@
 package com.emm.mybest.data
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -8,10 +9,18 @@ import com.emm.mybest.data.entities.DailyHabitDao
 import com.emm.mybest.data.entities.DailyHabitEntity
 import com.emm.mybest.data.entities.DailyWeightDao
 import com.emm.mybest.data.entities.DailyWeightEntity
+import com.emm.mybest.data.entities.ExerciseComplianceDao
+import com.emm.mybest.data.entities.ExerciseComplianceEntity
+import com.emm.mybest.data.entities.ExercisePlanDao
+import com.emm.mybest.data.entities.ExercisePlanEntryEntity
 import com.emm.mybest.data.entities.HabitDao
 import com.emm.mybest.data.entities.HabitEntity
 import com.emm.mybest.data.entities.HabitRecordDao
 import com.emm.mybest.data.entities.HabitRecordEntity
+import com.emm.mybest.data.entities.MealComplianceDao
+import com.emm.mybest.data.entities.MealComplianceEntity
+import com.emm.mybest.data.entities.MealPlanDao
+import com.emm.mybest.data.entities.MealPlanEntryEntity
 import com.emm.mybest.data.entities.ProgressPhotoDao
 import com.emm.mybest.data.entities.ProgressPhotoEntity
 
@@ -22,9 +31,16 @@ import com.emm.mybest.data.entities.ProgressPhotoEntity
         ProgressPhotoEntity::class,
         HabitEntity::class,
         HabitRecordEntity::class,
+        MealPlanEntryEntity::class,
+        ExercisePlanEntryEntity::class,
+        MealComplianceEntity::class,
+        ExerciseComplianceEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2),
+    ],
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -33,6 +49,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun progressPhotoDao(): ProgressPhotoDao
     abstract fun habitDao(): HabitDao
     abstract fun habitRecordDao(): HabitRecordDao
+    abstract fun mealPlanDao(): MealPlanDao
+    abstract fun exercisePlanDao(): ExercisePlanDao
+    abstract fun mealComplianceDao(): MealComplianceDao
+    abstract fun exerciseComplianceDao(): ExerciseComplianceDao
 
     companion object {
         const val DB_NAME = "my_best_db"
