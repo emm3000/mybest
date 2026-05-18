@@ -25,10 +25,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.domain.models.WeightEntry
+import com.emm.mybest.ui.theme.StarlinkTextStyles
 import java.util.Locale
 import kotlin.math.abs
 
@@ -131,14 +131,14 @@ private fun StatCard(
                 modifier = Modifier.size(24.dp),
             )
             Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium,
+                text = title.uppercase(),
+                style = StarlinkTextStyles.sectionLabel,
                 modifier = Modifier.padding(top = 8.dp),
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Black,
+                style = MaterialTheme.typography.displaySmall,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }

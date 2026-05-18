@@ -35,6 +35,7 @@ import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
+import com.emm.mybest.ui.theme.StarlinkTextStyles
 import kotlinx.coroutines.launch
 
 private const val TIMELINE_PHOTO_HEIGHT_RATIO = 0.8f
@@ -152,10 +153,18 @@ fun TimelineContent(
                         color = MaterialTheme.colorScheme.primary,
                     )
                 }
-                Text(
-                    text = "${pagerState.currentPage + 1} / ${allPhotos.size}",
-                    style = MaterialTheme.typography.labelLarge,
-                )
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "${pagerState.currentPage + 1} / ${allPhotos.size}",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = "FOTO".uppercase(),
+                        style = StarlinkTextStyles.sectionLabel,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
 

@@ -44,6 +44,7 @@ import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.StarlinkTextStyles
 
 @Composable
 fun HomeScreen(
@@ -155,16 +156,15 @@ fun SummaryCard(
                     SummaryCardLoadingState()
                 } else {
                     Text(
-                        text = "Tu Progreso",
+                        text = "Tu Progreso".uppercase(),
                         color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                        style = MaterialTheme.typography.labelLarge,
+                        style = StarlinkTextStyles.sectionLabel,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = progressHeadline(state.totalWeightLost),
                         color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.displayMedium,
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
