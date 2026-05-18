@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Upload
@@ -55,6 +56,7 @@ fun ReminderSettingsScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     onMealPlanClick: () -> Unit = {},
+    onExercisePlanClick: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -124,6 +126,7 @@ fun ReminderSettingsScreen(
                 onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
             )
             MealPlanNavRow(onClick = onMealPlanClick)
+            ExercisePlanNavRow(onClick = onExercisePlanClick)
         }
     }
 }
@@ -256,6 +259,37 @@ private fun MealPlanNavRow(
             )
             Text(
                 text = "Mi dieta",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ExercisePlanNavRow(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HCard(
+        modifier = modifier.fillMaxWidth(),
+        variant = CardVariant.Filled,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(SETTINGS_CARD_PADDING.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.FitnessCenter,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Mi rutina",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f),
             )

@@ -40,4 +40,7 @@ sealed interface Screen {
 
     @Serializable
     data object MealPlan : Screen
+
+    @Serializable
+    data object ExercisePlan : Screen
 }

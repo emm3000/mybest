@@ -19,6 +19,8 @@ import androidx.navigation.toRoute
 import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.features.diet.presentation.MealPlanScreen
 import com.emm.mybest.features.diet.presentation.MealPlanViewModel
+import com.emm.mybest.features.exercise.presentation.ExercisePlanScreen
+import com.emm.mybest.features.exercise.presentation.ExercisePlanViewModel
 import com.emm.mybest.features.habit.presentation.AddHabitScreen
 import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
@@ -229,6 +231,7 @@ private fun AppNavGraph(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
                 onMealPlanClick = { navController.navigate(Screen.MealPlan) },
+                onExercisePlanClick = { navController.navigate(Screen.ExercisePlan) },
                 modifier = Modifier,
             )
         }
@@ -236,6 +239,14 @@ private fun AppNavGraph(
         composable<Screen.MealPlan> {
             val viewModel: MealPlanViewModel = koinViewModel()
             MealPlanScreen(
+                viewModel = viewModel,
+                modifier = Modifier,
+            )
+        }
+
+        composable<Screen.ExercisePlan> {
+            val viewModel: ExercisePlanViewModel = koinViewModel()
+            ExercisePlanScreen(
                 viewModel = viewModel,
                 modifier = Modifier,
             )
