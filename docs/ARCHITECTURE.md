@@ -29,3 +29,11 @@
 - Prefer early return for validation and guard clauses.
 - Keep conditional depth low and avoid callback chains in composables.
 - Keep business logic in use cases and viewmodels, not in UI widgets.
+
+## 6. Visual Design
+The UI follows the Starlink Mono design system (see `docs/components/DESIGN_SYSTEM.md`).
+Key constraints for contributors:
+- Dark-first: do not branch on `isSystemInDarkTheme()`; the theme is forced dark.
+- Use `MaterialTheme.colorScheme.*` and `MaterialTheme.typography.*` tokens; never hardcode hex colors or sp/dp values for color or text styling.
+- Section labels and chips render `string.uppercase()` at the call site with `StarlinkTextStyles.sectionLabel` / `.chipLabel`. Do not uppercase resource strings.
+- Hero metrics (weight, deltas, counts) use `displayLarge` / `displayMedium` / `displaySmall` with an uppercase label above.
