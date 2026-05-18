@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.Icon
@@ -53,6 +54,7 @@ fun ReminderSettingsScreen(
     viewModel: ReminderSettingsViewModel,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onMealPlanClick: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -121,6 +123,7 @@ fun ReminderSettingsScreen(
                 onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
                 onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
             )
+            MealPlanNavRow(onClick = onMealPlanClick)
         }
     }
 }
@@ -224,6 +227,37 @@ private fun BackupSection(
                 leadingIcon = Icons.Rounded.Upload,
                 variant = ButtonVariant.Secondary,
                 modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun MealPlanNavRow(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HCard(
+        modifier = modifier.fillMaxWidth(),
+        variant = CardVariant.Filled,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(SETTINGS_CARD_PADDING.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Restaurant,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Mi dieta",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
             )
         }
     }

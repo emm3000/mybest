@@ -17,6 +17,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.emm.mybest.domain.models.InsightsRecommendationAction
+import com.emm.mybest.features.diet.presentation.MealPlanScreen
+import com.emm.mybest.features.diet.presentation.MealPlanViewModel
 import com.emm.mybest.features.habit.presentation.AddHabitScreen
 import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
@@ -226,6 +228,15 @@ private fun AppNavGraph(
             ReminderSettingsScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
+                onMealPlanClick = { navController.navigate(Screen.MealPlan) },
+                modifier = Modifier,
+            )
+        }
+
+        composable<Screen.MealPlan> {
+            val viewModel: MealPlanViewModel = koinViewModel()
+            MealPlanScreen(
+                viewModel = viewModel,
                 modifier = Modifier,
             )
         }

@@ -37,4 +37,7 @@ sealed interface Screen {
     // Example with arguments (for later use or demonstration of the "arguments" part of the requirement)
     @Serializable
     data class HabitDetail(val habitId: String) : Screen
+
+    @Serializable
+    data object MealPlan : Screen
 }

@@ -45,6 +45,7 @@ import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
 import com.emm.mybest.domain.usecase.diet.UpsertMealUseCase
 import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
 import com.emm.mybest.domain.usecase.exercise.UpsertExerciseRoutineUseCase
+import com.emm.mybest.features.diet.presentation.MealPlanViewModel
 import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeViewModel
@@ -125,5 +126,6 @@ val appModule = module {
     viewModel { ComparePhotosViewModel(get()) }
     viewModel { TimelineViewModel(get()) }
     viewModel { ReminderSettingsViewModel(get(), get(), get(), get()) }
+    viewModel { MealPlanViewModel(get(), get()) }
     viewModel { MainViewModel(get()) }
 }
