@@ -42,7 +42,7 @@ fun HCard(
     val (defaultContainerColor, tonalElevation, defaultBorder) = cardTokens(variant)
     val finalContainerColor = containerColor ?: defaultContainerColor
     val finalBorder = border ?: defaultBorder
-    val finalShadowElevation = shadowElevation ?: if (variant == CardVariant.Elevated) 1.dp else 0.dp
+    val finalShadowElevation = shadowElevation ?: 0.dp
 
     if (onClick == null) {
         Surface(

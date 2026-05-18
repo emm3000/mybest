@@ -1,5 +1,6 @@
 package com.emm.mybest.ui.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
@@ -44,35 +45,37 @@ fun HBottomNavigationBar(
         HBottomNavItem.Timeline,
     )
 
-    NavigationBar(
-        modifier = modifier,
-        containerColor = cs.surface,
-        contentColor = cs.onSurfaceVariant,
-        tonalElevation = 0.dp,
-    ) {
-        items.forEach { item ->
-            val isSelected = currentRoute == item.screen
+    Column(modifier = modifier) {
+        HSeparator(color = MaterialTheme.colorScheme.outlineVariant)
+        NavigationBar(
+            containerColor = cs.surface,
+            contentColor = cs.onSurfaceVariant,
+            tonalElevation = 0.dp,
+        ) {
+            items.forEach { item ->
+                val isSelected = currentRoute == item.screen
 
-            NavigationBarItem(
-                selected = isSelected,
-                onClick = { onNavItemClick(item.screen) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = cs.onPrimaryContainer,
-                    selectedTextColor = cs.onPrimaryContainer,
-                    unselectedIconColor = cs.onSurfaceVariant,
-                    unselectedTextColor = cs.onSurfaceVariant,
-                    indicatorColor = cs.primaryContainer,
-                ),
-                icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = stringResource(id = item.labelResId),
-                    )
-                },
-                label = {
-                    Text(text = stringResource(id = item.labelResId))
-                },
-            )
+                NavigationBarItem(
+                    selected = isSelected,
+                    onClick = { onNavItemClick(item.screen) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = cs.onPrimaryContainer,
+                        selectedTextColor = cs.onPrimaryContainer,
+                        unselectedIconColor = cs.onSurfaceVariant,
+                        unselectedTextColor = cs.onSurfaceVariant,
+                        indicatorColor = cs.primaryContainer,
+                    ),
+                    icon = {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = stringResource(id = item.labelResId),
+                        )
+                    },
+                    label = {
+                        Text(text = stringResource(id = item.labelResId))
+                    },
+                )
+            }
         }
     }
 }
