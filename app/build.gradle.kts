@@ -31,6 +31,10 @@ kover {
                     "*Preview*",
                     "*.di.*",
                     "*.core.navigation.*",
+                    "*.presentation.components.*",
+                    "*Section*",
+                    "*Sheet*",
+                    "*Row*",
                 )
             }
         }
