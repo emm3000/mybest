@@ -4,8 +4,11 @@ import androidx.room.Room
 import androidx.work.WorkManager
 import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.BackupRepositoryImpl
+import com.emm.mybest.data.ComplianceRepositoryImpl
 import com.emm.mybest.data.DailyHabitRepositoryImpl
+import com.emm.mybest.data.ExercisePlanRepositoryImpl
 import com.emm.mybest.data.HabitRepositoryImpl
+import com.emm.mybest.data.MealPlanRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepositoryImpl
 import com.emm.mybest.data.WeightRepositoryImpl
@@ -17,8 +20,11 @@ import com.emm.mybest.data.reminder.HabitReminderSchedulerImpl
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.reminder.HabitReminderScheduler
 import com.emm.mybest.domain.repository.BackupRepository
+import com.emm.mybest.domain.repository.ComplianceRepository
 import com.emm.mybest.domain.repository.DailyHabitRepository
+import com.emm.mybest.domain.repository.ExercisePlanRepository
 import com.emm.mybest.domain.repository.HabitRepository
+import com.emm.mybest.domain.repository.MealPlanRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.repository.WeightRepository
@@ -32,6 +38,13 @@ import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.ToggleHabitUseCase
 import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
 import com.emm.mybest.domain.usecase.UpdateHabitUseCase
+import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
+import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
+import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
+import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
+import com.emm.mybest.domain.usecase.diet.UpsertMealUseCase
+import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
+import com.emm.mybest.domain.usecase.exercise.UpsertExerciseRoutineUseCase
 import com.emm.mybest.features.habit.presentation.AddHabitViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeViewModel
@@ -70,6 +83,9 @@ val appModule = module {
     single<BackupRepository> { BackupRepositoryImpl(androidContext(), get()) }
 
     single<DailyHabitRepository> { DailyHabitRepositoryImpl(get()) }
+    single<MealPlanRepository> { MealPlanRepositoryImpl(get()) }
+    single<ExercisePlanRepository> { ExercisePlanRepositoryImpl(get()) }
+    single<ComplianceRepository> { ComplianceRepositoryImpl(get(), get()) }
     single { WorkManager.getInstance(androidContext()) }
     single<HabitReminderScheduler> { HabitReminderSchedulerImpl(get(), get()) }
 
@@ -83,6 +99,19 @@ val appModule = module {
     factory { GetHabitByIdUseCase(get()) }
     factory { UpdateHabitUseCase(get(), get()) }
     factory { UpdateDefaultReminderTimeUseCase(get(), get(), get()) }
+
+    // Diet use cases
+    factory { GetWeeklyMealPlanUseCase(get()) }
+    factory { UpsertMealUseCase(get()) }
+
+    // Exercise use cases
+    factory { GetWeeklyExercisePlanUseCase(get()) }
+    factory { UpsertExerciseRoutineUseCase(get()) }
+
+    // Compliance use cases
+    factory { ObserveDailyComplianceUseCase(get()) }
+    factory { ToggleMealComplianceUseCase(get()) }
+    factory { ToggleExerciseComplianceUseCase(get()) }
 
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
