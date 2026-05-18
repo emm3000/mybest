@@ -23,8 +23,6 @@ class UserPreferencesRepositoryImpl(
     private object PreferencesKeys {
         val DARK_MODE_ENABLED = booleanPreferencesKey("dark_mode_enabled")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
-        val DEFAULT_REMINDER_HOUR = intPreferencesKey("default_reminder_hour")
-        val DEFAULT_REMINDER_MINUTE = intPreferencesKey("default_reminder_minute")
         val WEIGHT_REMINDER_HOUR = intPreferencesKey("weight_reminder_hour")
         val WEIGHT_REMINDER_MINUTE = intPreferencesKey("weight_reminder_minute")
     }
@@ -46,20 +44,6 @@ class UserPreferencesRepositoryImpl(
     override suspend fun updateNotificationsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = enabled
-        }
-    }
-
-    override val defaultReminderTime: Flow<Pair<Int, Int>> = dataStore.data.map { preferences ->
-        Pair(
-            preferences[PreferencesKeys.DEFAULT_REMINDER_HOUR] ?: 20,
-            preferences[PreferencesKeys.DEFAULT_REMINDER_MINUTE] ?: 0,
-        )
-    }
-
-    override suspend fun updateDefaultReminderTime(hour: Int, minute: Int) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.DEFAULT_REMINDER_HOUR] = hour
-            preferences[PreferencesKeys.DEFAULT_REMINDER_MINUTE] = minute
         }
     }
 

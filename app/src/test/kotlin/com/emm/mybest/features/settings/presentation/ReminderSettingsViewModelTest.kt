@@ -33,7 +33,6 @@ class ReminderSettingsViewModelTest {
     @Test
     fun `state maps notifications preference`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(false)
-        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
         every { preferencesRepository.weightReminderTime } returns flowOf(null)
         every { preferencesRepository.isDarkMode } returns flowOf(null)
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
@@ -58,7 +57,6 @@ class ReminderSettingsViewModelTest {
     @Test
     fun `OnNotificationsToggle updates preference`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(true)
-        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
         every { preferencesRepository.weightReminderTime } returns flowOf(null)
         every { preferencesRepository.isDarkMode } returns flowOf(null)
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
@@ -82,7 +80,6 @@ class ReminderSettingsViewModelTest {
     @Test
     fun `OnExportBackup invokes export use case`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(true)
-        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
         every { preferencesRepository.weightReminderTime } returns flowOf(null)
         every { preferencesRepository.isDarkMode } returns flowOf(null)
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
@@ -106,7 +103,6 @@ class ReminderSettingsViewModelTest {
     @Test
     fun `OnImportBackup invokes restore use case`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(true)
-        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
         every { preferencesRepository.weightReminderTime } returns flowOf(null)
         every { preferencesRepository.isDarkMode } returns flowOf(null)
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
@@ -130,7 +126,6 @@ class ReminderSettingsViewModelTest {
     @Test
     fun `OnDefaultReminderTimeChange invokes update use case with LocalTime`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(true)
-        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
         every { preferencesRepository.weightReminderTime } returns flowOf(null)
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
@@ -152,7 +147,6 @@ class ReminderSettingsViewModelTest {
     @Test
     fun `OnWeightReminderToggleOff invokes update use case with null`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(true)
-        every { preferencesRepository.defaultReminderTime } returns flowOf(Pair(20, 0))
         every { preferencesRepository.weightReminderTime } returns flowOf(LocalTime(8, 0))
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)

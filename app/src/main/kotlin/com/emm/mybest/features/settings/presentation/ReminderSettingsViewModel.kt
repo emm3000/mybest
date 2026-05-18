@@ -19,8 +19,6 @@ import kotlinx.datetime.LocalTime
 
 data class ReminderSettingsState(
     val notificationsEnabled: Boolean = true,
-    val defaultReminderHour: Int = 20,
-    val defaultReminderMinute: Int = 0,
     val showDefaultTimePicker: Boolean = false,
     /** Null means no weight reminder has been configured yet. */
     val weightReminderTime: LocalTime? = null,
@@ -55,14 +53,11 @@ class ReminderSettingsViewModel(
 
     val state: StateFlow<ReminderSettingsState> = combine(
         userPreferencesRepository.notificationsEnabled,
-        userPreferencesRepository.defaultReminderTime,
         userPreferencesRepository.weightReminderTime,
         _showDefaultTimePicker,
-    ) { enabled, (hour, minute), weightTime, showPicker ->
+    ) { enabled, weightTime, showPicker ->
         ReminderSettingsState(
             notificationsEnabled = enabled,
-            defaultReminderHour = hour,
-            defaultReminderMinute = minute,
             showDefaultTimePicker = showPicker,
             weightReminderTime = weightTime,
         )

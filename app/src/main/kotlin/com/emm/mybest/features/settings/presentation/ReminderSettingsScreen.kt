@@ -184,7 +184,11 @@ private fun DefaultReminderTimeSection(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "%02d:%02d".format(state.defaultReminderHour, state.defaultReminderMinute),
+                text = if (state.weightReminderTime != null) {
+                    "%02d:%02d".format(state.weightReminderTime.hour, state.weightReminderTime.minute)
+                } else {
+                    "--:--"
+                },
                 style = MaterialTheme.typography.bodyLarge,
             )
             Icon(
@@ -196,8 +200,8 @@ private fun DefaultReminderTimeSection(
     }
     if (state.showDefaultTimePicker) {
         ReminderTimePickerDialog(
-            initialHour = state.defaultReminderHour,
-            initialMinute = state.defaultReminderMinute,
+            initialHour = state.weightReminderTime?.hour ?: 20,
+            initialMinute = state.weightReminderTime?.minute ?: 0,
             onConfirm = onTimeConfirm,
             onDismiss = onDismissPicker,
         )

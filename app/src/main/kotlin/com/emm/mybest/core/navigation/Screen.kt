@@ -11,12 +11,6 @@ sealed interface Screen {
     data object AddWeight : Screen
 
     @Serializable
-    data object AddHabit : Screen
-
-    @Serializable
-    data class EditHabit(val habitId: String) : Screen
-
-    @Serializable
     data object AddPhoto : Screen
 
     @Serializable
@@ -33,10 +27,6 @@ sealed interface Screen {
 
     @Serializable
     data object ReminderSettings : Screen
-
-    // Example with arguments (for later use or demonstration of the "arguments" part of the requirement)
-    @Serializable
-    data class HabitDetail(val habitId: String) : Screen
 
     @Serializable
     data object MealPlan : Screen
