@@ -19,22 +19,46 @@ private val AppFontFamily: FontFamily = FontFamily(
  *
  * Mapeo Material3 → shadcn (equivalencias de clase CSS):
  *
- * | Token M3          | shadcn clase         | Uso en Hello                      |
- * |-------------------|----------------------|-----------------------------------|
- * | headlineLarge     | text-4xl extrabold   | —                                 |
- * | headlineMedium    | text-3xl bold        | —                                 |
- * | headlineSmall     | text-2xl semibold    | Título de word en CardDetail      |
- * | titleLarge        | text-xl semibold     | TopAppBar, sección principal      |
- * | titleMedium       | text-lg medium       | Subtítulos de sección             |
- * | titleSmall        | text-sm medium       | Labels de sección (SectionCard)   |
- * | bodyLarge         | text-base normal     | Cuerpo principal de flashcard     |
- * | bodyMedium        | text-sm normal       | Textos secundarios / onSurfaceVariant |
- * | bodySmall         | text-xs normal       | Helper / supporting text          |
- * | labelLarge        | text-sm medium       | Texto de botones                  |
- * | labelMedium       | text-xs medium       | Badges, chips, conteos            |
- * | labelSmall        | text-[10px] medium   | Micro-labels, fechas de review    |
+ * | Token M3          | shadcn clase         | Uso en Hello                                      |
+ * |-------------------|----------------------|---------------------------------------------------|
+ * | displayLarge      | text-6xl bold        | Métricas hero (peso actual, delta grande)         |
+ * | displayMedium     | text-5xl bold        | Métricas secundarias (contadores de racha)        |
+ * | displaySmall      | text-4xl semibold    | Métricas auxiliares                               |
+ * | headlineLarge     | text-4xl extrabold   | —                                                 |
+ * | headlineMedium    | text-3xl bold        | —                                                 |
+ * | headlineSmall     | text-2xl semibold    | Título de word en CardDetail                      |
+ * | titleLarge        | text-xl semibold     | TopAppBar, sección principal                      |
+ * | titleMedium       | text-lg medium       | Subtítulos de sección                             |
+ * | titleSmall        | text-sm medium       | Labels de sección (SectionCard)                   |
+ * | bodyLarge         | text-base normal     | Cuerpo principal de flashcard                     |
+ * | bodyMedium        | text-sm normal       | Textos secundarios / onSurfaceVariant             |
+ * | bodySmall         | text-xs normal       | Helper / supporting text                          |
+ * | labelLarge        | text-sm medium       | Texto de botones                                  |
+ * | labelMedium       | text-xs medium       | Badges, chips, conteos (tracking +1.2sp uppercase)|
+ * | labelSmall        | text-[10px] medium   | Micro-labels, fechas de review (tracking +1.5sp uppercase) |
  */
 val Typography = Typography(
+    displayLarge = androidx.compose.ui.text.TextStyle(
+        fontFamily = AppFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 56.sp,
+        lineHeight = 64.sp,
+        letterSpacing = (-1.5).sp,
+    ),
+    displayMedium = androidx.compose.ui.text.TextStyle(
+        fontFamily = AppFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 40.sp,
+        lineHeight = 48.sp,
+        letterSpacing = (-1.0).sp,
+    ),
+    displaySmall = androidx.compose.ui.text.TextStyle(
+        fontFamily = AppFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 32.sp,
+        lineHeight = 40.sp,
+        letterSpacing = (-0.5).sp,
+    ),
     headlineLarge = androidx.compose.ui.text.TextStyle(
         fontFamily = AppFontFamily,
         fontWeight = FontWeight.ExtraBold,
@@ -110,13 +134,13 @@ val Typography = Typography(
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.sp,
+        letterSpacing = 1.2.sp,
     ),
     labelSmall = androidx.compose.ui.text.TextStyle(
         fontFamily = AppFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 10.sp,
         lineHeight = 14.sp,
-        letterSpacing = 0.sp,
+        letterSpacing = 1.5.sp,
     ),
 )
