@@ -28,17 +28,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
-      - name: Validate Gradle Wrapper (non-blocking)
-        id: wrapper_validation
-        continue-on-error: true
-        uses: gradle/actions/wrapper-validation@v3
-
-      - name: Warn on wrapper validation failure
-        if: steps.wrapper_validation.outcome == 'failure'
-        run: |
-          echo "::warning::Gradle wrapper validation failed due to runner network/connectivity. Continuing because this step is non-blocking in this workflow."
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v5
 
       - name: Set Up JDK
         uses: actions/setup-java@v5
@@ -52,47 +45,13 @@ jobs:
       - name: Quality gate (detekt + unit tests + androidTest compile + JaCoCo)
         run: ./gradlew :app:detekt :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :app:jacocoTestReport
 
-      - name: Validate minimum coverage (70%)
+      - name: Parse JaCoCo coverage
+        if: always()
+        id: coverage
         run: |
           REPORT_PATH="app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-          if [ ! -f "$REPORT_PATH" ]; then
-            echo "Coverage report not found at $REPORT_PATH"
-            exit 1
-          fi
-
-          if command -v xmllint >/dev/null 2>&1; then
-            MISSED=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@missed)' "$REPORT_PATH")
-            COVERED=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@covered)' "$REPORT_PATH")
-          else
-            MATCH=$(grep -o 'counter type="LINE" missed="[0-9]*" covered="[0-9]*"' "$REPORT_PATH" | tail -n 1)
-            MISSED=$(echo "$MATCH" | sed -E 's/.*missed="([0-9]+)".*/\1/')
-            COVERED=$(echo "$MATCH" | sed -E 's/.*covered="([0-9]+)".*/\1/')
-          fi
-          if [ -z "$MISSED" ] || [ -z "$COVERED" ]; then
-            echo "Could not parse line coverage counters from $REPORT_PATH"
-            exit 1
-          fi
-
-          TOTAL=$((MISSED+COVERED))
-          PCT=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN {if (t == 0) print "0.00"; else printf "%.2f", (c/t)*100}')
-          echo "Coverage: ${PCT}% (${COVERED}/${TOTAL})"
-          awk -v pct="$PCT" -v min="$MIN_LINE_COVERAGE" 'BEGIN { exit (pct >= min) ? 0 : 1 }'
-
-      - name: Upload JaCoCo reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-reports
-          path: |
-            app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
-            app/build/reports/jacoco/jacocoTestReport/html
-
-      - name: Capture coverage summary
-        if: always()
-        id: coverage_summary
-        run: |
-          REPORT_PATH="app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-          COVERAGE=""
+          PCT=""
+          SUMMARY=""
           if [ -f "$REPORT_PATH" ]; then
             if command -v xmllint >/dev/null 2>&1; then
               MISSED=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@missed)' "$REPORT_PATH")
@@ -104,10 +63,31 @@ jobs:
             fi
             if [ -n "$MISSED" ] && [ -n "$COVERED" ]; then
               TOTAL=$((MISSED + COVERED))
-              COVERAGE=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN { if (t == 0) print "0.00%"; else printf "%.2f%% (%d/%d)", (c/t)*100, c, t }')
+              PCT=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN { if (t == 0) print "0.00"; else printf "%.2f", (c/t)*100 }')
+              SUMMARY=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN { if (t == 0) print "0.00%"; else printf "%.2f%% (%d/%d)", (c/t)*100, c, t }')
             fi
           fi
-          echo "coverage=${COVERAGE}" >> "$GITHUB_OUTPUT"
+          echo "pct=${PCT}" >> "$GITHUB_OUTPUT"
+          echo "summary=${SUMMARY}" >> "$GITHUB_OUTPUT"
+          echo "Coverage: ${SUMMARY:-unavailable}"
+
+      - name: Validate minimum coverage (70%)
+        run: |
+          PCT="${{ steps.coverage.outputs.pct }}"
+          if [ -z "$PCT" ]; then
+            echo "Coverage could not be parsed"
+            exit 1
+          fi
+          awk -v pct="$PCT" -v min="$MIN_LINE_COVERAGE" 'BEGIN { exit (pct >= min) ? 0 : 1 }'
+
+      - name: Upload JaCoCo reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: jacoco-reports
+          path: |
+            app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+            app/build/reports/jacoco/jacocoTestReport/html
 
       - name: Notify Telegram (quality checks)
         if: always()
@@ -121,7 +101,7 @@ jobs:
           commit_sha: ${{ github.sha }}
           commit_message: ${{ github.event.head_commit.message }}
           run_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          coverage: ${{ steps.coverage_summary.outputs.coverage }}
+          coverage: ${{ steps.coverage.outputs.summary }}
 
   upload_dev_apk:
     needs: quality_checks
@@ -130,7 +110,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set Up JDK
         uses: actions/setup-java@v5
