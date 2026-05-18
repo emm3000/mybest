@@ -10,6 +10,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.datetime.LocalTime
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
@@ -24,6 +25,8 @@ class UserPreferencesRepositoryImpl(
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val DEFAULT_REMINDER_HOUR = intPreferencesKey("default_reminder_hour")
         val DEFAULT_REMINDER_MINUTE = intPreferencesKey("default_reminder_minute")
+        val WEIGHT_REMINDER_HOUR = intPreferencesKey("weight_reminder_hour")
+        val WEIGHT_REMINDER_MINUTE = intPreferencesKey("weight_reminder_minute")
     }
 
     override val isDarkMode: Flow<Boolean?> = dataStore.data.map { preferences ->
@@ -57,6 +60,24 @@ class UserPreferencesRepositoryImpl(
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.DEFAULT_REMINDER_HOUR] = hour
             preferences[PreferencesKeys.DEFAULT_REMINDER_MINUTE] = minute
+        }
+    }
+
+    override val weightReminderTime: Flow<LocalTime?> = dataStore.data.map { preferences ->
+        val hour = preferences[PreferencesKeys.WEIGHT_REMINDER_HOUR]
+        val minute = preferences[PreferencesKeys.WEIGHT_REMINDER_MINUTE]
+        if (hour != null && minute != null) LocalTime(hour, minute) else null
+    }
+
+    override suspend fun setReminderTime(time: LocalTime?) {
+        dataStore.edit { preferences ->
+            if (time != null) {
+                preferences[PreferencesKeys.WEIGHT_REMINDER_HOUR] = time.hour
+                preferences[PreferencesKeys.WEIGHT_REMINDER_MINUTE] = time.minute
+            } else {
+                preferences.remove(PreferencesKeys.WEIGHT_REMINDER_HOUR)
+                preferences.remove(PreferencesKeys.WEIGHT_REMINDER_MINUTE)
+            }
         }
     }
 }

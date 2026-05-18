@@ -15,12 +15,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalTime
 
 data class ReminderSettingsState(
     val notificationsEnabled: Boolean = true,
     val defaultReminderHour: Int = 20,
     val defaultReminderMinute: Int = 0,
     val showDefaultTimePicker: Boolean = false,
+    /** Null means no weight reminder has been configured yet. */
+    val weightReminderTime: LocalTime? = null,
 )
 
 sealed class ReminderSettingsIntent {
@@ -30,6 +33,7 @@ sealed class ReminderSettingsIntent {
     object OnDefaultTimePickerOpen : ReminderSettingsIntent()
     object OnDefaultTimePickerDismiss : ReminderSettingsIntent()
     data class OnDefaultReminderTimeChange(val hour: Int, val minute: Int) : ReminderSettingsIntent()
+    object OnWeightReminderToggleOff : ReminderSettingsIntent()
 }
 
 sealed class ReminderSettingsEffect {
@@ -52,13 +56,15 @@ class ReminderSettingsViewModel(
     val state: StateFlow<ReminderSettingsState> = combine(
         userPreferencesRepository.notificationsEnabled,
         userPreferencesRepository.defaultReminderTime,
+        userPreferencesRepository.weightReminderTime,
         _showDefaultTimePicker,
-    ) { enabled, (hour, minute), showPicker ->
+    ) { enabled, (hour, minute), weightTime, showPicker ->
         ReminderSettingsState(
             notificationsEnabled = enabled,
             defaultReminderHour = hour,
             defaultReminderMinute = minute,
             showDefaultTimePicker = showPicker,
+            weightReminderTime = weightTime,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -77,6 +83,7 @@ class ReminderSettingsViewModel(
                 intent.hour,
                 intent.minute,
             )
+            is ReminderSettingsIntent.OnWeightReminderToggleOff -> updateWeightReminder(null)
         }
     }
 
@@ -97,7 +104,7 @@ class ReminderSettingsViewModel(
     private fun updateDefaultReminderTime(hour: Int, minute: Int) {
         viewModelScope.launch {
             runCatching {
-                updateDefaultReminderTimeUseCase(hour, minute)
+                updateDefaultReminderTimeUseCase(LocalTime(hour, minute))
             }.onFailure {
                 _effect.emit(
                     ReminderSettingsEffect.ShowError(
@@ -106,6 +113,20 @@ class ReminderSettingsViewModel(
                 )
             }
             _showDefaultTimePicker.update { false }
+        }
+    }
+
+    private fun updateWeightReminder(time: LocalTime?) {
+        viewModelScope.launch {
+            runCatching {
+                updateDefaultReminderTimeUseCase(time)
+            }.onFailure {
+                _effect.emit(
+                    ReminderSettingsEffect.ShowError(
+                        it.message ?: "No se pudo actualizar el recordatorio de peso",
+                    ),
+                )
+            }
         }
     }
 

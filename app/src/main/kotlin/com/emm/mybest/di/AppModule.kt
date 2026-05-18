@@ -16,7 +16,9 @@ import com.emm.mybest.data.entities.ExerciseComplianceDao
 import com.emm.mybest.data.entities.ExercisePlanDao
 import com.emm.mybest.data.entities.MealComplianceDao
 import com.emm.mybest.data.entities.MealPlanDao
+import com.emm.mybest.data.reminder.WeightReminderSchedulerImpl
 import com.emm.mybest.domain.media.MediaManager
+import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.BackupRepository
 import com.emm.mybest.domain.repository.ComplianceRepository
 import com.emm.mybest.domain.repository.ExercisePlanRepository
@@ -73,11 +75,12 @@ val appModule = module {
     single<ExercisePlanRepository> { ExercisePlanRepositoryImpl(get()) }
     single<ComplianceRepository> { ComplianceRepositoryImpl(get(), get()) }
     single { WorkManager.getInstance(androidContext()) }
+    single<WeightReminderScheduler> { WeightReminderSchedulerImpl(get(), androidContext()) }
 
     factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
     factory { RestoreDatabaseBackupUseCase(get()) }
-    factory { UpdateDefaultReminderTimeUseCase(get()) }
+    factory { UpdateDefaultReminderTimeUseCase(get(), get()) }
 
     // Diet use cases
     factory { GetWeeklyMealPlanUseCase(get()) }
