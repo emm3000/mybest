@@ -12,12 +12,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.rounded.Lightbulb
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.domain.models.InsightsRecommendation
@@ -31,6 +36,7 @@ import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
+import com.emm.mybest.ui.theme.StarlinkTextStyles
 
 private const val INSIGHTS_SCREEN_PADDING = 16
 private const val INSIGHTS_SECTION_SPACING = 16
@@ -169,37 +175,64 @@ private fun RecommendationSection(
     onActionClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    InsightsSection(
-        title = "Recomendación de la semana",
-        modifier = modifier,
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                text = recommendation.title,
-                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                text = recommendation.description,
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = periodLabel,
-                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.outline,
-            )
-            Text(
-                text = "Siguiente paso: ${recommendation.actionLabel}",
-                style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-            )
-            HButton(
-                text = recommendation.actionLabel,
-                onClick = onActionClick,
-                modifier = Modifier.fillMaxWidth(),
-                variant = ButtonVariant.Secondary,
-            )
+    val tertiaryColor = androidx.compose.material3.MaterialTheme.colorScheme.tertiary
+    val borderStrokeWidth = 2.dp.value
+
+    Column(modifier = modifier) {
+        Text(
+            text = "RECOMENDACIÓN".uppercase(),
+            style = StarlinkTextStyles.sectionLabel,
+            modifier = androidx.compose.ui.Modifier.padding(bottom = 12.dp),
+        )
+        HCard(
+            variant = CardVariant.Outlined,
+            cornerRadius = INSIGHTS_SECTION_CORNER.dp,
+            modifier = androidx.compose.ui.Modifier
+                .fillMaxWidth()
+                .drawBehind {
+                    drawLine(
+                        color = tertiaryColor,
+                        start = Offset(0f, 0f),
+                        end = Offset(0f, size.height),
+                        strokeWidth = borderStrokeWidth * density,
+                    )
+                },
+        ) {
+            Box(modifier = androidx.compose.ui.Modifier.padding(INSIGHTS_SECTION_CONTENT_PADDING.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Lightbulb,
+                            contentDescription = null,
+                            tint = tertiaryColor,
+                        )
+                        Text(
+                            text = recommendation.title,
+                            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                    Text(
+                        text = recommendation.description,
+                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = periodLabel,
+                        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.outline,
+                    )
+                    HButton(
+                        text = recommendation.actionLabel,
+                        onClick = onActionClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        variant = ButtonVariant.Secondary,
+                    )
+                }
+            }
         }
     }
 }

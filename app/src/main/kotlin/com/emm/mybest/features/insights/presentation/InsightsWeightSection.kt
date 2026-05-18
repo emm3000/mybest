@@ -163,7 +163,7 @@ private fun WeightChart(
         return
     }
 
-    val primaryColor = MaterialTheme.colorScheme.primary
+    val lineColor = MaterialTheme.colorScheme.onSurface
     val pointInnerColor = MaterialTheme.colorScheme.background
 
     Canvas(modifier = modifier) {
@@ -196,7 +196,7 @@ private fun WeightChart(
         drawPath(
             path = fillPath,
             brush = Brush.verticalGradient(
-                colors = listOf(primaryColor.copy(alpha = 0.3f), Color.Transparent),
+                colors = listOf(lineColor.copy(alpha = 0.15f), Color.Transparent),
                 startY = 0f,
                 endY = height,
             ),
@@ -204,13 +204,13 @@ private fun WeightChart(
 
         drawPath(
             path = path,
-            color = primaryColor,
+            color = lineColor,
             style = Stroke(width = 4.dp.toPx()),
         )
 
         points.forEach { point ->
             drawCircle(
-                color = primaryColor,
+                color = lineColor,
                 radius = 4.dp.toPx(),
                 center = point,
             )
