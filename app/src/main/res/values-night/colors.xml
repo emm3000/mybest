@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="app_window_background">#0A0A0A</color>
-    <color name="splash_screen_background">#0A0A0A</color>
+    <color name="starlink_black">#000000</color>
+    <color name="app_window_background">@color/starlink_black</color>
+    <color name="splash_screen_background">@color/starlink_black</color>
 </resources>
