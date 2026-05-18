@@ -56,14 +56,14 @@ fun HProgressRing(
             val center = Offset(this.size.width / 2f, this.size.height / 2f)
 
             drawCircle(
-                color = cs.secondary.copy(alpha = 0.16f),
+                color = cs.tertiary.copy(alpha = 0.16f),
                 radius = radius,
                 center = center,
                 style = stroke,
             )
 
             drawArc(
-                color = cs.secondary,
+                color = cs.tertiary,
                 startAngle = -90f,
                 sweepAngle = 360f * animatedProgress,
                 useCenter = false,
@@ -94,8 +94,8 @@ fun HProgressRing(
 ) {
     CircularProgressIndicator(
         modifier = modifier.size(size),
-        color = MaterialTheme.colorScheme.secondary,
-        trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
+        color = MaterialTheme.colorScheme.tertiary,
+        trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.16f),
         strokeWidth = strokeWidth,
     )
 }

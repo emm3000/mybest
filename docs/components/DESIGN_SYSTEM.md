@@ -41,7 +41,7 @@ Fuente de verdad: `app/src/main/kotlin/com/emm/mybest/ui/theme/Color.kt` (bloque
 | `primary`                 | `starlinkOnSurface`    | Botones primarios (texto blanco sobre fondo negro)  |
 | `onPrimary`               | `starlinkBlack`        | Texto sobre botones primarios                       |
 | `primaryContainer`        | `starlinkSurfaceHigh`  | Contenedor de acción principal                      |
-| `secondary`               | `starlinkMuted`        | Botones secundarios; track de `HProgressRing`       |
+| `secondary`               | `starlinkMuted`        | Botones secundarios                                 |
 | `onSecondary`             | `starlinkBlack`        | Texto sobre secundario                              |
 | `secondaryContainer`      | `starlinkSurface`      | Contenedor secundario                               |
 | `onSecondaryContainer`    | `starlinkOnSurface`    | Texto sobre contenedor secundario                   |
@@ -117,7 +117,6 @@ Fuente de verdad: `app/src/main/kotlin/com/emm/mybest/ui/theme/Shape.kt`.
 | `large`         | 8dp    | Cards, alerts                                 |
 | `extraLarge`    | 10dp   | Modales, bottom sheets                        |
 
-> `HCard` usa un `cornerRadius: Dp = 12.dp` como parámetro propio (no del sistema de shapes), lo que representa la única excepción a la escala anterior. En la práctica los cards son el único lugar donde el radio puede superar `extraLarge`.
 
 ### Regla de elevación
 
@@ -164,7 +163,7 @@ Card con slots opcionales: `HCardHeader`, `HCardContent`, `HCardFooter`. Variant
 - `Elevated`: `surface` + `0dp shadow` + `1dp outlineVariant`.
 - `Filled`: `surfaceContainerHighest` (`starlinkOutline` = `#2A2A2A`) + sin borde.
 - `Outlined`: `surface` + `1dp outlineVariant`.
-- `cornerRadius` default `12dp` (parámetro propio, no del sistema de shapes).
+- `cornerRadius` default `8dp` (igual a `Shapes.large`).
 
 ### HButton (`Button.kt`)
 Botón de acción. Variantes: `Default`, `Destructive`, `Outline`, `Secondary`, `Ghost`, `Link`.
@@ -196,8 +195,8 @@ Campo de texto basado en `BasicTextField`.
 
 ### HProgressRing (`ProgressRing.kt`)
 Anillo de progreso circular dibujado en `Canvas`.
-- Track: `cs.secondary.copy(alpha = 0.16f)` (`starlinkMuted` al 16%).
-- Arco de progreso: `cs.secondary` (`starlinkMuted`).
+- Track: `cs.tertiary.copy(alpha = 0.16f)` (`starlinkAccent` al 16%).
+- Arco de progreso: `cs.tertiary` (`starlinkAccent`, cian `#00A3FF`).
 - `StrokeCap.Round`; `strokeWidth` default `8dp`.
 - Animación de `300ms` en la fracción de progreso.
 

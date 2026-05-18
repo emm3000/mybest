@@ -32,7 +32,7 @@ enum class CardVariant { Elevated, Filled, Outlined }
 fun HCard(
     modifier: Modifier = Modifier,
     variant: CardVariant = CardVariant.Elevated,
-    cornerRadius: Dp = 12.dp,
+    cornerRadius: Dp = 8.dp,
     onClick: (() -> Unit)? = null,
     containerColor: Color? = null,
     shadowElevation: Dp? = null,
