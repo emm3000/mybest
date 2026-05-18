@@ -21,6 +21,8 @@ import androidx.compose.runtime.Composable
 //   M3 outlineVariant   → shadcn --border
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Starlink rebrand: retained for reference — not applied at runtime (dark forced).
+@Suppress("UnusedPrivateProperty")
 private val lightScheme = lightColorScheme(
     // ── Primary (black button in shadcn) ──────────────────────────────────────
     primary = shadcnPrimary,
@@ -77,74 +79,71 @@ private val lightScheme = lightColorScheme(
     surfaceBright = shadcnWhite,
 )
 
+// Starlink rebrand: dark forced — lightScheme retained but not applied at runtime.
 private val darkScheme = darkColorScheme(
-    // ── Primary (near-white in dark mode) ─────────────────────────────────────
-    primary = shadcnDarkPrimary,
-    onPrimary = shadcnDarkPrimaryFg,
-    primaryContainer = shadcnDarkSecondary,
-    onPrimaryContainer = shadcnDarkPrimary,
+    // ── Primary (white buttons on pure black) ─────────────────────────────────
+    primary = starlinkOnSurface,
+    onPrimary = starlinkBlack,
+    primaryContainer = starlinkSurfaceHigh,
+    onPrimaryContainer = starlinkOnSurface,
 
-    // ── Secondary ─────────────────────────────────────────────────────────────
-    secondary = shadcnDarkMuted,
-    onSecondary = shadcnDarkForeground,
-    secondaryContainer = shadcnDarkSecondary,
-    onSecondaryContainer = shadcnDarkSecondaryFg,
+    // ── Secondary (muted gray) ────────────────────────────────────────────────
+    secondary = starlinkMuted,
+    onSecondary = starlinkBlack,
+    secondaryContainer = starlinkSurface,
+    onSecondaryContainer = starlinkOnSurface,
 
-    // ── Tertiary → success green ───────────────────────────────────────────────
-    tertiary = shadcnDarkSuccess,
-    onTertiary = shadcnBlack,
-    tertiaryContainer = shadcnDarkSuccessContainer,
-    onTertiaryContainer = shadcnDarkOnSuccessContainer,
+    // ── Tertiary → cyan accent ────────────────────────────────────────────────
+    tertiary = starlinkAccent,
+    onTertiary = starlinkBlack,
+    tertiaryContainer = starlinkAccentDim,
+    onTertiaryContainer = starlinkOnSurface,
 
-    // ── Error → destructive red ───────────────────────────────────────────────
-    error = shadcnDarkDestructive,
-    onError = shadcnDarkDestructiveFg,
-    errorContainer = shadcnDarkErrorContainer,
-    onErrorContainer = shadcnDarkOnErrorContainer,
+    // ── Error → iOS red (high contrast on pure black) ────────────────────────
+    error = starlinkError,
+    onError = starlinkOnSurface,
+    errorContainer = starlinkSurface,
+    onErrorContainer = starlinkError,
 
     // ── Background & Surface ──────────────────────────────────────────────────
-    background = shadcnDarkBackground,
-    onBackground = shadcnDarkForeground,
-    surface = shadcnDarkBackground,
-    onSurface = shadcnDarkForeground,
+    background = starlinkBlack,
+    onBackground = starlinkOnSurface,
+    surface = starlinkBlack,
+    onSurface = starlinkOnSurface,
 
-    // ── Surface variants → muted tones ────────────────────────────────────────
-    surfaceVariant = shadcnDarkMuted,
-    onSurfaceVariant = shadcnDarkMutedFg,
+    // ── Surface variants ──────────────────────────────────────────────────────
+    surfaceVariant = starlinkSurface,
+    onSurfaceVariant = starlinkMuted,
 
-    // ── Borders & rings ───────────────────────────────────────────────────────
-    outline = shadcnDarkRing,
-    outlineVariant = shadcnDarkBorder,
+    // ── Borders ───────────────────────────────────────────────────────────────
+    outline = starlinkOutline,
+    outlineVariant = starlinkBorder,
 
     // ── Inverse ───────────────────────────────────────────────────────────────
-    inverseSurface = shadcnDarkPrimary,
-    inverseOnSurface = shadcnDarkPrimaryFg,
-    inversePrimary = shadcnPrimary,
+    inverseSurface = starlinkOnSurface,
+    inverseOnSurface = starlinkBlack,
+    inversePrimary = starlinkBlack,
 
-    scrim = shadcnBlack,
+    scrim = starlinkBlack,
 
-    // ── Surface containers → card tones ──────────────────────────────────────
-    surfaceContainerLowest = shadcnBlack,
-    surfaceContainerLow = shadcnDarkBackground, // #0A0A0A
-    surfaceContainer = shadcnDarkCard, // #171717
-    surfaceContainerHigh = shadcnDarkSecondary, // #262626
-    surfaceContainerHighest = shadcnDarkAccent, // #3F3F3F
-    surfaceDim = shadcnDarkBackground,
-    surfaceBright = shadcnDarkCard,
+    // ── Surface containers ────────────────────────────────────────────────────
+    surfaceContainerLowest = starlinkBlack,
+    surfaceContainerLow = starlinkSurface,
+    surfaceContainer = starlinkSurface,
+    surfaceContainerHigh = starlinkSurfaceHigh,
+    surfaceContainerHighest = starlinkOutline,
+    surfaceDim = starlinkBlack,
+    surfaceBright = starlinkSurfaceHigh,
 )
 
 @Composable
 fun MyBestTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Starlink rebrand: dark forced — parameter kept for API compatibility.
+    @Suppress("UNUSED_PARAMETER") darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        darkTheme -> darkScheme
-        else -> lightScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = darkScheme,
         typography = Typography,
         shapes = Shapes,
         content = content,

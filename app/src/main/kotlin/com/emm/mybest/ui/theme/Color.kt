@@ -119,3 +119,24 @@ val shadcnWarning = Color(0xFFCA8A04) // Tailwind yellow-600
 val shadcnDarkWarningContainer = Color(0xFF713F12) // Tailwind yellow-900
 val shadcnDarkOnWarningContainer = Color(0xFFFEF08A) // Tailwind yellow-200
 val shadcnDarkWarning = Color(0xFFFACC15) // Tailwind yellow-400
+
+// ----------------------------------------------------------------------------
+// Starlink Mono palette
+// Inspired by Starlink's dark-first, high-contrast, minimal-color UI.
+// Background is pure black; surfaces step up in 10-point luminance increments;
+// a single cyan accent (#00A3FF) replaces all semantic color (success/warning
+// are expressed via icon/shape in this palette, not color).
+// Error uses #FF3B30 (iOS system red) — chosen over shadcnDarkDestructive
+// (#F87171) because the iOS red reads more urgently at high contrast on pure
+// black, while the coral-pink F87171 looks muted and playful on #000000.
+// ----------------------------------------------------------------------------
+val starlinkBlack = Color(0xFF000000) // background puro
+val starlinkSurface = Color(0xFF0A0A0A) // surface elevada nivel 1
+val starlinkSurfaceHigh = Color(0xFF141414) // surface elevada nivel 2
+val starlinkBorder = Color(0xFF1F1F1F) // hairline divider
+val starlinkOutline = Color(0xFF2A2A2A) // borde de input/card
+val starlinkMuted = Color(0xFF8A8A8A) // texto secundario
+val starlinkOnSurface = Color(0xFFFAFAFA) // texto primario sobre negro
+val starlinkAccent = Color(0xFF00A3FF) // acento cian Starlink
+val starlinkAccentDim = Color(0xFF0077B6) // acento atenuado / hover
+val starlinkError = Color(0xFFFF3B30) // error iOS red — alto contraste sobre negro puro
