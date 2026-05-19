@@ -168,6 +168,8 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         val viewModel: TimelineViewModel = koinViewModel()
         TimelineScreen(
             viewModel = viewModel,
+            onAddPhotoClick = { navigator.navigate(Screen.AddPhoto) },
+            onCompareClick = { navigator.navigate(Screen.ComparePhotos) },
             modifier = Modifier,
         )
     }
