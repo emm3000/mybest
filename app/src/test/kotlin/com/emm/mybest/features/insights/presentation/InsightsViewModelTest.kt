@@ -135,6 +135,28 @@ class InsightsViewModelTest {
     }
 
     @Test
+    fun `OnHistoryClick emits NavigateToHistory effect`() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.effect.test {
+            viewModel.onIntent(InsightsIntent.OnHistoryClick)
+            assertEquals(InsightsEffect.NavigateToHistory, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `OnAddWeightClick emits NavigateToAddWeight effect`() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.effect.test {
+            viewModel.onIntent(InsightsIntent.OnAddWeightClick)
+            assertEquals(InsightsEffect.NavigateToAddWeight, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `OnRecommendationActionClick emits NavigateByRecommendation with action from state`() = runTest {
         val viewModel = buildViewModel()
 

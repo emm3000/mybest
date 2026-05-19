@@ -1,7 +1,6 @@
 package com.emm.mybest.features.insights.presentation
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,13 +11,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.rounded.Compare
 import androidx.compose.material.icons.rounded.Lightbulb
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -36,19 +39,21 @@ import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
-import com.emm.mybest.ui.theme.StarlinkTextStyles
+import java.util.Locale
 
-private const val INSIGHTS_SCREEN_PADDING = 16
+private const val INSIGHTS_HORIZONTAL_PADDING = 16
 private const val INSIGHTS_SECTION_SPACING = 16
-private const val INSIGHTS_SECTION_CORNER = 20
-private const val INSIGHTS_SECTION_CONTENT_PADDING = 16
-private const val INSIGHTS_CHART_HEIGHT = 250
+private const val INSIGHTS_CORNER = 20
+private const val INSIGHTS_HERO_PADDING = 24
+private const val INSIGHTS_COMPARE_PADDING = 16
 
 @Composable
 fun InsightsScreen(
     viewModel: InsightsViewModel,
     onCompareClick: () -> Unit,
     onRecommendationAction: (InsightsRecommendationAction) -> Unit,
+    onHistoryClick: () -> Unit,
+    onAddWeightClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
@@ -57,12 +62,14 @@ fun InsightsScreen(
         viewModel = viewModel,
         onCompareClick = onCompareClick,
         onRecommendationAction = onRecommendationAction,
+        onHistoryClick = onHistoryClick,
+        onAddWeightClick = onAddWeightClick,
     )
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            HTopBar(title = "Estadísticas")
+            HTopBar(title = "Progreso")
         },
     ) { padding ->
         InsightsBody(
@@ -70,6 +77,8 @@ fun InsightsScreen(
             padding = padding,
             onCompareClick = { viewModel.onIntent(InsightsIntent.OnCompareClick) },
             onRecommendationActionClick = { viewModel.onIntent(InsightsIntent.OnRecommendationActionClick) },
+            onHistoryClick = { viewModel.onIntent(InsightsIntent.OnHistoryClick) },
+            onAddWeightClick = { viewModel.onIntent(InsightsIntent.OnAddWeightClick) },
         )
     }
 }
@@ -79,16 +88,22 @@ private fun HandleInsightsEffects(
     viewModel: InsightsViewModel,
     onCompareClick: () -> Unit,
     onRecommendationAction: (InsightsRecommendationAction) -> Unit,
+    onHistoryClick: () -> Unit,
+    onAddWeightClick: () -> Unit,
 ) {
-    val currentOnCompareClick by androidx.compose.runtime.rememberUpdatedState(onCompareClick)
-    val currentOnRecommendationAction by androidx.compose.runtime.rememberUpdatedState(onRecommendationAction)
+    val currentOnCompareClick by rememberUpdatedState(onCompareClick)
+    val currentOnRecommendationAction by rememberUpdatedState(onRecommendationAction)
+    val currentOnHistoryClick by rememberUpdatedState(onHistoryClick)
+    val currentOnAddWeightClick by rememberUpdatedState(onAddWeightClick)
 
-    androidx.compose.runtime.LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 InsightsEffect.NavigateBack -> Unit
                 InsightsEffect.NavigateToCompare -> currentOnCompareClick()
                 is InsightsEffect.NavigateByRecommendation -> currentOnRecommendationAction(effect.action)
+                InsightsEffect.NavigateToHistory -> currentOnHistoryClick()
+                InsightsEffect.NavigateToAddWeight -> currentOnAddWeightClick()
             }
         }
     }
@@ -100,34 +115,46 @@ private fun InsightsBody(
     padding: androidx.compose.foundation.layout.PaddingValues,
     onCompareClick: () -> Unit,
     onRecommendationActionClick: () -> Unit,
+    onHistoryClick: () -> Unit,
+    onAddWeightClick: () -> Unit,
 ) {
-    val contentModifier = androidx.compose.ui.Modifier
+    val contentModifier = Modifier
         .padding(padding)
         .fillMaxSize()
-        .padding(INSIGHTS_SCREEN_PADDING.dp)
 
     when {
-        state.isLoading -> InsightsLoadingState(modifier = contentModifier)
+        state.isLoading -> InsightsLoadingState(
+            modifier = contentModifier.padding(horizontal = INSIGHTS_HORIZONTAL_PADDING.dp),
+        )
         state.errorMessage != null -> {
             HAlert(
                 title = "No se pudieron cargar las estadísticas",
                 description = state.errorMessage,
                 variant = AlertVariant.Destructive,
-                modifier = contentModifier,
+                modifier = contentModifier.padding(horizontal = INSIGHTS_HORIZONTAL_PADDING.dp),
             )
         }
         state.weightHistory.isEmpty() && state.photoCount == 0 -> {
             HEmptyState(
-                title = "Sin datos para estadísticas",
-                description = "Registra peso y fotos para ver tu progreso en esta pantalla.",
+                title = "Sin datos aún",
+                description = "Registra tu peso para empezar a ver tu progreso.",
                 icon = Icons.Rounded.BarChart,
                 modifier = contentModifier,
+                action = {
+                    HButton(
+                        text = "Registrar primer peso",
+                        onClick = onAddWeightClick,
+                        variant = ButtonVariant.Default,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                },
             )
         }
         else -> InsightsDataContent(
             state = state,
             onCompareClick = onCompareClick,
             onRecommendationActionClick = onRecommendationActionClick,
+            onHistoryClick = onHistoryClick,
             modifier = contentModifier,
         )
     }
@@ -138,101 +165,215 @@ private fun InsightsDataContent(
     state: InsightsState,
     onCompareClick: () -> Unit,
     onRecommendationActionClick: () -> Unit,
+    onHistoryClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(INSIGHTS_SECTION_SPACING.dp),
     ) {
+        // Period label — rendered ONCE at the top
         Text(
             text = state.periodLabel,
-            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-            color = androidx.compose.material3.MaterialTheme.colorScheme.outline,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(horizontal = INSIGHTS_HORIZONTAL_PADDING.dp)
+                .padding(top = 8.dp),
         )
 
-        state.recommendation?.let { recommendation ->
-            RecommendationSection(
-                recommendation = recommendation,
-                periodLabel = state.periodLabel,
-                onActionClick = onRecommendationActionClick,
+        Column(
+            modifier = Modifier.padding(
+                horizontal = INSIGHTS_HORIZONTAL_PADDING.dp,
+                vertical = INSIGHTS_SECTION_SPACING.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(INSIGHTS_SECTION_SPACING.dp),
+        ) {
+            // Hero Delta Card — top priority, 24dp inner padding, tappable to History
+            HeroDeltaCard(
+                state = state,
+                onHistoryClick = onHistoryClick,
             )
+
+            // Recommendation card — second priority
+            state.recommendation?.let { recommendation ->
+                RecommendationCard(
+                    recommendation = recommendation,
+                    onActionClick = onRecommendationActionClick,
+                )
+            }
+
+            // Compare photos — only when canComparePhotos
+            if (state.canComparePhotos) {
+                ComparePhotosCard(
+                    photoCount = state.photoCount,
+                    onCompareClick = onCompareClick,
+                )
+            }
         }
-
-        WeightInsightsSection(state = state)
-
-        InsightsComparePhotosSection(
-            state = state,
-            periodLabel = state.periodLabel,
-            onCompareClick = onCompareClick,
-        )
     }
 }
 
 @Composable
-private fun RecommendationSection(
+private fun HeroDeltaCard(
+    state: InsightsState,
+    onHistoryClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HCard(
+        variant = CardVariant.Outlined,
+        cornerRadius = INSIGHTS_CORNER.dp,
+        onClick = onHistoryClick,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier.padding(INSIGHTS_HERO_PADDING.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            if (state.weightHistory.isEmpty()) {
+                Text(
+                    text = "Sin registros aún",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                HeroDeltaCardData(state = state)
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeroDeltaCardData(
+    state: InsightsState,
+) {
+    val cs = MaterialTheme.colorScheme
+    val deltaColor = when {
+        state.totalWeightLost > 0f -> cs.primary
+        state.totalWeightLost < 0f -> cs.error
+        else -> cs.onSurface
+    }
+    val deltaSign = when {
+        state.totalWeightLost > 0f -> "-"
+        state.totalWeightLost < 0f -> "+"
+        else -> ""
+    }
+    val deltaAbs = formatWeight(kotlin.math.abs(state.totalWeightLost))
+
+    Text(
+        text = "$deltaSign$deltaAbs",
+        style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
+        color = deltaColor,
+    )
+
+    val arrow = if (state.totalWeightLost >= 0f) "↓" else "↑"
+    Text(
+        text = "$arrow desde ${formatWeight(state.initialWeight)} → ${formatWeight(state.currentWeight)}",
+        style = MaterialTheme.typography.bodySmall,
+        color = cs.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun RecommendationCard(
     recommendation: InsightsRecommendation,
-    periodLabel: String,
     onActionClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val tertiaryColor = androidx.compose.material3.MaterialTheme.colorScheme.tertiary
+    val primaryColor = MaterialTheme.colorScheme.primary
     val borderStrokeWidth = 2.dp.value
 
-    Column(modifier = modifier) {
-        Text(
-            text = "RECOMENDACIÓN".uppercase(),
-            style = StarlinkTextStyles.sectionLabel,
-            modifier = androidx.compose.ui.Modifier.padding(bottom = 12.dp),
-        )
-        HCard(
-            variant = CardVariant.Outlined,
-            cornerRadius = INSIGHTS_SECTION_CORNER.dp,
-            modifier = androidx.compose.ui.Modifier
-                .fillMaxWidth()
-                .drawBehind {
-                    drawLine(
-                        color = tertiaryColor,
-                        start = Offset(0f, 0f),
-                        end = Offset(0f, size.height),
-                        strokeWidth = borderStrokeWidth * density,
-                    )
-                },
+    HCard(
+        variant = CardVariant.Outlined,
+        cornerRadius = INSIGHTS_CORNER.dp,
+        modifier = modifier
+            .fillMaxWidth()
+            .drawBehind {
+                drawLine(
+                    color = primaryColor,
+                    start = Offset(0f, 0f),
+                    end = Offset(0f, size.height),
+                    strokeWidth = borderStrokeWidth * density,
+                )
+            },
+    ) {
+        Column(
+            modifier = Modifier.padding(INSIGHTS_HERO_PADDING.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Box(modifier = androidx.compose.ui.Modifier.padding(INSIGHTS_SECTION_CONTENT_PADDING.dp)) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Lightbulb,
-                            contentDescription = null,
-                            tint = tertiaryColor,
-                        )
-                        Text(
-                            text = recommendation.title,
-                            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    }
-                    Text(
-                        text = recommendation.description,
-                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = periodLabel,
-                        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.outline,
-                    )
-                    HButton(
-                        text = recommendation.actionLabel,
-                        onClick = onActionClick,
-                        modifier = Modifier.fillMaxWidth(),
-                        variant = ButtonVariant.Secondary,
-                    )
-                }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Lightbulb,
+                    contentDescription = null,
+                    tint = primaryColor,
+                )
+                Text(
+                    text = recommendation.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
             }
+            Text(
+                text = recommendation.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (recommendation.action != InsightsRecommendationAction.KEEP_ROUTINE) {
+                HButton(
+                    text = recommendation.actionLabel,
+                    onClick = onActionClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    variant = ButtonVariant.Default,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ComparePhotosCard(
+    photoCount: Int,
+    onCompareClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HCard(
+        variant = CardVariant.Outlined,
+        cornerRadius = INSIGHTS_CORNER.dp,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier.padding(INSIGHTS_COMPARE_PADDING.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Compare,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "Comparar fotos",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Text(
+                text = "$photoCount fotos disponibles",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            HButton(
+                text = "Abrir comparador →",
+                onClick = onCompareClick,
+                modifier = Modifier.fillMaxWidth(),
+                variant = ButtonVariant.Outline,
+            )
         }
     }
 }
@@ -242,60 +383,32 @@ private fun InsightsLoadingState(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(top = 8.dp),
         verticalArrangement = Arrangement.spacedBy(INSIGHTS_SECTION_SPACING.dp),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            HSkeleton(
-                modifier = androidx.compose.ui.Modifier
-                    .weight(1f)
-                    .height(96.dp),
-                cornerRadius = INSIGHTS_SECTION_CORNER.dp,
-            )
-            HSkeleton(
-                modifier = androidx.compose.ui.Modifier
-                    .weight(1f)
-                    .height(96.dp),
-                cornerRadius = INSIGHTS_SECTION_CORNER.dp,
-            )
-        }
+        // Hero skeleton
         HSkeleton(
-            modifier = androidx.compose.ui.Modifier
-                .fillMaxWidth()
-                .height(INSIGHTS_CHART_HEIGHT.dp),
-            cornerRadius = INSIGHTS_SECTION_CORNER.dp,
-        )
-        HSkeleton(
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp),
-            cornerRadius = INSIGHTS_SECTION_CORNER.dp,
+            cornerRadius = INSIGHTS_CORNER.dp,
+        )
+        // Recommendation skeleton
+        HSkeleton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(140.dp),
+            cornerRadius = INSIGHTS_CORNER.dp,
+        )
+        // Compare skeleton
+        HSkeleton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(88.dp),
+            cornerRadius = INSIGHTS_CORNER.dp,
         )
     }
 }
 
-@Composable
-internal fun InsightsSection(
-    title: String,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = title,
-            style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = androidx.compose.ui.Modifier.padding(bottom = 12.dp),
-        )
-        HCard(
-            variant = CardVariant.Filled,
-            cornerRadius = INSIGHTS_SECTION_CORNER.dp,
-            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-            modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
-        ) {
-            Box(modifier = androidx.compose.ui.Modifier.padding(INSIGHTS_SECTION_CONTENT_PADDING.dp)) {
-                content()
-            }
-        }
-    }
-}
+private fun formatWeight(weight: Float): String =
+    String.format(Locale.getDefault(), "%.1f kg", weight)

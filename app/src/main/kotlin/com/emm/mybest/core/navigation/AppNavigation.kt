@@ -150,13 +150,14 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             onRecommendationAction = { action ->
                 when (action) {
                     InsightsRecommendationAction.ADJUST_WEIGHT_PLAN ->
-                        navigator.navigate(Screen.AddWeight)
+                        navigator.navigate(Screen.MealPlan)
                     InsightsRecommendationAction.ADD_PROGRESS_PHOTO ->
                         navigator.navigate(Screen.AddPhoto)
-                    InsightsRecommendationAction.KEEP_ROUTINE ->
-                        navigator.navigate(Screen.Home)
+                    InsightsRecommendationAction.KEEP_ROUTINE -> Unit
                 }
             },
+            onHistoryClick = { navigator.navigate(Screen.History) },
+            onAddWeightClick = { navigator.navigate(Screen.AddWeight) },
             modifier = Modifier,
         )
     }

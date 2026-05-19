@@ -38,12 +38,16 @@ sealed class InsightsIntent {
     object OnBackClick : InsightsIntent()
     object OnCompareClick : InsightsIntent()
     object OnRecommendationActionClick : InsightsIntent()
+    object OnHistoryClick : InsightsIntent()
+    object OnAddWeightClick : InsightsIntent()
 }
 
 sealed class InsightsEffect {
     object NavigateBack : InsightsEffect()
     object NavigateToCompare : InsightsEffect()
     data class NavigateByRecommendation(val action: InsightsRecommendationAction) : InsightsEffect()
+    object NavigateToHistory : InsightsEffect()
+    object NavigateToAddWeight : InsightsEffect()
 }
 
 class InsightsViewModel(
@@ -89,6 +93,8 @@ class InsightsViewModel(
                         _effect.emit(InsightsEffect.NavigateByRecommendation(recommendation.action))
                     }
                 }
+                InsightsIntent.OnHistoryClick -> _effect.emit(InsightsEffect.NavigateToHistory)
+                InsightsIntent.OnAddWeightClick -> _effect.emit(InsightsEffect.NavigateToAddWeight)
             }
         }
     }
