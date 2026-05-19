@@ -227,8 +227,8 @@ private fun HomeMealSection(
             )
             Spacer(modifier = Modifier.height(16.dp))
             HSeparator()
+            val haptic = LocalHapticFeedback.current
             state.mealRows.forEach { row ->
-                val haptic = LocalHapticFeedback.current
                 HomePlanRow(
                     label = row.type.labelEs(),
                     description = row.description,

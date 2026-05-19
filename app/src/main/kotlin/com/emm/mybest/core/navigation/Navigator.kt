@@ -17,6 +17,10 @@ class Navigator(val state: NavigationState) {
         }
     }
 
+    fun setSuppressBottomBar(suppress: Boolean) {
+        state.suppressBottomBar = suppress
+    }
+
     fun goBack() {
         val currentStack = state.backStacks[state.topLevelRoute]
             ?: error("Stack for ${state.topLevelRoute} not found")

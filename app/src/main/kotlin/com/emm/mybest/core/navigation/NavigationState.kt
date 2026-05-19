@@ -69,6 +69,10 @@ class NavigationState(
     var lastTransitionKind: NavTransitionKind by mutableStateOf(NavTransitionKind.Push)
         internal set
 
+    /** When true, the global [HBottomNavigationBar] is hidden (e.g. selection mode in Timeline). */
+    var suppressBottomBar: Boolean by mutableStateOf(false)
+        internal set
+
     val stacksInUse: List<NavKey>
         get() = if (topLevelRoute == startRoute) {
             listOf(startRoute)

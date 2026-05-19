@@ -229,40 +229,6 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `monthSummary counts weight and photo days in selected month`() = runTest {
-        val photoOtherDay = photo.copy(id = "p2", date = LocalDate(2026, 3, 12))
-        val viewModel = buildViewModel(
-            weights = listOf(weightEntry),
-            photos = listOf(photo, photoOtherDay),
-        )
-
-        viewModel.state.test {
-            awaitItem()
-            val loaded = awaitItem()
-            val summary = loaded.monthSummary
-            assertEquals(1, summary.weightDays)
-            // day 10 has photo, day 12 has photo — 2 photo days
-            assertEquals(2, summary.photoDays)
-            // day 10 has both — 2 active days total
-            assertEquals(2, summary.activityDays)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `monthSummary only counts days in selected month`() = runTest {
-        val otherMonthEntry = weightEntry.copy(id = "w2", date = LocalDate(2026, 4, 5))
-        val viewModel = buildViewModel(weights = listOf(weightEntry, otherMonthEntry))
-
-        viewModel.state.test {
-            awaitItem()
-            val loaded = awaitItem()
-            assertEquals(1, loaded.monthSummary.weightDays)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
     fun `state updates reactively when repository emits new data`() = runTest {
         val weightFlow = MutableStateFlow(emptyList<WeightEntry>())
         every { weightRepository.getWeightProgress() } returns weightFlow

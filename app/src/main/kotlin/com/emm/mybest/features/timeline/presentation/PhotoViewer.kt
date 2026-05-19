@@ -21,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,16 +34,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.core.datetime.formatEsLongDate
-import com.emm.mybest.domain.models.ProgressPhoto
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 internal fun PhotoViewer(
-    photos: List<ProgressPhoto>,
     initialPhotoId: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val initialPage = photos.indexOfFirst { it.id == initialPhotoId }.coerceAtLeast(0)
+    val viewModel: PhotoViewerViewModel = koinViewModel { parametersOf(initialPhotoId) }
+    val state by viewModel.state.collectAsState()
+
+    val photos = state.photos
+    val initialPage = photos.indexOfFirst { it.id == state.initialPhotoId }.coerceAtLeast(0)
     val pagerState = rememberPagerState(initialPage = initialPage) { photos.size }
     var overlayVisible by remember { mutableStateOf(true) }
 

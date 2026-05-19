@@ -27,6 +27,9 @@ sealed interface Screen : NavKey {
     data object Timeline : Screen
 
     @Serializable
+    data class PhotoViewer(val initialPhotoId: String) : Screen
+
+    @Serializable
     data object ReminderSettings : Screen
 
     @Serializable

@@ -45,6 +45,7 @@ import com.emm.mybest.features.insights.presentation.InsightsViewModel
 import com.emm.mybest.features.photo.presentation.AddPhotoViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.settings.presentation.ReminderSettingsViewModel
+import com.emm.mybest.features.timeline.presentation.PhotoViewerViewModel
 import com.emm.mybest.features.timeline.presentation.TimelineViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
 import com.emm.mybest.viewmodel.MainViewModel
@@ -105,6 +106,7 @@ val appModule = module {
     viewModel { InsightsViewModel(get()) }
     viewModel { ComparePhotosViewModel(get()) }
     viewModel { TimelineViewModel(get()) }
+    viewModel { (initialPhotoId: String) -> PhotoViewerViewModel(initialPhotoId, get()) }
     viewModel { ReminderSettingsViewModel(get(), get(), get(), get()) }
     viewModel { MealPlanViewModel(get(), get()) }
     viewModel { ExercisePlanViewModel(get(), get()) }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.YearMonthValue
+import com.emm.mybest.core.datetime.currentDate
 import com.emm.mybest.core.datetime.formatEsWeekdayDayMonth
 import com.emm.mybest.core.datetime.narrowEs
 import kotlinx.datetime.DayOfWeek
@@ -83,6 +85,7 @@ internal fun MonthCalendarGrid(
     dayData: Map<LocalDate, DaySummary>,
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
+    today: LocalDate = remember { currentDate() },
 ) {
     val daysInMonth = yearMonth.lengthOfMonth()
     val firstDayOffset = yearMonth.atDay(1).dayOfWeek.ordinal
@@ -105,6 +108,7 @@ internal fun MonthCalendarGrid(
                         HeatmapDayCell(
                             date = date,
                             summary = dayData[date],
+                            today = today,
                             onClick = { onDateClick(date) },
                             modifier = Modifier.weight(1f),
                         )
@@ -122,6 +126,7 @@ internal fun WeekHeatmapRow(
     dayData: Map<LocalDate, DaySummary>,
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
+    today: LocalDate = remember { currentDate() },
 ) {
     Row(
         modifier = modifier,
@@ -131,6 +136,7 @@ internal fun WeekHeatmapRow(
             HeatmapDayCell(
                 date = date,
                 summary = dayData[date],
+                today = today,
                 onClick = { onDateClick(date) },
                 modifier = Modifier.weight(1f),
             )
@@ -146,15 +152,21 @@ internal fun YearHeatmapRow(
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val months = (1..MONTH_COUNT).map { YearMonthValue(yearMonth.year, it) }
+    val year = yearMonth.year
+    val activityByMonth = remember(dayData, year) {
+        (1..MONTH_COUNT).associate { month ->
+            val ym = YearMonthValue(year, month)
+            val count = (1..ym.lengthOfMonth()).count { dayData[ym.atDay(it)]?.hasActivity == true }
+            month to count
+        }
+    }
+    val months = remember(year) { (1..MONTH_COUNT).map { YearMonthValue(year, it) } }
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         months.forEach { ym ->
-            val activityCount = (1..ym.lengthOfMonth())
-                .map { ym.atDay(it) }
-                .count { dayData[it]?.hasActivity == true }
+            val activityCount = activityByMonth[ym.month] ?: 0
             val totalDays = ym.lengthOfMonth()
             val intensity = when {
                 activityCount == 0 -> DayIntensity.NONE
@@ -198,8 +210,9 @@ internal fun HeatmapDayCell(
     summary: DaySummary?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    today: LocalDate = remember { currentDate() },
 ) {
-    val isToday = date == com.emm.mybest.core.datetime.currentDate()
+    val isToday = date == today
     val primary = MaterialTheme.colorScheme.primary
     val intensity = resolveDayIntensity(summary)
     val backgroundColor = dayIntensityColor(intensity, primary)

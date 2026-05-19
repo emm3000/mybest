@@ -31,6 +31,7 @@ import com.emm.mybest.features.photo.presentation.ComparePhotosScreen
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.settings.presentation.ReminderSettingsScreen
 import com.emm.mybest.features.settings.presentation.ReminderSettingsViewModel
+import com.emm.mybest.features.timeline.presentation.PhotoViewer
 import com.emm.mybest.features.timeline.presentation.TimelineScreen
 import com.emm.mybest.features.timeline.presentation.TimelineViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightScreen
@@ -60,7 +61,8 @@ fun AppNavigation(
     val currentOnConsumeAction by rememberUpdatedState(onConsumeAction)
 
     val showBottomBar = navigationState.topLevelRoute in TOP_LEVEL_SCREENS &&
-        navigationState.backStacks[navigationState.topLevelRoute]?.size == 1
+        navigationState.backStacks[navigationState.topLevelRoute]?.size == 1 &&
+        !navigationState.suppressBottomBar
 
     HandleIntentAction(
         intentAction = intentAction,
@@ -79,8 +81,9 @@ fun AppNavigation(
             }
         },
     ) { innerPadding ->
+        val entryProvider = remember(navigator) { appEntryProvider(navigator) }
         NavDisplay(
-            entries = navigationState.toEntries(appEntryProvider(navigator)),
+            entries = navigationState.toEntries(entryProvider),
             onBack = { navigator.goBack() },
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
@@ -98,7 +101,6 @@ fun AppNavigation(
     }
 }
 
-@Composable
 private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey> = entryProvider {
     entry<Screen.Home> {
         HomeScreen(
@@ -177,6 +179,16 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             viewModel = viewModel,
             onAddPhotoClick = { navigator.navigate(Screen.AddPhoto) },
             onCompareClick = { navigator.navigate(Screen.ComparePhotos) },
+            onSuppressBottomBar = navigator::setSuppressBottomBar,
+            onOpenViewer = { photoId -> navigator.navigate(Screen.PhotoViewer(photoId)) },
+            modifier = Modifier,
+        )
+    }
+
+    entry<Screen.PhotoViewer> { key ->
+        PhotoViewer(
+            initialPhotoId = key.initialPhotoId,
+            onBack = { navigator.goBack() },
             modifier = Modifier,
         )
     }

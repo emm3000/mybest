@@ -182,7 +182,9 @@ private fun HistoryScrollContent(
 
         item {
             HeatmapCard(
-                state = state,
+                selectedRange = state.selectedRange,
+                selectedMonth = state.selectedMonth,
+                monthlyData = state.monthlyData,
                 onDateClick = { onIntent(HistoryIntent.OnDateSelected(it)) },
             )
         }
@@ -257,7 +259,9 @@ private fun RangeSummaryLine(
 
 @Composable
 private fun HeatmapCard(
-    state: HistoryState,
+    selectedRange: HistoryRange,
+    selectedMonth: YearMonthValue,
+    monthlyData: Map<LocalDate, DaySummary>,
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -266,30 +270,30 @@ private fun HeatmapCard(
         variant = CardVariant.Outlined,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            when (state.selectedRange) {
+            when (selectedRange) {
                 HistoryRange.WEEK -> {
-                    val anchorDay = state.selectedMonth.atDay(1)
+                    val anchorDay = selectedMonth.atDay(1)
                     val weekStart = anchorDay.plus(DatePeriod(days = -anchorDay.dayOfWeek.ordinal))
                     val weekDates = (0 until DAYS_IN_WEEK).map { weekStart.plus(DatePeriod(days = it)) }
                     WeekdayHeaderRow()
                     Spacer(modifier = Modifier.height(8.dp))
                     WeekHeatmapRow(
                         dates = weekDates,
-                        dayData = state.monthlyData,
+                        dayData = monthlyData,
                         onDateClick = onDateClick,
                     )
                 }
                 HistoryRange.MONTH -> {
                     val hasActivity = hasActivityInSelectedMonth(
-                        selectedMonth = state.selectedMonth,
-                        monthlyData = state.monthlyData,
+                        selectedMonth = selectedMonth,
+                        monthlyData = monthlyData,
                     )
                     if (hasActivity) {
                         WeekdayHeaderRow()
                         Spacer(modifier = Modifier.height(8.dp))
                         MonthCalendarGrid(
-                            yearMonth = state.selectedMonth,
-                            dayData = state.monthlyData,
+                            yearMonth = selectedMonth,
+                            dayData = monthlyData,
                             onDateClick = onDateClick,
                         )
                     } else {
@@ -302,8 +306,8 @@ private fun HeatmapCard(
                 }
                 HistoryRange.YEAR -> {
                     YearHeatmapRow(
-                        yearMonth = state.selectedMonth,
-                        dayData = state.monthlyData,
+                        yearMonth = selectedMonth,
+                        dayData = monthlyData,
                         onDateClick = onDateClick,
                     )
                 }
@@ -375,7 +379,8 @@ fun DayDetailContent(
     onSeePhotosClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isToday = date == currentDate()
+    val today = remember { currentDate() }
+    val isToday = date == today
     var photoToDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
 
     if (photoToDelete != null) {

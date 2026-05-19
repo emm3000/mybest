@@ -1,5 +1,6 @@
 package com.emm.mybest.features.insights.presentation
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.InsightsRecommendation
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@Stable
 data class InsightsState(
     val weightHistory: List<WeightEntry> = emptyList(),
     val periodLabel: String = "",

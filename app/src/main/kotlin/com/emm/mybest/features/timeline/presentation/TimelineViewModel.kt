@@ -1,5 +1,6 @@
 package com.emm.mybest.features.timeline.presentation
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.YearMonthValue
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
+@Stable
 data class TimelineState(
     val photosByDate: Map<LocalDate, List<ProgressPhoto>> = emptyMap(),
     val photosByMonth: Map<YearMonthValue, List<ProgressPhoto>> = emptyMap(),
@@ -54,17 +56,19 @@ class TimelineViewModel(
 
     private val _photosState = photoRepository.getAllPhotos()
         .map { photos ->
-            photos to photos
-                .sortedByDescending { it.createdAt }
-                .groupBy { photo -> YearMonthValue.from(photo.date) }
+            val sorted = photos.sortedByDescending { it.createdAt }
+            Pair(
+                photos.groupBy { it.date },
+                sorted.groupBy { photo -> YearMonthValue.from(photo.date) },
+            )
         }
 
     val state: StateFlow<TimelineState> = combine(
         _photosState,
         _selection,
-    ) { (photos, byMonth), sel ->
+    ) { (byDate, byMonth), sel ->
         TimelineState(
-            photosByDate = photos.groupBy { it.date },
+            photosByDate = byDate,
             photosByMonth = byMonth,
             isLoading = false,
             selectionMode = sel.selectionMode,

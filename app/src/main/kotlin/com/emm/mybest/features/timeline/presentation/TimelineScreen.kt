@@ -15,12 +15,10 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.YearMonthValue
@@ -45,10 +43,11 @@ fun TimelineScreen(
     viewModel: TimelineViewModel,
     onAddPhotoClick: () -> Unit,
     onCompareClick: () -> Unit,
+    onSuppressBottomBar: (Boolean) -> Unit,
+    onOpenViewer: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
-    var viewerPhotoId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collect { effect ->
@@ -59,19 +58,12 @@ fun TimelineScreen(
         }
     }
 
-    val allPhotos = remember(state.photosByMonth) {
-        state.photosByMonth.values.flatten()
+    // Suppress the global bottom nav while selection mode is active; restore on exit or dispose.
+    LaunchedEffect(state.selectionMode) {
+        onSuppressBottomBar(state.selectionMode)
     }
-
-    // Fullscreen viewer overlay — shown when a photo is tapped in non-selection mode.
-    viewerPhotoId?.let { photoId ->
-        PhotoViewer(
-            photos = allPhotos,
-            initialPhotoId = photoId,
-            onBack = { viewerPhotoId = null },
-            modifier = modifier,
-        )
-        return
+    DisposableEffect(Unit) {
+        onDispose { onSuppressBottomBar(false) }
     }
 
     Scaffold(
@@ -112,12 +104,15 @@ fun TimelineScreen(
         },
     ) { paddingValues ->
         TimelineContent(
-            state = state,
+            photosByMonth = state.photosByMonth,
+            selectionMode = state.selectionMode,
+            selectedIds = state.selectedIds,
+            isLoading = state.isLoading,
             onPhotoTap = { photo ->
                 if (state.selectionMode) {
                     viewModel.onIntent(TimelineIntent.ToggleSelection(photo.id))
                 } else {
-                    viewerPhotoId = photo.id
+                    onOpenViewer(photo.id)
                 }
             },
             onPhotoLongPress = { photo ->
@@ -135,7 +130,10 @@ fun TimelineScreen(
 
 @Composable
 private fun TimelineContent(
-    state: TimelineState,
+    photosByMonth: Map<YearMonthValue, List<ProgressPhoto>>,
+    selectionMode: Boolean,
+    selectedIds: Set<String>,
+    isLoading: Boolean,
     onPhotoTap: (ProgressPhoto) -> Unit,
     onPhotoLongPress: (ProgressPhoto) -> Unit,
     onAddPhotoClick: () -> Unit,
@@ -143,7 +141,7 @@ private fun TimelineContent(
 ) {
     val contentModifier = modifier.fillMaxSize()
 
-    if (state.isLoading) {
+    if (isLoading) {
         HSkeleton(
             modifier = contentModifier.padding(16.dp),
             cornerRadius = 4.dp,
@@ -151,7 +149,7 @@ private fun TimelineContent(
         return
     }
 
-    if (state.photosByMonth.isEmpty()) {
+    if (photosByMonth.isEmpty()) {
         HEmptyState(
             title = "Aún no tenés fotos",
             description = "Tus fotos de progreso aparecerán acá.",
@@ -169,9 +167,9 @@ private fun TimelineContent(
     }
 
     PhotoGrid(
-        photosByMonth = state.photosByMonth,
-        selectionMode = state.selectionMode,
-        selectedIds = state.selectedIds,
+        photosByMonth = photosByMonth,
+        selectionMode = selectionMode,
+        selectedIds = selectedIds,
         onPhotoTap = onPhotoTap,
         onPhotoLongPress = onPhotoLongPress,
         modifier = contentModifier,
@@ -235,10 +233,11 @@ private fun PhotoGridRow(
         horizontalArrangement = Arrangement.spacedBy(GRID_ITEM_SPACING.dp),
     ) {
         photos.forEach { photo ->
+            val isSelected = photo.id in selectedIds
             PhotoGridItem(
                 photo = photo,
                 selectionMode = selectionMode,
-                isSelected = photo.id in selectedIds,
+                isSelected = isSelected,
                 onTap = { onPhotoTap(photo) },
                 onLongPress = { onPhotoLongPress(photo) },
                 modifier = Modifier.weight(1f),

@@ -1,5 +1,6 @@
 package com.emm.mybest.features.home.presentation
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.MealType
@@ -27,6 +28,7 @@ data class MealRow(
     val done: Boolean,
 )
 
+@Stable
 data class HomeState(
     val isLoading: Boolean = true,
     val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),

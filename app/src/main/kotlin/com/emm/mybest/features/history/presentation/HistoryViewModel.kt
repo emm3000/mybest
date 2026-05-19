@@ -1,5 +1,6 @@
 package com.emm.mybest.features.history.presentation
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.YearMonthValue
@@ -38,6 +39,7 @@ data class DaySummary(
     val hasActivity: Boolean get() = hasWeight || hasPhoto
 }
 
+@Stable
 data class HistoryState(
     val selectedMonth: YearMonthValue = YearMonthValue.now(),
     val selectedRange: HistoryRange = HistoryRange.MONTH,
@@ -48,8 +50,6 @@ data class HistoryState(
     val selectedDate: LocalDate? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    // kept for ViewModel tests that still reference monthSummary
-    val monthSummary: HistoryMonthSummary = HistoryMonthSummary(),
 )
 
 sealed class HistoryIntent {
@@ -96,7 +96,6 @@ class HistoryViewModel(
             weightTrend = weightTrend,
             streak = streak,
             activeDays = activeDays,
-            monthSummary = buildMonthSummary(month, monthlyData),
             isLoading = false,
             errorMessage = null,
         )
@@ -151,24 +150,6 @@ class HistoryViewModel(
 
         return days.toMap()
     }
-}
-
-data class HistoryMonthSummary(
-    val activityDays: Int = 0,
-    val weightDays: Int = 0,
-    val photoDays: Int = 0,
-)
-
-internal fun buildMonthSummary(
-    selectedMonth: YearMonthValue,
-    monthlyData: Map<LocalDate, DaySummary>,
-): HistoryMonthSummary {
-    val monthDays = monthlyData.values.filter { YearMonthValue.from(it.date) == selectedMonth }
-    return HistoryMonthSummary(
-        activityDays = monthDays.count(DaySummary::hasActivity),
-        weightDays = monthDays.count(DaySummary::hasWeight),
-        photoDays = monthDays.count(DaySummary::hasPhoto),
-    )
 }
 
 internal fun computeRangeDates(
