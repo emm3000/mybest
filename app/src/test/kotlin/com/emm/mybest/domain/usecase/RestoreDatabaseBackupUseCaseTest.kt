@@ -1,6 +1,7 @@
 package com.emm.mybest.domain.usecase
 
 import com.emm.mybest.domain.repository.BackupRepository
+import com.emm.mybest.domain.repository.RestoreResult
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -16,11 +17,12 @@ class RestoreDatabaseBackupUseCaseTest {
     @Test
     fun `invoke delegates restore to repository with uri`() = runBlocking {
         val uri = "content://com.emm.mybest.backup/db"
-        coEvery { backupRepository.restoreDatabase(uri) } returns Result.success(Unit)
+        coEvery { backupRepository.restoreDatabase(uri) } returns Result.success(RestoreResult.RequiresRestart)
 
         val result = useCase(uri)
 
         coVerify(exactly = 1) { backupRepository.restoreDatabase(uri) }
         assertEquals(true, result.isSuccess)
+        assertEquals(RestoreResult.RequiresRestart, result.getOrNull())
     }
 }

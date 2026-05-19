@@ -1,6 +1,7 @@
 package com.emm.mybest.features.settings.presentation
 
 import app.cash.turbine.test
+import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
@@ -38,7 +39,7 @@ class ReminderSettingsViewModelTest {
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
-        coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
+        coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
         coEvery { updateDefaultReminderTimeUseCase.invoke(any()) } returns Unit
         val viewModel = ReminderSettingsViewModel(
             preferencesRepository,
@@ -62,7 +63,7 @@ class ReminderSettingsViewModelTest {
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
-        coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
+        coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
         coEvery { updateDefaultReminderTimeUseCase.invoke(any()) } returns Unit
         val viewModel = ReminderSettingsViewModel(
             preferencesRepository,
@@ -85,7 +86,7 @@ class ReminderSettingsViewModelTest {
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
-        coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
+        coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
         coEvery { updateDefaultReminderTimeUseCase.invoke(any()) } returns Unit
         val viewModel = ReminderSettingsViewModel(
             preferencesRepository,
@@ -108,7 +109,7 @@ class ReminderSettingsViewModelTest {
         coEvery { preferencesRepository.updateDarkMode(any()) } returns Unit
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
-        coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
+        coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
         coEvery { updateDefaultReminderTimeUseCase.invoke(any()) } returns Unit
         val viewModel = ReminderSettingsViewModel(
             preferencesRepository,
@@ -129,7 +130,7 @@ class ReminderSettingsViewModelTest {
         every { preferencesRepository.weightReminderTime } returns flowOf(null)
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
-        coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
+        coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
         coEvery { updateDefaultReminderTimeUseCase.invoke(any()) } returns Unit
         val viewModel = ReminderSettingsViewModel(
             preferencesRepository,
@@ -150,7 +151,7 @@ class ReminderSettingsViewModelTest {
         every { preferencesRepository.weightReminderTime } returns flowOf(LocalTime(8, 0))
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
-        coEvery { restoreUseCase.invoke(any()) } returns Result.success(Unit)
+        coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
         coEvery { updateDefaultReminderTimeUseCase.invoke(any()) } returns Unit
         val viewModel = ReminderSettingsViewModel(
             preferencesRepository,

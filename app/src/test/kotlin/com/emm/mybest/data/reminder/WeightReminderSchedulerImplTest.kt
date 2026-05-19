@@ -15,8 +15,7 @@ import org.junit.Test
 class WeightReminderSchedulerImplTest {
 
     private val workManager = mockk<WorkManager>(relaxed = true)
-    private val context = mockk<android.content.Context>(relaxed = true)
-    private val scheduler = WeightReminderSchedulerImpl(workManager, context)
+    private val scheduler = WeightReminderSchedulerImpl(workManager)
 
     @Test
     fun `schedule calls enqueueUniquePeriodicWork with correct work name`() = runTest {

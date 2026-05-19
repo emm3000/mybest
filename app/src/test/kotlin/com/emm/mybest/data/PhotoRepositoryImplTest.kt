@@ -1,5 +1,6 @@
 package com.emm.mybest.data
 
+import android.content.Context
 import com.emm.mybest.data.entities.ProgressPhotoDao
 import com.emm.mybest.data.entities.ProgressPhotoEntity
 import com.emm.mybest.domain.models.NewProgressPhoto
@@ -18,8 +19,9 @@ import org.junit.Test
 
 class PhotoRepositoryImplTest {
 
+    private val context = mockk<Context>(relaxed = true)
     private val dao = mockk<ProgressPhotoDao>()
-    private val repository = PhotoRepositoryImpl(dao)
+    private val repository = PhotoRepositoryImpl(context, dao)
 
     @Test
     fun `getAllPhotos maps dao entities to domain models`() = runTest {
@@ -86,11 +88,30 @@ class PhotoRepositoryImplTest {
     }
 
     @Test
-    fun `deletePhoto delegates to dao`() = runTest {
+    fun `deletePhoto fetches entity then deletes from dao`() = runTest {
+        val entity = ProgressPhotoEntity(
+            id = "p3",
+            date = LocalDate(2026, 3, 8),
+            type = PhotoType.FACE,
+            photoPath = "https://example.com/photo.jpg",
+            createdAt = 100L,
+        )
+        coEvery { dao.getById("p3") } returns entity
         coEvery { dao.deleteById("p3") } returns Unit
 
         repository.deletePhoto("p3")
 
+        coVerify(exactly = 1) { dao.getById("p3") }
         coVerify(exactly = 1) { dao.deleteById("p3") }
+    }
+
+    @Test
+    fun `deletePhoto handles missing entity without crash`() = runTest {
+        coEvery { dao.getById("p4") } returns null
+        coEvery { dao.deleteById("p4") } returns Unit
+
+        repository.deletePhoto("p4")
+
+        coVerify(exactly = 1) { dao.deleteById("p4") }
     }
 }

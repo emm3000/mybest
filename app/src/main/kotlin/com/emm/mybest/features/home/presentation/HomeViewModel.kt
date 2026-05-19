@@ -9,16 +9,25 @@ import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
 import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
 import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
 
@@ -46,6 +55,7 @@ sealed interface HomeIntent {
     data class ToggleExercise(val done: Boolean) : HomeIntent
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val observeDailyCompliance: ObserveDailyComplianceUseCase,
     private val toggleMeal: ToggleMealComplianceUseCase,
@@ -55,38 +65,64 @@ class HomeViewModel(
     clock: Clock = Clock.System,
 ) : ViewModel() {
 
-    private val today: LocalDate = clock.todayIn(TimeZone.currentSystemDefault())
-    private val todayDow: DayOfWeek = today.dayOfWeek
+    private val dateFlow: Flow<LocalDate> = flow {
+        val tz = TimeZone.currentSystemDefault()
+        var current = clock.todayIn(tz)
+        emit(current)
+        while (true) {
+            val nowMs = clock.now().toEpochMilliseconds()
+            val nextMidnightMs = current.plus(DatePeriod(days = 1))
+                .atStartOfDayIn(tz)
+                .toEpochMilliseconds()
+            delay((nextMidnightMs - nowMs).coerceAtLeast(0L))
+            val next = clock.todayIn(tz)
+            if (next == current) break
+            current = next
+            emit(current)
+        }
+    }
 
-    private val _state = MutableStateFlow(HomeState(isLoading = true, today = today, dayOfWeek = todayDow))
+    private val _state = MutableStateFlow(
+        HomeState(
+            isLoading = true,
+            today = clock.todayIn(TimeZone.currentSystemDefault()),
+            dayOfWeek = clock.todayIn(TimeZone.currentSystemDefault()).dayOfWeek,
+        ),
+    )
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
     init {
         combine(
             getMealPlan(),
             getExercisePlan(),
-            observeDailyCompliance(today),
-        ) { mealPlan, exPlan, compliance ->
-            val rows = MealType.entries.map { type ->
-                MealRow(
-                    type = type,
-                    description = mealPlan.entryFor(todayDow, type)?.description.orEmpty(),
-                    done = compliance.mealsDone[type] ?: false,
-                )
-            }
-            val routine = exPlan.forDay(todayDow)?.routine.orEmpty()
-            val completedCount = rows.count { it.done } + if (compliance.exerciseDone) 1 else 0
-            HomeState(
-                isLoading = false,
-                today = today,
-                dayOfWeek = todayDow,
-                mealRows = rows,
-                exerciseRoutine = routine,
-                exerciseDone = compliance.exerciseDone,
-                completionRatio = compliance.completionRatio,
-                completedCount = completedCount,
-            )
+            dateFlow,
+        ) { mealPlan, exPlan, today ->
+            Triple(mealPlan, exPlan, today)
         }
+            .flatMapLatest { (mealPlan, exPlan, today) ->
+                val todayDow = today.dayOfWeek
+                observeDailyCompliance(today).map { compliance ->
+                    val rows = MealType.entries.map { type ->
+                        MealRow(
+                            type = type,
+                            description = mealPlan.entryFor(todayDow, type)?.description.orEmpty(),
+                            done = compliance.mealsDone[type] ?: false,
+                        )
+                    }
+                    val routine = exPlan.forDay(todayDow)?.routine.orEmpty()
+                    val completedCount = rows.count { it.done } + if (compliance.exerciseDone) 1 else 0
+                    HomeState(
+                        isLoading = false,
+                        today = today,
+                        dayOfWeek = todayDow,
+                        mealRows = rows,
+                        exerciseRoutine = routine,
+                        exerciseDone = compliance.exerciseDone,
+                        completionRatio = compliance.completionRatio,
+                        completedCount = completedCount,
+                    )
+                }
+            }
             .onEach { _state.value = it }
             .launchIn(viewModelScope)
     }
@@ -94,10 +130,10 @@ class HomeViewModel(
     fun handle(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.ToggleMeal -> viewModelScope.launch {
-                toggleMeal(today, intent.type, intent.done)
+                toggleMeal(_state.value.today, intent.type, intent.done)
             }
             is HomeIntent.ToggleExercise -> viewModelScope.launch {
-                toggleExercise(today, intent.done)
+                toggleExercise(_state.value.today, intent.done)
             }
         }
     }

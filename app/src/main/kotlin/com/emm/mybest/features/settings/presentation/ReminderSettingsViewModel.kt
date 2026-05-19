@@ -2,6 +2,7 @@ package com.emm.mybest.features.settings.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
@@ -143,12 +144,14 @@ class ReminderSettingsViewModel(
     private fun importBackup(sourceUri: String) {
         viewModelScope.launch {
             restoreDatabaseBackupUseCase(sourceUri)
-                .onSuccess {
-                    _effect.emit(
-                        ReminderSettingsEffect.ShowMessage(
-                            "Backup importado. Reinicia la app para aplicar cambios.",
-                        ),
-                    )
+                .onSuccess { result ->
+                    when (result) {
+                        RestoreResult.RequiresRestart -> _effect.emit(
+                            ReminderSettingsEffect.ShowMessage(
+                                "Backup restaurado. Reinicia la app para aplicar.",
+                            ),
+                        )
+                    }
                 }.onFailure {
                     _effect.emit(
                         ReminderSettingsEffect.ShowError(

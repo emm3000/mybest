@@ -1,7 +1,5 @@
 package com.emm.mybest.data.reminder
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -11,37 +9,33 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.emm.mybest.MainActivity
 import com.emm.mybest.R
+import com.emm.mybest.core.notification.WEIGHT_REMINDER_CHANNEL_ID
+import com.emm.mybest.domain.repository.UserPreferencesRepository
+import kotlinx.coroutines.flow.first
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-internal const val WEIGHT_REMINDER_CHANNEL_ID = "weight_reminder"
 private const val WEIGHT_REMINDER_NOTIFICATION_ID = 1001
 
 class WeightReminderWorker(
     private val context: Context,
     workerParams: WorkerParameters,
-) : CoroutineWorker(context, workerParams) {
+) : CoroutineWorker(context, workerParams), KoinComponent {
+
+    private val userPreferencesRepository: UserPreferencesRepository by inject()
 
     override suspend fun doWork(): Result {
-        ensureNotificationChannel()
+        val notificationsEnabled = userPreferencesRepository.notificationsEnabled.first()
+        if (!notificationsEnabled) return Result.success()
+
         showNotification()
         return Result.success()
-    }
-
-    private fun ensureNotificationChannel() {
-        val channel = NotificationChannel(
-            WEIGHT_REMINDER_CHANNEL_ID,
-            "Recordatorio de peso",
-            NotificationManager.IMPORTANCE_DEFAULT,
-        ).apply {
-            description = "Recordatorio diario para registrar el peso"
-        }
-        val notificationManager = context.getSystemService(NotificationManager::class.java)
-        notificationManager.createNotificationChannel(channel)
     }
 
     private fun showNotification() {
         val intent = Intent(context, MainActivity::class.java).apply {
             action = "com.emm.mybest.ACTION_ADD_WEIGHT"
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         val pendingIntent = PendingIntent.getActivity(
             context,

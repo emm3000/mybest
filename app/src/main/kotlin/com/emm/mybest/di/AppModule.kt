@@ -59,7 +59,9 @@ val appModule = module {
             androidContext(),
             AppDatabase::class.java,
             AppDatabase.DB_NAME,
-        ).addMigrations(MIGRATION_2_3, MIGRATION_3_4).build()
+        ).addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+            .fallbackToDestructiveMigration(dropAllTables = true)
+            .build()
     }
 
     single { get<AppDatabase>().dailyWeightDao() }
@@ -69,14 +71,14 @@ val appModule = module {
     single<MealComplianceDao> { get<AppDatabase>().mealComplianceDao() }
     single<ExerciseComplianceDao> { get<AppDatabase>().exerciseComplianceDao() }
     single<WeightRepository> { WeightRepositoryImpl(get()) }
-    single<PhotoRepository> { PhotoRepositoryImpl(get()) }
+    single<PhotoRepository> { PhotoRepositoryImpl(androidContext(), get()) }
     single<BackupRepository> { BackupRepositoryImpl(androidContext(), get()) }
 
     single<MealPlanRepository> { MealPlanRepositoryImpl(get()) }
     single<ExercisePlanRepository> { ExercisePlanRepositoryImpl(get()) }
     single<ComplianceRepository> { ComplianceRepositoryImpl(get(), get()) }
     single { WorkManager.getInstance(androidContext()) }
-    single<WeightReminderScheduler> { WeightReminderSchedulerImpl(get(), androidContext()) }
+    single<WeightReminderScheduler> { WeightReminderSchedulerImpl(get()) }
 
     factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }

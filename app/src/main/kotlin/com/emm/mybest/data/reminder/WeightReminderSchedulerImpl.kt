@@ -1,6 +1,5 @@
 package com.emm.mybest.data.reminder
 
-import android.content.Context
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -19,8 +18,6 @@ private const val MS_PER_DAY = 24L * 60 * 60 * 1000
 
 class WeightReminderSchedulerImpl(
     private val workManager: WorkManager,
-    @Suppress("UnusedPrivateMember")
-    private val context: Context,
 ) : WeightReminderScheduler {
 
     override suspend fun schedule(time: LocalTime) {
