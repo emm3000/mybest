@@ -7,14 +7,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.features.diet.presentation.MealPlanScreen
 import com.emm.mybest.features.diet.presentation.MealPlanViewModel
@@ -37,8 +36,9 @@ import com.emm.mybest.features.weight.presentation.AddWeightScreen
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
 import com.emm.mybest.ui.components.HBottomNavigationBar
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
-private val TOP_LEVEL_SCREENS = listOf(
+private val TOP_LEVEL_SCREENS = setOf(
     Screen.Home,
     Screen.History,
     Screen.Insights,
@@ -51,18 +51,19 @@ fun AppNavigation(
     intentAction: String? = null,
     onConsumeAction: () -> Unit = {},
 ) {
-    val navController = rememberNavController()
+    val navigationState = rememberNavigationState(
+        startRoute = Screen.Home,
+        topLevelRoutes = TOP_LEVEL_SCREENS,
+    )
+    val navigator = remember { Navigator(navigationState) }
     val currentOnConsumeAction by rememberUpdatedState(onConsumeAction)
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
-    val showBottomBar = TOP_LEVEL_SCREENS.any { screen ->
-        currentDestination?.hasRoute(screen::class) == true
-    }
+    val showBottomBar = navigationState.topLevelRoute in TOP_LEVEL_SCREENS &&
+        navigationState.backStacks[navigationState.topLevelRoute]?.size == 1
 
     HandleIntentAction(
         intentAction = intentAction,
-        navController = navController,
+        navigator = navigator,
         onConsumeAction = currentOnConsumeAction,
     )
 
@@ -71,31 +72,121 @@ fun AppNavigation(
         bottomBar = {
             if (showBottomBar) {
                 HBottomNavigationBar(
-                    currentRoute = TOP_LEVEL_SCREENS.firstOrNull { screen ->
-                        currentDestination?.hasRoute(screen::class) == true
-                    },
-                    onNavItemClick = { screen ->
-                        navController.navigate(screen) {
-                            // Pop up to the start destination of the graph to
-                            // avoid building up a large stack of destinations
-                            // on the back stack as users select items
-                            popUpTo(Screen.Home) {
-                                saveState = true
-                            }
-                            // Avoid multiple copies of the same destination when
-                            // reselecting the same item
-                            launchSingleTop = true
-                            // Restore state when reselecting a previously selected item
-                            restoreState = true
-                        }
-                    },
+                    currentRoute = navigationState.topLevelRoute as? Screen,
+                    onNavItemClick = { screen -> navigator.navigate(screen) },
                 )
             }
         },
     ) { innerPadding ->
-        AppNavGraph(
-            navController = navController,
-            innerPadding = innerPadding,
+        NavDisplay(
+            entries = navigationState.toEntries(appEntryProvider(navigator)),
+            onBack = { navigator.goBack() },
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .padding(innerPadding),
+        )
+    }
+}
+
+@Composable
+private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey> = entryProvider {
+    entry<Screen.Home> {
+        HomeScreen(
+            onWeightClick = { navigator.navigate(Screen.AddWeight) },
+            onPhotoClick = { navigator.navigate(Screen.AddPhoto) },
+            onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
+            onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
+            modifier = Modifier,
+        )
+    }
+
+    entry<Screen.AddWeight> {
+        val viewModel: AddWeightViewModel = koinViewModel()
+        AddWeightScreen(
+            viewModel = viewModel,
+            onBackClick = { navigator.goBack() },
+            modifier = Modifier,
+        )
+    }
+
+    entry<Screen.AddPhoto> {
+        val viewModel: AddPhotoViewModel = koinViewModel()
+        AddPhotoScreen(
+            viewModel = viewModel,
+            mediaManager = koinInject(),
+            onBackClick = { navigator.goBack() },
+            modifier = Modifier,
+        )
+    }
+
+    entry<Screen.History> {
+        val viewModel: HistoryViewModel = koinViewModel()
+        HistoryScreen(
+            viewModel = viewModel,
+            modifier = Modifier,
+        )
+    }
+
+    entry<Screen.Insights> {
+        val viewModel: InsightsViewModel = koinViewModel()
+        InsightsScreen(
+            viewModel = viewModel,
+            onCompareClick = { navigator.navigate(Screen.ComparePhotos) },
+            onRecommendationAction = { action ->
+                when (action) {
+                    InsightsRecommendationAction.ADJUST_WEIGHT_PLAN ->
+                        navigator.navigate(Screen.AddWeight)
+                    InsightsRecommendationAction.ADD_PROGRESS_PHOTO ->
+                        navigator.navigate(Screen.AddPhoto)
+                    InsightsRecommendationAction.KEEP_ROUTINE ->
+                        navigator.navigate(Screen.Home)
+                }
+            },
+            modifier = Modifier,
+        )
+    }
+
+    entry<Screen.ComparePhotos> {
+        val viewModel: ComparePhotosViewModel = koinViewModel()
+        ComparePhotosScreen(
+            viewModel = viewModel,
+            onBackClick = { navigator.goBack() },
+            modifier = Modifier,
+        )
+    }
+
+    entry<Screen.Timeline> {
+        val viewModel: TimelineViewModel = koinViewModel()
+        TimelineScreen(
+            viewModel = viewModel,
+            modifier = Modifier,
+        )
+    }
+
+    entry<Screen.ReminderSettings> {
+        val viewModel: ReminderSettingsViewModel = koinViewModel()
+        ReminderSettingsScreen(
+            viewModel = viewModel,
+            onBackClick = { navigator.goBack() },
+            onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
+            onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
+            modifier = Modifier,
+        )
+    }
+
+    entry<Screen.MealPlan> {
+        val viewModel: MealPlanViewModel = koinViewModel()
+        MealPlanScreen(
+            viewModel = viewModel,
+            modifier = Modifier,
+        )
+    }
+
+    entry<Screen.ExercisePlan> {
+        val viewModel: ExercisePlanViewModel = koinViewModel()
+        ExercisePlanScreen(
+            viewModel = viewModel,
+            modifier = Modifier,
         )
     }
 }
@@ -103,127 +194,16 @@ fun AppNavigation(
 @Composable
 private fun HandleIntentAction(
     intentAction: String?,
-    navController: NavHostController,
+    navigator: Navigator,
     onConsumeAction: () -> Unit,
 ) {
     val currentOnConsumeAction by rememberUpdatedState(onConsumeAction)
     LaunchedEffect(intentAction) {
         if (intentAction == null) return@LaunchedEffect
         when (intentAction) {
-            "com.emm.mybest.ACTION_ADD_WEIGHT" -> navController.navigate(Screen.AddWeight)
-            "com.emm.mybest.ACTION_ADD_PHOTO" -> navController.navigate(Screen.AddPhoto)
+            "com.emm.mybest.ACTION_ADD_WEIGHT" -> navigator.navigate(Screen.AddWeight)
+            "com.emm.mybest.ACTION_ADD_PHOTO" -> navigator.navigate(Screen.AddPhoto)
         }
         currentOnConsumeAction()
-    }
-}
-
-@Composable
-private fun AppNavGraph(
-    navController: NavHostController,
-    innerPadding: androidx.compose.foundation.layout.PaddingValues,
-) {
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Home,
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
-            .padding(innerPadding),
-    ) {
-        composable<Screen.Home> {
-            HomeScreen(
-                onWeightClick = { navController.navigate(Screen.AddWeight) },
-                onPhotoClick = { navController.navigate(Screen.AddPhoto) },
-                onMealPlanClick = { navController.navigate(Screen.MealPlan) },
-                onExercisePlanClick = { navController.navigate(Screen.ExercisePlan) },
-                modifier = Modifier,
-            )
-        }
-
-        composable<Screen.AddWeight> {
-            val viewModel: AddWeightViewModel = koinViewModel()
-            AddWeightScreen(
-                viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
-                modifier = Modifier,
-            )
-        }
-
-        composable<Screen.AddPhoto> {
-            val viewModel: AddPhotoViewModel = koinViewModel()
-            AddPhotoScreen(
-                viewModel = viewModel,
-                mediaManager = org.koin.compose.koinInject(),
-                onBackClick = { navController.popBackStack() },
-                modifier = Modifier,
-            )
-        }
-
-        composable<Screen.History> {
-            val viewModel: HistoryViewModel = koinViewModel()
-            HistoryScreen(
-                viewModel = viewModel,
-                modifier = Modifier,
-            )
-        }
-
-        composable<Screen.Insights> {
-            val viewModel: InsightsViewModel = koinViewModel()
-            InsightsScreen(
-                viewModel = viewModel,
-                onCompareClick = { navController.navigate(Screen.ComparePhotos) },
-                onRecommendationAction = { action ->
-                    when (action) {
-                        InsightsRecommendationAction.ADJUST_WEIGHT_PLAN -> navController.navigate(Screen.AddWeight)
-                        InsightsRecommendationAction.ADD_PROGRESS_PHOTO -> navController.navigate(Screen.AddPhoto)
-                        InsightsRecommendationAction.KEEP_ROUTINE -> navController.navigate(Screen.Home)
-                    }
-                },
-                modifier = Modifier,
-            )
-        }
-
-        composable<Screen.ComparePhotos> {
-            val viewModel: ComparePhotosViewModel = koinViewModel()
-            ComparePhotosScreen(
-                viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
-                modifier = Modifier,
-            )
-        }
-
-        composable<Screen.Timeline> {
-            val viewModel: TimelineViewModel = koinViewModel()
-            TimelineScreen(
-                viewModel = viewModel,
-                modifier = Modifier,
-            )
-        }
-
-        composable<Screen.ReminderSettings> {
-            val viewModel: ReminderSettingsViewModel = koinViewModel()
-            ReminderSettingsScreen(
-                viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
-                onMealPlanClick = { navController.navigate(Screen.MealPlan) },
-                onExercisePlanClick = { navController.navigate(Screen.ExercisePlan) },
-                modifier = Modifier,
-            )
-        }
-
-        composable<Screen.MealPlan> {
-            val viewModel: MealPlanViewModel = koinViewModel()
-            MealPlanScreen(
-                viewModel = viewModel,
-                modifier = Modifier,
-            )
-        }
-
-        composable<Screen.ExercisePlan> {
-            val viewModel: ExercisePlanViewModel = koinViewModel()
-            ExercisePlanScreen(
-                viewModel = viewModel,
-                modifier = Modifier,
-            )
-        }
     }
 }
