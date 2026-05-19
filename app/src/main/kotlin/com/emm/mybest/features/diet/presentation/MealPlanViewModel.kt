@@ -22,7 +22,10 @@ class MealPlanViewModel(
     private val _state = MutableStateFlow(MealPlanState())
     val state = _state.asStateFlow()
 
-    private val _effects = MutableSharedFlow<MealPlanEffect>()
+    private val _effects = MutableSharedFlow<MealPlanEffect>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+    )
     val effects = _effects.asSharedFlow()
 
     init {

@@ -21,7 +21,10 @@ class ExercisePlanViewModel(
     private val _state = MutableStateFlow(ExercisePlanState())
     val state = _state.asStateFlow()
 
-    private val _effects = MutableSharedFlow<ExercisePlanEffect>()
+    private val _effects = MutableSharedFlow<ExercisePlanEffect>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+    )
     val effects = _effects.asSharedFlow()
 
     init {

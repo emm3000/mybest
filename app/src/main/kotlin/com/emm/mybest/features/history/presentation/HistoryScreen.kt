@@ -46,6 +46,9 @@ import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.datetime.currentDate
 import com.emm.mybest.core.datetime.formatEsWeekdayDayMonth
 import com.emm.mybest.domain.models.ProgressPhoto
+import com.emm.mybest.domain.usecase.history.DaySummary
+import com.emm.mybest.domain.usecase.history.HistoryRange
+import com.emm.mybest.domain.usecase.history.WeightTrendPoint
 import com.emm.mybest.features.history.presentation.components.HistoryRangeSelector
 import com.emm.mybest.features.history.presentation.components.WeightTrendChart
 import com.emm.mybest.ui.components.AlertVariant

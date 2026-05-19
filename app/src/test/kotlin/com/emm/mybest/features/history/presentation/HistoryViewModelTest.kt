@@ -5,8 +5,14 @@ import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
-import com.emm.mybest.domain.repository.PhotoRepository
-import com.emm.mybest.domain.repository.WeightRepository
+import com.emm.mybest.domain.usecase.history.DaySummary
+import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
+import com.emm.mybest.domain.usecase.history.HistoryRange
+import com.emm.mybest.domain.usecase.history.HistoryResult
+import com.emm.mybest.domain.usecase.history.WeightTrendPoint
+import com.emm.mybest.domain.usecase.history.computeStreak
+import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
+import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coVerify
 import io.mockk.every
@@ -30,8 +36,9 @@ class HistoryViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val weightRepository = mockk<WeightRepository>(relaxed = true)
-    private val photoRepository = mockk<PhotoRepository>(relaxed = true)
+    private val getHistoryUseCase = mockk<GetHistoryUseCase>(relaxed = true)
+    private val deleteWeightByDate = mockk<DeleteWeightByDateUseCase>(relaxed = true)
+    private val deletePhoto = mockk<DeletePhotoUseCase>(relaxed = true)
 
     private val fixedMonth = YearMonthValue(2026, 3)
 
@@ -49,21 +56,25 @@ class HistoryViewModelTest {
         createdAt = 1L,
     )
 
+    private fun emptyResult() = HistoryResult(
+        monthlyData = emptyMap(),
+        weightTrend = emptyList(),
+        streak = 0,
+        activeDays = 0,
+    )
+
     private fun buildViewModel(
-        weights: List<WeightEntry> = emptyList(),
-        photos: List<ProgressPhoto> = emptyList(),
+        result: HistoryResult = emptyResult(),
         initialMonth: YearMonthValue = fixedMonth,
     ): HistoryViewModel {
-        every { weightRepository.getWeightProgress() } returns flowOf(weights)
-        every { photoRepository.getAllPhotos() } returns flowOf(photos)
-        return HistoryViewModel(weightRepository, photoRepository, initialMonth)
+        every { getHistoryUseCase(any(), any()) } returns flowOf(result)
+        return HistoryViewModel(getHistoryUseCase, deleteWeightByDate, deletePhoto, initialMonth)
     }
 
     @Test
     fun `initial state has isLoading true before data arrives`() = runTest {
-        every { weightRepository.getWeightProgress() } returns flowOf(emptyList())
-        every { photoRepository.getAllPhotos() } returns flowOf(emptyList())
-        val viewModel = HistoryViewModel(weightRepository, photoRepository, fixedMonth)
+        every { getHistoryUseCase(any(), any()) } returns flowOf(emptyResult())
+        val viewModel = HistoryViewModel(getHistoryUseCase, deleteWeightByDate, deletePhoto, fixedMonth)
 
         viewModel.state.test {
             assertEquals(true, awaitItem().isLoading)
@@ -86,48 +97,46 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `weight entry appears as DaySummary with hasWeight true`() = runTest {
-        val viewModel = buildViewModel(weights = listOf(weightEntry))
+    fun `weight entry in result appears as DaySummary with hasWeight true`() = runTest {
+        val summary = DaySummary(weightEntry.date, weight = weightEntry)
+        val result = HistoryResult(
+            monthlyData = mapOf(weightEntry.date to summary),
+            weightTrend = listOf(WeightTrendPoint(weightEntry.date, weightEntry.weight)),
+            streak = 1,
+            activeDays = 1,
+        )
+        val viewModel = buildViewModel(result)
 
         viewModel.state.test {
             awaitItem()
             val loaded = awaitItem()
-            val summary = loaded.monthlyData[weightEntry.date]
-            assertTrue(summary?.hasWeight == true)
-            assertFalse(summary?.hasPhoto == true)
-            assertTrue(summary?.hasActivity == true)
-            assertEquals(weightEntry, summary?.weight)
+            val s = loaded.monthlyData[weightEntry.date]
+            assertTrue(s?.hasWeight == true)
+            assertFalse(s?.hasPhoto == true)
+            assertTrue(s?.hasActivity == true)
+            assertEquals(weightEntry, s?.weight)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `photo entry appears as DaySummary with hasPhoto true`() = runTest {
-        val viewModel = buildViewModel(photos = listOf(photo))
+    fun `photo entry in result appears as DaySummary with hasPhoto true`() = runTest {
+        val summary = DaySummary(photo.date, photos = listOf(photo))
+        val result = HistoryResult(
+            monthlyData = mapOf(photo.date to summary),
+            weightTrend = emptyList(),
+            streak = 1,
+            activeDays = 1,
+        )
+        val viewModel = buildViewModel(result)
 
         viewModel.state.test {
             awaitItem()
             val loaded = awaitItem()
-            val summary = loaded.monthlyData[photo.date]
-            assertTrue(summary?.hasPhoto == true)
-            assertFalse(summary?.hasWeight == true)
-            assertEquals(listOf(photo), summary?.photos)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `same date weight and photo are merged into single DaySummary`() = runTest {
-        val viewModel = buildViewModel(weights = listOf(weightEntry), photos = listOf(photo))
-
-        viewModel.state.test {
-            awaitItem()
-            val loaded = awaitItem()
-            assertEquals(1, loaded.monthlyData.size)
-            val summary = loaded.monthlyData[LocalDate(2026, 3, 10)]
-            assertTrue(summary?.hasWeight == true)
-            assertTrue(summary?.hasPhoto == true)
-            assertTrue(summary?.hasActivity == true)
+            val s = loaded.monthlyData[photo.date]
+            assertTrue(s?.hasPhoto == true)
+            assertFalse(s?.hasWeight == true)
+            assertEquals(listOf(photo), s?.photos)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -197,8 +206,8 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `OnDeleteWeight calls repository deleteByDate`() = runTest {
-        val viewModel = buildViewModel(weights = listOf(weightEntry))
+    fun `OnDeleteWeight calls DeleteWeightByDateUseCase`() = runTest {
+        val viewModel = buildViewModel()
 
         viewModel.state.test {
             awaitItem()
@@ -207,14 +216,14 @@ class HistoryViewModelTest {
             viewModel.onIntent(HistoryIntent.OnDeleteWeight(weightEntry.date))
             advanceUntilIdle()
 
-            coVerify(exactly = 1) { weightRepository.deleteByDate(weightEntry.date) }
+            coVerify(exactly = 1) { deleteWeightByDate(weightEntry.date) }
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `OnDeletePhoto calls repository deletePhoto`() = runTest {
-        val viewModel = buildViewModel(photos = listOf(photo))
+    fun `OnDeletePhoto calls DeletePhotoUseCase`() = runTest {
+        val viewModel = buildViewModel()
 
         viewModel.state.test {
             awaitItem()
@@ -223,24 +232,29 @@ class HistoryViewModelTest {
             viewModel.onIntent(HistoryIntent.OnDeletePhoto(photo.id))
             advanceUntilIdle()
 
-            coVerify(exactly = 1) { photoRepository.deletePhoto(photo.id) }
+            coVerify(exactly = 1) { deletePhoto(photo.id) }
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `state updates reactively when repository emits new data`() = runTest {
-        val weightFlow = MutableStateFlow(emptyList<WeightEntry>())
-        every { weightRepository.getWeightProgress() } returns weightFlow
-        every { photoRepository.getAllPhotos() } returns flowOf(emptyList())
-        val viewModel = HistoryViewModel(weightRepository, photoRepository, fixedMonth)
+    fun `state updates reactively when use case emits new data`() = runTest {
+        val resultFlow = MutableStateFlow(emptyResult())
+        every { getHistoryUseCase(any(), any()) } returns resultFlow
+        val viewModel = HistoryViewModel(getHistoryUseCase, deleteWeightByDate, deletePhoto, fixedMonth)
 
         viewModel.state.test {
             awaitItem() // loading
             val empty = awaitItem()
             assertTrue(empty.monthlyData.isEmpty())
 
-            weightFlow.value = listOf(weightEntry)
+            val summary = DaySummary(weightEntry.date, weight = weightEntry)
+            resultFlow.value = HistoryResult(
+                monthlyData = mapOf(weightEntry.date to summary),
+                weightTrend = listOf(WeightTrendPoint(weightEntry.date, weightEntry.weight)),
+                streak = 1,
+                activeDays = 1,
+            )
             val updated = awaitItem()
             assertEquals(1, updated.monthlyData.size)
             cancelAndIgnoreRemainingEvents()
@@ -248,13 +262,19 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `weightTrend is populated from weight entries in selected range`() = runTest {
-        val viewModel = buildViewModel(weights = listOf(weightEntry))
+    fun `weightTrend is populated from use case result`() = runTest {
+        val trend = listOf(WeightTrendPoint(weightEntry.date, weightEntry.weight))
+        val result = HistoryResult(
+            monthlyData = emptyMap(),
+            weightTrend = trend,
+            streak = 0,
+            activeDays = 0,
+        )
+        val viewModel = buildViewModel(result)
 
         viewModel.state.test {
             awaitItem()
             val loaded = awaitItem()
-            // MONTH range, March 2026 — weightEntry date is 2026-03-10, which is in March
             assertEquals(1, loaded.weightTrend.size)
             assertEquals(weightEntry.date, loaded.weightTrend[0].date)
             assertEquals(weightEntry.weight, loaded.weightTrend[0].weight)
@@ -262,7 +282,7 @@ class HistoryViewModelTest {
         }
     }
 
-    // region streak computation
+    // region streak computation (pure function tests — still valid at domain level)
 
     @Test
     fun `computeStreak returns 0 for empty data`() {

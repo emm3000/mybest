@@ -3,7 +3,7 @@ package com.emm.mybest.features.photo.presentation
 import app.cash.turbine.test
 import com.emm.mybest.domain.models.NewProgressPhoto
 import com.emm.mybest.domain.models.PhotoType
-import com.emm.mybest.domain.repository.PhotoRepository
+import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -23,9 +23,9 @@ class AddPhotoViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val photoRepository = mockk<PhotoRepository>(relaxed = true)
+    private val savePhotosUseCase = mockk<SavePhotosUseCase>(relaxed = true)
 
-    private fun buildViewModel() = AddPhotoViewModel(photoRepository)
+    private fun buildViewModel() = AddPhotoViewModel(savePhotosUseCase)
 
     @Test
     fun `initial state has empty selectedPhotos and isLoading false`() = runTest {
@@ -104,7 +104,7 @@ class AddPhotoViewModelTest {
     }
 
     @Test
-    fun `OnSaveClick with empty selection emits ShowError without calling repository`() = runTest {
+    fun `OnSaveClick with empty selection emits ShowError without calling use case`() = runTest {
         val viewModel = buildViewModel()
 
         viewModel.effect.test {
@@ -115,12 +115,12 @@ class AddPhotoViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
 
-        coVerify(exactly = 0) { photoRepository.savePhotos(any()) }
+        coVerify(exactly = 0) { savePhotosUseCase(any()) }
     }
 
     @Test
-    fun `OnSaveClick with photos calls repository and emits NavigateBack on success`() = runTest {
-        coEvery { photoRepository.savePhotos(any()) } returns Unit
+    fun `OnSaveClick with photos calls use case and emits NavigateBack on success`() = runTest {
+        coEvery { savePhotosUseCase(any()) } returns Unit
         val viewModel = buildViewModel()
         viewModel.onIntent(AddPhotoIntent.OnPhotosSelected(listOf("/tmp/face.jpg")))
         viewModel.onIntent(AddPhotoIntent.OnTypeSelected(0, PhotoType.FACE))
@@ -133,7 +133,7 @@ class AddPhotoViewModelTest {
         }
 
         coVerify(exactly = 1) {
-            photoRepository.savePhotos(
+            savePhotosUseCase(
                 listOf(NewProgressPhoto(type = PhotoType.FACE, photoPath = "/tmp/face.jpg")),
             )
         }
@@ -141,7 +141,7 @@ class AddPhotoViewModelTest {
 
     @Test
     fun `OnSaveClick resets isLoading to false after save`() = runTest {
-        coEvery { photoRepository.savePhotos(any()) } returns Unit
+        coEvery { savePhotosUseCase(any()) } returns Unit
         val viewModel = buildViewModel()
         viewModel.onIntent(AddPhotoIntent.OnPhotosSelected(listOf("/tmp/face.jpg")))
 
@@ -152,8 +152,8 @@ class AddPhotoViewModelTest {
     }
 
     @Test
-    fun `OnSaveClick emits ShowError when repository throws`() = runTest {
-        coEvery { photoRepository.savePhotos(any()) } throws RuntimeException("DB error")
+    fun `OnSaveClick emits ShowError when use case throws`() = runTest {
+        coEvery { savePhotosUseCase(any()) } throws RuntimeException("DB error")
         val viewModel = buildViewModel()
         viewModel.onIntent(AddPhotoIntent.OnPhotosSelected(listOf("/tmp/face.jpg")))
 
@@ -168,8 +168,8 @@ class AddPhotoViewModelTest {
     }
 
     @Test
-    fun `OnSaveClick passes correct PhotoType to repository`() = runTest {
-        coEvery { photoRepository.savePhotos(any()) } returns Unit
+    fun `OnSaveClick passes correct PhotoType to use case`() = runTest {
+        coEvery { savePhotosUseCase(any()) } returns Unit
         val viewModel = buildViewModel()
         viewModel.onIntent(AddPhotoIntent.OnPhotosSelected(listOf("/tmp/trunk.jpg")))
         viewModel.onIntent(AddPhotoIntent.OnTypeSelected(0, PhotoType.TRUNK))
@@ -178,7 +178,7 @@ class AddPhotoViewModelTest {
         advanceUntilIdle()
 
         coVerify {
-            photoRepository.savePhotos(
+            savePhotosUseCase(
                 listOf(NewProgressPhoto(type = PhotoType.TRUNK, photoPath = "/tmp/trunk.jpg")),
             )
         }

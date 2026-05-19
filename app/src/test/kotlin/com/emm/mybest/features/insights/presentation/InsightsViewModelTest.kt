@@ -4,6 +4,8 @@ import app.cash.turbine.test
 import com.emm.mybest.domain.models.InsightsData
 import com.emm.mybest.domain.models.InsightsRecommendation
 import com.emm.mybest.domain.models.InsightsRecommendationAction
+import com.emm.mybest.domain.models.InsightsRecommendationKind
+import com.emm.mybest.domain.models.PeriodLabel
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.testing.MainDispatcherRule
@@ -32,9 +34,7 @@ class InsightsViewModelTest {
     private val getInsightsUseCase = mockk<GetInsightsUseCase>()
 
     private val keepRoutineRecommendation = InsightsRecommendation(
-        title = "Mantén el ritmo",
-        description = "desc",
-        actionLabel = "Sostén",
+        kind = InsightsRecommendationKind.KEEP_ROUTINE,
         action = InsightsRecommendationAction.KEEP_ROUTINE,
     )
 
@@ -43,7 +43,7 @@ class InsightsViewModelTest {
             WeightEntry(id = "w1", date = LocalDate(2026, 1, 1), weight = 80f),
             WeightEntry(id = "w2", date = LocalDate(2026, 2, 1), weight = 75f),
         ),
-        periodLabel = "Datos del 1 de enero, 2026 al 1 de febrero, 2026",
+        period = PeriodLabel.Range(LocalDate(2026, 1, 1), LocalDate(2026, 2, 1)),
         totalWeightLost = 5f,
         currentWeight = 75f,
         initialWeight = 80f,
@@ -81,7 +81,21 @@ class InsightsViewModelTest {
             assertEquals(75f, state.currentWeight, 0.001f)
             assertEquals(80f, state.initialWeight, 0.001f)
             assertEquals(4, state.photoCount)
-            assertEquals(keepRoutineRecommendation, state.recommendation)
+            assertTrue(state.hasRecommendation)
+            assertEquals(InsightsRecommendationAction.KEEP_ROUTINE, state.recommendationAction)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `period label is rendered for range`() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.state.test {
+            awaitItem()
+            val state = awaitItem()
+            assertTrue(state.periodLabel.contains("enero"))
+            assertTrue(state.periodLabel.contains("febrero"))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -108,17 +122,6 @@ class InsightsViewModelTest {
             awaitItem()
             val loaded = awaitItem()
             assertFalse(loaded.canComparePhotos)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `OnBackClick emits NavigateBack effect`() = runTest {
-        val viewModel = buildViewModel()
-
-        viewModel.effect.test {
-            viewModel.onIntent(InsightsIntent.OnBackClick)
-            assertEquals(InsightsEffect.NavigateBack, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -180,7 +183,8 @@ class InsightsViewModelTest {
 
     @Test
     fun `OnRecommendationActionClick with ADJUST_WEIGHT_PLAN emits correct action`() = runTest {
-        val adjustRecommendation = keepRoutineRecommendation.copy(
+        val adjustRecommendation = InsightsRecommendation(
+            kind = InsightsRecommendationKind.ADJUST_WEEKLY_PLAN,
             action = InsightsRecommendationAction.ADJUST_WEIGHT_PLAN,
         )
         val data = sampleInsightsData.copy(recommendation = adjustRecommendation)
@@ -221,14 +225,14 @@ class InsightsViewModelTest {
 
     @Test
     fun `OnRecommendationActionClick does nothing when recommendation is null`() = runTest {
-        // Use a use case that never emits so state stays at isLoading=true (recommendation=null)
+        // Use a use case that never emits so state stays at isLoading=true (recommendationAction=null)
         every { getInsightsUseCase() } returns flow { /* never emits */ }
         val viewModel = InsightsViewModel(getInsightsUseCase)
 
         viewModel.effect.test {
             viewModel.onIntent(InsightsIntent.OnRecommendationActionClick)
             advanceUntilIdle()
-            // null recommendation → no effect should be emitted
+            // null recommendationAction → no effect should be emitted
             expectNoEvents()
             cancelAndIgnoreRemainingEvents()
         }

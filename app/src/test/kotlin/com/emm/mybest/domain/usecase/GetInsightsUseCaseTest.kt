@@ -1,6 +1,7 @@
 package com.emm.mybest.domain.usecase
 
 import com.emm.mybest.domain.models.InsightsRecommendationAction
+import com.emm.mybest.domain.models.InsightsRecommendationKind
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
@@ -22,7 +23,7 @@ class GetInsightsUseCaseTest {
     private val useCase = GetInsightsUseCase(weightRepository, photoRepository)
 
     @Test
-    fun `empty weight and empty photos produces zero totals and ADD_PROGRESS_PHOTO recommendation`() = runTest {
+    fun `empty weight and empty photos produces zero totals and UPLOAD_PHOTO_TODAY recommendation`() = runTest {
         every { weightRepository.getWeightProgress() } returns flowOf(emptyList())
         every { photoRepository.getAllPhotos() } returns flowOf(emptyList())
 
@@ -30,6 +31,7 @@ class GetInsightsUseCaseTest {
 
         assertEquals(0f, result.totalWeightLost)
         assertEquals(0, result.photoCount)
+        assertEquals(InsightsRecommendationKind.UPLOAD_PHOTO_TODAY, result.recommendation.kind)
         assertEquals(InsightsRecommendationAction.ADD_PROGRESS_PHOTO, result.recommendation.action)
     }
 
@@ -57,11 +59,12 @@ class GetInsightsUseCaseTest {
 
         assertEquals(5f, result.totalWeightLost)
         assertEquals(10, result.photoCount)
+        assertEquals(InsightsRecommendationKind.KEEP_ROUTINE, result.recommendation.kind)
         assertEquals(InsightsRecommendationAction.KEEP_ROUTINE, result.recommendation.action)
     }
 
     @Test
-    fun `flat weight delta with photos produces ADJUST_WEIGHT_PLAN recommendation`() = runTest {
+    fun `flat weight delta with photos produces ADJUST_WEEKLY_PLAN recommendation`() = runTest {
         val startDate = LocalDate(2026, 1, 1)
         val endDate = LocalDate(2026, 2, 1)
         val weights = listOf(
@@ -90,6 +93,7 @@ class GetInsightsUseCaseTest {
         val result = useCase().first()
 
         assertEquals(0f, result.totalWeightLost)
+        assertEquals(InsightsRecommendationKind.ADJUST_WEEKLY_PLAN, result.recommendation.kind)
         assertEquals(InsightsRecommendationAction.ADJUST_WEIGHT_PLAN, result.recommendation.action)
     }
 }

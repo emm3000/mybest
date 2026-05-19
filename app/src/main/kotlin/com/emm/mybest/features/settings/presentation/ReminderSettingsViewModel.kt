@@ -2,6 +2,7 @@ package com.emm.mybest.features.settings.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
@@ -47,7 +48,10 @@ class ReminderSettingsViewModel(
     private val updateDefaultReminderTimeUseCase: UpdateDefaultReminderTimeUseCase,
 ) : ViewModel() {
 
-    private val _effect = MutableSharedFlow<ReminderSettingsEffect>()
+    private val _effect = MutableSharedFlow<ReminderSettingsEffect>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+    )
     val effect = _effect.asSharedFlow()
 
     private val _showDefaultTimePicker = MutableStateFlow(false)
@@ -64,7 +68,7 @@ class ReminderSettingsViewModel(
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
         initialValue = ReminderSettingsState(),
     )
 

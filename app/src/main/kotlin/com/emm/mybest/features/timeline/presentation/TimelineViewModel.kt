@@ -4,15 +4,17 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.YearMonthValue
+import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.domain.models.ProgressPhoto
-import com.emm.mybest.domain.repository.PhotoRepository
+import com.emm.mybest.domain.usecase.history.GetTimelineUseCase
+import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -46,37 +48,32 @@ private data class SelectionState(
 )
 
 class TimelineViewModel(
-    private val photoRepository: PhotoRepository,
+    private val getTimelineUseCase: GetTimelineUseCase,
+    private val deletePhotoUseCase: DeletePhotoUseCase,
 ) : ViewModel() {
 
-    private val _effect = MutableSharedFlow<TimelineEffect>()
+    private val _effect = MutableSharedFlow<TimelineEffect>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
     val effect = _effect.asSharedFlow()
 
     private val _selection = MutableStateFlow(SelectionState())
 
-    private val _photosState = photoRepository.getAllPhotos()
-        .map { photos ->
-            val sorted = photos.sortedByDescending { it.createdAt }
-            Pair(
-                photos.groupBy { it.date },
-                sorted.groupBy { photo -> YearMonthValue.from(photo.date) },
-            )
-        }
-
     val state: StateFlow<TimelineState> = combine(
-        _photosState,
+        getTimelineUseCase(),
         _selection,
-    ) { (byDate, byMonth), sel ->
+    ) { timeline, sel ->
         TimelineState(
-            photosByDate = byDate,
-            photosByMonth = byMonth,
+            photosByDate = timeline.photosByDate,
+            photosByMonth = timeline.photosByMonth,
             isLoading = false,
             selectionMode = sel.selectionMode,
             selectedIds = sel.selectedIds,
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(FLOW_STOP_TIMEOUT),
+        started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
         initialValue = TimelineState(isLoading = true),
     )
 
@@ -118,11 +115,7 @@ class TimelineViewModel(
         viewModelScope.launch {
             val ids = _selection.value.selectedIds.toList()
             exitSelection()
-            ids.forEach { id -> photoRepository.deletePhoto(id) }
+            ids.forEach { id -> deletePhotoUseCase(id) }
         }
-    }
-
-    companion object {
-        private const val FLOW_STOP_TIMEOUT = 5000L
     }
 }

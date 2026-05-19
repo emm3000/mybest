@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.features.history.presentation.WeightTrendPoint
+import com.emm.mybest.domain.usecase.history.WeightTrendPoint
 import com.emm.mybest.ui.components.HEmptyState
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis

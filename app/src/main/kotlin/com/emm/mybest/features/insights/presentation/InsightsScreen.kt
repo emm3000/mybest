@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.domain.models.InsightsRecommendation
 import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.ui.components.AlertVariant
 import com.emm.mybest.ui.components.ButtonVariant
@@ -99,7 +98,6 @@ private fun HandleInsightsEffects(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                InsightsEffect.NavigateBack -> Unit
                 InsightsEffect.NavigateToCompare -> currentOnCompareClick()
                 is InsightsEffect.NavigateByRecommendation -> currentOnRecommendationAction(effect.action)
                 InsightsEffect.NavigateToHistory -> currentOnHistoryClick()
@@ -195,9 +193,12 @@ private fun InsightsDataContent(
             )
 
             // Recommendation card — second priority
-            state.recommendation?.let { recommendation ->
+            if (state.hasRecommendation) {
                 RecommendationCard(
-                    recommendation = recommendation,
+                    title = state.recommendationTitle,
+                    description = state.recommendationDescription,
+                    actionLabel = state.recommendationActionLabel,
+                    action = state.recommendationAction,
                     onActionClick = onRecommendationActionClick,
                 )
             }
@@ -275,7 +276,10 @@ private fun HeroDeltaCardData(
 
 @Composable
 private fun RecommendationCard(
-    recommendation: InsightsRecommendation,
+    title: String,
+    description: String,
+    actionLabel: String,
+    action: InsightsRecommendationAction?,
     onActionClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -310,19 +314,19 @@ private fun RecommendationCard(
                     tint = primaryColor,
                 )
                 Text(
-                    text = recommendation.title,
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
             Text(
-                text = recommendation.description,
+                text = description,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (recommendation.action != InsightsRecommendationAction.KEEP_ROUTINE) {
+            if (action != InsightsRecommendationAction.KEEP_ROUTINE) {
                 HButton(
-                    text = recommendation.actionLabel,
+                    text = actionLabel,
                     onClick = onActionClick,
                     modifier = Modifier.fillMaxWidth(),
                     variant = ButtonVariant.Default,

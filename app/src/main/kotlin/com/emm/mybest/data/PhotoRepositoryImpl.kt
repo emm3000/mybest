@@ -2,6 +2,7 @@ package com.emm.mybest.data
 
 import android.content.Context
 import android.net.Uri
+import com.emm.mybest.core.coroutines.CoroutineDispatchers
 import com.emm.mybest.data.entities.ProgressPhotoDao
 import com.emm.mybest.data.mappers.toDomain
 import com.emm.mybest.data.mappers.toEntity
@@ -9,7 +10,6 @@ import com.emm.mybest.domain.models.NewProgressPhoto
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.repository.PhotoRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -20,6 +20,7 @@ private const val FILE_PROVIDER_AUTHORITY_SUFFIX = ".fileprovider"
 class PhotoRepositoryImpl(
     private val context: Context,
     private val dao: ProgressPhotoDao,
+    private val dispatchers: CoroutineDispatchers,
 ) : PhotoRepository {
 
     override fun getAllPhotos(): Flow<List<ProgressPhoto>> {
@@ -39,7 +40,7 @@ class PhotoRepositoryImpl(
     }
 
     override suspend fun deletePhoto(photoId: String) {
-        withContext(Dispatchers.IO) {
+        withContext(dispatchers.io) {
             val entity = dao.getById(photoId)
             dao.deleteById(photoId)
             if (entity != null) {

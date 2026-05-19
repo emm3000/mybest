@@ -2,7 +2,10 @@ package com.emm.mybest.features.weight.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emm.mybest.domain.repository.WeightRepository
+import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
+import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
+import com.emm.mybest.domain.validation.WeightInputValidator
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -30,18 +33,22 @@ sealed class AddWeightEffect {
 }
 
 class AddWeightViewModel(
-    private val weightRepository: WeightRepository,
+    private val saveWeightUseCase: SaveWeightUseCase,
+    private val observeWeightProgressUseCase: ObserveWeightProgressUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddWeightState())
     val state = _state.asStateFlow()
 
-    private val _effect = MutableSharedFlow<AddWeightEffect>()
+    private val _effect = MutableSharedFlow<AddWeightEffect>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
     val effect = _effect.asSharedFlow()
 
     init {
         viewModelScope.launch {
-            weightRepository.getWeightProgress().collect { entries ->
+            observeWeightProgressUseCase().collect { entries ->
                 _state.update { it.copy(lastRecordedWeight = entries.firstOrNull()?.weight) }
             }
         }
@@ -72,7 +79,7 @@ class AddWeightViewModel(
             return
         }
 
-        val weightValue = parseWeight(currentState.weight)
+        val weightValue = WeightInputValidator.parse(currentState.weight)
         if (weightValue == null) {
             _state.update { it.copy(weightError = INVALID_WEIGHT_MESSAGE) }
             return
@@ -81,7 +88,7 @@ class AddWeightViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             runCatching {
-                weightRepository.saveWeight(
+                saveWeightUseCase(
                     weight = weightValue,
                     note = _state.value.note.takeIf { it.isNotBlank() },
                 )
@@ -94,22 +101,16 @@ class AddWeightViewModel(
         }
     }
 
-    private fun parseWeight(input: String): Float? {
-        val normalized = input.replace(',', '.')
-        return normalized.toFloatOrNull()
-    }
-
     private fun weightErrorFor(input: String): String? {
         return when {
             input.isBlank() -> null
-            !WEIGHT_INPUT_REGEX.matches(input) -> INVALID_WEIGHT_MESSAGE
+            !WeightInputValidator.isValidWeightInput(input) -> INVALID_WEIGHT_MESSAGE
             input.endsWith('.') || input.endsWith(',') -> INVALID_WEIGHT_MESSAGE
             else -> null
         }
     }
 
     companion object {
-        private val WEIGHT_INPUT_REGEX = Regex("""^\d+([.,]\d{0,2})?$""")
         private const val INVALID_WEIGHT_MESSAGE = "Ingresa un peso valido. Ejemplo: 72.4 o 72,4"
     }
 }

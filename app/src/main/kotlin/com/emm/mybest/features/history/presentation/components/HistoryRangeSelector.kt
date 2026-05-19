@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.features.history.presentation.HistoryRange
+import com.emm.mybest.domain.usecase.history.HistoryRange
 
 private val SEGMENT_HEIGHT = 32.dp
 

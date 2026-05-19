@@ -2,7 +2,8 @@ package com.emm.mybest.features.weight.presentation
 
 import app.cash.turbine.test
 import com.emm.mybest.domain.models.WeightEntry
-import com.emm.mybest.domain.repository.WeightRepository
+import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
+import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -27,13 +28,14 @@ class AddWeightViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val weightRepository = mockk<WeightRepository>(relaxed = true)
+    private val saveWeightUseCase = mockk<SaveWeightUseCase>(relaxed = true)
+    private val observeWeightProgressUseCase = mockk<ObserveWeightProgressUseCase>(relaxed = true)
 
     private fun buildViewModel(
         existingEntries: List<WeightEntry> = emptyList(),
     ): AddWeightViewModel {
-        every { weightRepository.getWeightProgress() } returns flowOf(existingEntries)
-        return AddWeightViewModel(weightRepository)
+        every { observeWeightProgressUseCase() } returns flowOf(existingEntries)
+        return AddWeightViewModel(saveWeightUseCase, observeWeightProgressUseCase)
     }
 
     @Test
@@ -137,18 +139,18 @@ class AddWeightViewModelTest {
     }
 
     @Test
-    fun `OnSaveClick with blank weight sets error and does not call repository`() = runTest {
+    fun `OnSaveClick with blank weight sets error and does not call use case`() = runTest {
         val viewModel = buildViewModel()
         // weight is blank by default
 
         viewModel.onIntent(AddWeightIntent.OnSaveClick)
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { weightRepository.saveWeight(any(), any()) }
+        coVerify(exactly = 0) { saveWeightUseCase(any(), any()) }
     }
 
     @Test
-    fun `OnSaveClick with invalid weight sets error and does not call repository`() = runTest {
+    fun `OnSaveClick with invalid weight sets error and does not call use case`() = runTest {
         val viewModel = buildViewModel()
         viewModel.onIntent(AddWeightIntent.OnWeightChange("abc"))
 
@@ -156,12 +158,12 @@ class AddWeightViewModelTest {
         advanceUntilIdle()
 
         assertNotNull(viewModel.state.value.weightError)
-        coVerify(exactly = 0) { weightRepository.saveWeight(any(), any()) }
+        coVerify(exactly = 0) { saveWeightUseCase(any(), any()) }
     }
 
     @Test
-    fun `OnSaveClick with valid weight calls repository and emits NavigateBack`() = runTest {
-        coEvery { weightRepository.saveWeight(any(), any()) } returns Unit
+    fun `OnSaveClick with valid weight calls use case and emits NavigateBack`() = runTest {
+        coEvery { saveWeightUseCase(any(), any()) } returns Unit
         val viewModel = buildViewModel()
         viewModel.onIntent(AddWeightIntent.OnWeightChange("72.5"))
 
@@ -172,24 +174,24 @@ class AddWeightViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
 
-        coVerify(exactly = 1) { weightRepository.saveWeight(72.5f, null) }
+        coVerify(exactly = 1) { saveWeightUseCase(72.5f, null) }
     }
 
     @Test
-    fun `OnSaveClick with comma decimal calls repository with parsed float`() = runTest {
-        coEvery { weightRepository.saveWeight(any(), any()) } returns Unit
+    fun `OnSaveClick with comma decimal calls use case with parsed float`() = runTest {
+        coEvery { saveWeightUseCase(any(), any()) } returns Unit
         val viewModel = buildViewModel()
         viewModel.onIntent(AddWeightIntent.OnWeightChange("72,5"))
 
         viewModel.onIntent(AddWeightIntent.OnSaveClick)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { weightRepository.saveWeight(72.5f, null) }
+        coVerify(exactly = 1) { saveWeightUseCase(72.5f, null) }
     }
 
     @Test
-    fun `OnSaveClick with non-blank note passes note to repository`() = runTest {
-        coEvery { weightRepository.saveWeight(any(), any()) } returns Unit
+    fun `OnSaveClick with non-blank note passes note to use case`() = runTest {
+        coEvery { saveWeightUseCase(any(), any()) } returns Unit
         val viewModel = buildViewModel()
         viewModel.onIntent(AddWeightIntent.OnWeightChange("70.0"))
         viewModel.onIntent(AddWeightIntent.OnNoteChange("bien"))
@@ -197,12 +199,12 @@ class AddWeightViewModelTest {
         viewModel.onIntent(AddWeightIntent.OnSaveClick)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { weightRepository.saveWeight(70.0f, "bien") }
+        coVerify(exactly = 1) { saveWeightUseCase(70.0f, "bien") }
     }
 
     @Test
-    fun `OnSaveClick with blank note passes null to repository`() = runTest {
-        coEvery { weightRepository.saveWeight(any(), any()) } returns Unit
+    fun `OnSaveClick with blank note passes null to use case`() = runTest {
+        coEvery { saveWeightUseCase(any(), any()) } returns Unit
         val viewModel = buildViewModel()
         viewModel.onIntent(AddWeightIntent.OnWeightChange("70.0"))
         viewModel.onIntent(AddWeightIntent.OnNoteChange("   "))
@@ -210,12 +212,12 @@ class AddWeightViewModelTest {
         viewModel.onIntent(AddWeightIntent.OnSaveClick)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { weightRepository.saveWeight(70.0f, null) }
+        coVerify(exactly = 1) { saveWeightUseCase(70.0f, null) }
     }
 
     @Test
-    fun `OnSaveClick emits ShowError when repository throws`() = runTest {
-        coEvery { weightRepository.saveWeight(any(), any()) } throws RuntimeException("DB fail")
+    fun `OnSaveClick emits ShowError when use case throws`() = runTest {
+        coEvery { saveWeightUseCase(any(), any()) } throws RuntimeException("DB fail")
         val viewModel = buildViewModel()
         viewModel.onIntent(AddWeightIntent.OnWeightChange("70.0"))
 
@@ -231,7 +233,7 @@ class AddWeightViewModelTest {
 
     @Test
     fun `isLoading is reset to false after successful save`() = runTest {
-        coEvery { weightRepository.saveWeight(any(), any()) } returns Unit
+        coEvery { saveWeightUseCase(any(), any()) } returns Unit
         val viewModel = buildViewModel()
         viewModel.onIntent(AddWeightIntent.OnWeightChange("70.0"))
 

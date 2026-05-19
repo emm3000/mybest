@@ -4,7 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.NewProgressPhoto
 import com.emm.mybest.domain.models.PhotoType
-import com.emm.mybest.domain.repository.PhotoRepository
+import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -35,13 +36,16 @@ sealed class AddPhotoEffect {
 }
 
 class AddPhotoViewModel(
-    private val photoRepository: PhotoRepository,
+    private val savePhotosUseCase: SavePhotosUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddPhotoState())
     val state = _state.asStateFlow()
 
-    private val _effect = MutableSharedFlow<AddPhotoEffect>()
+    private val _effect = MutableSharedFlow<AddPhotoEffect>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
     val effect = _effect.asSharedFlow()
 
     fun onIntent(intent: AddPhotoIntent) {
@@ -90,7 +94,7 @@ class AddPhotoViewModel(
                         photoPath = photo.uri,
                     )
                 }
-                photoRepository.savePhotos(newPhotos)
+                savePhotosUseCase(newPhotos)
             }.onSuccess {
                 _effect.emit(AddPhotoEffect.NavigateBack)
             }.onFailure { error ->

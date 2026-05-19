@@ -2,10 +2,13 @@ package com.emm.mybest.features.photo.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.repository.PhotoRepository
+import com.emm.mybest.domain.usecase.history.ResolveComparisonSelectionUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,8 +18,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
-private const val MIN_COMPARE_PHOTOS = 2
 
 data class ComparePhotosState(
     val photos: List<ProgressPhoto> = emptyList(),
@@ -41,12 +42,16 @@ sealed class ComparePhotosEffect {
 
 class ComparePhotosViewModel(
     private val photoRepository: PhotoRepository,
+    private val resolveComparisonSelection: ResolveComparisonSelectionUseCase,
 ) : ViewModel() {
 
     private val _selectedType = MutableStateFlow<PhotoType?>(null)
     private val _beforePhoto = MutableStateFlow<ProgressPhoto?>(null)
     private val _afterPhoto = MutableStateFlow<ProgressPhoto?>(null)
-    private val _effect = MutableSharedFlow<ComparePhotosEffect>()
+    private val _effect = MutableSharedFlow<ComparePhotosEffect>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
 
     val effect = _effect.asSharedFlow()
 
@@ -81,7 +86,7 @@ class ComparePhotosViewModel(
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
         initialValue = ComparePhotosState(isLoading = true),
     )
 
@@ -135,35 +140,4 @@ class ComparePhotosViewModel(
         }
         onSelectionAccepted(selectedPhoto)
     }
-}
-
-private data class ComparisonSelection(
-    val before: ProgressPhoto?,
-    val after: ProgressPhoto?,
-)
-
-private fun resolveComparisonSelection(
-    photos: List<ProgressPhoto>,
-    before: ProgressPhoto?,
-    after: ProgressPhoto?,
-): ComparisonSelection {
-    val sortedPhotos = photos.sortedBy { it.createdAt }
-    val validPhotoIds = sortedPhotos.mapTo(mutableSetOf()) { it.id }
-
-    val resolvedBefore = before?.takeIf { it.id in validPhotoIds } ?: sortedPhotos.firstOrNull()
-    val resolvedAfter = after
-        ?.takeIf { it.id in validPhotoIds && it.id != resolvedBefore?.id }
-        ?: sortedPhotos.lastOrNull { it.id != resolvedBefore?.id }
-
-    if (sortedPhotos.size < MIN_COMPARE_PHOTOS) {
-        return ComparisonSelection(
-            before = sortedPhotos.firstOrNull(),
-            after = null,
-        )
-    }
-
-    return ComparisonSelection(
-        before = resolvedBefore,
-        after = resolvedAfter,
-    )
 }

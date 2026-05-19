@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
+import com.emm.mybest.domain.usecase.history.DaySummary
 
 internal enum class DayTimelineEventType {
     WEIGHT,

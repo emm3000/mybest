@@ -2,6 +2,8 @@ package com.emm.mybest.di
 
 import androidx.room.Room
 import androidx.work.WorkManager
+import com.emm.mybest.core.coroutines.CoroutineDispatchers
+import com.emm.mybest.core.coroutines.DefaultCoroutineDispatchers
 import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.BackupRepositoryImpl
 import com.emm.mybest.data.ComplianceRepositoryImpl
@@ -37,6 +39,15 @@ import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
 import com.emm.mybest.domain.usecase.diet.UpsertMealUseCase
 import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
 import com.emm.mybest.domain.usecase.exercise.UpsertExerciseRoutineUseCase
+import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
+import com.emm.mybest.domain.usecase.history.GetTimelineUseCase
+import com.emm.mybest.domain.usecase.history.ResolveComparisonSelectionUseCase
+import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
+import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
+import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
+import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
+import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
+import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.features.diet.presentation.MealPlanViewModel
 import com.emm.mybest.features.exercise.presentation.ExercisePlanViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
@@ -70,9 +81,12 @@ val appModule = module {
     single<ExercisePlanDao> { get<AppDatabase>().exercisePlanDao() }
     single<MealComplianceDao> { get<AppDatabase>().mealComplianceDao() }
     single<ExerciseComplianceDao> { get<AppDatabase>().exerciseComplianceDao() }
+
+    single<CoroutineDispatchers> { DefaultCoroutineDispatchers() }
+
     single<WeightRepository> { WeightRepositoryImpl(get()) }
-    single<PhotoRepository> { PhotoRepositoryImpl(androidContext(), get()) }
-    single<BackupRepository> { BackupRepositoryImpl(androidContext(), get()) }
+    single<PhotoRepository> { PhotoRepositoryImpl(androidContext(), get(), get()) }
+    single<BackupRepository> { BackupRepositoryImpl(androidContext(), get(), get()) }
 
     single<MealPlanRepository> { MealPlanRepositoryImpl(get()) }
     single<ExercisePlanRepository> { ExercisePlanRepositoryImpl(get()) }
@@ -98,16 +112,31 @@ val appModule = module {
     factory { ToggleMealComplianceUseCase(get()) }
     factory { ToggleExerciseComplianceUseCase(get()) }
 
+    // Weight use cases
+    factory { SaveWeightUseCase(get()) }
+    factory { DeleteWeightByDateUseCase(get()) }
+    factory { ObserveWeightProgressUseCase(get()) }
+
+    // Photo use cases
+    factory { SavePhotosUseCase(get()) }
+    factory { DeletePhotoUseCase(get()) }
+    factory { ObservePhotosUseCase(get()) }
+
+    // History / timeline use cases
+    factory { GetHistoryUseCase(get(), get()) }
+    factory { GetTimelineUseCase(get()) }
+    factory { ResolveComparisonSelectionUseCase() }
+
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
     viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
-    viewModel { AddWeightViewModel(get()) }
+    viewModel { AddWeightViewModel(get(), get()) }
     viewModel { AddPhotoViewModel(get()) }
-    viewModel { HistoryViewModel(get(), get()) }
+    viewModel { HistoryViewModel(get(), get(), get()) }
     viewModel { InsightsViewModel(get()) }
-    viewModel { ComparePhotosViewModel(get()) }
-    viewModel { TimelineViewModel(get()) }
+    viewModel { ComparePhotosViewModel(get(), get()) }
+    viewModel { TimelineViewModel(get(), get()) }
     viewModel { (initialPhotoId: String) -> PhotoViewerViewModel(initialPhotoId, get()) }
     viewModel { ReminderSettingsViewModel(get(), get(), get(), get()) }
     viewModel { MealPlanViewModel(get(), get()) }

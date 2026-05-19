@@ -4,6 +4,7 @@ import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
+import com.emm.mybest.domain.usecase.history.DaySummary
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

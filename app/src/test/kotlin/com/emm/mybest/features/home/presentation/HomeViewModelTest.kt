@@ -133,7 +133,7 @@ class HomeViewModelTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.handle(HomeIntent.ToggleMeal(MealType.BREAKFAST, true))
+        viewModel.onIntent(HomeIntent.ToggleMeal(MealType.BREAKFAST, true))
         advanceUntilIdle()
 
         coVerify(exactly = 1) { toggleMeal(FIXED_DATE, MealType.BREAKFAST, true) }
@@ -145,7 +145,7 @@ class HomeViewModelTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.handle(HomeIntent.ToggleMeal(MealType.LUNCH, false))
+        viewModel.onIntent(HomeIntent.ToggleMeal(MealType.LUNCH, false))
         advanceUntilIdle()
 
         coVerify(exactly = 1) { toggleMeal(FIXED_DATE, MealType.LUNCH, false) }
@@ -157,7 +157,7 @@ class HomeViewModelTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.handle(HomeIntent.ToggleExercise(true))
+        viewModel.onIntent(HomeIntent.ToggleExercise(true))
         advanceUntilIdle()
 
         coVerify(exactly = 1) { toggleExercise(FIXED_DATE, true) }

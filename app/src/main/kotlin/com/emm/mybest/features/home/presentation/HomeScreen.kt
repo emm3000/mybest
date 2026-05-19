@@ -23,10 +23,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -42,9 +45,11 @@ import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HProgressBar
 import com.emm.mybest.ui.components.HSeparator
+import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.ui.theme.StarlinkTextStyles
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
 data class HomeCallbacks(
@@ -63,11 +68,22 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is HomeEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+            }
+        }
+    }
+
     HomeScreenContent(
         modifier = modifier,
         state = state,
-        onIntent = viewModel::handle,
+        onIntent = viewModel::onIntent,
         callbacks = callbacks,
+        snackbarHostState = snackbarHostState,
     )
 }
 
@@ -77,10 +93,12 @@ internal fun HomeScreenContent(
     onIntent: (HomeIntent) -> Unit,
     callbacks: HomeCallbacks,
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { HSnackbarHost(hostState = snackbarHostState) },
         topBar = {
             HTopBar(
                 title = formatTopbarDate(state.today, state.dayOfWeek),

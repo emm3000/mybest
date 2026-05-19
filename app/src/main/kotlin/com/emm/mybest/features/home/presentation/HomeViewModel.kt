@@ -10,10 +10,13 @@ import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
 import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
 import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -55,6 +58,10 @@ sealed interface HomeIntent {
     data class ToggleExercise(val done: Boolean) : HomeIntent
 }
 
+sealed interface HomeEffect {
+    data class ShowError(val message: String) : HomeEffect
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val observeDailyCompliance: ObserveDailyComplianceUseCase,
@@ -90,6 +97,12 @@ class HomeViewModel(
         ),
     )
     val state: StateFlow<HomeState> = _state.asStateFlow()
+
+    private val _effect = MutableSharedFlow<HomeEffect>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    val effect = _effect.asSharedFlow()
 
     init {
         combine(
@@ -127,13 +140,21 @@ class HomeViewModel(
             .launchIn(viewModelScope)
     }
 
-    fun handle(intent: HomeIntent) {
+    fun onIntent(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.ToggleMeal -> viewModelScope.launch {
-                toggleMeal(_state.value.today, intent.type, intent.done)
+                runCatching {
+                    toggleMeal(_state.value.today, intent.type, intent.done)
+                }.onFailure { error ->
+                    _effect.tryEmit(HomeEffect.ShowError(error.message ?: "Error al actualizar comida"))
+                }
             }
             is HomeIntent.ToggleExercise -> viewModelScope.launch {
-                toggleExercise(_state.value.today, intent.done)
+                runCatching {
+                    toggleExercise(_state.value.today, intent.done)
+                }.onFailure { error ->
+                    _effect.tryEmit(HomeEffect.ShowError(error.message ?: "Error al actualizar ejercicio"))
+                }
             }
         }
     }

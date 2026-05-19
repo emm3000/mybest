@@ -1,6 +1,7 @@
 package com.emm.mybest.data
 
 import android.content.Context
+import com.emm.mybest.core.coroutines.CoroutineDispatchers
 import com.emm.mybest.data.entities.ProgressPhotoDao
 import com.emm.mybest.data.entities.ProgressPhotoEntity
 import com.emm.mybest.domain.models.NewProgressPhoto
@@ -10,8 +11,10 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
@@ -19,9 +22,17 @@ import org.junit.Test
 
 class PhotoRepositoryImplTest {
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    private val testDispatchers = object : CoroutineDispatchers {
+        override val main: CoroutineDispatcher = testDispatcher
+        override val io: CoroutineDispatcher = testDispatcher
+        override val default: CoroutineDispatcher = testDispatcher
+    }
+
     private val context = mockk<Context>(relaxed = true)
     private val dao = mockk<ProgressPhotoDao>()
-    private val repository = PhotoRepositoryImpl(context, dao)
+    private val repository = PhotoRepositoryImpl(context, dao, testDispatchers)
 
     @Test
     fun `getAllPhotos maps dao entities to domain models`() = runTest {

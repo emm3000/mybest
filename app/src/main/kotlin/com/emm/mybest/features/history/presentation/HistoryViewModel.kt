@@ -4,40 +4,23 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.YearMonthValue
-import com.emm.mybest.domain.models.ProgressPhoto
-import com.emm.mybest.domain.models.WeightEntry
-import com.emm.mybest.domain.repository.PhotoRepository
-import com.emm.mybest.domain.repository.WeightRepository
+import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
+import com.emm.mybest.domain.usecase.history.DaySummary
+import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
+import com.emm.mybest.domain.usecase.history.HistoryRange
+import com.emm.mybest.domain.usecase.history.WeightTrendPoint
+import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
+import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.plus
-
-private const val DAYS_IN_WEEK = 7
-private const val MONTHS_IN_YEAR = 12
-
-enum class HistoryRange { WEEK, MONTH, YEAR }
-
-data class WeightTrendPoint(
-    val date: LocalDate,
-    val weight: Float,
-)
-
-data class DaySummary(
-    val date: LocalDate,
-    val weight: WeightEntry? = null,
-    val photos: List<ProgressPhoto> = emptyList(),
-) {
-    val hasWeight: Boolean get() = weight != null
-    val hasPhoto: Boolean get() = photos.isNotEmpty()
-    val hasActivity: Boolean get() = hasWeight || hasPhoto
-}
 
 @Stable
 data class HistoryState(
@@ -61,9 +44,11 @@ sealed class HistoryIntent {
     data class OnDeletePhoto(val photoId: String) : HistoryIntent()
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModel(
-    private val weightRepository: WeightRepository,
-    private val photoRepository: PhotoRepository,
+    private val getHistoryUseCase: GetHistoryUseCase,
+    private val deleteWeightByDate: DeleteWeightByDateUseCase,
+    private val deletePhoto: DeletePhotoUseCase,
     initialMonth: YearMonthValue = YearMonthValue.now(),
 ) : ViewModel() {
 
@@ -75,30 +60,22 @@ class HistoryViewModel(
         _selectedMonth,
         _selectedRange,
         _selectedDate,
-        weightRepository.getWeightProgress(),
-        photoRepository.getAllPhotos(),
-    ) { month, range, selectedDate, weights, photos ->
-        val monthlyData = transformToDaySummary(weights, photos)
-        val rangeDates = computeRangeDates(month, range)
-        val rangeData = monthlyData.filterKeys { it in rangeDates }
-        val activeDays = rangeData.values.count { it.hasActivity }
-        val streak = computeStreak(rangeDates, monthlyData)
-        val weightTrend = weights
-            .filter { it.date in rangeDates }
-            .sortedBy { it.date }
-            .map { WeightTrendPoint(it.date, it.weight) }
-
-        HistoryState(
-            selectedMonth = month,
-            selectedRange = range,
-            selectedDate = selectedDate,
-            monthlyData = monthlyData,
-            weightTrend = weightTrend,
-            streak = streak,
-            activeDays = activeDays,
-            isLoading = false,
-            errorMessage = null,
-        )
+    ) { month, range, selectedDate ->
+        Triple(month, range, selectedDate)
+    }.flatMapLatest { (month, range, selectedDate) ->
+        getHistoryUseCase(month, range).combine(_selectedDate) { result, date ->
+            HistoryState(
+                selectedMonth = month,
+                selectedRange = range,
+                selectedDate = date,
+                monthlyData = result.monthlyData,
+                weightTrend = result.weightTrend,
+                streak = result.streak,
+                activeDays = result.activeDays,
+                isLoading = false,
+                errorMessage = null,
+            )
+        }
     }.catch { throwable ->
         emit(
             HistoryState(
@@ -111,7 +88,7 @@ class HistoryViewModel(
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
         initialValue = HistoryState(isLoading = true),
     )
 
@@ -122,63 +99,11 @@ class HistoryViewModel(
             is HistoryIntent.OnDateSelected -> _selectedDate.value = intent.date
             HistoryIntent.OnDateDismiss -> _selectedDate.value = null
             is HistoryIntent.OnDeleteWeight -> viewModelScope.launch {
-                weightRepository.deleteByDate(intent.date)
+                deleteWeightByDate(intent.date)
             }
             is HistoryIntent.OnDeletePhoto -> viewModelScope.launch {
-                photoRepository.deletePhoto(intent.photoId)
+                deletePhoto(intent.photoId)
             }
         }
     }
-
-    private fun transformToDaySummary(
-        weights: List<WeightEntry>,
-        photos: List<ProgressPhoto>,
-    ): Map<LocalDate, DaySummary> {
-        val days = mutableMapOf<LocalDate, DaySummary>()
-
-        weights.forEach { w ->
-            val current = days.getOrPut(w.date) { DaySummary(w.date) }
-            days[w.date] = current.copy(weight = w)
-        }
-
-        photos.forEach { p ->
-            val current = days.getOrPut(p.date) { DaySummary(p.date) }
-            val currentPhotos = current.photos.toMutableList()
-            currentPhotos.add(p)
-            days[p.date] = current.copy(photos = currentPhotos)
-        }
-
-        return days.toMap()
-    }
 }
-
-internal fun computeRangeDates(
-    anchor: YearMonthValue,
-    range: HistoryRange,
-): Set<LocalDate> = when (range) {
-    HistoryRange.WEEK -> {
-        val anchorDay = anchor.atDay(1)
-        val weekStart = anchorDay.plus(DatePeriod(days = -anchorDay.dayOfWeek.ordinal))
-        (0 until DAYS_IN_WEEK).map { weekStart.plus(DatePeriod(days = it)) }.toSet()
-    }
-    HistoryRange.MONTH -> {
-        val daysInMonth = anchor.lengthOfMonth()
-        (1..daysInMonth).map { anchor.atDay(it) }.toSet()
-    }
-    HistoryRange.YEAR -> {
-        val start = YearMonthValue(anchor.year, 1)
-        (0 until MONTHS_IN_YEAR).flatMap { monthOffset ->
-            val ym = start.plusMonths(monthOffset)
-            (1..ym.lengthOfMonth()).map { ym.atDay(it) }
-        }.toSet()
-    }
-}
-
-internal fun computeStreak(
-    rangeDates: Set<LocalDate>,
-    monthlyData: Map<LocalDate, DaySummary>,
-): Int = rangeDates.sorted()
-    .fold(intArrayOf(0, 0)) { (max, current), date ->
-        val next = if (monthlyData[date]?.hasActivity == true) current + 1 else 0
-        intArrayOf(maxOf(max, next), next)
-    }[0]

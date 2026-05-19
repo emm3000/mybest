@@ -1,9 +1,10 @@
 package com.emm.mybest.domain.usecase
 
-import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.domain.models.InsightsData
 import com.emm.mybest.domain.models.InsightsRecommendation
 import com.emm.mybest.domain.models.InsightsRecommendationAction
+import com.emm.mybest.domain.models.InsightsRecommendationKind
+import com.emm.mybest.domain.models.PeriodLabel
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +28,7 @@ class GetInsightsUseCase(
                 photoCount = photos.size,
                 hasWeightTrend = weights.size >= 2,
             )
-            val periodLabel = buildPeriodLabel(
+            val period = buildPeriod(
                 dates = buildList {
                     addAll(weights.map { it.date })
                     addAll(photos.map { it.date })
@@ -36,7 +37,7 @@ class GetInsightsUseCase(
 
             InsightsData(
                 weightEntries = weights,
-                periodLabel = periodLabel,
+                period = period,
                 totalWeightLost = initialWeight - currentWeight,
                 currentWeight = currentWeight,
                 initialWeight = initialWeight,
@@ -47,14 +48,10 @@ class GetInsightsUseCase(
     }
 }
 
-private fun buildPeriodLabel(dates: List<LocalDate>): String {
-    val start = dates.minOrNull() ?: return "Sin periodo disponible aún."
-    val end = dates.maxOrNull() ?: return "Sin periodo disponible aún."
-    return if (start == end) {
-        "Datos del ${start.formatEsLongDate()}"
-    } else {
-        "Datos del ${start.formatEsLongDate()} al ${end.formatEsLongDate()}"
-    }
+private fun buildPeriod(dates: List<LocalDate>): PeriodLabel {
+    val start = dates.minOrNull() ?: return PeriodLabel.NoData
+    val end = dates.maxOrNull() ?: return PeriodLabel.NoData
+    return if (start == end) PeriodLabel.SingleDay(start) else PeriodLabel.Range(start, end)
 }
 
 private fun buildRecommendation(
@@ -64,23 +61,17 @@ private fun buildRecommendation(
 ): InsightsRecommendation {
     return when {
         hasWeightTrend && totalWeightLost <= 0f -> InsightsRecommendation(
-            title = "Ajusta tu plan semanal",
-            description = "No hay mejora reciente de peso. Ajusta alimentación o entrenamiento 3 días esta semana.",
-            actionLabel = "Define un ajuste concreto",
+            kind = InsightsRecommendationKind.ADJUST_WEEKLY_PLAN,
             action = InsightsRecommendationAction.ADJUST_WEIGHT_PLAN,
         )
 
         photoCount < 2 -> InsightsRecommendation(
-            title = "Registra evidencia visual",
-            description = "Añade al menos 2 fotos por semana para comparar cambios reales.",
-            actionLabel = "Sube una foto hoy",
+            kind = InsightsRecommendationKind.UPLOAD_PHOTO_TODAY,
             action = InsightsRecommendationAction.ADD_PROGRESS_PHOTO,
         )
 
         else -> InsightsRecommendation(
-            title = "Mantén el ritmo",
-            description = "Tu progreso es consistente. Conserva tu rutina y registra evidencia cada semana.",
-            actionLabel = "Sostén la rutina actual",
+            kind = InsightsRecommendationKind.KEEP_ROUTINE,
             action = InsightsRecommendationAction.KEEP_ROUTINE,
         )
     }

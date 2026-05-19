@@ -4,7 +4,9 @@ import app.cash.turbine.test
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
-import com.emm.mybest.domain.repository.PhotoRepository
+import com.emm.mybest.domain.usecase.history.GetTimelineUseCase
+import com.emm.mybest.domain.usecase.history.TimelineResult
+import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coVerify
 import io.mockk.every
@@ -25,7 +27,8 @@ class TimelineViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val repository = mockk<PhotoRepository>(relaxed = true)
+    private val getTimelineUseCase = mockk<GetTimelineUseCase>(relaxed = true)
+    private val deletePhotoUseCase = mockk<DeletePhotoUseCase>(relaxed = true)
 
     private val dayOne = LocalDate(2026, 3, 8)
     private val dayTwo = LocalDate(2026, 3, 9)
@@ -35,10 +38,18 @@ class TimelineViewModelTest {
         ProgressPhoto("p3", date = dayTwo, type = PhotoType.TRUNK, photoPath = "/tmp/3", createdAt = 3L),
     )
 
+    private fun buildTimeline(photoList: List<ProgressPhoto> = photos): TimelineResult {
+        val sorted = photoList.sortedByDescending { it.createdAt }
+        return TimelineResult(
+            photosByDate = photoList.groupBy { it.date },
+            photosByMonth = sorted.groupBy { YearMonthValue.from(it.date) },
+        )
+    }
+
     @Test
     fun `state groups photos by date`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(photos)
-        val viewModel = TimelineViewModel(repository)
+        every { getTimelineUseCase() } returns flowOf(buildTimeline())
+        val viewModel = TimelineViewModel(getTimelineUseCase, deletePhotoUseCase)
 
         viewModel.state.test {
             assertEquals(true, awaitItem().isLoading)
@@ -53,8 +64,8 @@ class TimelineViewModelTest {
 
     @Test
     fun `state groups photos by month`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(photos)
-        val viewModel = TimelineViewModel(repository)
+        every { getTimelineUseCase() } returns flowOf(buildTimeline())
+        val viewModel = TimelineViewModel(getTimelineUseCase, deletePhotoUseCase)
 
         viewModel.state.test {
             awaitItem() // loading
@@ -68,8 +79,8 @@ class TimelineViewModelTest {
 
     @Test
     fun `OnBackClick emits NavigateBack effect`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(emptyList())
-        val viewModel = TimelineViewModel(repository)
+        every { getTimelineUseCase() } returns flowOf(buildTimeline(emptyList()))
+        val viewModel = TimelineViewModel(getTimelineUseCase, deletePhotoUseCase)
 
         viewModel.effect.test {
             viewModel.onIntent(TimelineIntent.OnBackClick)
@@ -80,8 +91,8 @@ class TimelineViewModelTest {
 
     @Test
     fun `EnterSelection sets selectionMode true and adds photo`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(photos)
-        val viewModel = TimelineViewModel(repository)
+        every { getTimelineUseCase() } returns flowOf(buildTimeline())
+        val viewModel = TimelineViewModel(getTimelineUseCase, deletePhotoUseCase)
 
         viewModel.state.test {
             awaitItem() // loading
@@ -97,8 +108,8 @@ class TimelineViewModelTest {
 
     @Test
     fun `ToggleSelection deselects already selected photo`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(photos)
-        val viewModel = TimelineViewModel(repository)
+        every { getTimelineUseCase() } returns flowOf(buildTimeline())
+        val viewModel = TimelineViewModel(getTimelineUseCase, deletePhotoUseCase)
 
         viewModel.state.test {
             awaitItem() // loading
@@ -117,8 +128,8 @@ class TimelineViewModelTest {
 
     @Test
     fun `ToggleSelection adds second photo to selection`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(photos)
-        val viewModel = TimelineViewModel(repository)
+        every { getTimelineUseCase() } returns flowOf(buildTimeline())
+        val viewModel = TimelineViewModel(getTimelineUseCase, deletePhotoUseCase)
 
         viewModel.state.test {
             awaitItem() // loading
@@ -136,8 +147,8 @@ class TimelineViewModelTest {
 
     @Test
     fun `ExitSelection clears selection mode`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(photos)
-        val viewModel = TimelineViewModel(repository)
+        every { getTimelineUseCase() } returns flowOf(buildTimeline())
+        val viewModel = TimelineViewModel(getTimelineUseCase, deletePhotoUseCase)
 
         viewModel.state.test {
             awaitItem()
@@ -155,9 +166,9 @@ class TimelineViewModelTest {
     }
 
     @Test
-    fun `DeleteSelected calls repository for each selected id`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(photos)
-        val viewModel = TimelineViewModel(repository)
+    fun `DeleteSelected calls DeletePhotoUseCase for each selected id`() = runTest {
+        every { getTimelineUseCase() } returns flowOf(buildTimeline())
+        val viewModel = TimelineViewModel(getTimelineUseCase, deletePhotoUseCase)
 
         viewModel.state.test {
             awaitItem()
@@ -173,16 +184,16 @@ class TimelineViewModelTest {
             val afterDelete = awaitItem()
             assertFalse(afterDelete.selectionMode)
 
-            coVerify { repository.deletePhoto("p1") }
-            coVerify { repository.deletePhoto("p2") }
+            coVerify { deletePhotoUseCase("p1") }
+            coVerify { deletePhotoUseCase("p2") }
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
     fun `CompareSelected emits NavigateToCompare effect`() = runTest {
-        every { repository.getAllPhotos() } returns flowOf(photos)
-        val viewModel = TimelineViewModel(repository)
+        every { getTimelineUseCase() } returns flowOf(buildTimeline(emptyList()))
+        val viewModel = TimelineViewModel(getTimelineUseCase, deletePhotoUseCase)
 
         viewModel.effect.test {
             viewModel.onIntent(TimelineIntent.CompareSelected)

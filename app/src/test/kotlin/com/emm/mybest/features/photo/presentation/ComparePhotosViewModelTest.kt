@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.repository.PhotoRepository
+import com.emm.mybest.domain.usecase.history.ResolveComparisonSelectionUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.every
 import io.mockk.mockk
@@ -24,6 +25,8 @@ class ComparePhotosViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val repository = mockk<PhotoRepository>()
+    private val resolveComparisonSelection = ResolveComparisonSelectionUseCase()
+
     private val face = ProgressPhoto(
         id = "p-face",
         date = LocalDate(2026, 3, 8),
@@ -46,11 +49,13 @@ class ComparePhotosViewModelTest {
         createdAt = 3L,
     )
 
+    private fun buildViewModel() = ComparePhotosViewModel(repository, resolveComparisonSelection)
+
     @Test
     fun `state emits initial photos from repository`() = runTest {
         every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
         every { repository.getPhotosByType(any()) } returns flowOf(listOf(face))
-        val viewModel = ComparePhotosViewModel(repository)
+        val viewModel = buildViewModel()
 
         viewModel.state.test {
             assertEquals(true, awaitItem().isLoading)
@@ -71,7 +76,7 @@ class ComparePhotosViewModelTest {
         every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
         every { repository.getPhotosByType(PhotoType.FACE) } returns flowOf(listOf(face))
         every { repository.getPhotosByType(PhotoType.TRUNK) } returns flowOf(listOf(body))
-        val viewModel = ComparePhotosViewModel(repository)
+        val viewModel = buildViewModel()
 
         viewModel.state.test {
             awaitItem() // loading
@@ -97,7 +102,7 @@ class ComparePhotosViewModelTest {
     fun `selection keeps manual choices while they remain available`() = runTest {
         every { repository.getAllPhotos() } returns flowOf(listOf(face, body, trunk2))
         every { repository.getPhotosByType(any()) } returns flowOf(listOf(face, body, trunk2))
-        val viewModel = ComparePhotosViewModel(repository)
+        val viewModel = buildViewModel()
 
         viewModel.state.test {
             awaitItem()
@@ -121,7 +126,7 @@ class ComparePhotosViewModelTest {
     fun `ToggleSwap exchanges before and after photos`() = runTest {
         every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
         every { repository.getPhotosByType(any()) } returns flowOf(listOf(face))
-        val viewModel = ComparePhotosViewModel(repository)
+        val viewModel = buildViewModel()
 
         viewModel.state.test {
             awaitItem() // loading
@@ -139,7 +144,7 @@ class ComparePhotosViewModelTest {
     fun `selecting the same photo in both slots emits error and keeps previous selection`() = runTest {
         every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
         every { repository.getPhotosByType(any()) } returns flowOf(listOf(face))
-        val viewModel = ComparePhotosViewModel(repository)
+        val viewModel = buildViewModel()
 
         viewModel.state.test {
             awaitItem()
@@ -168,7 +173,7 @@ class ComparePhotosViewModelTest {
     fun `selecting same photo for before slot emits error and keeps selection`() = runTest {
         every { repository.getAllPhotos() } returns flowOf(listOf(face, body))
         every { repository.getPhotosByType(any()) } returns flowOf(listOf(face))
-        val viewModel = ComparePhotosViewModel(repository)
+        val viewModel = buildViewModel()
 
         viewModel.state.test {
             awaitItem()
@@ -199,7 +204,7 @@ class ComparePhotosViewModelTest {
         val face2 = face.copy(id = "p-face2", createdAt = 4L)
         every { repository.getAllPhotos() } returns flowOf(listOf(face, face2))
         every { repository.getPhotosByType(PhotoType.TRUNK) } returns flowOf(emptyList())
-        val viewModel = ComparePhotosViewModel(repository)
+        val viewModel = buildViewModel()
 
         viewModel.state.test {
             awaitItem()
