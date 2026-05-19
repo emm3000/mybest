@@ -6,7 +6,6 @@ import com.emm.mybest.domain.models.NewProgressPhoto
 import com.emm.mybest.domain.models.PhotoType
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class DataMappersTest {
@@ -33,7 +32,7 @@ class DataMappersTest {
         val photoEntity = ProgressPhotoEntity(
             id = "p1",
             date = LocalDate(2026, 3, 8),
-            type = com.emm.mybest.data.entities.PhotoType.FACE,
+            type = PhotoType.FACE,
             photoPath = "/tmp/p.jpg",
             createdAt = 456L,
         )
@@ -55,23 +54,21 @@ class DataMappersTest {
 
         val entity = input.toEntity()
 
-        assertEquals(com.emm.mybest.data.entities.PhotoType.TRUNK, entity.type)
+        assertEquals(PhotoType.TRUNK, entity.type)
         assertEquals("/tmp/new.jpg", entity.photoPath)
         assertEquals(LocalDate(2026, 3, 8), entity.date)
     }
 
     @Test
-    fun `photo type mapping is symmetrical for all values`() {
+    fun `photo entity type is preserved through domain mapping`() {
         PhotoType.entries.forEach { type ->
-            val mapped = type.toData().toDomain()
-            assertEquals(type, mapped)
+            val entity = ProgressPhotoEntity(
+                id = "x",
+                date = LocalDate(2026, 1, 1),
+                type = type,
+                photoPath = "/tmp/x.jpg",
+            )
+            assertEquals(type, entity.toDomain().type)
         }
-
-        val hasAllTypes = PhotoType.entries.all {
-            com.emm.mybest.data.entities.PhotoType.entries.map { dataType ->
-                dataType.toDomain()
-            }.contains(it)
-        }
-        assertTrue(hasAllTypes)
     }
 }

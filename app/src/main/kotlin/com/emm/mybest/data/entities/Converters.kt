@@ -1,6 +1,7 @@
 package com.emm.mybest.data.entities
 
 import androidx.room.TypeConverter
+import com.emm.mybest.domain.models.PhotoType
 import kotlinx.datetime.LocalDate
 
 class Converters {
@@ -15,8 +16,7 @@ class Converters {
     fun fromPhotoType(type: PhotoType): String = type.name
 
     @TypeConverter
-    fun toPhotoType(value: String): PhotoType = when (value) {
-        "FACE" -> PhotoType.FACE
-        else -> PhotoType.TRUNK
-    }
+    fun toPhotoType(value: String): PhotoType =
+        PhotoType.entries.firstOrNull { it.name == value }
+            ?: throw IllegalArgumentException("Unknown PhotoType value: $value")
 }

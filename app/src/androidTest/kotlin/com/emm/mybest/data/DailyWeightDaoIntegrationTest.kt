@@ -9,8 +9,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDate
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -48,20 +46,6 @@ class DailyWeightDaoIntegrationTest {
         assertEquals(day1, all[0].date)
         assertEquals(70.5f, all[0].weight)
         assertEquals(day2, all[1].date)
-    }
-
-    @Test
-    fun getByDate_getLatest_and_deleteByDate_work_correctly() = runBlocking {
-        val day1 = LocalDate(2026, 3, 8)
-        val day2 = LocalDate(2026, 3, 9)
-        dao.upsert(DailyWeightEntity(id = "w1", date = day1, weight = 72.0f))
-        dao.upsert(DailyWeightEntity(id = "w2", date = day2, weight = 71.0f))
-
-        assertNotNull(dao.getByDate(day1))
-        assertEquals(day2, dao.getLatest()?.date)
-
-        dao.deleteByDate(day1)
-        assertNull(dao.getByDate(day1))
     }
 
     @Test

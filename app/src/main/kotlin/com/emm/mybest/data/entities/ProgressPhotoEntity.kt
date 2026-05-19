@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.emm.mybest.domain.models.PhotoType
 import kotlinx.datetime.LocalDate
 import java.util.UUID
 

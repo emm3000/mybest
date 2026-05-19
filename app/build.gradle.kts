@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kover)
     id("com.google.devtools.ksp")
-    id("com.google.gms.google-services")
     id("jacoco")
     alias(libs.plugins.detekt)
     alias(libs.plugins.kotlin.serialization)
@@ -197,5 +196,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation(platform(libs.firebase.bom))
 }

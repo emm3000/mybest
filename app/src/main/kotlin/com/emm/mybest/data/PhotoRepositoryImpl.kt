@@ -1,7 +1,6 @@
 package com.emm.mybest.data
 
 import com.emm.mybest.data.entities.ProgressPhotoDao
-import com.emm.mybest.data.mappers.toData
 import com.emm.mybest.data.mappers.toDomain
 import com.emm.mybest.data.mappers.toEntity
 import com.emm.mybest.domain.models.NewProgressPhoto
@@ -22,7 +21,7 @@ class PhotoRepositoryImpl(
     }
 
     override fun getPhotosByType(type: PhotoType): Flow<List<ProgressPhoto>> {
-        return dao.observeByType(type.toData()).map { list ->
+        return dao.observeByType(type).map { list ->
             list.map { it.toDomain() }
         }
     }

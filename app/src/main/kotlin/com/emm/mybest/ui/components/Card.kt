@@ -21,7 +21,7 @@ import com.emm.mybest.ui.theme.MyBestTheme
 
 // ─── Variantes ──────────────────────────────────────────────────────────────
 
-enum class CardVariant { Elevated, Filled, Outlined }
+enum class CardVariant { Filled, Outlined }
 
 /**
  * Card inspirada en shadcn/ui con header/content/footer opcionales.
@@ -31,7 +31,7 @@ enum class CardVariant { Elevated, Filled, Outlined }
 @Composable
 fun HCard(
     modifier: Modifier = Modifier,
-    variant: CardVariant = CardVariant.Elevated,
+    variant: CardVariant = CardVariant.Outlined,
     cornerRadius: Dp = 8.dp,
     onClick: (() -> Unit)? = null,
     containerColor: Color? = null,
@@ -74,7 +74,6 @@ fun HCard(
 private fun cardTokens(variant: CardVariant): Triple<Color, Dp, BorderStroke?> {
     val cs = MaterialTheme.colorScheme
     return when (variant) {
-        CardVariant.Elevated -> Triple(cs.surface, 0.dp, BorderStroke(1.dp, cs.outlineVariant))
         CardVariant.Filled -> Triple(cs.surfaceContainerHighest, 0.dp, null)
         CardVariant.Outlined -> Triple(cs.surface, 0.dp, BorderStroke(1.dp, cs.outlineVariant))
     }
@@ -179,7 +178,7 @@ private fun HCardWithSlotsPreview() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                variant = CardVariant.Elevated,
+                variant = CardVariant.Outlined,
             ) {
                 HCardHeader(
                     title = "Serendipity",

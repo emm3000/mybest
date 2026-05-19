@@ -70,7 +70,6 @@ fun HInput(
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val cs = MaterialTheme.colorScheme
-    val borderColor = inputBorderColor(isError = isError, isFocused = isFocused)
     val ringColor = inputRingColor(isError = isError, isFocused = isFocused)
     val textColor = inputTextColor(enabled = enabled)
 
@@ -94,13 +93,7 @@ fun HInput(
                 onValueChange = onValueChange,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .defaultMinSize(minHeight = 40.dp)
-                    .clip(MaterialTheme.shapes.small)
-                    .border(
-                        width = 1.dp,
-                        color = borderColor,
-                        shape = MaterialTheme.shapes.small,
-                    ),
+                    .defaultMinSize(minHeight = 40.dp),
                 enabled = enabled,
                 readOnly = readOnly,
                 singleLine = singleLine,
@@ -129,21 +122,6 @@ fun HInput(
         val helperText = errorMessage ?: supportingText
         InputHelperSection(helperText = helperText, isError = isError)
     }
-}
-
-@Composable
-private fun inputBorderColor(isError: Boolean, isFocused: Boolean): androidx.compose.ui.graphics.Color {
-    val cs = MaterialTheme.colorScheme
-    val targetColor = when {
-        isError -> cs.error
-        isFocused -> cs.outline
-        else -> cs.outlineVariant
-    }
-    return animateColorAsState(
-        targetValue = targetColor,
-        animationSpec = tween(durationMillis = 150),
-        label = "input_border",
-    ).value
 }
 
 @Composable

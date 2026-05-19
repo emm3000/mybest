@@ -15,7 +15,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import com.emm.mybest.data.entities.PhotoType as DataPhotoType
 
 class PhotoRepositoryImplTest {
 
@@ -27,7 +26,7 @@ class PhotoRepositoryImplTest {
         val entity = ProgressPhotoEntity(
             id = "p1",
             date = LocalDate(2026, 3, 8),
-            type = DataPhotoType.FACE,
+            type = PhotoType.FACE,
             photoPath = "/tmp/face.jpg",
             createdAt = 123L,
         )
@@ -46,11 +45,11 @@ class PhotoRepositoryImplTest {
         val entity = ProgressPhotoEntity(
             id = "p2",
             date = LocalDate(2026, 3, 8),
-            type = DataPhotoType.TRUNK,
+            type = PhotoType.TRUNK,
             photoPath = "/tmp/body.jpg",
             createdAt = 999L,
         )
-        every { dao.observeByType(DataPhotoType.TRUNK) } returns flowOf(listOf(entity))
+        every { dao.observeByType(PhotoType.TRUNK) } returns flowOf(listOf(entity))
 
         val result = repository.getPhotosByType(PhotoType.TRUNK).first()
 
@@ -81,7 +80,7 @@ class PhotoRepositoryImplTest {
 
         coVerify(exactly = 1) { dao.insertAll(any()) }
         assertEquals(2, captured.captured.size)
-        assertEquals(DataPhotoType.TRUNK, captured.captured[0].type)
+        assertEquals(PhotoType.TRUNK, captured.captured[0].type)
         assertEquals("/tmp/a.jpg", captured.captured[0].photoPath)
         assertEquals(LocalDate(2026, 3, 8), captured.captured[1].date)
     }
