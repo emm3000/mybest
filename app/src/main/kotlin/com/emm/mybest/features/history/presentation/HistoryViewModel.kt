@@ -18,6 +18,16 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 
+private const val DAYS_IN_WEEK = 7
+private const val MONTHS_IN_YEAR = 12
+
+enum class HistoryRange { WEEK, MONTH, YEAR }
+
+data class WeightTrendPoint(
+    val date: LocalDate,
+    val weight: Float,
+)
+
 data class DaySummary(
     val date: LocalDate,
     val weight: WeightEntry? = null,
@@ -30,16 +40,21 @@ data class DaySummary(
 
 data class HistoryState(
     val selectedMonth: YearMonthValue = YearMonthValue.now(),
+    val selectedRange: HistoryRange = HistoryRange.MONTH,
     val monthlyData: Map<LocalDate, DaySummary> = emptyMap(),
-    val weekSummary: HistoryWeekSummary = HistoryWeekSummary(),
-    val monthSummary: HistoryMonthSummary = HistoryMonthSummary(),
+    val weightTrend: List<WeightTrendPoint> = emptyList(),
+    val streak: Int = 0,
+    val activeDays: Int = 0,
     val selectedDate: LocalDate? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    // kept for ViewModel tests that still reference monthSummary
+    val monthSummary: HistoryMonthSummary = HistoryMonthSummary(),
 )
 
 sealed class HistoryIntent {
     data class OnMonthChange(val newMonth: YearMonthValue) : HistoryIntent()
+    data class OnRangeChange(val range: HistoryRange) : HistoryIntent()
     data class OnDateSelected(val date: LocalDate) : HistoryIntent()
     object OnDateDismiss : HistoryIntent()
     data class OnDeleteWeight(val date: LocalDate) : HistoryIntent()
@@ -53,20 +68,34 @@ class HistoryViewModel(
 ) : ViewModel() {
 
     private val _selectedMonth = MutableStateFlow(initialMonth)
+    private val _selectedRange = MutableStateFlow(HistoryRange.MONTH)
     private val _selectedDate = MutableStateFlow<LocalDate?>(null)
 
     val state: StateFlow<HistoryState> = combine(
         _selectedMonth,
+        _selectedRange,
         _selectedDate,
         weightRepository.getWeightProgress(),
         photoRepository.getAllPhotos(),
-    ) { month, selectedDate, weights, photos ->
+    ) { month, range, selectedDate, weights, photos ->
         val monthlyData = transformToDaySummary(weights, photos)
+        val rangeDates = computeRangeDates(month, range)
+        val rangeData = monthlyData.filterKeys { it in rangeDates }
+        val activeDays = rangeData.values.count { it.hasActivity }
+        val streak = computeStreak(rangeDates, monthlyData)
+        val weightTrend = weights
+            .filter { it.date in rangeDates }
+            .sortedBy { it.date }
+            .map { WeightTrendPoint(it.date, it.weight) }
+
         HistoryState(
             selectedMonth = month,
+            selectedRange = range,
             selectedDate = selectedDate,
             monthlyData = monthlyData,
-            weekSummary = buildWeekSummary(month, selectedDate, monthlyData),
+            weightTrend = weightTrend,
+            streak = streak,
+            activeDays = activeDays,
             monthSummary = buildMonthSummary(month, monthlyData),
             isLoading = false,
             errorMessage = null,
@@ -75,6 +104,7 @@ class HistoryViewModel(
         emit(
             HistoryState(
                 selectedMonth = _selectedMonth.value,
+                selectedRange = _selectedRange.value,
                 selectedDate = _selectedDate.value,
                 isLoading = false,
                 errorMessage = throwable.message ?: "No se pudo cargar el historial.",
@@ -89,6 +119,7 @@ class HistoryViewModel(
     fun onIntent(intent: HistoryIntent) {
         when (intent) {
             is HistoryIntent.OnMonthChange -> _selectedMonth.value = intent.newMonth
+            is HistoryIntent.OnRangeChange -> _selectedRange.value = intent.range
             is HistoryIntent.OnDateSelected -> _selectedDate.value = intent.date
             HistoryIntent.OnDateDismiss -> _selectedDate.value = null
             is HistoryIntent.OnDeleteWeight -> viewModelScope.launch {
@@ -128,15 +159,7 @@ data class HistoryMonthSummary(
     val photoDays: Int = 0,
 )
 
-data class HistoryWeekSummary(
-    val startDate: LocalDate? = null,
-    val endDate: LocalDate? = null,
-    val activityDays: Int = 0,
-    val weightDays: Int = 0,
-    val photoDays: Int = 0,
-)
-
-private fun buildMonthSummary(
+internal fun buildMonthSummary(
     selectedMonth: YearMonthValue,
     monthlyData: Map<LocalDate, DaySummary>,
 ): HistoryMonthSummary {
@@ -148,26 +171,33 @@ private fun buildMonthSummary(
     )
 }
 
-private fun buildWeekSummary(
-    selectedMonth: YearMonthValue,
-    selectedDate: LocalDate?,
-    monthlyData: Map<LocalDate, DaySummary>,
-): HistoryWeekSummary {
-    val anchorDate = selectedDate ?: monthlyData.keys
-        .filter { YearMonthValue.from(it) == selectedMonth }
-        .maxOrNull()
-        ?: selectedMonth.atDay(1)
-    val weekStart = anchorDate.plus(DatePeriod(days = -anchorDate.dayOfWeek.ordinal))
-    val weekEnd = weekStart.plus(DatePeriod(days = 6))
-    val weekDays = monthlyData.values.filter { summary ->
-        summary.date >= weekStart && summary.date <= weekEnd
+internal fun computeRangeDates(
+    anchor: YearMonthValue,
+    range: HistoryRange,
+): Set<LocalDate> = when (range) {
+    HistoryRange.WEEK -> {
+        val anchorDay = anchor.atDay(1)
+        val weekStart = anchorDay.plus(DatePeriod(days = -anchorDay.dayOfWeek.ordinal))
+        (0 until DAYS_IN_WEEK).map { weekStart.plus(DatePeriod(days = it)) }.toSet()
     }
-
-    return HistoryWeekSummary(
-        startDate = weekStart,
-        endDate = weekEnd,
-        activityDays = weekDays.count(DaySummary::hasActivity),
-        weightDays = weekDays.count(DaySummary::hasWeight),
-        photoDays = weekDays.count(DaySummary::hasPhoto),
-    )
+    HistoryRange.MONTH -> {
+        val daysInMonth = anchor.lengthOfMonth()
+        (1..daysInMonth).map { anchor.atDay(it) }.toSet()
+    }
+    HistoryRange.YEAR -> {
+        val start = YearMonthValue(anchor.year, 1)
+        (0 until MONTHS_IN_YEAR).flatMap { monthOffset ->
+            val ym = start.plusMonths(monthOffset)
+            (1..ym.lengthOfMonth()).map { ym.atDay(it) }
+        }.toSet()
+    }
 }
+
+internal fun computeStreak(
+    rangeDates: Set<LocalDate>,
+    monthlyData: Map<LocalDate, DaySummary>,
+): Int = rangeDates.sorted()
+    .fold(intArrayOf(0, 0)) { (max, current), date ->
+        val next = if (monthlyData[date]?.hasActivity == true) current + 1 else 0
+        intArrayOf(maxOf(max, next), next)
+    }[0]

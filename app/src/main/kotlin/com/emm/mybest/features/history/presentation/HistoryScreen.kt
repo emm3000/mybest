@@ -1,15 +1,13 @@
 package com.emm.mybest.features.history.presentation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,10 +16,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
@@ -44,44 +40,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.datetime.currentDate
-import com.emm.mybest.core.datetime.formatEsMonthYear
 import com.emm.mybest.core.datetime.formatEsWeekdayDayMonth
-import com.emm.mybest.core.datetime.minusDays
-import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
-import com.emm.mybest.domain.models.WeightEntry
+import com.emm.mybest.features.history.presentation.components.HistoryRangeSelector
+import com.emm.mybest.features.history.presentation.components.WeightTrendChart
 import com.emm.mybest.ui.components.AlertVariant
-import com.emm.mybest.ui.components.BadgeVariant
+import com.emm.mybest.ui.components.ButtonVariant
+import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HAlert
 import com.emm.mybest.ui.components.HAlertDialog
-import com.emm.mybest.ui.components.HBadge
 import com.emm.mybest.ui.components.HBottomSheet
+import com.emm.mybest.ui.components.HButton
+import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSkeleton
 import com.emm.mybest.ui.components.HTopBar
-import com.emm.mybest.ui.theme.MyBestTheme
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 
-private const val CALENDAR_COLUMNS = 7
-private const val DAY_CELL_ASPECT_RATIO = 0.8f
-private const val HISTORY_SCREEN_PADDING = 16
-private const val HISTORY_SECTION_SPACING = 12
 private const val HISTORY_SECTION_CORNER = 16
 private const val HISTORY_LOADING_CARD_HEIGHT = 56
 private const val HISTORY_LOADING_GRID_HEIGHT = 320
+private const val DAYS_IN_WEEK = 7
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     viewModel: HistoryViewModel,
+    onSeePhotosClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
@@ -90,6 +82,7 @@ fun HistoryScreen(
         modifier = modifier,
         state = state,
         onIntent = viewModel::onIntent,
+        onSeePhotosClick = onSeePhotosClick,
     )
 }
 
@@ -98,6 +91,7 @@ fun HistoryScreen(
 fun HistoryContent(
     state: HistoryState,
     onIntent: (HistoryIntent) -> Unit,
+    onSeePhotosClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val selectedDate = state.selectedDate
@@ -112,6 +106,7 @@ fun HistoryContent(
                 onClose = { onIntent(HistoryIntent.OnDateDismiss) },
                 onDeleteWeight = { onIntent(HistoryIntent.OnDeleteWeight(selectedDate)) },
                 onDeletePhoto = { onIntent(HistoryIntent.OnDeletePhoto(it)) },
+                onSeePhotosClick = onSeePhotosClick,
             )
         }
     }
@@ -125,52 +120,218 @@ fun HistoryContent(
         val contentModifier = Modifier
             .padding(padding)
             .fillMaxSize()
-            .padding(HISTORY_SCREEN_PADDING.dp)
 
         when {
-            state.isLoading -> HistoryLoadingState(modifier = contentModifier)
+            state.isLoading -> HistoryLoadingState(modifier = contentModifier.padding(16.dp))
             state.errorMessage != null -> {
                 HAlert(
                     title = "No se pudo cargar el historial",
                     description = state.errorMessage,
                     variant = AlertVariant.Destructive,
-                    modifier = contentModifier,
-                )
-            }
-            state.monthlyData.isEmpty() -> {
-                HEmptyState(
-                    title = "Historial vacío",
-                    description = "Registra peso, hábitos o fotos para empezar a ver actividad por día.",
-                    icon = Icons.Rounded.History,
-                    modifier = contentModifier,
+                    modifier = contentModifier.padding(16.dp),
                 )
             }
             else -> {
-                Column(
+                HistoryScrollContent(
+                    state = state,
+                    onIntent = onIntent,
                     modifier = contentModifier,
-                    verticalArrangement = Arrangement.spacedBy(HISTORY_SECTION_SPACING.dp),
-                ) {
-                    MonthSelector(
-                        currentMonth = state.selectedMonth,
-                        onMonthChange = { onIntent(HistoryIntent.OnMonthChange(it)) },
-                    )
+                )
+            }
+        }
+    }
+}
 
-                    HistoryWeekSummarySection(
-                        summary = state.weekSummary,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+@Composable
+private fun HistoryScrollContent(
+    state: HistoryState,
+    onIntent: (HistoryIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        item {
+            HistoryRangeSelector(
+                selectedRange = state.selectedRange,
+                onRangeChange = { onIntent(HistoryIntent.OnRangeChange(it)) },
+            )
+        }
 
-                    HistoryMonthSummarySection(
-                        summary = state.monthSummary,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+        item {
+            RangeNavigationRow(
+                selectedMonth = state.selectedMonth,
+                selectedRange = state.selectedRange,
+                onMonthChange = { onIntent(HistoryIntent.OnMonthChange(it)) },
+            )
+        }
 
-                    HistoryMonthSection(
-                        selectedMonth = state.selectedMonth,
-                        monthlyData = state.monthlyData,
-                        onDateClick = { onIntent(HistoryIntent.OnDateSelected(it)) },
+        item {
+            RangeSummaryLine(
+                range = state.selectedRange,
+                activeDays = state.activeDays,
+                streak = state.streak,
+                monthlyData = state.monthlyData,
+                selectedMonth = state.selectedMonth,
+            )
+        }
+
+        item { Spacer(modifier = Modifier.height(8.dp)) }
+
+        item {
+            HeatmapCard(
+                state = state,
+                onDateClick = { onIntent(HistoryIntent.OnDateSelected(it)) },
+            )
+        }
+
+        item {
+            WeightTrendSection(weightTrend = state.weightTrend)
+        }
+    }
+}
+
+@Composable
+private fun RangeNavigationRow(
+    selectedMonth: YearMonthValue,
+    selectedRange: HistoryRange,
+    onMonthChange: (YearMonthValue) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        HIconButton(
+            icon = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
+            contentDescription = "Período anterior",
+            onClick = { onMonthChange(selectedMonth.minusMonths(1)) },
+        )
+
+        Text(
+            text = rangeLabel(selectedMonth, selectedRange),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+
+        HIconButton(
+            icon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            contentDescription = "Período siguiente",
+            onClick = { onMonthChange(selectedMonth.plusMonths(1)) },
+        )
+    }
+}
+
+@Composable
+private fun RangeSummaryLine(
+    range: HistoryRange,
+    activeDays: Int,
+    streak: Int,
+    monthlyData: Map<LocalDate, DaySummary>,
+    selectedMonth: YearMonthValue,
+    modifier: Modifier = Modifier,
+) {
+    val text = when (range) {
+        HistoryRange.WEEK -> {
+            val weightDays = monthlyData.values.count { it.hasWeight }
+            val photoDays = monthlyData.values.count { it.hasPhoto }
+            "$activeDays/7 días · $weightDays con peso · $photoDays con foto"
+        }
+        HistoryRange.MONTH -> "$activeDays días activos · racha $streak"
+        HistoryRange.YEAR -> {
+            val bestMonth = findBestMonthName(monthlyData, selectedMonth.year)
+            "$activeDays/365 días activos · $bestMonth fue tu mejor mes"
+        }
+    }
+
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun HeatmapCard(
+    state: HistoryState,
+    onDateClick: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HCard(
+        modifier = modifier.fillMaxWidth(),
+        variant = CardVariant.Outlined,
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            when (state.selectedRange) {
+                HistoryRange.WEEK -> {
+                    val anchorDay = state.selectedMonth.atDay(1)
+                    val weekStart = anchorDay.plus(DatePeriod(days = -anchorDay.dayOfWeek.ordinal))
+                    val weekDates = (0 until DAYS_IN_WEEK).map { weekStart.plus(DatePeriod(days = it)) }
+                    WeekdayHeaderRow()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    WeekHeatmapRow(
+                        dates = weekDates,
+                        dayData = state.monthlyData,
+                        onDateClick = onDateClick,
                     )
                 }
+                HistoryRange.MONTH -> {
+                    val hasActivity = hasActivityInSelectedMonth(
+                        selectedMonth = state.selectedMonth,
+                        monthlyData = state.monthlyData,
+                    )
+                    if (hasActivity) {
+                        WeekdayHeaderRow()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        MonthCalendarGrid(
+                            yearMonth = state.selectedMonth,
+                            dayData = state.monthlyData,
+                            onDateClick = onDateClick,
+                        )
+                    } else {
+                        HEmptyState(
+                            title = "Sin actividad",
+                            description = "Registra peso o fotos para ver actividad diaria.",
+                            icon = Icons.Rounded.History,
+                        )
+                    }
+                }
+                HistoryRange.YEAR -> {
+                    YearHeatmapRow(
+                        yearMonth = state.selectedMonth,
+                        dayData = state.monthlyData,
+                        onDateClick = onDateClick,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeightTrendSection(
+    weightTrend: List<WeightTrendPoint>,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = "EVOLUCIÓN DEL PESO",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = MaterialTheme.typography.labelSmall.letterSpacing,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        HCard(
+            modifier = Modifier.fillMaxWidth(),
+            variant = CardVariant.Outlined,
+        ) {
+            Box(modifier = Modifier.padding(16.dp)) {
+                WeightTrendChart(points = weightTrend)
             }
         }
     }
@@ -180,7 +341,7 @@ fun HistoryContent(
 private fun HistoryLoadingState(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(HISTORY_SECTION_SPACING.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         HSkeleton(
             modifier = Modifier
@@ -203,117 +364,7 @@ private fun HistoryLoadingState(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun MonthSelector(
-    currentMonth: YearMonthValue,
-    onMonthChange: (YearMonthValue) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        HIconButton(
-            icon = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
-            contentDescription = "Mes anterior",
-            onClick = { onMonthChange(currentMonth.minusMonths(1)) },
-        )
-
-        Text(
-            text = currentMonth.formatEsMonthYear(),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-        )
-
-        HIconButton(
-            icon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-            contentDescription = "Mes siguiente",
-            onClick = { onMonthChange(currentMonth.plusMonths(1)) },
-        )
-    }
-}
-
-@Composable
-fun CalendarGrid(
-    yearMonth: YearMonthValue,
-    dayData: Map<LocalDate, DaySummary>,
-    onDateClick: (LocalDate) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val daysInMonth = yearMonth.lengthOfMonth()
-    val firstDayOfMonth = yearMonth.atDay(1).dayOfWeek.ordinal + 1
-    val startOffset = firstDayOfMonth - 1
-
-    val totalCells = daysInMonth + startOffset
-
-    LazyVerticalGrid(
-        modifier = modifier,
-        columns = GridCells.Fixed(CALENDAR_COLUMNS),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items(count = totalCells) { index ->
-            if (index < startOffset) {
-                Box(modifier = Modifier.aspectRatio(1f))
-            } else {
-                val dayOfMonth = index - startOffset + 1
-                val date = yearMonth.atDay(dayOfMonth)
-                val summary = dayData[date]
-
-                DayCell(
-                    date = date,
-                    summary = summary,
-                    onClick = { onDateClick(date) },
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun DayCell(
-    date: LocalDate,
-    summary: DaySummary?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val isToday = date == currentDate()
-    val intensity = resolveDayIntensity(summary)
-    val backgroundColor = dayIntensityColor(intensity)
-    val dayContentDescription = buildDayCellDescription(date = date, summary = summary, isToday = isToday)
-
-    Column(
-        modifier = modifier
-            .aspectRatio(DAY_CELL_ASPECT_RATIO)
-            .clip(RoundedCornerShape(12.dp))
-            .background(backgroundColor)
-            .border(
-                width = 1.dp,
-                color = if (isToday) MaterialTheme.colorScheme.primary.copy(alpha = 0.45f) else Color.Transparent,
-                shape = RoundedCornerShape(12.dp),
-            )
-            .clickable(onClick = onClick)
-            .semantics {
-                contentDescription = dayContentDescription
-            }
-            .padding(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = date.day.toString(),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-            color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        DayActivityIndicators(summary = summary)
-        Spacer(modifier = Modifier.height(4.dp))
-    }
-}
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DayDetailContent(
     date: LocalDate,
@@ -321,6 +372,7 @@ fun DayDetailContent(
     onClose: () -> Unit,
     onDeleteWeight: () -> Unit,
     onDeletePhoto: (String) -> Unit,
+    onSeePhotosClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isToday = date == currentDate()
@@ -375,6 +427,13 @@ fun DayDetailContent(
                 onDeletePhoto = { photoToDelete = it },
             )
         }
+
+        HButton(
+            text = "Ver fotos del día",
+            onClick = onSeePhotosClick,
+            variant = ButtonVariant.Outline,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
@@ -422,51 +481,5 @@ fun DetailItem(
                 variant = com.emm.mybest.ui.components.IconButtonVariant.Destructive,
             )
         }
-    }
-}
-
-@Composable
-fun HChip(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    HBadge(
-        label = text,
-        variant = BadgeVariant.Secondary,
-        modifier = modifier,
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HistoryScreenPreview() {
-    val today = currentDate()
-    val currentMonth = YearMonthValue.now()
-
-    val sampleMonthlyData = mapOf(
-        today to DaySummary(
-            date = today,
-            weight = WeightEntry(id = "w1", date = today, weight = 75.5f, note = "Post entrenamiento"),
-            photos = listOf(
-                ProgressPhoto(id = "p1", date = today, type = PhotoType.TRUNK, photoPath = "", createdAt = 0L),
-                ProgressPhoto(id = "p2", date = today, type = PhotoType.FACE, photoPath = "", createdAt = 0L),
-            ),
-        ),
-        today.minusDays(1) to DaySummary(
-            date = today.minusDays(1),
-            weight = WeightEntry(id = "w2", date = today.minusDays(1), weight = 76.0f),
-        ),
-    )
-
-    val state = HistoryState(
-        selectedMonth = currentMonth,
-        monthlyData = sampleMonthlyData,
-    )
-
-    MyBestTheme {
-        HistoryContent(
-            state = state,
-            onIntent = {},
-        )
     }
 }

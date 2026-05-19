@@ -137,6 +137,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         val viewModel: HistoryViewModel = koinViewModel()
         HistoryScreen(
             viewModel = viewModel,
+            onSeePhotosClick = { navigator.navigate(Screen.Timeline) },
             modifier = Modifier,
         )
     }

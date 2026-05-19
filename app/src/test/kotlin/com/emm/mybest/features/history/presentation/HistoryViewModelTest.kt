@@ -182,6 +182,21 @@ class HistoryViewModelTest {
     }
 
     @Test
+    fun `OnRangeChange updates selectedRange in state`() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.state.test {
+            awaitItem()
+            awaitItem()
+
+            viewModel.onIntent(HistoryIntent.OnRangeChange(HistoryRange.YEAR))
+            val updated = awaitItem()
+            assertEquals(HistoryRange.YEAR, updated.selectedRange)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `OnDeleteWeight calls repository deleteByDate`() = runTest {
         val viewModel = buildViewModel(weights = listOf(weightEntry))
 
@@ -265,4 +280,60 @@ class HistoryViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun `weightTrend is populated from weight entries in selected range`() = runTest {
+        val viewModel = buildViewModel(weights = listOf(weightEntry))
+
+        viewModel.state.test {
+            awaitItem()
+            val loaded = awaitItem()
+            // MONTH range, March 2026 — weightEntry date is 2026-03-10, which is in March
+            assertEquals(1, loaded.weightTrend.size)
+            assertEquals(weightEntry.date, loaded.weightTrend[0].date)
+            assertEquals(weightEntry.weight, loaded.weightTrend[0].weight)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    // region streak computation
+
+    @Test
+    fun `computeStreak returns 0 for empty data`() {
+        val rangeDates = setOf(
+            LocalDate(2026, 3, 1),
+            LocalDate(2026, 3, 2),
+        )
+        assertEquals(0, computeStreak(rangeDates, emptyMap()))
+    }
+
+    @Test
+    fun `computeStreak returns 1 for single active day`() {
+        val date = LocalDate(2026, 3, 10)
+        val summary = DaySummary(date, weight = weightEntry)
+        assertEquals(1, computeStreak(setOf(date), mapOf(date to summary)))
+    }
+
+    @Test
+    fun `computeStreak returns correct longest run for non-consecutive days`() {
+        val dates = (1..7).map { LocalDate(2026, 3, it) }.toSet()
+        val data = mapOf(
+            LocalDate(2026, 3, 1) to DaySummary(LocalDate(2026, 3, 1), weight = weightEntry),
+            LocalDate(2026, 3, 2) to DaySummary(LocalDate(2026, 3, 2), weight = weightEntry),
+            // gap on 3rd
+            LocalDate(2026, 3, 4) to DaySummary(LocalDate(2026, 3, 4), weight = weightEntry),
+            LocalDate(2026, 3, 5) to DaySummary(LocalDate(2026, 3, 5), weight = weightEntry),
+            LocalDate(2026, 3, 6) to DaySummary(LocalDate(2026, 3, 6), weight = weightEntry),
+        )
+        assertEquals(3, computeStreak(dates, data))
+    }
+
+    @Test
+    fun `computeStreak returns total count when all days are active`() {
+        val dates = (1..5).map { LocalDate(2026, 3, it) }.toSet()
+        val data = dates.associateWith { DaySummary(it, weight = weightEntry) }
+        assertEquals(5, computeStreak(dates, data))
+    }
+
+    // endregion
 }
