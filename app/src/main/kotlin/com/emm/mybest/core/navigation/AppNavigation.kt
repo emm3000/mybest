@@ -84,6 +84,15 @@ fun AppNavigation(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding),
+            transitionSpec = {
+                when (navigationState.lastTransitionKind) {
+                    NavTransitionKind.TabSwitch -> tabSwitchTransition()
+                    NavTransitionKind.Pop -> popTransition()
+                    NavTransitionKind.Push -> pushTransition()
+                }
+            },
+            popTransitionSpec = { popTransition() },
+            predictivePopTransitionSpec = { popTransition() },
         )
     }
 }
