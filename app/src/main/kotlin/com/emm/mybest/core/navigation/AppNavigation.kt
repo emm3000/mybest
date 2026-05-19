@@ -21,6 +21,7 @@ import com.emm.mybest.features.exercise.presentation.ExercisePlanScreen
 import com.emm.mybest.features.exercise.presentation.ExercisePlanViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
 import com.emm.mybest.features.history.presentation.HistoryViewModel
+import com.emm.mybest.features.home.presentation.HomeCallbacks
 import com.emm.mybest.features.home.presentation.HomeScreen
 import com.emm.mybest.features.insights.presentation.InsightsScreen
 import com.emm.mybest.features.insights.presentation.InsightsViewModel
@@ -101,10 +102,14 @@ fun AppNavigation(
 private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey> = entryProvider {
     entry<Screen.Home> {
         HomeScreen(
-            onWeightClick = { navigator.navigate(Screen.AddWeight) },
-            onPhotoClick = { navigator.navigate(Screen.AddPhoto) },
-            onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
-            onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
+            callbacks = HomeCallbacks(
+                onWeightClick = { navigator.navigate(Screen.AddWeight) },
+                onPhotoClick = { navigator.navigate(Screen.AddPhoto) },
+                onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
+                onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
+                onSettingsClick = { navigator.navigate(Screen.ReminderSettings) },
+                onHistoryClick = { navigator.navigate(Screen.History) },
+            ),
             modifier = Modifier,
         )
     }

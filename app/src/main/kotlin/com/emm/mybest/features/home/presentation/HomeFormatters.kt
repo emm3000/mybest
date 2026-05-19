@@ -19,6 +19,16 @@ private val MONTH_ABBR_ES = mapOf(
     12 to "DIC",
 )
 
+internal fun DayOfWeek.shortEs(): String = when (this) {
+    DayOfWeek.MONDAY -> "LUN"
+    DayOfWeek.TUESDAY -> "MAR"
+    DayOfWeek.WEDNESDAY -> "MIE"
+    DayOfWeek.THURSDAY -> "JUE"
+    DayOfWeek.FRIDAY -> "VIE"
+    DayOfWeek.SATURDAY -> "SAB"
+    DayOfWeek.SUNDAY -> "DOM"
+}
+
 internal fun DayOfWeek.longEs(): String = when (this) {
     DayOfWeek.MONDAY -> "Lunes"
     DayOfWeek.TUESDAY -> "Martes"
@@ -31,7 +41,17 @@ internal fun DayOfWeek.longEs(): String = when (this) {
 
 internal fun LocalDate.formatShortMonthDay(): String {
     val abbr = MONTH_ABBR_ES[month.ordinal + 1] ?: month.name.take(3)
-    return "$dayOfMonth $abbr"
+    return "$day $abbr"
+}
+
+/**
+ * Returns a compact topbar date string for the given date, e.g. "LUN 18 MAY".
+ * HTopBar will uppercase the string itself via its letter-spacing style.
+ */
+internal fun formatTopbarDate(date: LocalDate, dow: DayOfWeek): String {
+    val dayAbbr = dow.shortEs()
+    val monthAbbr = MONTH_ABBR_ES[date.month.ordinal + 1] ?: date.month.name.take(3)
+    return "$dayAbbr ${date.day} $monthAbbr"
 }
 
 internal fun MealType.labelEs(): String = when (this) {

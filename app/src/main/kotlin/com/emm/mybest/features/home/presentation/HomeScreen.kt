@@ -1,5 +1,6 @@
 package com.emm.mybest.features.home.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,9 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FitnessCenter
+import androidx.compose.material.icons.rounded.MonitorWeight
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.Restaurant
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -24,6 +29,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.domain.models.MealType
@@ -32,18 +41,25 @@ import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HProgressBar
+import com.emm.mybest.ui.components.HSeparator
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.MyBestTheme
 import com.emm.mybest.ui.theme.StarlinkTextStyles
 import org.koin.androidx.compose.koinViewModel
 
+data class HomeCallbacks(
+    val onWeightClick: () -> Unit,
+    val onPhotoClick: () -> Unit,
+    val onMealPlanClick: () -> Unit,
+    val onExercisePlanClick: () -> Unit,
+    val onSettingsClick: () -> Unit,
+    val onHistoryClick: () -> Unit,
+)
+
 @Composable
 fun HomeScreen(
+    callbacks: HomeCallbacks,
     modifier: Modifier = Modifier,
-    onWeightClick: () -> Unit,
-    onPhotoClick: () -> Unit,
-    onMealPlanClick: () -> Unit,
-    onExercisePlanClick: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -51,10 +67,7 @@ fun HomeScreen(
         modifier = modifier,
         state = state,
         onIntent = viewModel::handle,
-        onWeightClick = onWeightClick,
-        onPhotoClick = onPhotoClick,
-        onMealPlanClick = onMealPlanClick,
-        onExercisePlanClick = onExercisePlanClick,
+        callbacks = callbacks,
     )
 }
 
@@ -62,16 +75,26 @@ fun HomeScreen(
 internal fun HomeScreenContent(
     state: HomeState,
     onIntent: (HomeIntent) -> Unit,
-    onWeightClick: () -> Unit,
-    onPhotoClick: () -> Unit,
-    onMealPlanClick: () -> Unit,
-    onExercisePlanClick: () -> Unit,
+    callbacks: HomeCallbacks,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { HTopBar(title = "Hoy") },
+        topBar = {
+            HTopBar(
+                title = formatTopbarDate(state.today, state.dayOfWeek),
+                actions = {
+                    IconButton(onClick = callbacks.onSettingsClick) {
+                        Icon(
+                            imageVector = Icons.Rounded.Settings,
+                            contentDescription = "Ajustes",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                },
+            )
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -81,20 +104,33 @@ internal fun HomeScreenContent(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            item { HomeDayHeroCard(state = state, modifier = Modifier.fillMaxWidth()) }
-            item { HomeMealSection(state = state, onIntent = onIntent, modifier = Modifier.fillMaxWidth()) }
-            item { HomeExerciseSection(state = state, onIntent = onIntent, modifier = Modifier.fillMaxWidth()) }
             item {
-                HomeEditorsRow(
-                    onMealPlanClick = onMealPlanClick,
-                    onExercisePlanClick = onExercisePlanClick,
+                HomeDayHeroCard(
+                    state = state,
+                    onHistoryClick = callbacks.onHistoryClick,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
             item {
-                HomePrimaryCtaSection(
-                    onWeightClick = onWeightClick,
-                    onPhotoClick = onPhotoClick,
+                HomePrimaryCtaRow(
+                    onWeightClick = callbacks.onWeightClick,
+                    onPhotoClick = callbacks.onPhotoClick,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            item {
+                HomeMealSection(
+                    state = state,
+                    onIntent = onIntent,
+                    onMealPlanClick = callbacks.onMealPlanClick,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            item {
+                HomeExerciseSection(
+                    state = state,
+                    onIntent = onIntent,
+                    onExercisePlanClick = callbacks.onExercisePlanClick,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -105,18 +141,19 @@ internal fun HomeScreenContent(
 // ── Hero card ────────────────────────────────────────────────────────────────
 
 @Composable
-private fun HomeDayHeroCard(state: HomeState, modifier: Modifier = Modifier) {
-    HCard(modifier = modifier, variant = CardVariant.Outlined) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = "${state.dayOfWeek.longEs().uppercase()} · ${state.today.formatShortMonthDay()}",
-                style = StarlinkTextStyles.sectionLabel,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+private fun HomeDayHeroCard(
+    state: HomeState,
+    onHistoryClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HCard(
+        modifier = modifier.clickable(onClick = onHistoryClick),
+        variant = CardVariant.Outlined,
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
             Text(
                 text = "${state.completedCount}/${state.totalCount}",
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -125,14 +162,41 @@ private fun HomeDayHeroCard(state: HomeState, modifier: Modifier = Modifier) {
                 style = StarlinkTextStyles.sectionLabel,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             HProgressBar(
                 progress = state.completionRatio,
-                height = 2.dp,
-                indicatorColor = MaterialTheme.colorScheme.onSurface,
+                height = 4.dp,
+                indicatorColor = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
+    }
+}
+
+// ── Primary CTA row ──────────────────────────────────────────────────────────
+
+@Composable
+private fun HomePrimaryCtaRow(
+    onWeightClick: () -> Unit,
+    onPhotoClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        HButton(
+            text = "PESO",
+            onClick = onWeightClick,
+            variant = ButtonVariant.Default,
+            leadingIcon = Icons.Rounded.MonitorWeight,
+            modifier = Modifier.weight(1f),
+        )
+        HButton(
+            text = "FOTO",
+            onClick = onPhotoClick,
+            variant = ButtonVariant.Default,
+            leadingIcon = Icons.Rounded.PhotoCamera,
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 
@@ -142,12 +206,16 @@ private fun HomeDayHeroCard(state: HomeState, modifier: Modifier = Modifier) {
 private fun HomeMealSection(
     state: HomeState,
     onIntent: (HomeIntent) -> Unit,
+    onMealPlanClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val completedMeals = state.mealRows.count { it.done }
+    val totalMeals = state.mealRows.size
     HCard(modifier = modifier, variant = CardVariant.Outlined) {
         Column(modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {
             HomeSectionHeader(
                 label = "COMIDAS",
+                count = "$completedMeals/$totalMeals",
                 icon = {
                     Icon(
                         Icons.Rounded.Restaurant,
@@ -155,14 +223,20 @@ private fun HomeMealSection(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
+                onClick = onMealPlanClick,
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            HSeparator()
             state.mealRows.forEach { row ->
+                val haptic = LocalHapticFeedback.current
                 HomePlanRow(
                     label = row.type.labelEs(),
                     description = row.description,
                     done = row.done,
-                    onCheckedChange = { done -> onIntent(HomeIntent.ToggleMeal(row.type, done)) },
+                    onCheckedChange = { done ->
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onIntent(HomeIntent.ToggleMeal(row.type, done))
+                    },
                 )
             }
         }
@@ -175,12 +249,15 @@ private fun HomeMealSection(
 private fun HomeExerciseSection(
     state: HomeState,
     onIntent: (HomeIntent) -> Unit,
+    onExercisePlanClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val completedExercise = if (state.exerciseDone) 1 else 0
     HCard(modifier = modifier, variant = CardVariant.Outlined) {
         Column(modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {
             HomeSectionHeader(
                 label = "EJERCICIO",
+                count = "$completedExercise/1",
                 icon = {
                     Icon(
                         Icons.Rounded.FitnessCenter,
@@ -188,16 +265,21 @@ private fun HomeExerciseSection(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
+                onClick = onExercisePlanClick,
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            HSeparator()
+            val haptic = LocalHapticFeedback.current
             HomePlanRow(
-                label = "EJERCICIO",
+                label = "RUTINA",
                 description = state.exerciseRoutine,
                 done = state.exerciseDone,
-                onCheckedChange = { done -> onIntent(HomeIntent.ToggleExercise(done)) },
+                onCheckedChange = { done ->
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onIntent(HomeIntent.ToggleExercise(done))
+                },
                 emptyPlaceholder = "Sin rutina",
             )
-            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -207,20 +289,33 @@ private fun HomeExerciseSection(
 @Composable
 private fun HomeSectionHeader(
     label: String,
+    count: String,
     icon: @Composable () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        icon()
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            icon()
+            Text(
+                text = label,
+                style = StarlinkTextStyles.sectionLabel,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         Text(
-            text = label,
-            style = StarlinkTextStyles.sectionLabel,
+            text = count,
+            style = StarlinkTextStyles.chipLabel,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -238,7 +333,8 @@ private fun HomePlanRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 2.dp),
+            .clickable { onCheckedChange(!done) }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = done, onCheckedChange = onCheckedChange)
@@ -246,60 +342,20 @@ private fun HomePlanRow(
             Text(
                 text = label,
                 style = StarlinkTextStyles.chipLabel,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = if (done) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
             )
             val hasContent = description.isNotEmpty()
             Text(
                 text = if (hasContent) description else emptyPlaceholder,
                 style = MaterialTheme.typography.bodySmall,
-                color = if (hasContent) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textDecoration = if (done && hasContent) TextDecoration.LineThrough else TextDecoration.None,
             )
         }
-    }
-}
-
-// ── Editor CTAs ──────────────────────────────────────────────────────────────
-
-@Composable
-private fun HomeEditorsRow(
-    onMealPlanClick: () -> Unit,
-    onExercisePlanClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        HButton(
-            text = "EDITAR DIETA",
-            onClick = onMealPlanClick,
-            variant = ButtonVariant.Outline,
-            leadingIcon = Icons.Rounded.Restaurant,
-            modifier = Modifier.weight(1f),
-        )
-        HButton(
-            text = "EDITAR RUTINA",
-            onClick = onExercisePlanClick,
-            variant = ButtonVariant.Outline,
-            leadingIcon = Icons.Rounded.FitnessCenter,
-            modifier = Modifier.weight(1f),
-        )
-    }
-}
-
-// ── Primary CTAs ─────────────────────────────────────────────────────────────
-
-@Composable
-private fun HomePrimaryCtaSection(
-    onWeightClick: () -> Unit,
-    onPhotoClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        HButton(text = "REGISTRAR PESO", onClick = onWeightClick, modifier = Modifier.fillMaxWidth())
-        HButton(
-            text = "TOMAR FOTO",
-            onClick = onPhotoClick,
-            variant = ButtonVariant.Secondary,
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
 
@@ -318,10 +374,14 @@ private fun HomeScreenPreview() {
                 completionRatio = 0.4f,
             ),
             onIntent = {},
-            onWeightClick = {},
-            onPhotoClick = {},
-            onMealPlanClick = {},
-            onExercisePlanClick = {},
+            callbacks = HomeCallbacks(
+                onWeightClick = {},
+                onPhotoClick = {},
+                onMealPlanClick = {},
+                onExercisePlanClick = {},
+                onSettingsClick = {},
+                onHistoryClick = {},
+            ),
         )
     }
 }
