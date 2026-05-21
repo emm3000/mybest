@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.emm.mybest.domain.models.DailySlot
+import com.emm.mybest.domain.models.DailySlotTimes
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -25,6 +27,19 @@ class UserPreferencesRepositoryImpl(
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val WEIGHT_REMINDER_HOUR = intPreferencesKey("weight_reminder_hour")
         val WEIGHT_REMINDER_MINUTE = intPreferencesKey("weight_reminder_minute")
+        val SLOT_TIME_BREAKFAST_MIN = intPreferencesKey("slot_time_breakfast_min")
+        val SLOT_TIME_LUNCH_MIN = intPreferencesKey("slot_time_lunch_min")
+        val SLOT_TIME_SNACK_MIN = intPreferencesKey("slot_time_snack_min")
+        val SLOT_TIME_DINNER_MIN = intPreferencesKey("slot_time_dinner_min")
+        val SLOT_TIME_EXERCISE_MIN = intPreferencesKey("slot_time_exercise_min")
+    }
+
+    private fun DailySlot.prefKey() = when (this) {
+        DailySlot.BREAKFAST -> PreferencesKeys.SLOT_TIME_BREAKFAST_MIN
+        DailySlot.LUNCH -> PreferencesKeys.SLOT_TIME_LUNCH_MIN
+        DailySlot.SNACK -> PreferencesKeys.SLOT_TIME_SNACK_MIN
+        DailySlot.DINNER -> PreferencesKeys.SLOT_TIME_DINNER_MIN
+        DailySlot.EXERCISE -> PreferencesKeys.SLOT_TIME_EXERCISE_MIN
     }
 
     override val isDarkMode: Flow<Boolean?> = dataStore.data.map { preferences ->
@@ -63,5 +78,24 @@ class UserPreferencesRepositoryImpl(
                 preferences.remove(PreferencesKeys.WEIGHT_REMINDER_MINUTE)
             }
         }
+    }
+
+    override val dailySlotTimes: Flow<DailySlotTimes> = dataStore.data.map { preferences ->
+        val resolved = DailySlot.entries.associateWith { slot ->
+            preferences[slot.prefKey()]
+                ?.let { minutes -> LocalTime(minutes / MIN_PER_HOUR, minutes % MIN_PER_HOUR) }
+                ?: DailySlotTimes.DEFAULT_TIMES.getValue(slot)
+        }
+        DailySlotTimes(resolved)
+    }
+
+    override suspend fun setDailySlotTime(slot: DailySlot, time: LocalTime) {
+        dataStore.edit { preferences ->
+            preferences[slot.prefKey()] = time.hour * MIN_PER_HOUR + time.minute
+        }
+    }
+
+    private companion object {
+        const val MIN_PER_HOUR = 60
     }
 }
