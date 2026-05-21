@@ -35,7 +35,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 private const val SWITCH_DISABLED_ALPHA = 0.5f
 private const val SWITCH_ANIMATION_MS = 180
@@ -104,7 +104,7 @@ fun HSwitch(
 @PreviewLightDark
 @Composable
 private fun HSwitchPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             Column(
                 modifier = Modifier.padding(16.dp),

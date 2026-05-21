@@ -48,7 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -356,7 +356,7 @@ private fun formatTwoDigits(value: Int): String = value.toString().padStart(2, '
 @PreviewLightDark
 @Composable
 private fun ReminderTimePickerDialogPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             HTimePickerDialog(
                 initialHour = 8,
@@ -371,7 +371,7 @@ private fun ReminderTimePickerDialogPreview() {
 @PreviewLightDark
 @Composable
 private fun ReminderTimePickerDialogEdgeCasePreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             HTimePickerDialog(
                 initialHour = 23,

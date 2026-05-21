@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 import com.emm.mybest.ui.theme.StarlinkTextStyles
 
 enum class StatChipVariant { Neutral, Primary, Secondary, Tertiary, Success, Destructive }
@@ -117,7 +117,7 @@ private fun statChipValueColor(variant: StatChipVariant): Color {
 @PreviewLightDark
 @Composable
 private fun HStatChipPreview() {
-    MyBestTheme {
+    AtelierTheme {
         androidx.compose.material3.Surface {
             Column(
                 modifier = Modifier.padding(16.dp),

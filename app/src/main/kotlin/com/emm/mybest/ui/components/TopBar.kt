@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 @Composable
 fun HTopBar(
@@ -85,7 +85,7 @@ fun HTopBar(
 @PreviewLightDark
 @Composable
 private fun HTopBarPreview() {
-    MyBestTheme {
+    AtelierTheme {
         HTopBar(
             title = "Habit Details",
             navigationIcon = {

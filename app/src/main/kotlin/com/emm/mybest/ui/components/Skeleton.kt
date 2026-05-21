@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 private const val DECK_ITEM_TITLE_WIDTH_RATIO = 0.55f
 private const val DECK_ITEM_SUBTITLE_WIDTH_RATIO = 0.35f
@@ -156,7 +156,7 @@ fun TextSkeleton(
 @PreviewLightDark
 @Composable
 private fun HSkeletonPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             Column(
                 modifier = Modifier
@@ -180,7 +180,7 @@ private fun HSkeletonPreview() {
 @PreviewLightDark
 @Composable
 private fun DashboardSkeletonPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             DashboardSkeleton(
                 count = 4,
@@ -193,7 +193,7 @@ private fun DashboardSkeletonPreview() {
 @PreviewLightDark
 @Composable
 private fun TextSkeletonPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             TextSkeleton(
                 lines = 4,

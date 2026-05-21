@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 enum class IconButtonVariant { Ghost, Outline, Destructive }
 
@@ -71,7 +71,7 @@ fun HIconButton(
 @Preview(showBackground = true)
 @Composable
 private fun HIconButtonPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),

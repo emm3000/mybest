@@ -32,7 +32,7 @@ import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.HTopBar
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Locale
 
@@ -146,7 +146,7 @@ private fun AddWeightContent(
 @Preview(showBackground = true)
 @Composable
 private fun AddWeightScreenPreview() {
-    MyBestTheme {
+    AtelierTheme {
         AddWeightContent(
             state = AddWeightState(
                 weight = "80.5",

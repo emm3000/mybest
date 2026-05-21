@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 import kotlin.math.min
 
 private const val RING_ANIMATION_MS = 300
@@ -103,7 +103,7 @@ fun HProgressRing(
 @PreviewLightDark
 @Composable
 private fun HProgressRingPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             Column(
                 modifier = Modifier.padding(16.dp),

@@ -1,146 +1,120 @@
 package com.emm.mybest.ui.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.emm.mybest.R
-
-private val AppFontFamily: FontFamily = FontFamily(
-    Font(R.font.geist_regular, FontWeight.Normal),
-    Font(R.font.geist_medium, FontWeight.Medium),
-    Font(R.font.geist_semibold, FontWeight.SemiBold),
-    Font(R.font.geist_bold, FontWeight.Bold),
-)
 
 /**
- * Sistema tipográfico inspirado directamente en shadcn/ui.
+ * Atelier Dark type scale.
  *
- * Mapeo Material3 → shadcn (equivalencias de clase CSS):
- *
- * | Token M3          | shadcn clase         | Uso en Hello                                      |
- * |-------------------|----------------------|---------------------------------------------------|
- * | displayLarge      | text-6xl bold        | Métricas hero (peso actual, delta grande)         |
- * | displayMedium     | text-5xl bold        | Métricas secundarias (contadores de racha)        |
- * | displaySmall      | text-4xl semibold    | Métricas auxiliares                               |
- * | headlineLarge     | text-4xl extrabold   | —                                                 |
- * | headlineMedium    | text-3xl bold        | —                                                 |
- * | headlineSmall     | text-2xl semibold    | Título de word en CardDetail                      |
- * | titleLarge        | text-xl semibold     | TopAppBar, sección principal                      |
- * | titleMedium       | text-lg medium       | Subtítulos de sección                             |
- * | titleSmall        | text-sm medium       | Labels de sección (SectionCard)                   |
- * | bodyLarge         | text-base normal     | Cuerpo principal de flashcard                     |
- * | bodyMedium        | text-sm normal       | Textos secundarios / onSurfaceVariant             |
- * | bodySmall         | text-xs normal       | Helper / supporting text                          |
- * | labelLarge        | text-sm medium       | Texto de botones                                  |
- * | labelMedium       | text-xs medium       | Badges, chips, conteos (tracking +1.2sp uppercase)|
- * | labelSmall        | text-[10px] medium   | Micro-labels, fechas de review (tracking +1.5sp uppercase) |
+ * | Token M3          | Family          | Style    | Use                                        |
+ * |-------------------|-----------------|----------|--------------------------------------------|
+ * | displayLarge      | Instrument Serif| Italic   | Hero number (−4.2 kg, 30/5 ratio)          |
+ * | displayMedium     | Instrument Serif| Italic   | Secondary metric (streak counter)          |
+ * | displaySmall      | Instrument Serif| Italic   | Auxiliary metric                           |
+ * | headlineLarge     | Instrument Serif| Regular  | Section hero headline                      |
+ * | headlineMedium    | Instrument Serif| Regular  | Sub-title ("Mantén la rutina.")            |
+ * | headlineSmall     | Instrument Serif| Regular  | Card display sub-title                     |
+ * | titleLarge        | Geist Sans      | SemiBold | TopAppBar, primary section label           |
+ * | titleMedium       | Geist Sans      | Medium   | Section sub-label                          |
+ * | titleSmall        | Geist Sans      | Medium   | SectionCard label                          |
+ * | bodyLarge         | Geist Sans      | Normal   | Primary body copy                          |
+ * | bodyMedium        | Geist Sans      | Normal   | Secondary body / onSurfaceVariant          |
+ * | bodySmall         | Geist Sans      | Normal   | Helper / supporting text                   |
+ * | labelLarge        | Geist Sans      | Medium   | Button text                                |
+ * | labelMedium       | Geist Mono      | Medium   | Uppercase tracking label (PROGRESO)        |
+ * | labelSmall        | Geist Mono      | Medium   | Micro uppercase label (DELTA PESO)         |
  */
-val Typography = Typography(
-    displayLarge = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 56.sp,
-        lineHeight = 64.sp,
+val AtelierTypography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = AtelierSerifFamily,
+        fontStyle = FontStyle.Italic,
+        fontSize = 128.sp,
+        letterSpacing = (-2).sp,
+    ),
+    displayMedium = TextStyle(
+        fontFamily = AtelierSerifFamily,
+        fontStyle = FontStyle.Italic,
+        fontSize = 96.sp,
         letterSpacing = (-1.5).sp,
     ),
-    displayMedium = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 40.sp,
-        lineHeight = 48.sp,
-        letterSpacing = (-1.0).sp,
+    displaySmall = TextStyle(
+        fontFamily = AtelierSerifFamily,
+        fontStyle = FontStyle.Italic,
+        fontSize = 56.sp,
+        letterSpacing = (-1).sp,
     ),
-    displaySmall = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 32.sp,
-        lineHeight = 40.sp,
+    headlineLarge = TextStyle(
+        fontFamily = AtelierSerifFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 36.sp,
+        lineHeight = (36 * 1.2).sp,
         letterSpacing = (-0.5).sp,
     ),
-    headlineLarge = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
-        fontWeight = FontWeight.ExtraBold,
-        fontSize = 32.sp,
-        lineHeight = 40.sp,
-        letterSpacing = (-0.5).sp,
-    ),
-    headlineMedium = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
-        fontWeight = FontWeight.Bold,
+    headlineMedium = TextStyle(
+        fontFamily = AtelierSerifFamily,
+        fontWeight = FontWeight.Normal,
         fontSize = 28.sp,
-        lineHeight = 36.sp,
+        lineHeight = (28 * 1.2).sp,
         letterSpacing = (-0.25).sp,
     ),
-    headlineSmall = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
-        letterSpacing = 0.sp,
-    ),
-    titleLarge = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp,
-    ),
-    titleMedium = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.sp,
-    ),
-    titleSmall = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.sp,
-    ),
-    bodyLarge = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
+    headlineSmall = TextStyle(
+        fontFamily = AtelierSerifFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 26.sp,
+        fontSize = 22.sp,
+        lineHeight = (22 * 1.2).sp,
         letterSpacing = 0.sp,
     ),
-    bodyMedium = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
+    titleLarge = TextStyle(
+        fontFamily = AtelierSansFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp,
+    ),
+    titleMedium = TextStyle(
+        fontFamily = AtelierSansFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 15.sp,
+    ),
+    titleSmall = TextStyle(
+        fontFamily = AtelierSansFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 13.sp,
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = AtelierSansFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 22.sp,
-        letterSpacing = 0.sp,
+        fontSize = 15.sp,
+        lineHeight = (15 * 1.45).sp,
     ),
-    bodySmall = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
+    bodyMedium = TextStyle(
+        fontFamily = AtelierSansFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.sp,
+        lineHeight = (13 * 1.45).sp,
+    ),
+    bodySmall = TextStyle(
+        fontFamily = AtelierSansFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
-        lineHeight = 18.sp,
-        letterSpacing = 0.sp,
+        lineHeight = (12 * 1.45).sp,
     ),
-    labelLarge = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
+    labelLarge = TextStyle(
+        fontFamily = AtelierSansFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.sp,
+        fontSize = 13.sp,
     ),
-    labelMedium = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
+    labelMedium = TextStyle(
+        fontFamily = AtelierMonoFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 1.2.sp,
+        fontSize = 11.sp,
+        letterSpacing = 1.8.sp,
     ),
-    labelSmall = androidx.compose.ui.text.TextStyle(
-        fontFamily = AppFontFamily,
+    labelSmall = TextStyle(
+        fontFamily = AtelierMonoFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 10.sp,
-        lineHeight = 14.sp,
-        letterSpacing = 1.5.sp,
+        letterSpacing = 2.0.sp,
     ),
 )

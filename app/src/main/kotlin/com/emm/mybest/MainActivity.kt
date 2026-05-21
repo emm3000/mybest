@@ -10,9 +10,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,13 +19,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.emm.mybest.core.navigation.AppNavigation
-import com.emm.mybest.ui.theme.MyBestTheme
-import com.emm.mybest.viewmodel.MainViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import com.emm.mybest.ui.theme.AtelierTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: MainViewModel by viewModel()
     private var intentAction by mutableStateOf<String?>(null)
     private var hasAttemptedNotificationPermissionRequest = false
     private val notificationPermissionLauncher = registerForActivityResult(
@@ -42,29 +37,21 @@ class MainActivity : ComponentActivity() {
         intentAction = intent.action
 
         setContent {
-            val state by viewModel.state.collectAsState()
-            val darkTheme = state.isDarkMode ?: isSystemInDarkTheme()
-
-            // Modern Edge-to-Edge configuration that syncs with the app's theme state.
-            // This ensures status bar and navigation bar icons correctly adapt even if
-            // the user overrides the system theme within the app.
-            DisposableEffect(darkTheme) {
+            DisposableEffect(Unit) {
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.auto(
                         Color.Transparent.toArgb(),
                         Color.Transparent.toArgb(),
-                    ) { darkTheme },
+                    ) { true },
                     navigationBarStyle = SystemBarStyle.auto(
                         DefaultLightScrim,
                         DefaultDarkScrim,
-                    ) { darkTheme },
+                    ) { true },
                 )
                 onDispose {}
             }
 
-            MyBestTheme(
-                darkTheme = darkTheme,
-            ) {
+            AtelierTheme {
                 AppNavigation(
                     intentAction = intentAction,
                     onConsumeAction = { intentAction = null },

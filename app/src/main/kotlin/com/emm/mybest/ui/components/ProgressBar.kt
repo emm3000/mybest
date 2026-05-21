@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 /**
  * shadcn/ui-style progress bar with rounded corners and smooth animation.
@@ -68,7 +68,7 @@ fun HProgressBar(
 @PreviewLightDark
 @Composable
 private fun HProgressBarPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             Column(
                 modifier = Modifier

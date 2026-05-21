@@ -18,7 +18,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 import com.emm.mybest.ui.theme.StarlinkTextStyles
 
 private const val FILTER_CHIP_DISABLED_ALPHA = 0.5f
@@ -76,7 +76,7 @@ fun HFilterChip(
 )
 @Composable
 private fun HFilterChipPreview() {
-    MyBestTheme {
+    AtelierTheme {
         androidx.compose.material3.Surface {
             Column(
                 modifier = Modifier.padding(16.dp),

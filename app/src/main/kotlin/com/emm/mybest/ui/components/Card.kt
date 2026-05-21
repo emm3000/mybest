@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 // ─── Variantes ──────────────────────────────────────────────────────────────
 
@@ -142,7 +142,7 @@ fun HCardFooter(
 @PreviewLightDark
 @Composable
 private fun HCardVariantsPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             Column(
                 modifier = Modifier
@@ -172,7 +172,7 @@ private fun HCardVariantsPreview() {
 @PreviewLightDark
 @Composable
 private fun HCardWithSlotsPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             HCard(
                 modifier = Modifier

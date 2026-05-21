@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 @Composable
 internal fun InputLabelSection(label: String?, isError: Boolean) {
@@ -43,7 +43,7 @@ internal fun InputHelperSection(helperText: String?, isError: Boolean) {
 @Preview(showBackground = true)
 @Composable
 private fun InputLabelSectionPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Column {
             InputLabelSection(label = "Label", isError = false)
             InputLabelSection(label = "Label Error", isError = true)
@@ -54,7 +54,7 @@ private fun InputLabelSectionPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun InputHelperSectionPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Column {
             InputHelperSection(helperText = "Helper text", isError = false)
             InputHelperSection(helperText = "Helper text error", isError = true)

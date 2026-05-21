@@ -31,7 +31,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 /**
  * Input de texto inspirado en shadcn/ui — look & feel exacto.
@@ -238,7 +238,7 @@ private fun BoxScope.TrailingIconSlot(icon: (@Composable () -> Unit)?, alignment
 @PreviewLightDark
 @Composable
 private fun HInputPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             Column(
                 modifier = Modifier

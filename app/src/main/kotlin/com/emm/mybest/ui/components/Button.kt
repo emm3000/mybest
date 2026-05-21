@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 // ─── Variants ──────────────────────────────────────────────────────────────
 
@@ -170,7 +170,7 @@ fun HButton(
 @PreviewLightDark
 @Composable
 private fun HButtonVariantsPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             Column(
                 modifier = Modifier
@@ -194,7 +194,7 @@ private fun HButtonVariantsPreview() {
 @PreviewLightDark
 @Composable
 private fun HButtonWithIconPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface(Modifier.padding(16.dp)) {
             HButton(
                 text = "Nueva tarjeta",
@@ -209,7 +209,7 @@ private fun HButtonWithIconPreview() {
 @PreviewLightDark
 @Composable
 private fun HButtonLoadingPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface(Modifier.padding(16.dp)) {
             HButton(
                 text = "Generar",

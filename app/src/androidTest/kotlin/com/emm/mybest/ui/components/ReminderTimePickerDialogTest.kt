@@ -5,7 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -19,7 +19,7 @@ class ReminderTimePickerDialogTest {
     @Test
     fun reminderTimePickerDialog_displaysInitialSelection() {
         composeTestRule.setContent {
-            MyBestTheme {
+            AtelierTheme {
                 ReminderTimePickerDialog(
                     initialHour = 8,
                     initialMinute = 30,
@@ -40,7 +40,7 @@ class ReminderTimePickerDialogTest {
         var confirmedMinute = -1
 
         composeTestRule.setContent {
-            MyBestTheme {
+            AtelierTheme {
                 ReminderTimePickerDialog(
                     initialHour = 8,
                     initialMinute = 30,
@@ -75,7 +75,7 @@ class ReminderTimePickerDialogTest {
         var dismissed = false
 
         composeTestRule.setContent {
-            MyBestTheme {
+            AtelierTheme {
                 ReminderTimePickerDialog(
                     initialHour = 7,
                     initialMinute = 15,

@@ -28,7 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 import com.emm.mybest.ui.theme.StarlinkTextStyles
 
 // ─── Variants ──────────────────────────────────────────────────────────────
@@ -126,7 +126,7 @@ private fun alertBarColor(variant: AlertVariant): Color {
 @PreviewLightDark
 @Composable
 private fun HAlertVariantsPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             Column(
                 modifier = Modifier

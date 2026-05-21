@@ -61,7 +61,7 @@ import com.emm.mybest.ui.components.HMediaOverlayLabel
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.components.IconButtonVariant
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -450,7 +450,7 @@ private fun selectedPhotoContentDescription(type: PhotoType): String {
 @Preview(showBackground = true)
 @Composable
 private fun AddPhotoScreenPreview() {
-    MyBestTheme {
+    AtelierTheme {
         AddPhotoContent(
             state = AddPhotoState(),
             onIntent = {},

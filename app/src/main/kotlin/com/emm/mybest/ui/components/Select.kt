@@ -35,7 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 private const val SELECT_EXPANDED_ROTATION_DEGREES = 180f
 
@@ -193,7 +193,7 @@ private val demoItems = listOf("Vocabulario B2", "Phrasal Verbs", "Idioms", "Gra
 @PreviewLightDark
 @Composable
 private fun HSelectEmptyPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             HSelect(
                 items = demoItems,
@@ -212,7 +212,7 @@ private fun HSelectEmptyPreview() {
 @PreviewLightDark
 @Composable
 private fun HSelectWithValuePreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             Column(
                 modifier = Modifier

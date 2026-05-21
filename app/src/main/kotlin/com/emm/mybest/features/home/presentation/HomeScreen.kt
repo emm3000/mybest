@@ -47,7 +47,7 @@ import com.emm.mybest.ui.components.HProgressBar
 import com.emm.mybest.ui.components.HSeparator
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.HTopBar
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 import com.emm.mybest.ui.theme.StarlinkTextStyles
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
@@ -382,7 +382,7 @@ private fun HomePlanRow(
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
-    MyBestTheme {
+    AtelierTheme {
         HomeScreenContent(
             state = HomeState(
                 isLoading = false,

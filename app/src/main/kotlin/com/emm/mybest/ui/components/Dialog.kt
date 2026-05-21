@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import com.emm.mybest.ui.theme.MyBestTheme
+import com.emm.mybest.ui.theme.AtelierTheme
 
 /**
  * Standard Dialog inspired by shadcn/ui `<AlertDialog />`.
@@ -89,7 +89,7 @@ fun HAlertDialog(
 @PreviewLightDark
 @Composable
 private fun HAlertDialogPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             var show by remember { mutableStateOf(true) }
             if (show) {
@@ -110,7 +110,7 @@ private fun HAlertDialogPreview() {
 @PreviewLightDark
 @Composable
 private fun HAlertDialogDangerousPreview() {
-    MyBestTheme {
+    AtelierTheme {
         Surface {
             var show by remember { mutableStateOf(true) }
             if (show) {
