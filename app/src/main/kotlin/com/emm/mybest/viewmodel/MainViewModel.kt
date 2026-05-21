@@ -9,10 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-data class MainState(
-    val isDarkMode: Boolean? = null,
-)
-
 class MainViewModel(
     private val preferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {

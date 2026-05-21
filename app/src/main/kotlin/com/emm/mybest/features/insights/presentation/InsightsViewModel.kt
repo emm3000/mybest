@@ -1,14 +1,11 @@
 package com.emm.mybest.features.insights.presentation
 
-import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
-import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.domain.models.InsightsRecommendationKind
 import com.emm.mybest.domain.models.PeriodLabel
-import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,49 +18,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
-
-@Stable
-data class InsightsState(
-    val weightHistory: List<WeightEntry> = emptyList(),
-    val periodLabel: String = "",
-    val totalWeightLost: Float = 0f,
-    val currentWeight: Float = 0f,
-    val initialWeight: Float = 0f,
-    val deltaWeightKg: Float? = null,
-    val deltaWeightPercent: Float? = null,
-    val kgPerDayRate14d: Float? = null,
-    val photoCount: Int = 0,
-    val recommendationTitle: String = "",
-    val recommendationDescription: String = "",
-    val recommendationActionLabel: String = "",
-    val recommendationAction: InsightsRecommendationAction? = null,
-    val isLoading: Boolean = true,
-    val errorMessage: String? = null,
-) {
-    val canComparePhotos: Boolean
-        get() = photoCount >= MIN_COMPARE_PHOTOS
-
-    val hasRecommendation: Boolean
-        get() = recommendationAction != null
-
-    private companion object {
-        private const val MIN_COMPARE_PHOTOS = 2
-    }
-}
-
-sealed class InsightsIntent {
-    object OnCompareClick : InsightsIntent()
-    object OnRecommendationActionClick : InsightsIntent()
-    object OnHistoryClick : InsightsIntent()
-    object OnAddWeightClick : InsightsIntent()
-}
-
-sealed class InsightsEffect {
-    object NavigateToCompare : InsightsEffect()
-    data class NavigateByRecommendation(val action: InsightsRecommendationAction) : InsightsEffect()
-    object NavigateToHistory : InsightsEffect()
-    object NavigateToAddWeight : InsightsEffect()
-}
 
 class InsightsViewModel(
     getInsightsUseCase: GetInsightsUseCase,

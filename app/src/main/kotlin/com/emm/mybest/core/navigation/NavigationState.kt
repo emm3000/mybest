@@ -19,12 +19,6 @@ import androidx.navigation3.runtime.serialization.NavKeySerializer
 import androidx.savedstate.compose.serialization.serializers.MutableStateSerializer
 
 /**
- * Classifies the most-recent navigation action so the transition spec
- * can pick the right animation without inspecting the back-stack directly.
- */
-enum class NavTransitionKind { Push, Pop, TabSwitch }
-
-/**
  * Create a navigation state that persists config changes and process death.
  */
 @Composable

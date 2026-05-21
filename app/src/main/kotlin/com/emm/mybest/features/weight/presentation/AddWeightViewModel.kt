@@ -13,25 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class AddWeightState(
-    val weight: String = "",
-    val note: String = "",
-    val weightError: String? = null,
-    val lastRecordedWeight: Float? = null,
-    val isLoading: Boolean = false,
-)
-
-sealed class AddWeightIntent {
-    data class OnWeightChange(val weight: String) : AddWeightIntent()
-    data class OnNoteChange(val note: String) : AddWeightIntent()
-    object OnSaveClick : AddWeightIntent()
-}
-
-sealed class AddWeightEffect {
-    object NavigateBack : AddWeightEffect()
-    data class ShowError(val message: String) : AddWeightEffect()
-}
-
 class AddWeightViewModel(
     private val saveWeightUseCase: SaveWeightUseCase,
     private val observeWeightProgressUseCase: ObserveWeightProgressUseCase,

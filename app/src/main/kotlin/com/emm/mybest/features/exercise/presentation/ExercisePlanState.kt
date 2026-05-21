@@ -7,8 +7,3 @@ data class ExercisePlanState(
     val routines: Map<DayOfWeek, String> = emptyMap(),
     val editing: EditingExercise? = null,
 )
-
-data class EditingExercise(
-    val day: DayOfWeek,
-    val draftRoutine: String,
-)

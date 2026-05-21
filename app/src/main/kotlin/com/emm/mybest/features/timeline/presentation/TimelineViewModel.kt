@@ -1,11 +1,8 @@
 package com.emm.mybest.features.timeline.presentation
 
-import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
-import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.usecase.history.GetTimelineUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import kotlinx.coroutines.channels.BufferOverflow
@@ -17,30 +14,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
-
-@Stable
-data class TimelineState(
-    val photosByDate: Map<LocalDate, List<ProgressPhoto>> = emptyMap(),
-    val photosByMonth: Map<YearMonthValue, List<ProgressPhoto>> = emptyMap(),
-    val isLoading: Boolean = false,
-    val selectionMode: Boolean = false,
-    val selectedIds: Set<String> = emptySet(),
-)
-
-sealed class TimelineIntent {
-    object OnBackClick : TimelineIntent()
-    data class EnterSelection(val photoId: String) : TimelineIntent()
-    data class ToggleSelection(val photoId: String) : TimelineIntent()
-    object ExitSelection : TimelineIntent()
-    object DeleteSelected : TimelineIntent()
-    object CompareSelected : TimelineIntent()
-}
-
-sealed class TimelineEffect {
-    object NavigateBack : TimelineEffect()
-    object NavigateToCompare : TimelineEffect()
-}
 
 private data class SelectionState(
     val selectionMode: Boolean = false,

@@ -24,17 +24,6 @@ import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.usecase.history.DaySummary
 
-internal enum class DayTimelineEventType {
-    WEIGHT,
-    PHOTO,
-}
-
-internal data class DayTimelineEntry(
-    val type: DayTimelineEventType,
-    val sequence: Long,
-    val photo: ProgressPhoto? = null,
-)
-
 @Composable
 internal fun DayEmptyState(modifier: Modifier = Modifier) {
     Box(

@@ -1,14 +1,11 @@
 package com.emm.mybest.features.history.presentation
 
-import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
-import com.emm.mybest.domain.usecase.history.DaySummary
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.HistoryRange
-import com.emm.mybest.domain.usecase.history.WeightTrendPoint
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,28 +18,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-
-@Stable
-data class HistoryState(
-    val selectedMonth: YearMonthValue = YearMonthValue.now(),
-    val selectedRange: HistoryRange = HistoryRange.MONTH,
-    val monthlyData: Map<LocalDate, DaySummary> = emptyMap(),
-    val weightTrend: List<WeightTrendPoint> = emptyList(),
-    val streak: Int = 0,
-    val activeDays: Int = 0,
-    val selectedDate: LocalDate? = null,
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-)
-
-sealed class HistoryIntent {
-    data class OnMonthChange(val newMonth: YearMonthValue) : HistoryIntent()
-    data class OnRangeChange(val range: HistoryRange) : HistoryIntent()
-    data class OnDateSelected(val date: LocalDate) : HistoryIntent()
-    object OnDateDismiss : HistoryIntent()
-    data class OnDeleteWeight(val date: LocalDate) : HistoryIntent()
-    data class OnDeletePhoto(val photoId: String) : HistoryIntent()
-}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModel(

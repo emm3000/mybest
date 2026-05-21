@@ -3,7 +3,6 @@ package com.emm.mybest.features.photo.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.NewProgressPhoto
-import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -12,28 +11,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-data class SelectedPhoto(
-    val uri: String,
-    val type: PhotoType = PhotoType.FACE,
-)
-
-data class AddPhotoState(
-    val selectedPhotos: List<SelectedPhoto> = emptyList(),
-    val isLoading: Boolean = false,
-)
-
-sealed class AddPhotoIntent {
-    data class OnPhotosSelected(val uris: List<String>) : AddPhotoIntent()
-    data class OnTypeSelected(val index: Int, val type: PhotoType) : AddPhotoIntent()
-    data class OnRemovePhoto(val index: Int) : AddPhotoIntent()
-    object OnSaveClick : AddPhotoIntent()
-}
-
-sealed class AddPhotoEffect {
-    object NavigateBack : AddPhotoEffect()
-    data class ShowError(val message: String) : AddPhotoEffect()
-}
 
 class AddPhotoViewModel(
     private val savePhotosUseCase: SavePhotosUseCase,

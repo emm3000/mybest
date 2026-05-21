@@ -19,28 +19,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalTime
 
-data class ReminderSettingsState(
-    val notificationsEnabled: Boolean = true,
-    val showDefaultTimePicker: Boolean = false,
-    /** Null means no weight reminder has been configured yet. */
-    val weightReminderTime: LocalTime? = null,
-)
-
-sealed class ReminderSettingsIntent {
-    data class OnNotificationsToggle(val enabled: Boolean) : ReminderSettingsIntent()
-    data class OnExportBackup(val targetUri: String) : ReminderSettingsIntent()
-    data class OnImportBackup(val sourceUri: String) : ReminderSettingsIntent()
-    object OnDefaultTimePickerOpen : ReminderSettingsIntent()
-    object OnDefaultTimePickerDismiss : ReminderSettingsIntent()
-    data class OnDefaultReminderTimeChange(val hour: Int, val minute: Int) : ReminderSettingsIntent()
-    object OnWeightReminderToggleOff : ReminderSettingsIntent()
-}
-
-sealed class ReminderSettingsEffect {
-    data class ShowError(val message: String) : ReminderSettingsEffect()
-    data class ShowMessage(val message: String) : ReminderSettingsEffect()
-}
-
 class ReminderSettingsViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val exportDatabaseBackupUseCase: ExportDatabaseBackupUseCase,

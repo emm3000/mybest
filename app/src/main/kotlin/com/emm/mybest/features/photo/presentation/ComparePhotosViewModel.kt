@@ -19,27 +19,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class ComparePhotosState(
-    val photos: List<ProgressPhoto> = emptyList(),
-    val selectedType: PhotoType? = null,
-    val beforePhoto: ProgressPhoto? = null,
-    val afterPhoto: ProgressPhoto? = null,
-    val totalPhotosCount: Int = 0,
-    val photoCountByType: Map<PhotoType, Int> = emptyMap(),
-    val isLoading: Boolean = false,
-)
-
-sealed class ComparePhotosIntent {
-    data class OnTypeSelected(val type: PhotoType?) : ComparePhotosIntent()
-    data class OnBeforePhotoSelected(val photo: ProgressPhoto) : ComparePhotosIntent()
-    data class OnAfterPhotoSelected(val photo: ProgressPhoto) : ComparePhotosIntent()
-    object ToggleSwap : ComparePhotosIntent()
-}
-
-sealed class ComparePhotosEffect {
-    data class ShowError(val message: String) : ComparePhotosEffect()
-}
-
 class ComparePhotosViewModel(
     private val photoRepository: PhotoRepository,
     private val resolveComparisonSelection: ResolveComparisonSelectionUseCase,
@@ -94,7 +73,6 @@ class ComparePhotosViewModel(
         when (intent) {
             is ComparePhotosIntent.OnTypeSelected -> {
                 _selectedType.value = intent.type
-                // Keep selection logic simple while filters change.
                 _beforePhoto.value = null
                 _afterPhoto.value = null
             }

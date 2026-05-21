@@ -8,9 +8,3 @@ data class MealPlanState(
     val entries: Map<DayOfWeek, Map<MealType, String>> = emptyMap(),
     val editing: EditingMeal? = null,
 )
-
-data class EditingMeal(
-    val day: DayOfWeek,
-    val type: MealType,
-    val draftDescription: String,
-)

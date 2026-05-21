@@ -1,6 +1,5 @@
 package com.emm.mybest.features.home.presentation
 
-import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.DailyCompliance
@@ -36,35 +35,6 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
-
-data class MealRow(
-    val type: MealType,
-    val description: String,
-    val done: Boolean,
-)
-
-@Stable
-data class HomeState(
-    val isLoading: Boolean = true,
-    val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    val dayOfWeek: DayOfWeek = Clock.System.todayIn(TimeZone.currentSystemDefault()).dayOfWeek,
-    val mealRows: List<MealRow> = emptyList(),
-    val exerciseRoutine: String = "",
-    val exerciseDone: Boolean = false,
-    val completionRatio: Float = 0f,
-    val completedCount: Int = 0,
-    val totalCount: Int = MealType.entries.size + 1,
-    val streakDays: Int = 0,
-)
-
-sealed interface HomeIntent {
-    data class ToggleMeal(val type: MealType, val done: Boolean) : HomeIntent
-    data class ToggleExercise(val done: Boolean) : HomeIntent
-}
-
-sealed interface HomeEffect {
-    data class ShowError(val message: String) : HomeEffect
-}
 
 private data class DayContext(
     val today: LocalDate,

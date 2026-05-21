@@ -14,30 +14,6 @@ import kotlinx.datetime.plus
 private const val DAYS_IN_WEEK = 7
 private const val MONTHS_IN_YEAR = 12
 
-data class DaySummary(
-    val date: LocalDate,
-    val weight: WeightEntry? = null,
-    val photos: List<ProgressPhoto> = emptyList(),
-) {
-    val hasWeight: Boolean get() = weight != null
-    val hasPhoto: Boolean get() = photos.isNotEmpty()
-    val hasActivity: Boolean get() = hasWeight || hasPhoto
-}
-
-data class WeightTrendPoint(
-    val date: LocalDate,
-    val weight: Float,
-)
-
-enum class HistoryRange { WEEK, MONTH, YEAR }
-
-data class HistoryResult(
-    val monthlyData: Map<LocalDate, DaySummary>,
-    val weightTrend: List<WeightTrendPoint>,
-    val streak: Int,
-    val activeDays: Int,
-)
-
 class GetHistoryUseCase(
     private val weightRepository: WeightRepository,
     private val photoRepository: PhotoRepository,

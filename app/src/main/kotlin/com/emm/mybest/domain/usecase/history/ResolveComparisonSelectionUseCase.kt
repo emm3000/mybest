@@ -4,11 +4,6 @@ import com.emm.mybest.domain.models.ProgressPhoto
 
 private const val MIN_COMPARE_PHOTOS = 2
 
-data class ComparisonSelection(
-    val before: ProgressPhoto?,
-    val after: ProgressPhoto?,
-)
-
 class ResolveComparisonSelectionUseCase {
     operator fun invoke(
         photos: List<ProgressPhoto>,
