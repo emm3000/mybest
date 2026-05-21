@@ -24,6 +24,12 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import kotlin.time.Clock
+import kotlin.time.Instant
+
+private val FIXED_CLOCK = object : Clock {
+    override fun now(): Instant = Instant.fromEpochSeconds(1_779_624_000L)
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class InsightsViewModelTest {
@@ -52,14 +58,14 @@ class InsightsViewModelTest {
     )
 
     private fun buildViewModel(): InsightsViewModel {
-        every { getInsightsUseCase() } returns flowOf(sampleInsightsData)
-        return InsightsViewModel(getInsightsUseCase)
+        every { getInsightsUseCase(any()) } returns flowOf(sampleInsightsData)
+        return InsightsViewModel(getInsightsUseCase, FIXED_CLOCK)
     }
 
     @Test
     fun `initial state has isLoading true`() = runTest {
-        every { getInsightsUseCase() } returns flowOf(sampleInsightsData)
-        val viewModel = InsightsViewModel(getInsightsUseCase)
+        every { getInsightsUseCase(any()) } returns flowOf(sampleInsightsData)
+        val viewModel = InsightsViewModel(getInsightsUseCase, FIXED_CLOCK)
 
         viewModel.state.test {
             assertEquals(true, awaitItem().isLoading)
@@ -72,7 +78,7 @@ class InsightsViewModelTest {
         val viewModel = buildViewModel()
 
         viewModel.state.test {
-            awaitItem() // loading
+            awaitItem()
             val state = awaitItem()
             assertFalse(state.isLoading)
             assertNull(state.errorMessage)
@@ -115,8 +121,8 @@ class InsightsViewModelTest {
     @Test
     fun `canComparePhotos is false when photoCount is below 2`() = runTest {
         val data = sampleInsightsData.copy(photoCount = 1)
-        every { getInsightsUseCase() } returns flowOf(data)
-        val viewModel = InsightsViewModel(getInsightsUseCase)
+        every { getInsightsUseCase(any()) } returns flowOf(data)
+        val viewModel = InsightsViewModel(getInsightsUseCase, FIXED_CLOCK)
 
         viewModel.state.test {
             awaitItem()
@@ -163,10 +169,9 @@ class InsightsViewModelTest {
     fun `OnRecommendationActionClick emits NavigateByRecommendation with action from state`() = runTest {
         val viewModel = buildViewModel()
 
-        // Wait for state to be loaded (recommendation available)
         viewModel.state.test {
-            awaitItem() // loading
-            awaitItem() // loaded — recommendation is now in state
+            awaitItem()
+            awaitItem()
             cancelAndIgnoreRemainingEvents()
         }
 
@@ -188,8 +193,8 @@ class InsightsViewModelTest {
             action = InsightsRecommendationAction.ADJUST_WEIGHT_PLAN,
         )
         val data = sampleInsightsData.copy(recommendation = adjustRecommendation)
-        every { getInsightsUseCase() } returns flowOf(data)
-        val viewModel = InsightsViewModel(getInsightsUseCase)
+        every { getInsightsUseCase(any()) } returns flowOf(data)
+        val viewModel = InsightsViewModel(getInsightsUseCase, FIXED_CLOCK)
 
         viewModel.state.test {
             awaitItem()
@@ -210,11 +215,11 @@ class InsightsViewModelTest {
 
     @Test
     fun `error from use case sets errorMessage and clears isLoading`() = runTest {
-        every { getInsightsUseCase() } returns flow { throw IllegalStateException("network error") }
-        val viewModel = InsightsViewModel(getInsightsUseCase)
+        every { getInsightsUseCase(any()) } returns flow { throw IllegalStateException("network error") }
+        val viewModel = InsightsViewModel(getInsightsUseCase, FIXED_CLOCK)
 
         viewModel.state.test {
-            awaitItem() // isLoading=true
+            awaitItem()
             val errorState = awaitItem()
             assertFalse(errorState.isLoading)
             assertNotNull(errorState.errorMessage)
@@ -225,15 +230,33 @@ class InsightsViewModelTest {
 
     @Test
     fun `OnRecommendationActionClick does nothing when recommendation is null`() = runTest {
-        // Use a use case that never emits so state stays at isLoading=true (recommendationAction=null)
-        every { getInsightsUseCase() } returns flow { /* never emits */ }
-        val viewModel = InsightsViewModel(getInsightsUseCase)
+        every { getInsightsUseCase(any()) } returns flow { }
+        val viewModel = InsightsViewModel(getInsightsUseCase, FIXED_CLOCK)
 
         viewModel.effect.test {
             viewModel.onIntent(InsightsIntent.OnRecommendationActionClick)
             advanceUntilIdle()
-            // null recommendationAction → no effect should be emitted
             expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `state propagates three new weight metrics from InsightsData`() = runTest {
+        val data = sampleInsightsData.copy(
+            deltaWeightKg = -4.2f,
+            deltaWeightPercent = -5.1f,
+            kgPerDayRate14d = -0.12f,
+        )
+        every { getInsightsUseCase(any()) } returns flowOf(data)
+        val viewModel = InsightsViewModel(getInsightsUseCase, FIXED_CLOCK)
+
+        viewModel.state.test {
+            awaitItem()
+            val loaded = awaitItem()
+            assertEquals(-4.2f, loaded.deltaWeightKg!!, 0.001f)
+            assertEquals(-5.1f, loaded.deltaWeightPercent!!, 0.001f)
+            assertEquals(-0.12f, loaded.kgPerDayRate14d!!, 0.001f)
             cancelAndIgnoreRemainingEvents()
         }
     }

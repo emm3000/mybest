@@ -33,4 +33,7 @@ data class InsightsData(
     val initialWeight: Float,
     val photoCount: Int,
     val recommendation: InsightsRecommendation,
+    val deltaWeightKg: Float? = null,
+    val deltaWeightPercent: Float? = null,
+    val kgPerDayRate14d: Float? = null,
 )

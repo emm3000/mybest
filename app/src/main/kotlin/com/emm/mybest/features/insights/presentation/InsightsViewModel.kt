@@ -18,6 +18,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 @Stable
 data class InsightsState(
@@ -26,6 +29,9 @@ data class InsightsState(
     val totalWeightLost: Float = 0f,
     val currentWeight: Float = 0f,
     val initialWeight: Float = 0f,
+    val deltaWeightKg: Float? = null,
+    val deltaWeightPercent: Float? = null,
+    val kgPerDayRate14d: Float? = null,
     val photoCount: Int = 0,
     val recommendationTitle: String = "",
     val recommendationDescription: String = "",
@@ -61,6 +67,7 @@ sealed class InsightsEffect {
 
 class InsightsViewModel(
     getInsightsUseCase: GetInsightsUseCase,
+    clock: Clock = Clock.System,
 ) : ViewModel() {
 
     private val _effect = MutableSharedFlow<InsightsEffect>(
@@ -69,7 +76,7 @@ class InsightsViewModel(
     )
     val effect = _effect.asSharedFlow()
 
-    val state: StateFlow<InsightsState> = getInsightsUseCase()
+    val state: StateFlow<InsightsState> = getInsightsUseCase(clock.todayIn(TimeZone.currentSystemDefault()))
         .map { data ->
             val (recTitle, recDesc, recLabel) = mapRecommendationStrings(data.recommendation.kind)
             InsightsState(
@@ -78,6 +85,9 @@ class InsightsViewModel(
                 totalWeightLost = data.totalWeightLost,
                 currentWeight = data.currentWeight,
                 initialWeight = data.initialWeight,
+                deltaWeightKg = data.deltaWeightKg,
+                deltaWeightPercent = data.deltaWeightPercent,
+                kgPerDayRate14d = data.kgPerDayRate14d,
                 photoCount = data.photoCount,
                 recommendationTitle = recTitle,
                 recommendationDescription = recDesc,
