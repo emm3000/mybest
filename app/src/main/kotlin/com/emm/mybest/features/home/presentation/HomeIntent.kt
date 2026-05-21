@@ -1,8 +1,7 @@
 package com.emm.mybest.features.home.presentation
 
-import com.emm.mybest.domain.models.MealType
+import com.emm.mybest.domain.models.DailySlot
 
 sealed interface HomeIntent {
-    data class ToggleMeal(val type: MealType, val done: Boolean) : HomeIntent
-    data class ToggleExercise(val done: Boolean) : HomeIntent
+    data class ToggleSlot(val slot: DailySlot, val done: Boolean) : HomeIntent
 }

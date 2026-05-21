@@ -46,12 +46,14 @@ import com.emm.mybest.domain.usecase.history.ResolveComparisonSelectionUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
 import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
+import com.emm.mybest.domain.usecase.preferences.ObserveDailySlotTimesUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.features.diet.presentation.MealPlanViewModel
 import com.emm.mybest.features.exercise.presentation.ExercisePlanViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
+import com.emm.mybest.features.home.presentation.HomeToggleUseCases
 import com.emm.mybest.features.home.presentation.HomeViewModel
 import com.emm.mybest.features.insights.presentation.InsightsViewModel
 import com.emm.mybest.features.photo.presentation.AddPhotoViewModel
@@ -113,6 +115,8 @@ val appModule = module {
     factory { ToggleMealComplianceUseCase(get()) }
     factory { ToggleExerciseComplianceUseCase(get()) }
     factory { GetCompletionStreakUseCase(get()) }
+    factory { ObserveDailySlotTimesUseCase(get()) }
+    factory { HomeToggleUseCases(get(), get()) }
 
     // Weight use cases
     factory { SaveWeightUseCase(get()) }

@@ -3,15 +3,16 @@ package com.emm.mybest.features.home.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.DailyCompliance
+import com.emm.mybest.domain.models.DailySlot
+import com.emm.mybest.domain.models.DailySlotTimes
 import com.emm.mybest.domain.models.MealType
 import com.emm.mybest.domain.models.WeeklyExercisePlan
 import com.emm.mybest.domain.models.WeeklyMealPlan
 import com.emm.mybest.domain.usecase.compliance.GetCompletionStreakUseCase
 import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
-import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
-import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
 import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
 import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
+import com.emm.mybest.domain.usecase.preferences.ObserveDailySlotTimesUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -33,37 +34,70 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.todayIn
+import java.time.temporal.WeekFields
 import kotlin.time.Clock
 
-private data class DayContext(
+private val PLAN_MEAL_ORDER = listOf(
+    MealType.BREAKFAST,
+    MealType.LUNCH,
+    MealType.SNACK,
+    MealType.DINNER,
+)
+
+private data class PlanContext(
     val today: LocalDate,
     val todayDow: DayOfWeek,
     val mealPlan: WeeklyMealPlan,
     val exPlan: WeeklyExercisePlan,
+    val slotTimes: DailySlotTimes,
 )
+
+private fun MealType.toDailySlot(): DailySlot = when (this) {
+    MealType.BREAKFAST -> DailySlot.BREAKFAST
+    MealType.LUNCH -> DailySlot.LUNCH
+    MealType.SNACK -> DailySlot.SNACK
+    MealType.DINNER -> DailySlot.DINNER
+}
+
+private fun computeWeekNumber(date: LocalDate): Int =
+    date.toJavaLocalDate().get(WeekFields.ISO.weekOfWeekBasedYear())
+
+private fun buildMealRows(
+    context: PlanContext,
+    compliance: DailyCompliance,
+): List<PlanRow> = PLAN_MEAL_ORDER.map { type ->
+    val slot = type.toDailySlot()
+    PlanRow(
+        slot = slot,
+        time = context.slotTimes[slot],
+        description = context.mealPlan.entryFor(context.todayDow, type)?.description.orEmpty(),
+        done = compliance.mealsDone[type] ?: false,
+    )
+}
+
+private fun buildExerciseRow(context: PlanContext, compliance: DailyCompliance): PlanRow =
+    PlanRow(
+        slot = DailySlot.EXERCISE,
+        time = context.slotTimes[DailySlot.EXERCISE],
+        description = context.exPlan.forDay(context.todayDow)?.routine.orEmpty(),
+        done = compliance.exerciseDone,
+    )
 
 private fun buildHomeState(
     compliance: DailyCompliance,
     streak: Int,
-    context: DayContext,
+    context: PlanContext,
 ): HomeState {
-    val rows = MealType.entries.map { type ->
-        MealRow(
-            type = type,
-            description = context.mealPlan.entryFor(context.todayDow, type)?.description.orEmpty(),
-            done = compliance.mealsDone[type] ?: false,
-        )
-    }
-    val routine = context.exPlan.forDay(context.todayDow)?.routine.orEmpty()
-    val completedCount = rows.count { it.done } + if (compliance.exerciseDone) 1 else 0
+    val rows = buildMealRows(context, compliance) + buildExerciseRow(context, compliance)
+    val completedCount = rows.count { it.done }
     return HomeState(
         isLoading = false,
         today = context.today,
         dayOfWeek = context.todayDow,
-        mealRows = rows,
-        exerciseRoutine = routine,
-        exerciseDone = compliance.exerciseDone,
+        weekNumber = computeWeekNumber(context.today),
+        planRows = rows,
         completionRatio = compliance.completionRatio,
         completedCount = completedCount,
         streakDays = streak,
@@ -73,11 +107,11 @@ private fun buildHomeState(
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val observeDailyCompliance: ObserveDailyComplianceUseCase,
-    private val toggleMeal: ToggleMealComplianceUseCase,
-    private val toggleExercise: ToggleExerciseComplianceUseCase,
+    private val toggleUseCases: HomeToggleUseCases,
     private val getMealPlan: GetWeeklyMealPlanUseCase,
     private val getExercisePlan: GetWeeklyExercisePlanUseCase,
     private val getCompletionStreak: GetCompletionStreakUseCase,
+    private val observeDailySlotTimes: ObserveDailySlotTimesUseCase,
     clock: Clock = Clock.System,
 ) : ViewModel() {
 
@@ -118,20 +152,16 @@ class HomeViewModel(
             getMealPlan(),
             getExercisePlan(),
             dateFlow,
-        ) { mealPlan, exPlan, today ->
-            Triple(mealPlan, exPlan, today)
+            observeDailySlotTimes(),
+        ) { mealPlan, exPlan, today, slotTimes ->
+            PlanContext(today, today.dayOfWeek, mealPlan, exPlan, slotTimes)
         }
-            .flatMapLatest { (mealPlan, exPlan, today) ->
-                val todayDow = today.dayOfWeek
+            .flatMapLatest { context ->
                 combine(
-                    observeDailyCompliance(today),
-                    getCompletionStreak(today),
+                    observeDailyCompliance(context.today),
+                    getCompletionStreak(context.today),
                 ) { compliance, streak ->
-                    buildHomeState(
-                        compliance = compliance,
-                        streak = streak,
-                        context = DayContext(today, todayDow, mealPlan, exPlan),
-                    )
+                    buildHomeState(compliance, streak, context)
                 }
             }
             .onEach { _state.value = it }
@@ -140,19 +170,22 @@ class HomeViewModel(
 
     fun onIntent(intent: HomeIntent) {
         when (intent) {
-            is HomeIntent.ToggleMeal -> viewModelScope.launch {
-                runCatching {
-                    toggleMeal(_state.value.today, intent.type, intent.done)
-                }.onFailure { error ->
-                    _effect.tryEmit(HomeEffect.ShowError(error.message ?: "Error al actualizar comida"))
+            is HomeIntent.ToggleSlot -> handleSlotToggle(intent.slot, intent.done)
+        }
+    }
+
+    private fun handleSlotToggle(slot: DailySlot, done: Boolean) {
+        viewModelScope.launch {
+            runCatching {
+                when (slot) {
+                    DailySlot.BREAKFAST -> toggleUseCases.toggleMeal(_state.value.today, MealType.BREAKFAST, done)
+                    DailySlot.LUNCH -> toggleUseCases.toggleMeal(_state.value.today, MealType.LUNCH, done)
+                    DailySlot.SNACK -> toggleUseCases.toggleMeal(_state.value.today, MealType.SNACK, done)
+                    DailySlot.DINNER -> toggleUseCases.toggleMeal(_state.value.today, MealType.DINNER, done)
+                    DailySlot.EXERCISE -> toggleUseCases.toggleExercise(_state.value.today, done)
                 }
-            }
-            is HomeIntent.ToggleExercise -> viewModelScope.launch {
-                runCatching {
-                    toggleExercise(_state.value.today, intent.done)
-                }.onFailure { error ->
-                    _effect.tryEmit(HomeEffect.ShowError(error.message ?: "Error al actualizar ejercicio"))
-                }
+            }.onFailure { error ->
+                _effect.tryEmit(HomeEffect.ShowError(error.message ?: "Error al actualizar"))
             }
         }
     }

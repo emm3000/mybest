@@ -1,8 +1,10 @@
 package com.emm.mybest.features.home.presentation
 
+import com.emm.mybest.domain.models.DailySlot
 import com.emm.mybest.domain.models.MealType
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 private val MONTH_ABBR_ES = mapOf(
     1 to "ENE",
@@ -44,14 +46,18 @@ internal fun LocalDate.formatShortMonthDay(): String {
     return "$day $abbr"
 }
 
-/**
- * Returns a compact topbar date string for the given date, e.g. "LUN 18 MAY".
- * AtelierAppBar will uppercase the string itself via its title style.
- */
+/** Returns a compact topbar date string for the given date, e.g. "LUN 18 MAY". */
 internal fun formatTopbarDate(date: LocalDate, dow: DayOfWeek): String {
     val dayAbbr = dow.shortEs()
     val monthAbbr = MONTH_ABBR_ES[date.month.ordinal + 1] ?: date.month.name.take(3)
     return "$dayAbbr ${date.day} $monthAbbr"
+}
+
+/** Returns "MIÉ · 21 MAY" format for the Home header row. */
+internal fun formatHomeHeaderDate(date: LocalDate, dow: DayOfWeek): String {
+    val dayAbbr = dow.shortEs()
+    val monthAbbr = MONTH_ABBR_ES[date.month.ordinal + 1] ?: date.month.name.take(3)
+    return "$dayAbbr · ${date.day} $monthAbbr"
 }
 
 internal fun MealType.labelEs(): String = when (this) {
@@ -59,4 +65,18 @@ internal fun MealType.labelEs(): String = when (this) {
     MealType.LUNCH -> "ALMUERZO"
     MealType.DINNER -> "CENA"
     MealType.SNACK -> "SNACK"
+}
+
+internal fun DailySlot.labelEs(): String = when (this) {
+    DailySlot.BREAKFAST -> "DESAYUNO"
+    DailySlot.LUNCH -> "ALMUERZO"
+    DailySlot.SNACK -> "SNACK"
+    DailySlot.DINNER -> "CENA"
+    DailySlot.EXERCISE -> "EJERCICIO"
+}
+
+internal fun LocalTime.formatHHmm(): String {
+    val hh = hour.toString().padStart(2, '0')
+    val mm = minute.toString().padStart(2, '0')
+    return "$hh:$mm"
 }

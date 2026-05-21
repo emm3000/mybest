@@ -1,6 +1,8 @@
 package com.emm.mybest.features.home.presentation
 
 import com.emm.mybest.domain.models.DailyCompliance
+import com.emm.mybest.domain.models.DailySlot
+import com.emm.mybest.domain.models.DailySlotTimes
 import com.emm.mybest.domain.models.ExercisePlanEntry
 import com.emm.mybest.domain.models.MealPlanEntry
 import com.emm.mybest.domain.models.MealType
@@ -12,6 +14,7 @@ import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
 import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
 import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
+import com.emm.mybest.domain.usecase.preferences.ObserveDailySlotTimesUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -29,10 +32,9 @@ import org.junit.Test
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-// Fixed clock: Sunday 2026-05-17 noon UTC — stays in Sunday for any reasonable TZ
 private val FIXED_DATE = LocalDate(2026, 5, 17)
 private val FIXED_CLOCK = object : Clock {
-    override fun now(): Instant = Instant.fromEpochSeconds(1_779_019_200L) // 2026-05-17T12:00:00Z
+    override fun now(): Instant = Instant.fromEpochSeconds(1_779_019_200L)
 }
 
 class HomeViewModelTest {
@@ -46,6 +48,7 @@ class HomeViewModelTest {
     private val getMealPlan: GetWeeklyMealPlanUseCase = mockk()
     private val getExercisePlan: GetWeeklyExercisePlanUseCase = mockk()
     private val getCompletionStreak: GetCompletionStreakUseCase = mockk()
+    private val observeDailySlotTimes: ObserveDailySlotTimesUseCase = mockk()
 
     private fun emptyCompliance() = DailyCompliance(
         date = FIXED_DATE,
@@ -63,31 +66,30 @@ class HomeViewModelTest {
         every { getExercisePlan() } returns flowOf(exercisePlan)
         every { observeCompliance(any()) } returns flowOf(compliance)
         every { getCompletionStreak(any()) } returns flowOf(streak)
+        every { observeDailySlotTimes() } returns flowOf(DailySlotTimes(emptyMap()))
         return HomeViewModel(
             observeDailyCompliance = observeCompliance,
-            toggleMeal = toggleMeal,
-            toggleExercise = toggleExercise,
+            toggleUseCases = HomeToggleUseCases(toggleMeal, toggleExercise),
             getMealPlan = getMealPlan,
             getExercisePlan = getExercisePlan,
             getCompletionStreak = getCompletionStreak,
+            observeDailySlotTimes = observeDailySlotTimes,
             clock = FIXED_CLOCK,
         )
     }
 
     @Test
-    fun `empty plan and no compliance yields 4 meal rows all done-false and zero ratio`() = runTest {
+    fun `empty plan and no compliance yields 5 plan rows all done-false and zero ratio`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
         val state = viewModel.state.value
         assertFalse(state.isLoading)
-        assertEquals(4, state.mealRows.size)
-        state.mealRows.forEach { row ->
+        assertEquals(5, state.planRows.size)
+        state.planRows.forEach { row ->
             assertFalse(row.done)
             assertEquals("", row.description)
         }
-        assertEquals("", state.exerciseRoutine)
-        assertFalse(state.exerciseDone)
         assertEquals(0f, state.completionRatio, 0.001f)
         assertEquals(0, state.completedCount)
     }
@@ -120,47 +122,51 @@ class HomeViewModelTest {
         advanceUntilIdle()
 
         val state = viewModel.state.value
-        assertEquals("Avena con frutas", state.mealRows.first { it.type == MealType.BREAKFAST }.description)
-        assertEquals(true, state.mealRows.first { it.type == MealType.BREAKFAST }.done)
-        assertEquals(true, state.mealRows.first { it.type == MealType.LUNCH }.done)
-        assertEquals(false, state.mealRows.first { it.type == MealType.DINNER }.done)
-        assertEquals("Cardio 30 min", state.exerciseRoutine)
-        assertEquals(true, state.exerciseDone)
+        val breakfastRow = state.planRows.first { it.slot == DailySlot.BREAKFAST }
+        val lunchRow = state.planRows.first { it.slot == DailySlot.LUNCH }
+        val dinnerRow = state.planRows.first { it.slot == DailySlot.DINNER }
+        val exerciseRow = state.planRows.first { it.slot == DailySlot.EXERCISE }
+        assertEquals("Avena con frutas", breakfastRow.description)
+        assertEquals(true, breakfastRow.done)
+        assertEquals(true, lunchRow.done)
+        assertEquals(false, dinnerRow.done)
+        assertEquals("Cardio 30 min", exerciseRow.description)
+        assertEquals(true, exerciseRow.done)
         assertEquals(3, state.completedCount)
         assertEquals(3f / 5f, state.completionRatio, 0.001f)
     }
 
     @Test
-    fun `ToggleMeal BREAKFAST true calls toggleMeal with correct args`() = runTest {
+    fun `ToggleSlot BREAKFAST true calls toggleMeal with correct args`() = runTest {
         coEvery { toggleMeal(any(), any(), any()) } returns Unit
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onIntent(HomeIntent.ToggleMeal(MealType.BREAKFAST, true))
+        viewModel.onIntent(HomeIntent.ToggleSlot(DailySlot.BREAKFAST, true))
         advanceUntilIdle()
 
         coVerify(exactly = 1) { toggleMeal(FIXED_DATE, MealType.BREAKFAST, true) }
     }
 
     @Test
-    fun `ToggleMeal LUNCH false calls toggleMeal with correct args`() = runTest {
+    fun `ToggleSlot LUNCH false calls toggleMeal with correct args`() = runTest {
         coEvery { toggleMeal(any(), any(), any()) } returns Unit
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onIntent(HomeIntent.ToggleMeal(MealType.LUNCH, false))
+        viewModel.onIntent(HomeIntent.ToggleSlot(DailySlot.LUNCH, false))
         advanceUntilIdle()
 
         coVerify(exactly = 1) { toggleMeal(FIXED_DATE, MealType.LUNCH, false) }
     }
 
     @Test
-    fun `ToggleExercise true calls toggleExercise with correct args`() = runTest {
+    fun `ToggleSlot EXERCISE true calls toggleExercise with correct args`() = runTest {
         coEvery { toggleExercise(any(), any()) } returns Unit
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onIntent(HomeIntent.ToggleExercise(true))
+        viewModel.onIntent(HomeIntent.ToggleSlot(DailySlot.EXERCISE, true))
         advanceUntilIdle()
 
         coVerify(exactly = 1) { toggleExercise(FIXED_DATE, true) }
