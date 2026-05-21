@@ -1,6 +1,5 @@
 package com.emm.mybest.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,10 +8,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.automirrored.outlined.NavigateBefore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -21,17 +20,26 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.emm.mybest.R
 import com.emm.mybest.ui.theme.AtelierTheme
 
+private val APP_BAR_HEIGHT = 56.dp
+private val APP_BAR_PADDING_START = 8.dp
+private val APP_BAR_PADDING_END = 16.dp
+private val APP_BAR_PADDING_VERTICAL = 12.dp
+private val BACK_BUTTON_SIZE = 44.dp
+private val BACK_ICON_SIZE = 20.dp
+private val LEADING_SPACER = 12.dp
+
 @Composable
-fun HTopBar(
+fun AtelierAppBar(
     title: String,
     modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
     navigationIcon: (@Composable () -> Unit)? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -46,33 +54,26 @@ fun HTopBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 56.dp)
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .heightIn(min = APP_BAR_HEIGHT)
+                    .padding(
+                        start = APP_BAR_PADDING_START,
+                        end = APP_BAR_PADDING_END,
+                        top = APP_BAR_PADDING_VERTICAL,
+                        bottom = APP_BAR_PADDING_VERTICAL,
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                if (navigationIcon != null) {
-                    Box(contentAlignment = Alignment.Center) { navigationIcon() }
-                } else {
-                    Spacer(modifier = Modifier.width(12.dp))
-                }
-
+                LeadingSlot(onBack = onBack, navigationIcon = navigationIcon)
                 Text(
                     text = title.uppercase(),
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 1.2.sp,
-                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
-
                 if (actions != null) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        content = actions,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, content = actions)
                 }
             }
             HSeparator()
@@ -80,30 +81,36 @@ fun HTopBar(
     }
 }
 
-// ─── Previews ────────────────────────────────────────────────────────────────
+@Composable
+private fun LeadingSlot(
+    onBack: (() -> Unit)?,
+    navigationIcon: (@Composable () -> Unit)?,
+) {
+    when {
+        navigationIcon != null -> Box(contentAlignment = Alignment.Center) { navigationIcon() }
+        onBack != null -> BackChevronButton(onClick = onBack)
+        else -> Spacer(modifier = Modifier.width(LEADING_SPACER))
+    }
+}
+
+@Composable
+private fun BackChevronButton(onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.size(BACK_BUTTON_SIZE),
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.NavigateBefore,
+            contentDescription = stringResource(id = R.string.action_back),
+            modifier = Modifier.size(BACK_ICON_SIZE),
+        )
+    }
+}
 
 @PreviewLightDark
 @Composable
-private fun HTopBarPreview() {
+private fun AtelierAppBarPreview() {
     AtelierTheme {
-        HTopBar(
-            title = "Habit Details",
-            navigationIcon = {
-                IconButton(onClick = {}) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                    )
-                }
-            },
-            actions = {
-                IconButton(onClick = {}) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More",
-                    )
-                }
-            },
-        )
+        AtelierAppBar(title = "Habit Details", onBack = {})
     }
 }

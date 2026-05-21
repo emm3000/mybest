@@ -14,8 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.emm.mybest.features.exercise.presentation.components.ExerciseDayRow
 import com.emm.mybest.features.exercise.presentation.components.ExerciseEditorSheet
+import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.HSeparator
-import com.emm.mybest.ui.components.HTopBar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.datetime.DayOfWeek
 
@@ -50,7 +50,7 @@ private fun ExercisePlanContent(
     Scaffold(
         modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
         topBar = {
-            HTopBar(title = "MY ROUTINE")
+            AtelierAppBar(title = "MY ROUTINE")
         },
     ) { padding ->
         val days = DayOfWeek.entries

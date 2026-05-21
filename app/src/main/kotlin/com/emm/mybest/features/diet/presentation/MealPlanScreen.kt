@@ -14,8 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.emm.mybest.features.diet.presentation.components.DaySection
 import com.emm.mybest.features.diet.presentation.components.MealEditorSheet
+import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.HSeparator
-import com.emm.mybest.ui.components.HTopBar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.datetime.DayOfWeek
 
@@ -50,7 +50,7 @@ private fun MealPlanContent(
     Scaffold(
         modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
         topBar = {
-            HTopBar(title = "My Diet")
+            AtelierAppBar(title = "My Diet")
         },
     ) { padding ->
         val days = DayOfWeek.entries

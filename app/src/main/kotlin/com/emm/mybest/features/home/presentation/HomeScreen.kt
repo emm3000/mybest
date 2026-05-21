@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.domain.models.MealType
+import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HButton
@@ -46,7 +47,6 @@ import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HProgressBar
 import com.emm.mybest.ui.components.HSeparator
 import com.emm.mybest.ui.components.HSnackbarHost
-import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.AtelierTheme
 import com.emm.mybest.ui.theme.StarlinkTextStyles
 import kotlinx.coroutines.flow.collectLatest
@@ -100,7 +100,7 @@ internal fun HomeScreenContent(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { HSnackbarHost(hostState = snackbarHostState) },
         topBar = {
-            HTopBar(
+            AtelierAppBar(
                 title = formatTopbarDate(state.today, state.dayOfWeek),
                 actions = {
                     IconButton(onClick = callbacks.onSettingsClick) {

@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.ui.components.AlertVariant
+import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HAlert
@@ -37,7 +38,6 @@ import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HSkeleton
-import com.emm.mybest.ui.components.HTopBar
 import java.util.Locale
 
 private const val INSIGHTS_HORIZONTAL_PADDING = 16
@@ -68,7 +68,7 @@ fun InsightsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            HTopBar(title = "Progreso")
+            AtelierAppBar(title = "Progreso")
         },
     ) { padding ->
         InsightsBody(

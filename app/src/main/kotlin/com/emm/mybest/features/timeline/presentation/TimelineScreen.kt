@@ -26,12 +26,12 @@ import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.features.timeline.presentation.components.MonthHeader
 import com.emm.mybest.features.timeline.presentation.components.PhotoGridItem
 import com.emm.mybest.features.timeline.presentation.components.SelectionActionBar
+import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSkeleton
-import com.emm.mybest.ui.components.HTopBar
 
 private const val PHOTO_GRID_COLUMNS = 3
 private const val GRID_ITEM_SPACING = 1
@@ -60,7 +60,7 @@ fun TimelineScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             if (state.selectionMode) {
-                HTopBar(
+                AtelierAppBar(
                     title = "${state.selectedIds.size} seleccionadas",
                     navigationIcon = {
                         HIconButton(
@@ -71,7 +71,7 @@ fun TimelineScreen(
                     },
                 )
             } else {
-                HTopBar(
+                AtelierAppBar(
                     title = "Fotos",
                     actions = {
                         HIconButton(

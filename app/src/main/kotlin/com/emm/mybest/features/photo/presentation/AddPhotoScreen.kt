@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.PhotoCamera
@@ -50,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.HButton
@@ -59,7 +59,6 @@ import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HMediaCard
 import com.emm.mybest.ui.components.HMediaOverlayLabel
 import com.emm.mybest.ui.components.HSnackbarHost
-import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.components.IconButtonVariant
 import com.emm.mybest.ui.theme.AtelierTheme
 import kotlinx.coroutines.CoroutineScope
@@ -125,15 +124,9 @@ fun AddPhotoContent(
         modifier = modifier,
         snackbarHost = { HSnackbarHost(snackbarHostState) },
         topBar = {
-            HTopBar(
+            AtelierAppBar(
                 title = "Añadir Fotos",
-                navigationIcon = {
-                    HIconButton(
-                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Atrás",
-                        onClick = onBackClick,
-                    )
-                },
+                onBack = onBackClick,
                 actions = {
                     HIconButton(
                         icon = Icons.Rounded.AddAPhoto,

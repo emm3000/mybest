@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Scale
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,11 +26,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.HButton
-import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSnackbarHost
-import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.theme.AtelierTheme
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Locale
@@ -78,15 +76,9 @@ private fun AddWeightContent(
         modifier = modifier,
         snackbarHost = { HSnackbarHost(snackbarHostState) },
         topBar = {
-            HTopBar(
+            AtelierAppBar(
                 title = "Registrar peso",
-                navigationIcon = {
-                    HIconButton(
-                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Atrás",
-                        onClick = onBackClick,
-                    )
-                },
+                onBack = onBackClick,
             )
         },
     ) { padding ->

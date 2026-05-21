@@ -51,6 +51,7 @@ import com.emm.mybest.domain.usecase.history.WeightTrendPoint
 import com.emm.mybest.features.history.presentation.components.HistoryRangeSelector
 import com.emm.mybest.features.history.presentation.components.WeightTrendChart
 import com.emm.mybest.ui.components.AlertVariant
+import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HAlert
@@ -61,7 +62,6 @@ import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HEmptyState
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSkeleton
-import com.emm.mybest.ui.components.HTopBar
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
@@ -114,7 +114,7 @@ fun HistoryContent(
     Scaffold(
         modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
         topBar = {
-            HTopBar(title = "Historial")
+            AtelierAppBar(title = "Historial")
         },
     ) { padding ->
         val contentModifier = Modifier

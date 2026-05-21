@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -31,10 +30,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.HCard
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSnackbarHost
-import com.emm.mybest.ui.components.HTopBar
 import kotlinx.coroutines.flow.collectLatest
 
 private const val PHOTO_SELECTION_GRID_COLUMNS = 3
@@ -62,15 +61,9 @@ fun ComparePhotosScreen(
         modifier = modifier,
         snackbarHost = { HSnackbarHost(snackbarHostState) },
         topBar = {
-            HTopBar(
+            AtelierAppBar(
                 title = "Comparar fotos de progreso",
-                navigationIcon = {
-                    HIconButton(
-                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Atrás",
-                        onClick = currentOnBackClick,
-                    )
-                },
+                onBack = currentOnBackClick,
                 actions = {
                     HIconButton(
                         icon = Icons.Rounded.SwapHoriz,

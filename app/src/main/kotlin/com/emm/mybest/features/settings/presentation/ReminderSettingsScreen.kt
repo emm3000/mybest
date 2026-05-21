@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.Restaurant
@@ -34,14 +33,13 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.CardVariant
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HCard
-import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.HSwitch
-import com.emm.mybest.ui.components.HTopBar
 import com.emm.mybest.ui.components.ReminderTimePickerDialog
 import kotlinx.coroutines.flow.collectLatest
 
@@ -83,15 +81,9 @@ fun ReminderSettingsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            HTopBar(
+            AtelierAppBar(
                 title = "Recordatorios",
-                navigationIcon = {
-                    HIconButton(
-                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Atrás",
-                        onClick = onBackClick,
-                    )
-                },
+                onBack = onBackClick,
             )
         },
         snackbarHost = { HSnackbarHost(snackbarHostState) },

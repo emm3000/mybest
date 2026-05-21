@@ -18,6 +18,7 @@
     <string name="time_picker_selected_description">Hora seleccionada %s</string>
 
     <!-- Common actions -->
+    <string name="action_back">Volver</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_accept">Aceptar</string>
 </resources>

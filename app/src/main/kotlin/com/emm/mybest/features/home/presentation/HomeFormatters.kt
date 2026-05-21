@@ -46,7 +46,7 @@ internal fun LocalDate.formatShortMonthDay(): String {
 
 /**
  * Returns a compact topbar date string for the given date, e.g. "LUN 18 MAY".
- * HTopBar will uppercase the string itself via its letter-spacing style.
+ * AtelierAppBar will uppercase the string itself via its title style.
  */
 internal fun formatTopbarDate(date: LocalDate, dow: DayOfWeek): String {
     val dayAbbr = dow.shortEs()
