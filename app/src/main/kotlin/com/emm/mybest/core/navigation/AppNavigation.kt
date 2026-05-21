@@ -42,9 +42,9 @@ import org.koin.compose.koinInject
 
 private val TOP_LEVEL_SCREENS = setOf(
     Screen.Home,
-    Screen.History,
     Screen.Insights,
-    Screen.Timeline,
+    Screen.History,
+    Screen.Settings,
 )
 
 @Composable
@@ -61,8 +61,7 @@ fun AppNavigation(
     val currentOnConsumeAction by rememberUpdatedState(onConsumeAction)
 
     val showBottomBar = navigationState.topLevelRoute in TOP_LEVEL_SCREENS &&
-        navigationState.backStacks[navigationState.topLevelRoute]?.size == 1 &&
-        !navigationState.suppressBottomBar
+        navigationState.backStacks[navigationState.topLevelRoute]?.size == 1
 
     HandleIntentAction(
         intentAction = intentAction,
@@ -109,7 +108,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
                 onPhotoClick = { navigator.navigate(Screen.AddPhoto) },
                 onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
                 onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
-                onSettingsClick = { navigator.navigate(Screen.ReminderSettings) },
+                onSettingsClick = { navigator.navigate(Screen.Settings) },
                 onHistoryClick = { navigator.navigate(Screen.History) },
             ),
             modifier = Modifier,
@@ -179,7 +178,6 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             viewModel = viewModel,
             onAddPhotoClick = { navigator.navigate(Screen.AddPhoto) },
             onCompareClick = { navigator.navigate(Screen.ComparePhotos) },
-            onSuppressBottomBar = navigator::setSuppressBottomBar,
             onOpenViewer = { photoId -> navigator.navigate(Screen.PhotoViewer(photoId)) },
             modifier = Modifier,
         )
@@ -193,7 +191,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         )
     }
 
-    entry<Screen.ReminderSettings> {
+    entry<Screen.Settings> {
         val viewModel: ReminderSettingsViewModel = koinViewModel()
         ReminderSettingsScreen(
             viewModel = viewModel,

@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,7 +42,6 @@ fun TimelineScreen(
     viewModel: TimelineViewModel,
     onAddPhotoClick: () -> Unit,
     onCompareClick: () -> Unit,
-    onSuppressBottomBar: (Boolean) -> Unit,
     onOpenViewer: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -56,14 +54,6 @@ fun TimelineScreen(
                 TimelineEffect.NavigateBack -> Unit
             }
         }
-    }
-
-    // Suppress the global bottom nav while selection mode is active; restore on exit or dispose.
-    LaunchedEffect(state.selectionMode) {
-        onSuppressBottomBar(state.selectionMode)
-    }
-    DisposableEffect(Unit) {
-        onDispose { onSuppressBottomBar(false) }
     }
 
     Scaffold(

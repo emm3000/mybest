@@ -30,7 +30,7 @@ sealed interface Screen : NavKey {
     data class PhotoViewer(val initialPhotoId: String) : Screen
 
     @Serializable
-    data object ReminderSettings : Screen
+    data object Settings : Screen
 
     @Serializable
     data object MealPlan : Screen
