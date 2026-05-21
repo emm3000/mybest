@@ -1,6 +1,5 @@
 package com.emm.mybest.features.photo.presentation
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,7 +39,6 @@ import kotlinx.coroutines.flow.collectLatest
 
 private const val PHOTO_SELECTION_GRID_COLUMNS = 3
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ComparePhotosScreen(
     viewModel: ComparePhotosViewModel,

@@ -7,7 +7,6 @@ import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.usecase.history.ResolveComparisonSelectionUseCase
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +33,6 @@ class ComparePhotosViewModel(
 
     val effect = _effect.asSharedFlow()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val state: StateFlow<ComparePhotosState> = combine(
         photoRepository.getAllPhotos(),
         _selectedType.flatMapLatest { type ->

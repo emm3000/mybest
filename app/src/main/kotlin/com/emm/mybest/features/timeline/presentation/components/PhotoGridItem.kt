@@ -1,6 +1,5 @@
 package com.emm.mybest.features.timeline.presentation.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -34,7 +33,6 @@ import com.emm.mybest.features.timeline.presentation.timelinePhotoTypeLabel
 private val GRID_CORNER_RADIUS = 4.dp
 private val SELECTION_BADGE_SIZE = 20.dp
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun PhotoGridItem(
     photo: ProgressPhoto,

@@ -24,3 +24,6 @@ key/
 captures/
 *.hprof
 .DS_Store
+
+## Claude Code worktrees
+.claude/worktrees/

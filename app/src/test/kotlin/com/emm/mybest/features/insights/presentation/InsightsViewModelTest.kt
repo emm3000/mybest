@@ -11,7 +11,6 @@ import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -31,7 +30,6 @@ private val FIXED_CLOCK = object : Clock {
     override fun now(): Instant = Instant.fromEpochSeconds(1_779_624_000L)
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class InsightsViewModelTest {
 
     @get:Rule

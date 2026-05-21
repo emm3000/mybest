@@ -4,7 +4,6 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.emm.mybest.domain.models.DailySlot
 import com.emm.mybest.domain.models.DailySlotTimes
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalTime
@@ -13,7 +12,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import java.io.File
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class UserPreferencesRepositoryImplTest {
 
     @Test
