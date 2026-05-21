@@ -24,10 +24,10 @@ private val MONTH_ABBR_ES = mapOf(
 internal fun DayOfWeek.shortEs(): String = when (this) {
     DayOfWeek.MONDAY -> "LUN"
     DayOfWeek.TUESDAY -> "MAR"
-    DayOfWeek.WEDNESDAY -> "MIE"
+    DayOfWeek.WEDNESDAY -> "MIÉ"
     DayOfWeek.THURSDAY -> "JUE"
     DayOfWeek.FRIDAY -> "VIE"
-    DayOfWeek.SATURDAY -> "SAB"
+    DayOfWeek.SATURDAY -> "SÁB"
     DayOfWeek.SUNDAY -> "DOM"
 }
 

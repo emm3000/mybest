@@ -73,10 +73,10 @@ class DateTimeUtilsTest {
         val shortExpected = mapOf(
             DayOfWeek.MONDAY to "LUN",
             DayOfWeek.TUESDAY to "MAR",
-            DayOfWeek.WEDNESDAY to "MIE",
+            DayOfWeek.WEDNESDAY to "MIÉ",
             DayOfWeek.THURSDAY to "JUE",
             DayOfWeek.FRIDAY to "VIE",
-            DayOfWeek.SATURDAY to "SAB",
+            DayOfWeek.SATURDAY to "SÁB",
             DayOfWeek.SUNDAY to "DOM",
         )
         val narrowExpected = mapOf(
