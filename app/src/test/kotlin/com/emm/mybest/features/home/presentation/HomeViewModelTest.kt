@@ -6,6 +6,7 @@ import com.emm.mybest.domain.models.MealPlanEntry
 import com.emm.mybest.domain.models.MealType
 import com.emm.mybest.domain.models.WeeklyExercisePlan
 import com.emm.mybest.domain.models.WeeklyMealPlan
+import com.emm.mybest.domain.usecase.compliance.GetCompletionStreakUseCase
 import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
@@ -46,6 +47,7 @@ class HomeViewModelTest {
     private val toggleExercise: ToggleExerciseComplianceUseCase = mockk(relaxed = true)
     private val getMealPlan: GetWeeklyMealPlanUseCase = mockk()
     private val getExercisePlan: GetWeeklyExercisePlanUseCase = mockk()
+    private val getCompletionStreak: GetCompletionStreakUseCase = mockk()
 
     private fun emptyCompliance() = DailyCompliance(
         date = FIXED_DATE,
@@ -57,16 +59,19 @@ class HomeViewModelTest {
         mealPlan: WeeklyMealPlan = WeeklyMealPlan(emptyList()),
         exercisePlan: WeeklyExercisePlan = WeeklyExercisePlan(emptyList()),
         compliance: DailyCompliance = emptyCompliance(),
+        streak: Int = 0,
     ): HomeViewModel {
         every { getMealPlan() } returns flowOf(mealPlan)
         every { getExercisePlan() } returns flowOf(exercisePlan)
         every { observeCompliance(any()) } returns flowOf(compliance)
+        every { getCompletionStreak(any()) } returns flowOf(streak)
         return HomeViewModel(
             observeDailyCompliance = observeCompliance,
             toggleMeal = toggleMeal,
             toggleExercise = toggleExercise,
             getMealPlan = getMealPlan,
             getExercisePlan = getExercisePlan,
+            getCompletionStreak = getCompletionStreak,
             clock = FIXED_CLOCK,
         )
     }
@@ -161,5 +166,12 @@ class HomeViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { toggleExercise(FIXED_DATE, true) }
+    }
+
+    @Test
+    fun `streak from use case propagates to state streakDays`() = runTest {
+        val viewModel = buildViewModel(streak = 7)
+        advanceUntilIdle()
+        assertEquals(7, viewModel.state.value.streakDays)
     }
 }

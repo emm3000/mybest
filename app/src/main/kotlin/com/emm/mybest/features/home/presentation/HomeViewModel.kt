@@ -3,7 +3,11 @@ package com.emm.mybest.features.home.presentation
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.domain.models.DailyCompliance
 import com.emm.mybest.domain.models.MealType
+import com.emm.mybest.domain.models.WeeklyExercisePlan
+import com.emm.mybest.domain.models.WeeklyMealPlan
+import com.emm.mybest.domain.usecase.compliance.GetCompletionStreakUseCase
 import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
@@ -22,7 +26,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DatePeriod
@@ -51,6 +54,7 @@ data class HomeState(
     val completionRatio: Float = 0f,
     val completedCount: Int = 0,
     val totalCount: Int = MealType.entries.size + 1,
+    val streakDays: Int = 0,
 )
 
 sealed interface HomeIntent {
@@ -62,6 +66,40 @@ sealed interface HomeEffect {
     data class ShowError(val message: String) : HomeEffect
 }
 
+private data class DayContext(
+    val today: LocalDate,
+    val todayDow: DayOfWeek,
+    val mealPlan: WeeklyMealPlan,
+    val exPlan: WeeklyExercisePlan,
+)
+
+private fun buildHomeState(
+    compliance: DailyCompliance,
+    streak: Int,
+    context: DayContext,
+): HomeState {
+    val rows = MealType.entries.map { type ->
+        MealRow(
+            type = type,
+            description = context.mealPlan.entryFor(context.todayDow, type)?.description.orEmpty(),
+            done = compliance.mealsDone[type] ?: false,
+        )
+    }
+    val routine = context.exPlan.forDay(context.todayDow)?.routine.orEmpty()
+    val completedCount = rows.count { it.done } + if (compliance.exerciseDone) 1 else 0
+    return HomeState(
+        isLoading = false,
+        today = context.today,
+        dayOfWeek = context.todayDow,
+        mealRows = rows,
+        exerciseRoutine = routine,
+        exerciseDone = compliance.exerciseDone,
+        completionRatio = compliance.completionRatio,
+        completedCount = completedCount,
+        streakDays = streak,
+    )
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val observeDailyCompliance: ObserveDailyComplianceUseCase,
@@ -69,6 +107,7 @@ class HomeViewModel(
     private val toggleExercise: ToggleExerciseComplianceUseCase,
     private val getMealPlan: GetWeeklyMealPlanUseCase,
     private val getExercisePlan: GetWeeklyExercisePlanUseCase,
+    private val getCompletionStreak: GetCompletionStreakUseCase,
     clock: Clock = Clock.System,
 ) : ViewModel() {
 
@@ -114,25 +153,14 @@ class HomeViewModel(
         }
             .flatMapLatest { (mealPlan, exPlan, today) ->
                 val todayDow = today.dayOfWeek
-                observeDailyCompliance(today).map { compliance ->
-                    val rows = MealType.entries.map { type ->
-                        MealRow(
-                            type = type,
-                            description = mealPlan.entryFor(todayDow, type)?.description.orEmpty(),
-                            done = compliance.mealsDone[type] ?: false,
-                        )
-                    }
-                    val routine = exPlan.forDay(todayDow)?.routine.orEmpty()
-                    val completedCount = rows.count { it.done } + if (compliance.exerciseDone) 1 else 0
-                    HomeState(
-                        isLoading = false,
-                        today = today,
-                        dayOfWeek = todayDow,
-                        mealRows = rows,
-                        exerciseRoutine = routine,
-                        exerciseDone = compliance.exerciseDone,
-                        completionRatio = compliance.completionRatio,
-                        completedCount = completedCount,
+                combine(
+                    observeDailyCompliance(today),
+                    getCompletionStreak(today),
+                ) { compliance, streak ->
+                    buildHomeState(
+                        compliance = compliance,
+                        streak = streak,
+                        context = DayContext(today, todayDow, mealPlan, exPlan),
                     )
                 }
             }

@@ -32,6 +32,7 @@ import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
+import com.emm.mybest.domain.usecase.compliance.GetCompletionStreakUseCase
 import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
@@ -111,6 +112,7 @@ val appModule = module {
     factory { ObserveDailyComplianceUseCase(get()) }
     factory { ToggleMealComplianceUseCase(get()) }
     factory { ToggleExerciseComplianceUseCase(get()) }
+    factory { GetCompletionStreakUseCase(get()) }
 
     // Weight use cases
     factory { SaveWeightUseCase(get()) }
@@ -130,7 +132,7 @@ val appModule = module {
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
-    viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { AddWeightViewModel(get(), get()) }
     viewModel { AddPhotoViewModel(get()) }
     viewModel { HistoryViewModel(get(), get(), get()) }
