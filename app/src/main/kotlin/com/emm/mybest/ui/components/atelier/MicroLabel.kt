@@ -12,14 +12,12 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.emm.mybest.ui.theme.AtelierBg
+import com.emm.mybest.ui.theme.AtelierBackground
 import com.emm.mybest.ui.theme.AtelierDone
-import com.emm.mybest.ui.theme.AtelierInk2
-import com.emm.mybest.ui.theme.AtelierInk3
+import com.emm.mybest.ui.theme.AtelierInkSecondary
+import com.emm.mybest.ui.theme.AtelierInkTertiary
 import com.emm.mybest.ui.theme.AtelierMonoFamily
 import com.emm.mybest.ui.theme.AtelierWarm
-
-enum class MLabelTone { Default, Dim, Done, Warm }
 
 /**
  * Micro-label — Geist Mono, all caps, tracked at 0.18em.
@@ -29,35 +27,38 @@ enum class MLabelTone { Default, Dim, Done, Warm }
  * predictable for Spanish copy like `MIÉ · 21 MAY`).
  */
 @Composable
-fun MLabel(
+fun MicroLabel(
     text: String,
     modifier: Modifier = Modifier,
-    tone: MLabelTone = MLabelTone.Default,
-    size: TextUnit = 10.sp,
+    tone: MicroLabelTone = MicroLabelTone.Default,
+    size: TextUnit = DEFAULT_SIZE_SP,
 ) {
     Text(
         text = text,
         modifier = modifier,
         color = when (tone) {
-            MLabelTone.Default -> AtelierInk2
-            MLabelTone.Dim -> AtelierInk3
-            MLabelTone.Done -> AtelierDone
-            MLabelTone.Warm -> AtelierWarm
+            MicroLabelTone.Default -> AtelierInkSecondary
+            MicroLabelTone.Dim -> AtelierInkTertiary
+            MicroLabelTone.Done -> AtelierDone
+            MicroLabelTone.Warm -> AtelierWarm
         },
         fontFamily = AtelierMonoFamily,
         fontSize = size,
-        letterSpacing = 0.18.em,
+        letterSpacing = TRACKING_EM,
         fontWeight = FontWeight.Normal,
     )
 }
 
+private val DEFAULT_SIZE_SP = 10.sp
+private val TRACKING_EM = 0.18.em
+
 @Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)
 @Composable
-private fun MLabelPreview() {
-    Column(modifier = Modifier.background(AtelierBg).padding(16.dp)) {
-        MLabel("MIÉ · 21 MAY")
-        MLabel("SEMANA 20", tone = MLabelTone.Dim)
-        MLabel("CUMPLIDO", tone = MLabelTone.Done)
-        MLabel("RECOMENDACIÓN", tone = MLabelTone.Warm)
+private fun MicroLabelPreview() {
+    Column(modifier = Modifier.background(AtelierBackground).padding(16.dp)) {
+        MicroLabel("MIÉ · 21 MAY")
+        MicroLabel("SEMANA 20", tone = MicroLabelTone.Dim)
+        MicroLabel("CUMPLIDO", tone = MicroLabelTone.Done)
+        MicroLabel("RECOMENDACIÓN", tone = MicroLabelTone.Warm)
     }
 }

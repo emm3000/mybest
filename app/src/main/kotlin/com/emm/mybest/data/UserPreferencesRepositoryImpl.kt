@@ -83,7 +83,12 @@ class UserPreferencesRepositoryImpl(
     override val dailySlotTimes: Flow<DailySlotTimes> = dataStore.data.map { preferences ->
         val resolved = DailySlot.entries.associateWith { slot ->
             preferences[slot.prefKey()]
-                ?.let { minutes -> LocalTime(minutes / MIN_PER_HOUR, minutes % MIN_PER_HOUR) }
+                ?.let { minutesSinceMidnight ->
+                    LocalTime(
+                        hour = minutesSinceMidnight / MINUTES_PER_HOUR,
+                        minute = minutesSinceMidnight % MINUTES_PER_HOUR,
+                    )
+                }
                 ?: DailySlotTimes.DEFAULT_TIMES.getValue(slot)
         }
         DailySlotTimes(resolved)
@@ -91,11 +96,11 @@ class UserPreferencesRepositoryImpl(
 
     override suspend fun setDailySlotTime(slot: DailySlot, time: LocalTime) {
         dataStore.edit { preferences ->
-            preferences[slot.prefKey()] = time.hour * MIN_PER_HOUR + time.minute
+            preferences[slot.prefKey()] = time.hour * MINUTES_PER_HOUR + time.minute
         }
     }
 
     private companion object {
-        const val MIN_PER_HOUR = 60
+        const val MINUTES_PER_HOUR = 60
     }
 }

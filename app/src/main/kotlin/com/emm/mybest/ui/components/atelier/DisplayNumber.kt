@@ -15,9 +15,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.emm.mybest.ui.theme.AtelierBg
+import com.emm.mybest.ui.theme.AtelierBackground
 import com.emm.mybest.ui.theme.AtelierInk
-import com.emm.mybest.ui.theme.AtelierInk3
+import com.emm.mybest.ui.theme.AtelierInkTertiary
 import com.emm.mybest.ui.theme.AtelierSerifFamily
 
 /**
@@ -55,9 +55,9 @@ fun DisplayNumber(
 @Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)
 @Composable
 private fun DisplayNumberPreview() {
-    Column(modifier = Modifier.background(AtelierBg).padding(16.dp)) {
+    Column(modifier = Modifier.background(AtelierBackground).padding(16.dp)) {
         DisplayNumber(text = "3", fontSize = 148.sp, italic = true)
-        DisplayNumber(text = "/5", fontSize = 56.sp, color = AtelierInk3)
+        DisplayNumber(text = "/5", fontSize = 56.sp, color = AtelierInkTertiary)
         DisplayNumber(text = "−4.2", fontSize = 96.sp, italic = true)
         DisplayNumber(text = "78.2", fontSize = 28.sp)
     }

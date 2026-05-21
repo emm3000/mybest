@@ -13,7 +13,7 @@ interface UserPreferencesRepository {
     /** Null means the user has not configured a weight reminder yet (no scheduling). */
     val weightReminderTime: Flow<LocalTime?>
 
-    /** Times shown on Home for each daily slot. Defaults from [DailySlotTimes.DEFAULT]. */
+    /** Times shown on Home for each daily slot. Defaults from [DailySlotTimes.DEFAULT_TIMES]. */
     val dailySlotTimes: Flow<DailySlotTimes>
 
     suspend fun updateDarkMode(enabled: Boolean)

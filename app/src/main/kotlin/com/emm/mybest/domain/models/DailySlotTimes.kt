@@ -18,7 +18,5 @@ data class DailySlotTimes(val times: Map<DailySlot, LocalTime>) {
             DailySlot.DINNER to LocalTime(20, 0),
             DailySlot.EXERCISE to LocalTime(18, 30),
         )
-
-        val DEFAULT: DailySlotTimes = DailySlotTimes(DEFAULT_TIMES)
     }
 }
