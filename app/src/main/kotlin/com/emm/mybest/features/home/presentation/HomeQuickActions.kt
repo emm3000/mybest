@@ -32,7 +32,11 @@ internal fun QuickActionDivider() {
 }
 
 @Composable
-internal fun QuickActionNumberRow(number: String, unit: String?) {
+internal fun QuickActionNumberRow(number: String, unit: String?, isPlaceholder: Boolean = false) {
+    if (isPlaceholder) {
+        MicroLabel(text = number, style = MicroLabelStyle(tone = MicroLabelTone.Dim))
+        return
+    }
     Row(verticalAlignment = Alignment.Bottom) {
         DisplayNumber(
             text = number,
@@ -55,6 +59,7 @@ internal fun weightCellContent(state: HomeState): QuickActionCellContent {
         number = if (kg != null) formatHomeWeight(kg) else stringResource(R.string.home_quick_action_placeholder),
         unit = if (kg != null) stringResource(R.string.home_weight_unit_kg).uppercase() else null,
         caption = caption,
+        isPlaceholder = kg == null,
     )
 }
 
@@ -76,5 +81,6 @@ internal fun photoCellContent(state: HomeState): QuickActionCellContent {
         label = stringResource(R.string.home_photo).uppercase(),
         number = state.photoCount.toString(),
         caption = caption,
+        isPlaceholder = state.photoCount == 0,
     )
 }

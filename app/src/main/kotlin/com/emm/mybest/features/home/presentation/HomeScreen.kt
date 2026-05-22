@@ -58,7 +58,7 @@ private val PLAN_ROW_MIN_HEIGHT = 60.dp
 private val PLAN_ROW_PADDING_HORIZONTAL = 28.dp
 private val PLAN_ROW_PADDING_VERTICAL = 14.dp
 private val PLAN_ROW_SPACING = 16.dp
-private val SLOT_LABEL_WIDTH = 54.dp
+private val SLOT_LABEL_WIDTH = 84.dp
 private val QUICK_ACTION_HEIGHT = 80.dp
 private val QUICK_ACTION_CELL_SPACER = 4.dp
 private const val PERCENT_FACTOR = 100
@@ -77,6 +77,7 @@ data class QuickActionCellContent(
     val number: String,
     val unit: String? = null,
     val caption: String? = null,
+    val isPlaceholder: Boolean = false,
 )
 
 @Composable
@@ -306,7 +307,7 @@ private fun HomeQuickActionCell(
     ) {
         MicroLabel(text = content.label, style = MicroLabelStyle(tone = MicroLabelTone.Dim))
         Spacer(modifier = Modifier.height(QUICK_ACTION_CELL_SPACER))
-        QuickActionNumberRow(content.number, content.unit)
+        QuickActionNumberRow(content.number, content.unit, content.isPlaceholder)
         if (content.caption != null) {
             MicroLabel(text = content.caption, style = MicroLabelStyle(tone = MicroLabelTone.Dim))
         }
