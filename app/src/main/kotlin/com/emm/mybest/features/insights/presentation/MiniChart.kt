@@ -30,6 +30,7 @@ import com.emm.mybest.ui.theme.AtelierDone
 import com.emm.mybest.ui.theme.AtelierHairline
 import com.emm.mybest.ui.theme.AtelierInk
 import com.emm.mybest.ui.theme.AtelierMonoFamily
+import kotlinx.collections.immutable.ImmutableList
 import java.util.Locale
 
 private val CHART_HEIGHT = 108.dp
@@ -43,7 +44,7 @@ private const val DASH_ON = 1f
 private const val DASH_OFF = 4f
 
 @Composable
-internal fun InsightsMiniChartContainer(weights: List<Float>) {
+internal fun InsightsMiniChartContainer(weights: ImmutableList<Float>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -60,7 +61,7 @@ internal fun InsightsMiniChartContainer(weights: List<Float>) {
 }
 
 @Composable
-fun MiniChart(data: List<Float>, modifier: Modifier = Modifier) {
+fun MiniChart(data: ImmutableList<Float>, modifier: Modifier = Modifier) {
     val textMeasurer = rememberTextMeasurer()
     val insufficientLabel = stringResource(R.string.insights_chart_insufficient)
 
@@ -73,12 +74,19 @@ fun MiniChart(data: List<Float>, modifier: Modifier = Modifier) {
 
     val firstLabel = remember(data) { String.format(Locale.US, "%.1f", data.first()) }
     val lastLabel = remember(data) { String.format(Locale.US, "%.1f", data.last()) }
+    val (minVal, maxVal) = remember(data) {
+        var lo = Float.POSITIVE_INFINITY
+        var hi = Float.NEGATIVE_INFINITY
+        for (v in data) {
+            if (v < lo) lo = v
+            if (v > hi) hi = v
+        }
+        (lo - CHART_VALUE_PADDING) to (hi + CHART_VALUE_PADDING)
+    }
 
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val minVal = data.min() - CHART_VALUE_PADDING
-        val maxVal = data.max() + CHART_VALUE_PADDING
 
         val path = Path()
         data.forEachIndexed { i, v ->

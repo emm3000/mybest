@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,6 +18,8 @@ import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 private val HEADER_PADDING_TOP = 18.dp
 private val HEADER_PADDING_BOTTOM = 14.dp
@@ -27,7 +30,10 @@ internal fun InsightsLoaded(state: InsightsState, modifier: Modifier = Modifier)
         InsightsHeader(daysSinceFirstWeight = state.daysSinceFirstWeight)
         Hairline()
         InsightsHeroDelta(state = state)
-        InsightsMiniChartContainer(weights = state.weightHistory.map { it.weight })
+        val weights: ImmutableList<Float> = remember(state.weightHistory) {
+            state.weightHistory.map { it.weight }.toImmutableList()
+        }
+        InsightsMiniChartContainer(weights = weights)
         Hairline()
         InsightsPhotoCounts(tronco = state.troncoPhotoCount, cara = state.caraPhotoCount)
         Hairline()

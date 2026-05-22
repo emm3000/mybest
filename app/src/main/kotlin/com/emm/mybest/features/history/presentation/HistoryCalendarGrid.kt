@@ -41,7 +41,7 @@ internal fun HistoryCalendarGrid(
     modifier: Modifier = Modifier,
 ) {
     val cells = remember(month) { buildCalendarCells(month) }
-    val rows = cells.chunked(CALENDAR_COLUMNS)
+    val rows = remember(cells) { cells.chunked(CALENDAR_COLUMNS) }
 
     WeekHeaderRow()
 
