@@ -43,6 +43,7 @@ fun InsightsScreen(
     viewModel: InsightsViewModel,
     onHistoryClick: () -> Unit,
     onAddWeightClick: () -> Unit,
+    bottomBar: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
@@ -56,6 +57,7 @@ fun InsightsScreen(
     Scaffold(
         modifier = modifier,
         containerColor = AtelierBackground,
+        bottomBar = bottomBar,
     ) { padding ->
         InsightsContent(
             state = state,

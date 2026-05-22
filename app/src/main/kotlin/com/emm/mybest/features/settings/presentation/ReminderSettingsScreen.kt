@@ -55,6 +55,7 @@ fun ReminderSettingsScreen(
     modifier: Modifier = Modifier,
     onMealPlanClick: () -> Unit = {},
     onExercisePlanClick: () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -87,6 +88,7 @@ fun ReminderSettingsScreen(
             )
         },
         snackbarHost = { HSnackbarHost(snackbarHostState) },
+        bottomBar = bottomBar,
     ) { paddingValues ->
         Column(
             modifier = Modifier

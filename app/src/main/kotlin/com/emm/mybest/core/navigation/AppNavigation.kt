@@ -1,9 +1,8 @@
 package com.emm.mybest.core.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,57 +58,52 @@ fun AppNavigation(
     val navigator = remember { Navigator(navigationState) }
     val currentOnConsumeAction by rememberUpdatedState(onConsumeAction)
 
-    val showBottomBar = navigationState.topLevelRoute in TOP_LEVEL_SCREENS &&
-        navigationState.backStacks[navigationState.topLevelRoute]?.size == 1
-
     HandleIntentAction(
         intentAction = intentAction,
         navigator = navigator,
         onConsumeAction = currentOnConsumeAction,
     )
 
-    Scaffold(
-        modifier = modifier,
-        bottomBar = {
-            if (showBottomBar) {
-                HBottomNavigationBar(
-                    currentRoute = navigationState.topLevelRoute as? Screen,
-                    onNavItemClick = { screen -> navigator.navigate(screen) },
-                )
+    val entryProvider = remember(navigator) { appEntryProvider(navigator) }
+    NavDisplay(
+        entries = navigationState.toEntries(entryProvider),
+        onBack = { navigator.goBack() },
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        transitionSpec = {
+            when (navigationState.lastTransitionKind) {
+                NavTransitionKind.TabSwitch -> tabSwitchTransition()
+                NavTransitionKind.Pop -> popTransition()
+                NavTransitionKind.Push -> pushTransition()
             }
         },
-    ) { innerPadding ->
-        val entryProvider = remember(navigator) { appEntryProvider(navigator) }
-        NavDisplay(
-            entries = navigationState.toEntries(entryProvider),
-            onBack = { navigator.goBack() },
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .padding(innerPadding),
-            transitionSpec = {
-                when (navigationState.lastTransitionKind) {
-                    NavTransitionKind.TabSwitch -> tabSwitchTransition()
-                    NavTransitionKind.Pop -> popTransition()
-                    NavTransitionKind.Push -> pushTransition()
-                }
-            },
-            popTransitionSpec = { popTransition() },
-            predictivePopTransitionSpec = { popTransition() },
-        )
-    }
+        popTransitionSpec = { popTransition() },
+        predictivePopTransitionSpec = { popTransition() },
+    )
 }
+
+private fun navBar(current: Screen, navigator: Navigator): @Composable () -> Unit = {
+    HBottomNavigationBar(
+        currentRoute = current,
+        onNavItemClick = { screen -> navigator.navigate(screen) },
+    )
+}
+
+private fun homeCallbacks(navigator: Navigator) = HomeCallbacks(
+    onWeightClick = { navigator.navigate(Screen.AddWeight) },
+    onPhotoClick = { navigator.navigate(Screen.AddPhoto) },
+    onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
+    onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
+    onSettingsClick = { navigator.navigate(Screen.Settings) },
+    onHistoryClick = { navigator.navigate(Screen.History) },
+)
 
 private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey> = entryProvider {
     entry<Screen.Home> {
         HomeScreen(
-            callbacks = HomeCallbacks(
-                onWeightClick = { navigator.navigate(Screen.AddWeight) },
-                onPhotoClick = { navigator.navigate(Screen.AddPhoto) },
-                onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
-                onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
-                onSettingsClick = { navigator.navigate(Screen.Settings) },
-                onHistoryClick = { navigator.navigate(Screen.History) },
-            ),
+            callbacks = homeCallbacks(navigator),
+            bottomBar = navBar(Screen.Home, navigator),
             modifier = Modifier,
         )
     }
@@ -138,6 +132,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         HistoryScreen(
             viewModel = viewModel,
             onSeePhotosClick = { navigator.navigate(Screen.Timeline) },
+            bottomBar = navBar(Screen.History, navigator),
             modifier = Modifier,
         )
     }
@@ -148,6 +143,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             viewModel = viewModel,
             onHistoryClick = { navigator.navigate(Screen.History) },
             onAddWeightClick = { navigator.navigate(Screen.AddWeight) },
+            bottomBar = navBar(Screen.Insights, navigator),
             modifier = Modifier,
         )
     }
@@ -187,6 +183,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             onBackClick = { navigator.goBack() },
             onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
             onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
+            bottomBar = navBar(Screen.Settings, navigator),
             modifier = Modifier,
         )
     }

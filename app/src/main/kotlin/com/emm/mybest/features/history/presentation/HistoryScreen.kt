@@ -7,12 +7,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -75,6 +72,7 @@ private const val DAYS_IN_WEEK = 7
 fun HistoryScreen(
     viewModel: HistoryViewModel,
     onSeePhotosClick: () -> Unit,
+    bottomBar: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
@@ -84,6 +82,7 @@ fun HistoryScreen(
         state = state,
         onIntent = viewModel::onIntent,
         onSeePhotosClick = onSeePhotosClick,
+        bottomBar = bottomBar,
     )
 }
 
@@ -92,6 +91,7 @@ fun HistoryContent(
     state: HistoryState,
     onIntent: (HistoryIntent) -> Unit,
     onSeePhotosClick: () -> Unit,
+    bottomBar: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val selectedDate = state.selectedDate
@@ -112,10 +112,11 @@ fun HistoryContent(
     }
 
     Scaffold(
-        modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
+        modifier = modifier,
         topBar = {
             AtelierAppBar(title = "Historial")
         },
+        bottomBar = bottomBar,
     ) { padding ->
         val contentModifier = Modifier
             .padding(padding)

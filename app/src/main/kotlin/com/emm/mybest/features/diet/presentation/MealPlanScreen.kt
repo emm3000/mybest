@@ -1,10 +1,7 @@
 package com.emm.mybest.features.diet.presentation
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -60,7 +57,7 @@ private fun MealPlanContent(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
-        modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
+        modifier = modifier,
         containerColor = AtelierBackground,
         topBar = {
             AtelierAppBar(

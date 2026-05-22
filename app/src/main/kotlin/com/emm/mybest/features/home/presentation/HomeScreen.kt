@@ -7,16 +7,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
@@ -87,6 +84,7 @@ data class QuickActionCellContent(
 @Composable
 fun HomeScreen(
     callbacks: HomeCallbacks,
+    bottomBar: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
@@ -107,6 +105,7 @@ fun HomeScreen(
         onIntent = viewModel::onIntent,
         callbacks = callbacks,
         snackbarHostState = snackbarHostState,
+        bottomBar = bottomBar,
     )
 }
 
@@ -117,11 +116,13 @@ internal fun HomeScreenContent(
     callbacks: HomeCallbacks,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    bottomBar: @Composable () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { HSnackbarHost(hostState = snackbarHostState) },
+        bottomBar = bottomBar,
     ) { paddingValues ->
         HomeLazyContent(state, onIntent, callbacks, paddingValues)
     }
@@ -147,8 +148,7 @@ private fun HomeLazyContent(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
-            .windowInsetsPadding(WindowInsets.statusBars),
+            .padding(paddingValues),
     ) {
         item { HomeHeaderRow(state) }
         item { Hairline() }
