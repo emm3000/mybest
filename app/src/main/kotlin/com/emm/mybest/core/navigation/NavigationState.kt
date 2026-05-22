@@ -2,6 +2,7 @@ package com.emm.mybest.core.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,13 +46,7 @@ fun rememberNavigationState(
     }
 }
 
-/**
- * State holder for navigation state.
- *
- * @param startRoute - the start route. The user will exit the app through this route.
- * @param topLevelRoute - the current top level route
- * @param backStacks - the back stacks for each top level route
- */
+@Stable
 class NavigationState(
     val startRoute: NavKey,
     topLevelRoute: MutableState<NavKey>,

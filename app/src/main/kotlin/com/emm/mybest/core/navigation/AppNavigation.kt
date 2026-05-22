@@ -83,27 +83,35 @@ fun AppNavigation(
     )
 }
 
-private fun navBar(current: Screen, navigator: Navigator): @Composable () -> Unit = {
-    HBottomNavigationBar(
-        currentRoute = current,
-        onNavItemClick = { screen -> navigator.navigate(screen) },
-    )
-}
+@Composable
+private fun rememberHomeCallbacks(navigator: Navigator): HomeCallbacks =
+    remember(navigator) {
+        HomeCallbacks(
+            onWeightClick = { navigator.navigate(Screen.AddWeight) },
+            onPhotoClick = { navigator.navigate(Screen.AddPhoto) },
+            onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
+            onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
+            onSettingsClick = { navigator.navigate(Screen.Settings) },
+            onHistoryClick = { navigator.navigate(Screen.History) },
+        )
+    }
 
-private fun homeCallbacks(navigator: Navigator) = HomeCallbacks(
-    onWeightClick = { navigator.navigate(Screen.AddWeight) },
-    onPhotoClick = { navigator.navigate(Screen.AddPhoto) },
-    onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
-    onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
-    onSettingsClick = { navigator.navigate(Screen.Settings) },
-    onHistoryClick = { navigator.navigate(Screen.History) },
-)
+@Composable
+private fun rememberBottomBar(current: Screen, navigator: Navigator): @Composable () -> Unit =
+    remember(current, navigator) {
+        {
+            HBottomNavigationBar(
+                currentRoute = current,
+                onNavItemClick = { screen -> navigator.navigate(screen) },
+            )
+        }
+    }
 
 private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey> = entryProvider {
     entry<Screen.Home> {
         HomeScreen(
-            callbacks = homeCallbacks(navigator),
-            bottomBar = navBar(Screen.Home, navigator),
+            callbacks = rememberHomeCallbacks(navigator),
+            bottomBar = rememberBottomBar(Screen.Home, navigator),
             modifier = Modifier,
         )
     }
@@ -132,7 +140,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         HistoryScreen(
             viewModel = viewModel,
             onSeePhotosClick = { navigator.navigate(Screen.Timeline) },
-            bottomBar = navBar(Screen.History, navigator),
+            bottomBar = rememberBottomBar(Screen.History, navigator),
             modifier = Modifier,
         )
     }
@@ -143,7 +151,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             viewModel = viewModel,
             onHistoryClick = { navigator.navigate(Screen.History) },
             onAddWeightClick = { navigator.navigate(Screen.AddWeight) },
-            bottomBar = navBar(Screen.Insights, navigator),
+            bottomBar = rememberBottomBar(Screen.Insights, navigator),
             modifier = Modifier,
         )
     }
@@ -183,7 +191,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             onBackClick = { navigator.goBack() },
             onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
             onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
-            bottomBar = navBar(Screen.Settings, navigator),
+            bottomBar = rememberBottomBar(Screen.Settings, navigator),
             modifier = Modifier,
         )
     }

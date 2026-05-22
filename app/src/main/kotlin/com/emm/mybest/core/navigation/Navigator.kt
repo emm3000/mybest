@@ -1,10 +1,9 @@
 package com.emm.mybest.core.navigation
 
+import androidx.compose.runtime.Stable
 import androidx.navigation3.runtime.NavKey
 
-/**
- * Handles navigation events (forward and back) by updating the navigation state.
- */
+@Stable
 class Navigator(val state: NavigationState) {
     fun navigate(route: NavKey) {
         if (route in state.backStacks.keys) {

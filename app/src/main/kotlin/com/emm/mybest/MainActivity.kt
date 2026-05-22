@@ -10,6 +10,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,21 +33,23 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        window.isNavigationBarContrastEnforced = false
         requestNotificationPermissionIfNeeded()
 
         intentAction = intent.action
 
         setContent {
-            DisposableEffect(Unit) {
+            val isDark = isSystemInDarkTheme()
+            DisposableEffect(isDark) {
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.auto(
                         Color.Transparent.toArgb(),
                         Color.Transparent.toArgb(),
-                    ) { true },
+                    ) { isDark },
                     navigationBarStyle = SystemBarStyle.auto(
                         DefaultLightScrim,
                         DefaultDarkScrim,
-                    ) { true },
+                    ) { isDark },
                 )
                 onDispose {}
             }
