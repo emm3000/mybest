@@ -12,7 +12,7 @@ sealed interface Screen : NavKey {
     data object AddWeight : Screen
 
     @Serializable
-    data object AddPhoto : Screen
+    data object Photos : Screen
 
     @Serializable
     data object History : Screen
@@ -21,10 +21,7 @@ sealed interface Screen : NavKey {
     data object Insights : Screen
 
     @Serializable
-    data object ComparePhotos : Screen
-
-    @Serializable
-    data object Timeline : Screen
+    data class ComparePhotos(val beforeId: String, val afterId: String) : Screen
 
     @Serializable
     data class PhotoViewer(val initialPhotoId: String) : Screen

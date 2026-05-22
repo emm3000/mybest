@@ -1,4 +1,4 @@
-package com.emm.mybest.features.timeline.presentation
+package com.emm.mybest.features.photo.presentation.viewer
 
 import com.emm.mybest.domain.models.ProgressPhoto
 

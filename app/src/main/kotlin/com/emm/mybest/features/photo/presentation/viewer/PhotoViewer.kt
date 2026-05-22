@@ -1,4 +1,4 @@
-package com.emm.mybest.features.timeline.presentation
+package com.emm.mybest.features.photo.presentation.viewer
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.emm.mybest.core.datetime.formatEsLongDate
+import com.emm.mybest.features.photo.presentation.photoTypeLabel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -70,13 +71,12 @@ internal fun PhotoViewer(
             val photo = photos[page]
             AsyncImage(
                 model = photo.photoPath,
-                contentDescription = timelinePhotoTypeLabel(photo.type),
+                contentDescription = photoTypeLabel(photo.type),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit,
             )
         }
 
-        // Overlay — top bar with back + metadata
         val currentPhoto = photos.getOrNull(pagerState.currentPage)
         AnimatedVisibility(
             visible = overlayVisible,
@@ -116,7 +116,7 @@ internal fun PhotoViewer(
                                 color = Color.White,
                             )
                             Text(
-                                text = timelinePhotoTypeLabel(currentPhoto.type),
+                                text = photoTypeLabel(currentPhoto.type),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.White.copy(alpha = 0.7f),
                             )

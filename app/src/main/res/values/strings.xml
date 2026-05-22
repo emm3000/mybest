@@ -62,6 +62,21 @@
     <string name="exercise_plan_edit_detail_label">DETALLE</string>
     <string name="exercise_plan_edit_volume_label">VOLUMEN</string>
 
+    <!-- Photos screen (C15) -->
+    <string name="photos_app_bar_title">FOTOS DE PROGRESO</string>
+    <string name="photos_tab_trunk">Tronco</string>
+    <string name="photos_tab_face">Cara</string>
+    <string name="photos_label_before">ANTES</string>
+    <string name="photos_label_after">AHORA</string>
+    <string name="photos_timeline_header_format">TIMELINE · %1$d FOTOS</string>
+    <string name="photos_compare_summary_format">%1$d DÍAS · %2$s KG</string>
+    <string name="photos_compare_summary_empty">— DÍAS · — KG</string>
+    <string name="photos_compare_cta">COMPARAR ↗</string>
+    <string name="photos_add_action_cd">Tomar foto</string>
+    <string name="photos_camera_permission_denied">Habilita el permiso de cámara en Ajustes.</string>
+    <string name="photos_camera_permission_settings">Ajustes</string>
+    <string name="photos_camera_permission_required">Se necesita acceso a la cámara para tomar fotos.</string>
+
     <!-- Insights screen (C12) -->
     <string name="insights_header_title">PROGRESO</string>
     <string name="insights_days_format">%d DÍAS</string>

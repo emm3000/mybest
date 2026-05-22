@@ -23,20 +23,19 @@ import com.emm.mybest.features.home.presentation.HomeCallbacks
 import com.emm.mybest.features.home.presentation.HomeScreen
 import com.emm.mybest.features.insights.presentation.InsightsScreen
 import com.emm.mybest.features.insights.presentation.InsightsViewModel
-import com.emm.mybest.features.photo.presentation.AddPhotoScreen
-import com.emm.mybest.features.photo.presentation.AddPhotoViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosScreen
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
+import com.emm.mybest.features.photo.presentation.PhotosScreen
+import com.emm.mybest.features.photo.presentation.PhotosViewModel
+import com.emm.mybest.features.photo.presentation.viewer.PhotoViewer
 import com.emm.mybest.features.settings.presentation.ReminderSettingsScreen
 import com.emm.mybest.features.settings.presentation.ReminderSettingsViewModel
-import com.emm.mybest.features.timeline.presentation.PhotoViewer
-import com.emm.mybest.features.timeline.presentation.TimelineScreen
-import com.emm.mybest.features.timeline.presentation.TimelineViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightScreen
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
 import com.emm.mybest.ui.components.HBottomNavigationBar
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
 
 private val TOP_LEVEL_SCREENS = setOf(
     Screen.Home,
@@ -88,7 +87,7 @@ private fun rememberHomeCallbacks(navigator: Navigator): HomeCallbacks =
     remember(navigator) {
         HomeCallbacks(
             onWeightClick = { navigator.navigate(Screen.AddWeight) },
-            onPhotoClick = { navigator.navigate(Screen.AddPhoto) },
+            onPhotoClick = { navigator.navigate(Screen.Photos) },
             onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
             onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
             onSettingsClick = { navigator.navigate(Screen.Settings) },
@@ -125,12 +124,16 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         )
     }
 
-    entry<Screen.AddPhoto> {
-        val viewModel: AddPhotoViewModel = koinViewModel()
-        AddPhotoScreen(
+    entry<Screen.Photos> {
+        val viewModel: PhotosViewModel = koinViewModel()
+        PhotosScreen(
             viewModel = viewModel,
             mediaManager = koinInject(),
-            onBackClick = { navigator.goBack() },
+            onOpenViewer = { photoId -> navigator.navigate(Screen.PhotoViewer(photoId)) },
+            onCompare = { beforeId, afterId ->
+                navigator.navigate(Screen.ComparePhotos(beforeId, afterId))
+            },
+            bottomBar = {},
             modifier = Modifier,
         )
     }
@@ -139,7 +142,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         val viewModel: HistoryViewModel = koinViewModel()
         HistoryScreen(
             viewModel = viewModel,
-            onSeePhotosClick = { navigator.navigate(Screen.Timeline) },
+            onSeePhotosClick = { navigator.navigate(Screen.Photos) },
             bottomBar = rememberBottomBar(Screen.History, navigator),
             modifier = Modifier,
         )
@@ -156,22 +159,13 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         )
     }
 
-    entry<Screen.ComparePhotos> {
-        val viewModel: ComparePhotosViewModel = koinViewModel()
+    entry<Screen.ComparePhotos> { key ->
+        val viewModel: ComparePhotosViewModel = koinViewModel {
+            parametersOf(key.beforeId, key.afterId)
+        }
         ComparePhotosScreen(
             viewModel = viewModel,
             onBackClick = { navigator.goBack() },
-            modifier = Modifier,
-        )
-    }
-
-    entry<Screen.Timeline> {
-        val viewModel: TimelineViewModel = koinViewModel()
-        TimelineScreen(
-            viewModel = viewModel,
-            onAddPhotoClick = { navigator.navigate(Screen.AddPhoto) },
-            onCompareClick = { navigator.navigate(Screen.ComparePhotos) },
-            onOpenViewer = { photoId -> navigator.navigate(Screen.PhotoViewer(photoId)) },
             modifier = Modifier,
         )
     }
@@ -224,7 +218,7 @@ private fun HandleIntentAction(
         if (intentAction == null) return@LaunchedEffect
         when (intentAction) {
             "com.emm.mybest.ACTION_ADD_WEIGHT" -> navigator.navigate(Screen.AddWeight)
-            "com.emm.mybest.ACTION_ADD_PHOTO" -> navigator.navigate(Screen.AddPhoto)
+            "com.emm.mybest.ACTION_ADD_PHOTO" -> navigator.navigate(Screen.Photos)
         }
         currentOnConsumeAction()
     }

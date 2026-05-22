@@ -3,117 +3,47 @@ package com.emm.mybest.features.photo.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
-import com.emm.mybest.domain.models.PhotoType
-import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.repository.PhotoRepository
-import com.emm.mybest.domain.usecase.history.ResolveComparisonSelectionUseCase
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ComparePhotosViewModel(
+    private val beforeId: String,
+    private val afterId: String,
     private val photoRepository: PhotoRepository,
-    private val resolveComparisonSelection: ResolveComparisonSelectionUseCase,
 ) : ViewModel() {
 
-    private val _selectedType = MutableStateFlow<PhotoType?>(null)
-    private val _beforePhoto = MutableStateFlow<ProgressPhoto?>(null)
-    private val _afterPhoto = MutableStateFlow<ProgressPhoto?>(null)
     private val _effect = MutableSharedFlow<ComparePhotosEffect>(
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
-
     val effect = _effect.asSharedFlow()
 
-    val state: StateFlow<ComparePhotosState> = combine(
-        photoRepository.getAllPhotos(),
-        _selectedType.flatMapLatest { type ->
-            if (type == null) {
-                photoRepository.getAllPhotos()
-            } else {
-                photoRepository.getPhotosByType(type)
-            }
-        },
-        _selectedType,
-        _beforePhoto,
-        _afterPhoto,
-    ) { allPhotos, photos, type, before, after ->
-        val resolvedSelection = resolveComparisonSelection(
-            photos = photos,
-            before = before,
-            after = after,
+    val state: StateFlow<ComparePhotosState> = photoRepository.getAllPhotos()
+        .map { photos ->
+            ComparePhotosState(
+                before = photos.firstOrNull { it.id == beforeId },
+                after = photos.firstOrNull { it.id == afterId },
+                isLoading = false,
+            )
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
+            initialValue = ComparePhotosState(isLoading = true),
         )
-        val countByType = allPhotos.groupingBy { it.type }.eachCount()
-        ComparePhotosState(
-            photos = photos,
-            selectedType = type,
-            beforePhoto = resolvedSelection.before,
-            afterPhoto = resolvedSelection.after,
-            totalPhotosCount = allPhotos.size,
-            photoCountByType = countByType,
-            isLoading = false,
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
-        initialValue = ComparePhotosState(isLoading = true),
-    )
 
     fun onIntent(intent: ComparePhotosIntent) {
         when (intent) {
-            is ComparePhotosIntent.OnTypeSelected -> {
-                _selectedType.value = intent.type
-                _beforePhoto.value = null
-                _afterPhoto.value = null
-            }
-            is ComparePhotosIntent.OnBeforePhotoSelected -> {
-                handlePhotoSelection(
-                    selectedPhoto = intent.photo,
-                    conflictingPhoto = state.value.afterPhoto,
-                    errorMessage = "Elige una foto distinta para ANTES.",
-                    onSelectionAccepted = { _beforePhoto.value = it },
-                )
-            }
-            is ComparePhotosIntent.OnAfterPhotoSelected -> {
-                handlePhotoSelection(
-                    selectedPhoto = intent.photo,
-                    conflictingPhoto = state.value.beforePhoto,
-                    errorMessage = "Elige una foto distinta para DESPUÉS.",
-                    onSelectionAccepted = { _afterPhoto.value = it },
-                )
-            }
-            ComparePhotosIntent.ToggleSwap -> {
-                val currentSelection = state.value
-                _beforePhoto.value = currentSelection.afterPhoto
-                _afterPhoto.value = currentSelection.beforePhoto
+            ComparePhotosIntent.Close -> viewModelScope.launch {
+                _effect.emit(ComparePhotosEffect.NavigateBack)
             }
         }
-    }
-
-    private fun showError(message: String) {
-        viewModelScope.launch {
-            _effect.emit(ComparePhotosEffect.ShowError(message))
-        }
-    }
-
-    private fun handlePhotoSelection(
-        selectedPhoto: ProgressPhoto,
-        conflictingPhoto: ProgressPhoto?,
-        errorMessage: String,
-        onSelectionAccepted: (ProgressPhoto) -> Unit,
-    ) {
-        if (conflictingPhoto?.id == selectedPhoto.id) {
-            showError(errorMessage)
-            return
-        }
-        onSelectionAccepted(selectedPhoto)
     }
 }

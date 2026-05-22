@@ -41,13 +41,13 @@ import com.emm.mybest.domain.usecase.diet.UpsertMealUseCase
 import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
 import com.emm.mybest.domain.usecase.exercise.UpsertExerciseRoutineUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
-import com.emm.mybest.domain.usecase.history.GetTimelineUseCase
-import com.emm.mybest.domain.usecase.history.ResolveComparisonSelectionUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
+import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
 import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
 import com.emm.mybest.domain.usecase.preferences.ObserveDailySlotTimesUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
+import com.emm.mybest.domain.usecase.weight.GetNearestWeightOnDateUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.features.diet.presentation.MealPlanViewModel
@@ -58,16 +58,16 @@ import com.emm.mybest.features.home.presentation.HomeMutationUseCases
 import com.emm.mybest.features.home.presentation.HomePlanUseCases
 import com.emm.mybest.features.home.presentation.HomeViewModel
 import com.emm.mybest.features.insights.presentation.InsightsViewModel
-import com.emm.mybest.features.photo.presentation.AddPhotoViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
+import com.emm.mybest.features.photo.presentation.PhotosViewModel
+import com.emm.mybest.features.photo.presentation.viewer.PhotoViewerViewModel
 import com.emm.mybest.features.settings.presentation.ReminderSettingsViewModel
-import com.emm.mybest.features.timeline.presentation.PhotoViewerViewModel
-import com.emm.mybest.features.timeline.presentation.TimelineViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
 import com.emm.mybest.viewmodel.MainViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import kotlin.time.Clock
 
 val appModule = module {
     single {
@@ -126,27 +126,28 @@ val appModule = module {
     factory { SaveWeightUseCase(get()) }
     factory { DeleteWeightByDateUseCase(get()) }
     factory { ObserveWeightProgressUseCase(get()) }
+    factory { GetNearestWeightOnDateUseCase(get()) }
 
     // Photo use cases
     factory { SavePhotosUseCase(get()) }
     factory { DeletePhotoUseCase(get()) }
     factory { ObservePhotosUseCase(get()) }
+    factory { GetPhotosOverviewUseCase(get(), get()) }
 
-    // History / timeline use cases
+    // History use cases
     factory { GetHistoryUseCase(get(), get()) }
-    factory { GetTimelineUseCase(get()) }
-    factory { ResolveComparisonSelectionUseCase() }
 
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
     viewModel { HomeViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { AddWeightViewModel(get(), get()) }
-    viewModel { AddPhotoViewModel(get()) }
+    viewModel { PhotosViewModel(get(), get(), get(), Clock.System) }
     viewModel { HistoryViewModel(get(), get(), get()) }
     viewModel { InsightsViewModel(get()) }
-    viewModel { ComparePhotosViewModel(get(), get()) }
-    viewModel { TimelineViewModel(get(), get()) }
+    viewModel { (beforeId: String, afterId: String) ->
+        ComparePhotosViewModel(beforeId, afterId, get())
+    }
     viewModel { (initialPhotoId: String) -> PhotoViewerViewModel(initialPhotoId, get()) }
     viewModel { ReminderSettingsViewModel(get(), get(), get(), get()) }
     viewModel { MealPlanViewModel(get(), get()) }
