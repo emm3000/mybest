@@ -50,6 +50,18 @@
     <string name="meal_plan_hero_line2">en bucle.</string>
     <string name="meal_plan_empty_meal">—</string>
 
+    <!-- Exercise screen (C14) -->
+    <string name="exercise_plan_app_bar_title">EJERCICIO · PLANTILLA 7×1</string>
+    <string name="exercise_plan_app_bar_right">SEMANA</string>
+    <string name="exercise_plan_hero_label">RUTINA SEMANAL</string>
+    <string name="exercise_plan_hero_line1">Mover</string>
+    <string name="exercise_plan_hero_line2">el cuerpo.</string>
+    <string name="exercise_plan_volume_format">VOL · %s</string>
+    <string name="exercise_plan_empty_value">—</string>
+    <string name="exercise_plan_edit_name_label">NOMBRE</string>
+    <string name="exercise_plan_edit_detail_label">DETALLE</string>
+    <string name="exercise_plan_edit_volume_label">VOLUMEN</string>
+
     <!-- Insights screen (C12) -->
     <string name="insights_header_title">PROGRESO</string>
     <string name="insights_days_format">%d DÍAS</string>

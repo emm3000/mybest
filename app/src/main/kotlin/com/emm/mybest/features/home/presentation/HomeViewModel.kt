@@ -95,7 +95,7 @@ private fun buildExerciseRow(context: PlanContext, compliance: DailyCompliance):
     PlanRow(
         slot = DailySlot.EXERCISE,
         time = context.slotTimes[DailySlot.EXERCISE],
-        description = context.exPlan.forDay(context.todayDow)?.routine.orEmpty(),
+        description = context.exPlan.forDay(context.todayDow)?.detail.orEmpty(),
         done = compliance.exerciseDone,
     )
 

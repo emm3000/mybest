@@ -126,7 +126,7 @@ class HomeViewModelTest {
             ),
         )
         val exercisePlan = WeeklyExercisePlan(
-            listOf(ExercisePlanEntry(dow, "Cardio 30 min")),
+            listOf(ExercisePlanEntry(dow, detail = "Cardio 30 min")),
         )
         val compliance = DailyCompliance(
             date = FIXED_DATE,

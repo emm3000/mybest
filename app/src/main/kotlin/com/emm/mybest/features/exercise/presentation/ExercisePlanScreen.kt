@@ -1,22 +1,30 @@
 package com.emm.mybest.features.exercise.presentation
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.emm.mybest.features.exercise.presentation.components.ExerciseDayRow
-import com.emm.mybest.features.exercise.presentation.components.ExerciseEditorSheet
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.emm.mybest.R
+import com.emm.mybest.domain.models.ExercisePlanEntry
+import com.emm.mybest.features.exercise.presentation.edit.EditExerciseSheet
+import com.emm.mybest.features.exercise.presentation.edit.EditExerciseSheetCallbacks
 import com.emm.mybest.ui.components.AtelierAppBar
-import com.emm.mybest.ui.components.HSeparator
-import kotlinx.coroutines.flow.collectLatest
+import com.emm.mybest.ui.components.atelier.Hairline
+import com.emm.mybest.ui.components.atelier.MicroLabel
+import com.emm.mybest.ui.components.atelier.MicroLabelStyle
+import com.emm.mybest.ui.components.atelier.MicroLabelTone
+import com.emm.mybest.ui.theme.AtelierBackground
 import kotlinx.datetime.DayOfWeek
 
 @Composable
@@ -25,19 +33,10 @@ fun ExercisePlanScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.effects.collectLatest { effect ->
-            when (effect) {
-                ExercisePlanEffect.DismissSheet -> Unit
-            }
-        }
-    }
-
     ExercisePlanContent(
-        modifier = modifier,
         state = state,
         onIntent = viewModel::onIntent,
+        modifier = modifier,
     )
 }
 
@@ -49,39 +48,52 @@ private fun ExercisePlanContent(
 ) {
     Scaffold(
         modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
+        containerColor = AtelierBackground,
         topBar = {
-            AtelierAppBar(title = "MY ROUTINE")
+            AtelierAppBar(
+                title = stringResource(R.string.exercise_plan_app_bar_title),
+                actions = {
+                    MicroLabel(
+                        text = stringResource(R.string.exercise_plan_app_bar_right),
+                        style = MicroLabelStyle(tone = MicroLabelTone.Dim),
+                    )
+                },
+            )
         },
     ) { padding ->
-        val days = DayOfWeek.entries
-
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .consumeWindowInsets(padding),
-            contentPadding = padding,
+                .padding(padding)
+                .verticalScroll(rememberScrollState()),
         ) {
-            itemsIndexed(
-                items = days,
-                key = { _, day -> day.name },
-            ) { index, day ->
-                val routine = state.routines[day].orEmpty()
-                ExerciseDayRow(
-                    day = day,
-                    routine = routine,
+            ExercisePlanHero()
+            Hairline()
+            DayOfWeek.entries.forEachIndexed { index, day ->
+                ExercisePlanDayRow(
+                    content = ExercisePlanDayContent(
+                        day = day,
+                        today = state.today,
+                        entry = state.entries[day] ?: ExercisePlanEntry(day),
+                    ),
                     onClick = { onIntent(ExercisePlanIntent.StartEdit(day)) },
                 )
-                if (index < days.lastIndex) {
-                    HSeparator()
+                if (index < DayOfWeek.entries.lastIndex) {
+                    Hairline(inset = 28.dp)
                 }
             }
         }
     }
-
-    state.editing?.let { editing ->
-        ExerciseEditorSheet(
-            editing = editing,
-            onIntent = onIntent,
+    state.editing?.let { draft ->
+        EditExerciseSheet(
+            draft = draft,
+            callbacks = EditExerciseSheetCallbacks(
+                onNameChange = { onIntent(ExercisePlanIntent.UpdateName(it)) },
+                onDetailChange = { onIntent(ExercisePlanIntent.UpdateDetail(it)) },
+                onVolumeChange = { onIntent(ExercisePlanIntent.UpdateVolume(it)) },
+                onSave = { onIntent(ExercisePlanIntent.SaveRoutine) },
+                onCancel = { onIntent(ExercisePlanIntent.CancelEdit) },
+            ),
         )
     }
 }

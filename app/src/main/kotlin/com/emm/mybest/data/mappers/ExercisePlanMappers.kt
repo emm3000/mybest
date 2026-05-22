@@ -6,10 +6,12 @@ import kotlinx.datetime.DayOfWeek
 
 fun ExercisePlanEntryEntity.toDomain(): ExercisePlanEntry? {
     val day = runCatching { DayOfWeek.valueOf(dayOfWeek) }.getOrNull() ?: return null
-    return ExercisePlanEntry(dayOfWeek = day, routine = routine)
+    return ExercisePlanEntry(dayOfWeek = day, name = name, detail = detail, volume = volume)
 }
 
 fun ExercisePlanEntry.toEntity(): ExercisePlanEntryEntity = ExercisePlanEntryEntity(
     dayOfWeek = dayOfWeek.name,
-    routine = routine,
+    name = name,
+    detail = detail,
+    volume = volume,
 )

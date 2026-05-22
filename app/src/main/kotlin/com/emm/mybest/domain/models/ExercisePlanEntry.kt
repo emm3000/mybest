@@ -4,5 +4,7 @@ import kotlinx.datetime.DayOfWeek
 
 data class ExercisePlanEntry(
     val dayOfWeek: DayOfWeek,
-    val routine: String,
+    val name: String = "",
+    val detail: String = "",
+    val volume: String = "",
 )

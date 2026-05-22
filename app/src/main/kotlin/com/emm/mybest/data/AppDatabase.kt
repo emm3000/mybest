@@ -27,7 +27,7 @@ import com.emm.mybest.data.entities.ProgressPhotoEntity
         MealComplianceEntity::class,
         ExerciseComplianceEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
