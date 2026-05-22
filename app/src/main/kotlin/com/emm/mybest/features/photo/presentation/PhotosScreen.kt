@@ -34,6 +34,7 @@ import com.emm.mybest.ui.components.atelier.TrunkSilhouette
 fun PhotosScreen(
     viewModel: PhotosViewModel,
     mediaManager: MediaManager,
+    onBack: () -> Unit,
     onOpenViewer: (String) -> Unit,
     onCompare: (String, String) -> Unit,
     bottomBar: @Composable () -> Unit,
@@ -63,6 +64,7 @@ fun PhotosScreen(
         topBar = {
             AtelierAppBar(
                 title = stringResource(R.string.photos_app_bar_title),
+                onBack = onBack,
                 actions = {
                     HIconButton(
                         icon = Icons.Default.Add,

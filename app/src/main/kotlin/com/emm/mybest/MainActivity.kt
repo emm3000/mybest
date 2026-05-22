@@ -10,7 +10,6 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,17 +38,10 @@ class MainActivity : ComponentActivity() {
         intentAction = intent.action
 
         setContent {
-            val isDark = isSystemInDarkTheme()
-            DisposableEffect(isDark) {
+            DisposableEffect(Unit) {
                 enableEdgeToEdge(
-                    statusBarStyle = SystemBarStyle.auto(
-                        Color.Transparent.toArgb(),
-                        Color.Transparent.toArgb(),
-                    ) { isDark },
-                    navigationBarStyle = SystemBarStyle.auto(
-                        DefaultLightScrim,
-                        DefaultDarkScrim,
-                    ) { isDark },
+                    statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
+                    navigationBarStyle = SystemBarStyle.dark(DefaultDarkScrim),
                 )
                 onDispose {}
             }
@@ -83,14 +75,6 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        /**
-         * The default light scrim, as defined by [androidx.activity.enableEdgeToEdge].
-         */
-        private val DefaultLightScrim = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
-
-        /**
-         * The default dark scrim, as defined by [androidx.activity.enableEdgeToEdge].
-         */
         private val DefaultDarkScrim = android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)
     }
 }
