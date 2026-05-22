@@ -53,6 +53,8 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
+private enum class HomeContentType { Header, Hairline, Hero, PlanRow, QuickActions }
+
 private val HERO_NUMBER_FONT_SIZE = 128.sp
 private val HERO_SLASH_FONT_SIZE = 56.sp
 private val HERO_LABEL_GAP = 6.dp
@@ -151,11 +153,11 @@ private fun HomeLazyContent(
             .fillMaxSize()
             .padding(paddingValues),
     ) {
-        item { HomeHeaderRow(state) }
-        item { Hairline() }
-        item { HomeHero(state) }
-        item { Hairline() }
-        itemsIndexed(state.planRows) { index, row ->
+        item(contentType = HomeContentType.Header) { HomeHeaderRow(state) }
+        item(contentType = HomeContentType.Hairline) { Hairline() }
+        item(contentType = HomeContentType.Hero) { HomeHero(state) }
+        item(contentType = HomeContentType.Hairline) { Hairline() }
+        itemsIndexed(state.planRows, contentType = { _, _ -> HomeContentType.PlanRow }) { index, row ->
             val onEditRequest: () -> Unit = if (row.slot == DailySlot.EXERCISE) {
                 {}
             } else {
@@ -173,8 +175,8 @@ private fun HomeLazyContent(
                 Hairline(inset = PLAN_ROW_PADDING_HORIZONTAL)
             }
         }
-        item { Hairline() }
-        item { HomeQuickActionsRow(state, callbacks) }
+        item(contentType = HomeContentType.Hairline) { Hairline() }
+        item(contentType = HomeContentType.QuickActions) { HomeQuickActionsRow(state, callbacks) }
     }
 }
 

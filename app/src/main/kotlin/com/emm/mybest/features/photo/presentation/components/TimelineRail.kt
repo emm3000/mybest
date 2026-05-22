@@ -44,7 +44,11 @@ internal fun TimelineRail(
             contentPadding = PaddingValues(end = RAIL_START_PADDING),
             horizontalArrangement = Arrangement.spacedBy(TILE_SPACING),
         ) {
-            itemsIndexed(photos, key = { _, photo -> photo.id }) { index, photo ->
+            itemsIndexed(
+                photos,
+                key = { _, photo -> photo.id },
+                contentType = { _, _ -> "photo_tile" },
+            ) { index, photo ->
                 PhotoTile(
                     photoPath = photo.photoPath,
                     dateLabel = formatTileDate(photo),
