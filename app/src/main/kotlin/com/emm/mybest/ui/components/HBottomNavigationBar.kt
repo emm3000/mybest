@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
@@ -37,8 +36,6 @@ import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.theme.AtelierHairline
 
 private val NAV_BAR_HEIGHT = 60.dp
-private val ACTIVE_INDICATOR_WIDTH = 26.dp
-private val ACTIVE_INDICATOR_HEIGHT = 1.dp
 private val ICON_SIZE = 18.dp
 private val LABEL_GAP = 7.dp
 private val ITEM_TOP_PADDING = 10.dp
@@ -103,15 +100,6 @@ private fun AtelierNavCell(
             )
             .padding(top = ITEM_TOP_PADDING, bottom = ITEM_BOTTOM_PADDING),
     ) {
-        if (isActive) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .width(ACTIVE_INDICATOR_WIDTH)
-                    .height(ACTIVE_INDICATOR_HEIGHT)
-                    .background(cs.onBackground),
-            )
-        }
         Column(
             modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally,
