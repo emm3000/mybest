@@ -7,6 +7,7 @@ import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.domain.models.InsightsRecommendationKind
 import com.emm.mybest.domain.models.PeriodLabel
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +35,7 @@ class InsightsViewModel(
         .map { data ->
             val (recTitle, recDesc) = mapRecommendationStrings(data.recommendation.kind)
             InsightsState(
-                weightHistory = data.weightEntries,
+                weightHistory = data.weightEntries.toImmutableList(),
                 periodLabel = mapPeriodLabel(data.period),
                 totalWeightLost = data.totalWeightLost,
                 currentWeight = data.currentWeight,

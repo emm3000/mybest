@@ -13,6 +13,7 @@ import com.emm.mybest.domain.models.WeeklyMealPlan
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.features.diet.presentation.edit.EditingMealDraft
 import com.emm.mybest.features.diet.presentation.edit.toDailySlot
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -109,7 +110,7 @@ private fun buildHomeState(
         today = context.today,
         dayOfWeek = context.todayDow,
         weekNumber = context.today.toJavaLocalDate().get(WeekFields.ISO.weekOfWeekBasedYear()),
-        planRows = rows,
+        planRows = rows.toImmutableList(),
         completionRatio = complianceSnapshot.compliance.completionRatio,
         completedCount = rows.count { it.done },
         streakDays = complianceSnapshot.streak,

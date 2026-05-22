@@ -49,6 +49,7 @@ import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
 import com.emm.mybest.ui.theme.AtelierInkTertiary
 import com.emm.mybest.ui.theme.AtelierTheme
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
@@ -344,7 +345,7 @@ private fun HomeScreenPreview() {
                         description = "",
                         done = false,
                     )
-                },
+                }.toImmutableList(),
                 completedCount = 2,
                 totalCount = 5,
                 completionRatio = 0.4f,

@@ -7,6 +7,8 @@ import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,10 +40,10 @@ class HistoryViewModel(
             HistoryState(
                 selectedMonth = month,
                 selectedDate = date,
-                monthlyData = result.monthlyData,
+                monthlyData = result.monthlyData.toImmutableMap(),
                 monthWeightCount = result.monthWeightCount,
                 monthPhotoCount = result.monthPhotoCount,
-                recentEntries = result.recentEntries,
+                recentEntries = result.recentEntries.toImmutableList(),
                 isLoading = false,
                 errorMessage = null,
             )

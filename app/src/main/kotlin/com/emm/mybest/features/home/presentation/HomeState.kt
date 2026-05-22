@@ -3,6 +3,8 @@ package com.emm.mybest.features.home.presentation
 import androidx.compose.runtime.Stable
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.features.diet.presentation.edit.EditingMealDraft
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -17,7 +19,7 @@ data class HomeState(
     val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     val dayOfWeek: DayOfWeek = Clock.System.todayIn(TimeZone.currentSystemDefault()).dayOfWeek,
     val weekNumber: Int = 0,
-    val planRows: List<PlanRow> = emptyList(),
+    val planRows: ImmutableList<PlanRow> = persistentListOf(),
     val completionRatio: Float = 0f,
     val completedCount: Int = 0,
     val totalCount: Int = DEFAULT_TOTAL,

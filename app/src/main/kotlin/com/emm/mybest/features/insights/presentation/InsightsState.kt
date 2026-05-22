@@ -2,10 +2,12 @@ package com.emm.mybest.features.insights.presentation
 
 import androidx.compose.runtime.Stable
 import com.emm.mybest.domain.models.WeightEntry
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Stable
 data class InsightsState(
-    val weightHistory: List<WeightEntry> = emptyList(),
+    val weightHistory: ImmutableList<WeightEntry> = persistentListOf(),
     val periodLabel: String = "",
     val totalWeightLost: Float = 0f,
     val currentWeight: Float = 0f,
