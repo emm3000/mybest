@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -40,6 +41,33 @@ import com.emm.mybest.ui.theme.AtelierTheme
 private const val SWITCH_DISABLED_ALPHA = 0.5f
 private const val SWITCH_ANIMATION_MS = 180
 
+private data class SwitchColors(
+    val track: Color,
+    val border: Color,
+    val thumb: Color,
+)
+
+@Composable
+private fun animateSwitchColors(checked: Boolean): SwitchColors {
+    val cs = MaterialTheme.colorScheme
+    val track by animateColorAsState(
+        targetValue = if (checked) cs.primary else cs.surfaceContainerHighest,
+        animationSpec = tween(SWITCH_ANIMATION_MS),
+        label = "switch_track",
+    )
+    val border by animateColorAsState(
+        targetValue = if (checked) cs.primary else cs.outlineVariant,
+        animationSpec = tween(SWITCH_ANIMATION_MS),
+        label = "switch_border",
+    )
+    val thumb by animateColorAsState(
+        targetValue = if (checked) cs.onPrimary else cs.onSurfaceVariant,
+        animationSpec = tween(SWITCH_ANIMATION_MS),
+        label = "switch_thumb",
+    )
+    return SwitchColors(track = track, border = border, thumb = thumb)
+}
+
 @Composable
 fun HSwitch(
     checked: Boolean,
@@ -51,23 +79,7 @@ fun HSwitch(
     height: Dp = 24.dp,
     thumbSize: Dp = 18.dp,
 ) {
-    val cs = MaterialTheme.colorScheme
-    val trackColor by animateColorAsState(
-        targetValue = if (checked) cs.primary else cs.surfaceContainerHighest,
-        animationSpec = tween(SWITCH_ANIMATION_MS),
-        label = "switch_track",
-    )
-    val borderColor by animateColorAsState(
-        targetValue = if (checked) cs.primary else cs.outlineVariant,
-        animationSpec = tween(SWITCH_ANIMATION_MS),
-        label = "switch_border",
-    )
-    val thumbColor by animateColorAsState(
-        targetValue = if (checked) cs.onPrimary else cs.onSurfaceVariant,
-        animationSpec = tween(SWITCH_ANIMATION_MS),
-        label = "switch_thumb",
-    )
-
+    val colors = animateSwitchColors(checked)
     val horizontalOffset = ((width - thumbSize) / 2f) - 2.dp
     val thumbOffset = if (checked) horizontalOffset else -horizontalOffset
 
@@ -88,15 +100,15 @@ fun HSwitch(
             ) { onCheckedChange(!checked) }
             .width(width)
             .height(height)
-            .border(1.dp, borderColor, RoundedCornerShape(999.dp))
-            .background(trackColor, RoundedCornerShape(999.dp)),
+            .border(1.dp, colors.border, RoundedCornerShape(999.dp))
+            .background(colors.track, RoundedCornerShape(999.dp)),
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
                 .offset(x = thumbOffset)
                 .size(thumbSize)
-                .background(thumbColor, CircleShape),
+                .background(colors.thumb, CircleShape),
         )
     }
 }

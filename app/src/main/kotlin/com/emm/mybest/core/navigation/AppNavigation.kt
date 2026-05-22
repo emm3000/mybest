@@ -114,30 +114,21 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             modifier = Modifier,
         )
     }
-
     entry<Screen.AddWeight> {
         val viewModel: AddWeightViewModel = koinViewModel()
-        AddWeightScreen(
-            viewModel = viewModel,
-            onBackClick = { navigator.goBack() },
-            modifier = Modifier,
-        )
+        AddWeightScreen(viewModel = viewModel, onBackClick = { navigator.goBack() }, modifier = Modifier)
     }
-
     entry<Screen.Photos> {
         val viewModel: PhotosViewModel = koinViewModel()
         PhotosScreen(
             viewModel = viewModel,
             mediaManager = koinInject(),
             onOpenViewer = { photoId -> navigator.navigate(Screen.PhotoViewer(photoId)) },
-            onCompare = { beforeId, afterId ->
-                navigator.navigate(Screen.ComparePhotos(beforeId, afterId))
-            },
+            onCompare = { beforeId, afterId -> navigator.navigate(Screen.ComparePhotos(beforeId, afterId)) },
             bottomBar = {},
             modifier = Modifier,
         )
     }
-
     entry<Screen.History> {
         val viewModel: HistoryViewModel = koinViewModel()
         HistoryScreen(
@@ -147,7 +138,6 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             modifier = Modifier,
         )
     }
-
     entry<Screen.Insights> {
         val viewModel: InsightsViewModel = koinViewModel()
         InsightsScreen(
@@ -158,26 +148,13 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             modifier = Modifier,
         )
     }
-
     entry<Screen.ComparePhotos> { key ->
-        val viewModel: ComparePhotosViewModel = koinViewModel {
-            parametersOf(key.beforeId, key.afterId)
-        }
-        ComparePhotosScreen(
-            viewModel = viewModel,
-            onBackClick = { navigator.goBack() },
-            modifier = Modifier,
-        )
+        val viewModel: ComparePhotosViewModel = koinViewModel { parametersOf(key.beforeId, key.afterId) }
+        ComparePhotosScreen(viewModel = viewModel, onBackClick = { navigator.goBack() }, modifier = Modifier)
     }
-
     entry<Screen.PhotoViewer> { key ->
-        PhotoViewer(
-            initialPhotoId = key.initialPhotoId,
-            onBack = { navigator.goBack() },
-            modifier = Modifier,
-        )
+        PhotoViewer(initialPhotoId = key.initialPhotoId, onBack = { navigator.goBack() }, modifier = Modifier)
     }
-
     entry<Screen.Settings> {
         val viewModel: SettingsViewModel = koinViewModel()
         SettingsScreen(
@@ -188,21 +165,13 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             modifier = Modifier,
         )
     }
-
     entry<Screen.MealPlan> {
         val viewModel: MealPlanViewModel = koinViewModel()
-        MealPlanScreen(
-            viewModel = viewModel,
-            modifier = Modifier,
-        )
+        MealPlanScreen(viewModel = viewModel, modifier = Modifier)
     }
-
     entry<Screen.ExercisePlan> {
         val viewModel: ExercisePlanViewModel = koinViewModel()
-        ExercisePlanScreen(
-            viewModel = viewModel,
-            modifier = Modifier,
-        )
+        ExercisePlanScreen(viewModel = viewModel, modifier = Modifier)
     }
 }
 

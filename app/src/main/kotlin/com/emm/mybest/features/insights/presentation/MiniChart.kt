@@ -14,8 +14,10 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -74,89 +76,98 @@ fun MiniChart(data: ImmutableList<Float>, modifier: Modifier = Modifier) {
 
     val firstLabel = remember(data) { String.format(Locale.US, "%.1f", data.first()) }
     val lastLabel = remember(data) { String.format(Locale.US, "%.1f", data.last()) }
-    val (minVal, maxVal) = remember(data) {
-        var lo = Float.POSITIVE_INFINITY
-        var hi = Float.NEGATIVE_INFINITY
-        for (v in data) {
-            if (v < lo) lo = v
-            if (v > hi) hi = v
-        }
-        (lo - CHART_VALUE_PADDING) to (hi + CHART_VALUE_PADDING)
-    }
+    val (minVal, maxVal) = remember(data) { computeRange(data) }
+    val labelStyle = TextStyle(
+        fontFamily = AtelierMonoFamily,
+        fontSize = CHART_LABEL_SIZE,
+        letterSpacing = CHART_LABEL_TRACKING,
+    )
 
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-
-        val path = Path()
-        data.forEachIndexed { i, v ->
-            val x = w * i / (data.size - 1)
-            val y = h - (v - minVal) / (maxVal - minVal) * h
-            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-        }
-
-        drawPath(
-            path = path,
-            color = AtelierInk,
-            style = Stroke(
-                width = 1.dp.toPx(),
-                cap = StrokeCap.Round,
-                join = StrokeJoin.Round,
-            ),
-        )
-        drawLine(
-            color = AtelierHairline,
-            start = Offset(0f, h),
-            end = Offset(w, h),
-            strokeWidth = 1.dp.toPx(),
-        )
-        drawLine(
-            color = AtelierHairline.copy(alpha = 0.05f),
-            start = Offset(0f, h / 2f),
-            end = Offset(w, h / 2f),
-            strokeWidth = 1.dp.toPx(),
-            pathEffect = PathEffect.dashPathEffect(floatArrayOf(DASH_ON, DASH_OFF)),
-        )
-
-        val firstY = h - (data.first() - minVal) / (maxVal - minVal) * h
-        drawCircle(
-            color = AtelierInk,
-            radius = 3.dp.toPx(),
-            center = Offset(0f, firstY),
-        )
-
-        val lastY = h - (data.last() - minVal) / (maxVal - minVal) * h
-        drawCircle(
-            color = AtelierDone,
-            radius = 4.dp.toPx(),
-            center = Offset(w, lastY),
-        )
-        drawCircle(
-            color = AtelierDone.copy(alpha = 0.3f),
-            radius = 9.dp.toPx(),
-            center = Offset(w, lastY),
-            style = Stroke(width = 0.5.dp.toPx()),
-        )
-
-        val labelStyle = TextStyle(
-            fontFamily = AtelierMonoFamily,
-            fontSize = CHART_LABEL_SIZE,
-            letterSpacing = CHART_LABEL_TRACKING,
-        )
-        val lastMeasure = textMeasurer.measure(lastLabel, labelStyle.copy(color = AtelierDone))
-        val lastOffX = (w - lastMeasure.size.width - 6.dp.toPx()).coerceAtLeast(0f)
-        val lastOffY = (lastY - lastMeasure.size.height - 12.dp.toPx()).coerceAtLeast(0f)
-        drawText(
-            textLayoutResult = lastMeasure,
-            topLeft = Offset(lastOffX, lastOffY),
-        )
-
-        val dimInk = AtelierInk.copy(alpha = 0.5f)
-        val firstMeasure = textMeasurer.measure(firstLabel, labelStyle.copy(color = dimInk))
-        val firstOffY = (firstY - firstMeasure.size.height - 10.dp.toPx()).coerceAtLeast(0f)
-        drawText(
-            textLayoutResult = firstMeasure,
-            topLeft = Offset(0f, firstOffY),
-        )
+        val range = maxVal - minVal
+        val firstY = h - (data.first() - minVal) / range * h
+        val lastY = h - (data.last() - minVal) / range * h
+        drawLineChart(data, w, h, minVal, maxVal)
+        drawGridLines(w, h)
+        drawEndPoints(firstY, lastY, w)
+        drawValueLabels(textMeasurer, labelStyle, firstLabel, lastLabel, w, firstY, lastY)
     }
+}
+
+private fun computeRange(data: ImmutableList<Float>): Pair<Float, Float> {
+    var lo = Float.POSITIVE_INFINITY
+    var hi = Float.NEGATIVE_INFINITY
+    for (v in data) {
+        if (v < lo) lo = v
+        if (v > hi) hi = v
+    }
+    return (lo - CHART_VALUE_PADDING) to (hi + CHART_VALUE_PADDING)
+}
+
+private fun DrawScope.drawLineChart(
+    data: ImmutableList<Float>,
+    w: Float,
+    h: Float,
+    minVal: Float,
+    maxVal: Float,
+) {
+    val path = Path()
+    data.forEachIndexed { i, v ->
+        val x = w * i / (data.size - 1)
+        val y = h - (v - minVal) / (maxVal - minVal) * h
+        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+    }
+    drawPath(
+        path = path,
+        color = AtelierInk,
+        style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+    )
+}
+
+private fun DrawScope.drawGridLines(w: Float, h: Float) {
+    drawLine(
+        color = AtelierHairline,
+        start = Offset(0f, h),
+        end = Offset(w, h),
+        strokeWidth = 1.dp.toPx(),
+    )
+    drawLine(
+        color = AtelierHairline.copy(alpha = 0.05f),
+        start = Offset(0f, h / 2f),
+        end = Offset(w, h / 2f),
+        strokeWidth = 1.dp.toPx(),
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(DASH_ON, DASH_OFF)),
+    )
+}
+
+private fun DrawScope.drawEndPoints(firstY: Float, lastY: Float, w: Float) {
+    drawCircle(color = AtelierInk, radius = 3.dp.toPx(), center = Offset(0f, firstY))
+    drawCircle(color = AtelierDone, radius = 4.dp.toPx(), center = Offset(w, lastY))
+    drawCircle(
+        color = AtelierDone.copy(alpha = 0.3f),
+        radius = 9.dp.toPx(),
+        center = Offset(w, lastY),
+        style = Stroke(width = 0.5.dp.toPx()),
+    )
+}
+
+private fun DrawScope.drawValueLabels(
+    textMeasurer: TextMeasurer,
+    labelStyle: TextStyle,
+    firstLabel: String,
+    lastLabel: String,
+    w: Float,
+    firstY: Float,
+    lastY: Float,
+) {
+    val lastMeasure = textMeasurer.measure(lastLabel, labelStyle.copy(color = AtelierDone))
+    val lastOffX = (w - lastMeasure.size.width - 6.dp.toPx()).coerceAtLeast(0f)
+    val lastOffY = (lastY - lastMeasure.size.height - 12.dp.toPx()).coerceAtLeast(0f)
+    drawText(textLayoutResult = lastMeasure, topLeft = Offset(lastOffX, lastOffY))
+    val dimInk = AtelierInk.copy(alpha = 0.5f)
+    val firstMeasure = textMeasurer.measure(firstLabel, labelStyle.copy(color = dimInk))
+    val firstOffY = (firstY - firstMeasure.size.height - 10.dp.toPx()).coerceAtLeast(0f)
+    drawText(textLayoutResult = firstMeasure, topLeft = Offset(0f, firstOffY))
 }

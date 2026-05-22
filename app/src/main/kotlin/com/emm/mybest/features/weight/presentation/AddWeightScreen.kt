@@ -76,64 +76,62 @@ private fun AddWeightContent(
     Scaffold(
         modifier = modifier,
         snackbarHost = { HSnackbarHost(snackbarHostState) },
-        topBar = {
-            AtelierAppBar(
-                title = "Registrar peso",
-                onBack = onBackClick,
-            )
-        },
+        topBar = { AtelierAppBar(title = "Registrar peso", onBack = onBackClick) },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(24.dp)
-                .fillMaxSize()
-                .imePadding(),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            Text(
-                text = "¿Cuánto pesas hoy?",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-            )
+        AddWeightBody(state = state, padding = padding, onIntent = onIntent)
+    }
+}
 
-            HInput(
-                value = state.weight,
-                onValueChange = { onIntent(AddWeightIntent.OnWeightChange(it)) },
-                label = "Peso (kg)",
-                placeholder = "Ej: 72.4",
-                supportingText = state.lastRecordedWeight?.let {
-                    "Ultimo registro: ${String.format(Locale.getDefault(), "%.1f", it)} kg"
-                },
-                errorMessage = state.weightError,
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                leadingIcon = { Icon(Icons.Rounded.Scale, contentDescription = null) },
-                singleLine = true,
-            )
-
-            HInput(
-                value = state.note,
-                onValueChange = { onIntent(AddWeightIntent.OnNoteChange(it)) },
-                label = "Nota (opcional)",
-                placeholder = "Ej: Después del entrenamiento",
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = false,
-                minLines = 3,
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            HButton(
-                text = "Guardar Registro",
-                onClick = { onIntent(AddWeightIntent.OnSaveClick) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                enabled = state.weight.isNotBlank() && state.weightError == null && !state.isLoading,
-                isLoading = state.isLoading,
-            )
-        }
+@Composable
+private fun AddWeightBody(
+    state: AddWeightState,
+    padding: androidx.compose.foundation.layout.PaddingValues,
+    onIntent: (AddWeightIntent) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .padding(padding)
+            .padding(24.dp)
+            .fillMaxSize()
+            .imePadding(),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+        Text(
+            text = "¿Cuánto pesas hoy?",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        HInput(
+            value = state.weight,
+            onValueChange = { onIntent(AddWeightIntent.OnWeightChange(it)) },
+            label = "Peso (kg)",
+            placeholder = "Ej: 72.4",
+            supportingText = state.lastRecordedWeight?.let {
+                "Ultimo registro: ${String.format(Locale.getDefault(), "%.1f", it)} kg"
+            },
+            errorMessage = state.weightError,
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            leadingIcon = { Icon(Icons.Rounded.Scale, contentDescription = null) },
+            singleLine = true,
+        )
+        HInput(
+            value = state.note,
+            onValueChange = { onIntent(AddWeightIntent.OnNoteChange(it)) },
+            label = "Nota (opcional)",
+            placeholder = "Ej: Después del entrenamiento",
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
+            minLines = 3,
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        HButton(
+            text = "Guardar Registro",
+            onClick = { onIntent(AddWeightIntent.OnSaveClick) },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            enabled = state.weight.isNotBlank() && state.weightError == null && !state.isLoading,
+            isLoading = state.isLoading,
+        )
     }
 }
 

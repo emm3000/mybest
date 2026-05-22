@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.emm.mybest.core.datetime.formatEsLongDate
+import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.features.photo.presentation.photoTypeLabel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -57,26 +59,11 @@ internal fun PhotoViewer(
             .fillMaxSize()
             .background(Color.Black),
     ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                ) {
-                    overlayVisible = !overlayVisible
-                },
-        ) { page ->
-            val photo = photos[page]
-            AsyncImage(
-                model = photo.photoPath,
-                contentDescription = photoTypeLabel(photo.type),
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-            )
-        }
-
+        PhotoPager(
+            photos = photos,
+            pagerState = pagerState,
+            onToggleOverlay = { overlayVisible = !overlayVisible },
+        )
         val currentPhoto = photos.getOrNull(pagerState.currentPage)
         AnimatedVisibility(
             visible = overlayVisible,
@@ -84,46 +71,91 @@ internal fun PhotoViewer(
             exit = fadeOut(),
             modifier = Modifier.align(Alignment.TopStart),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.Black.copy(alpha = 0.55f))
-                    .statusBarsPadding()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.CenterStart,
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color.White,
-                        )
-                    }
-                    if (currentPhoto != null) {
-                        Column(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .padding(horizontal = 48.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text(
-                                text = currentPhoto.date.formatEsLongDate(),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                            )
-                            Text(
-                                text = photoTypeLabel(currentPhoto.type),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.White.copy(alpha = 0.7f),
-                            )
-                        }
-                    }
-                }
+            ViewerOverlay(currentPhoto = currentPhoto, onBack = onBack)
+        }
+    }
+}
+
+@Composable
+private fun PhotoPager(
+    photos: List<ProgressPhoto>,
+    pagerState: PagerState,
+    onToggleOverlay: () -> Unit,
+) {
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onToggleOverlay,
+            ),
+    ) { page ->
+        val photo = photos[page]
+        AsyncImage(
+            model = photo.photoPath,
+            contentDescription = photoTypeLabel(photo.type),
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit,
+        )
+    }
+}
+
+@Composable
+private fun ViewerOverlay(
+    currentPhoto: ProgressPhoto?,
+    onBack: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.Black.copy(alpha = 0.55f))
+            .statusBarsPadding()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Volver",
+                    tint = Color.White,
+                )
+            }
+            if (currentPhoto != null) {
+                ViewerPhotoInfo(
+                    photo = currentPhoto,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = 48.dp),
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun ViewerPhotoInfo(
+    photo: ProgressPhoto,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = photo.date.formatEsLongDate(),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+        )
+        Text(
+            text = photoTypeLabel(photo.type),
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.7f),
+        )
     }
 }

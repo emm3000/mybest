@@ -134,7 +134,7 @@ comments:
 complexity:
   active: true
   CognitiveComplexMethod:
-    active: false
+    active: true
     threshold: 15
   ComplexCondition:
     active: true
@@ -166,10 +166,10 @@ complexity:
     ignoredLabels: []
   LargeClass:
     active: true
-    threshold: 600
+    threshold: 300
   LongMethod:
     active: true
-    threshold: 120
+    threshold: 80
   LongParameterList:
     active: true
     functionThreshold: 8

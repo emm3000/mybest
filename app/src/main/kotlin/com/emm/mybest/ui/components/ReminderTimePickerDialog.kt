@@ -79,36 +79,21 @@ internal fun HTimePickerDialog(
     onConfirm: (hour: Int, minute: Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var selectedHour by rememberSaveable(initialHour) {
-        mutableIntStateOf(initialHour.coerceIn(0, 23))
-    }
-    var selectedMinute by rememberSaveable(initialMinute) {
-        mutableIntStateOf(initialMinute.coerceIn(0, 59))
-    }
-
+    var selectedHour by rememberSaveable(initialHour) { mutableIntStateOf(initialHour.coerceIn(0, 23)) }
+    var selectedMinute by rememberSaveable(initialMinute) { mutableIntStateOf(initialMinute.coerceIn(0, 59)) }
     val hours = remember { (0..23).toList() }
     val minutes = remember { (0..59).toList() }
-
     BasicAlertDialog(onDismissRequest = onDismiss) {
         Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
             shape = MaterialTheme.shapes.extraLarge,
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             tonalElevation = 0.dp,
             shadowElevation = 8.dp,
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-            ) {
-                TimePickerHeader(
-                    hour = selectedHour,
-                    minute = selectedMinute,
-                )
-
+            Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                TimePickerHeader(hour = selectedHour, minute = selectedMinute)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -121,14 +106,12 @@ internal fun HTimePickerDialog(
                         onValueChange = { selectedHour = it },
                         modifier = Modifier.weight(1f),
                     )
-
                     Text(
                         text = ":",
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.SemiBold,
                     )
-
                     TimePickerColumn(
                         label = stringResource(R.string.time_picker_minute_label),
                         values = minutes,
@@ -137,11 +120,7 @@ internal fun HTimePickerDialog(
                         modifier = Modifier.weight(1f),
                     )
                 }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     HButton(
                         text = stringResource(R.string.action_cancel),
                         onClick = onDismiss,
@@ -166,7 +145,6 @@ private fun TimePickerHeader(
     val cs = MaterialTheme.colorScheme
     val timeText = remember(hour, minute) { formatTime(hour, minute) }
     val selectedDescription = stringResource(R.string.time_picker_selected_description, timeText)
-
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
@@ -180,7 +158,6 @@ private fun TimePickerHeader(
                 color = cs.onSurfaceVariant,
             )
         }
-
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
@@ -191,10 +168,10 @@ private fun TimePickerHeader(
         ) {
             Text(
                 text = timeText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
-                    .semantics { contentDescription = selectedDescription },
+                modifier = Modifier.fillMaxWidth().padding(
+                    horizontal = 16.dp,
+                    vertical = 14.dp,
+                ).semantics { contentDescription = selectedDescription },
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
                 color = cs.onSurface,
@@ -211,62 +188,48 @@ private fun TimePickerColumn(
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = values.indexOf(selectedValue).coerceAtLeast(0),
-    )
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = values.indexOf(selectedValue).coerceAtLeast(0))
     val scope = rememberCoroutineScope()
     val currentOnValueChange by rememberUpdatedState(onValueChange)
     val itemContainerShape = remember { RoundedCornerShape(10.dp) }
-    val flingBehavior = rememberSnapFlingBehavior(
-        lazyListState = listState,
-        snapPosition = SnapPosition.Center,
-    )
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState, snapPosition = SnapPosition.Center)
     val verticalContentPadding = TIME_PICKER_ITEM_HEIGHT * TIME_PICKER_CENTER_PADDING_ITEMS
-
     var isAnimatingScroll by remember { mutableStateOf(false) }
-
     LaunchedEffect(listState, values) {
-        snapshotFlow { values[centeredItemIndex(listState)] }
-            .distinctUntilChanged()
-            .collect { value ->
-                if (!isAnimatingScroll) {
-                    currentOnValueChange(value)
-                }
-            }
+        snapshotFlow { values[centeredItemIndex(listState)] }.distinctUntilChanged()
+            .collect { value -> if (!isAnimatingScroll) currentOnValueChange(value) }
     }
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
             color = MaterialTheme.colorScheme.onSurface,
         )
-
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(TIME_PICKER_ITEM_HEIGHT * TIME_PICKER_VISIBLE_ITEM_COUNT)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.shapes.medium)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth().height(
+                TIME_PICKER_ITEM_HEIGHT * TIME_PICKER_VISIBLE_ITEM_COUNT,
+            ).border(
+                1.dp,
+                MaterialTheme.colorScheme.outlineVariant,
+                MaterialTheme.shapes.medium,
+            ).background(
+                MaterialTheme.colorScheme.surfaceContainerLow,
+                MaterialTheme.shapes.medium,
+            ).padding(horizontal = 8.dp, vertical = 4.dp),
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(TIME_PICKER_ITEM_HEIGHT)
-                    .align(Alignment.Center)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, itemContainerShape)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, itemContainerShape),
+                modifier = Modifier.fillMaxWidth().height(
+                    TIME_PICKER_ITEM_HEIGHT,
+                ).align(
+                    Alignment.Center,
+                ).background(
+                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                    itemContainerShape,
+                ).border(1.dp, MaterialTheme.colorScheme.outline, itemContainerShape),
             )
-
             LazyColumn(
                 state = listState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics { contentDescription = label },
+                modifier = Modifier.fillMaxWidth().semantics { contentDescription = label },
                 contentPadding = PaddingValues(vertical = verticalContentPadding),
                 flingBehavior = flingBehavior,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -311,25 +274,20 @@ private fun TimePickerCell(
         animationSpec = tween(durationMillis = 150),
         label = "time_picker_text_color",
     )
-
     Surface(
         onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(TIME_PICKER_ITEM_HEIGHT)
-            .semantics(mergeDescendants = true) {
-                contentDescription = cellContentDescription
-                selected = isSelected
-            },
+        modifier = Modifier.fillMaxWidth().height(
+            TIME_PICKER_ITEM_HEIGHT,
+        ).semantics(mergeDescendants = true) {
+            contentDescription = cellContentDescription
+            selected = isSelected
+        },
         color = Color.Transparent,
         contentColor = cs.onSurface,
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Text(
                 text = formatTwoDigits(value),
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -358,12 +316,7 @@ private fun formatTwoDigits(value: Int): String = value.toString().padStart(2, '
 private fun ReminderTimePickerDialogPreview() {
     AtelierTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            HTimePickerDialog(
-                initialHour = 8,
-                initialMinute = 30,
-                onConfirm = { _, _ -> },
-                onDismiss = {},
-            )
+            HTimePickerDialog(initialHour = 8, initialMinute = 30, onConfirm = { _, _ -> }, onDismiss = {})
         }
     }
 }
@@ -373,12 +326,7 @@ private fun ReminderTimePickerDialogPreview() {
 private fun ReminderTimePickerDialogEdgeCasePreview() {
     AtelierTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            HTimePickerDialog(
-                initialHour = 23,
-                initialMinute = 59,
-                onConfirm = { _, _ -> },
-                onDismiss = {},
-            )
+            HTimePickerDialog(initialHour = 23, initialMinute = 59, onConfirm = { _, _ -> }, onDismiss = {})
         }
     }
 }

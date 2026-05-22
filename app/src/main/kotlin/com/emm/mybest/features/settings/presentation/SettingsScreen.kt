@@ -39,17 +39,13 @@ fun SettingsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val backupExportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
-    ) { uri ->
-        uri?.let { viewModel.onIntent(SettingsIntent.OnExportBackup(it.toString())) }
-    }
-    val backupImportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-    ) { uri ->
+    val backupExportLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+            uri?.let { viewModel.onIntent(SettingsIntent.OnExportBackup(it.toString())) }
+        }
+    val backupImportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { viewModel.onIntent(SettingsIntent.OnImportBackup(it.toString())) }
     }
-
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
@@ -58,56 +54,77 @@ fun SettingsScreen(
             }
         }
     }
-
     if (state.showDefaultTimePicker) {
         ReminderTimePickerDialog(
             initialHour = state.weightReminderTime?.hour ?: 8,
             initialMinute = state.weightReminderTime?.minute ?: 0,
             onConfirm = { hour, minute ->
-                viewModel.onIntent(SettingsIntent.OnDefaultReminderTimeChange(hour, minute))
+                viewModel.onIntent(
+                    SettingsIntent.OnDefaultReminderTimeChange(hour, minute),
+                )
             },
             onDismiss = { viewModel.onIntent(SettingsIntent.OnDefaultTimePickerDismiss) },
         )
     }
-
     Scaffold(
         modifier = modifier,
-        topBar = {
-            AtelierAppBar(
-                title = stringResource(R.string.settings_title),
-                actions = {
-                    MicroLabel(
-                        text = stringResource(R.string.settings_app_label),
-                        style = MicroLabelStyle(tone = MicroLabelTone.Dim),
-                        modifier = Modifier.padding(end = SETTINGS_GUT),
-                    )
-                },
-            )
-        },
+        topBar = { SettingsAppBar() },
         snackbarHost = { HSnackbarHost(snackbarHostState) },
         bottomBar = bottomBar,
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-        ) {
-            SettingsHero()
-            Hairline()
-            ReminderRow(state = state, onOpenPicker = { viewModel.onIntent(SettingsIntent.OnDefaultTimePickerOpen) })
-            Hairline(inset = SETTINGS_GUT)
-            DietRow(onMealPlanClick = onMealPlanClick)
-            Hairline(inset = SETTINGS_GUT)
-            ExerciseRow(onExercisePlanClick = onExercisePlanClick)
-            Hairline(inset = SETTINGS_GUT)
-            BackupRow(
-                onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
-                onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
+        SettingsBody(
+            state = state,
+            paddingValues = paddingValues,
+            onMealPlanClick = onMealPlanClick,
+            onExercisePlanClick = onExercisePlanClick,
+            onOpenPicker = { viewModel.onIntent(SettingsIntent.OnDefaultTimePickerOpen) },
+            onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
+            onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
+        )
+    }
+}
+
+@Composable
+private fun SettingsAppBar() {
+    AtelierAppBar(
+        title = stringResource(R.string.settings_title),
+        actions = {
+            MicroLabel(
+                text = stringResource(R.string.settings_app_label),
+                style = MicroLabelStyle(tone = MicroLabelTone.Dim),
+                modifier = Modifier.padding(end = SETTINGS_GUT),
             )
-            Hairline()
-            SettingsFooter(versionLabel = state.appVersionLabel)
-        }
+        },
+    )
+}
+
+@Composable
+private fun SettingsBody(
+    state: SettingsState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
+    onMealPlanClick: () -> Unit,
+    onExercisePlanClick: () -> Unit,
+    onOpenPicker: () -> Unit,
+    onExportClick: () -> Unit,
+    onImportClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        SettingsHero()
+        Hairline()
+        ReminderRow(state = state, onOpenPicker = onOpenPicker)
+        Hairline(inset = SETTINGS_GUT)
+        DietRow(onMealPlanClick = onMealPlanClick)
+        Hairline(inset = SETTINGS_GUT)
+        ExerciseRow(onExercisePlanClick = onExercisePlanClick)
+        Hairline(inset = SETTINGS_GUT)
+        BackupRow(onExportClick = onExportClick, onImportClick = onImportClick)
+        Hairline()
+        SettingsFooter(versionLabel = state.appVersionLabel)
     }
 }
 
