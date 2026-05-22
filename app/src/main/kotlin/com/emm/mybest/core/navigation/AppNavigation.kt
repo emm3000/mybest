@@ -70,16 +70,16 @@ fun AppNavigation(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
-        transitionSpec = {
-            when (navigationState.lastTransitionKind) {
-                NavTransitionKind.TabSwitch -> tabSwitchTransition()
-                NavTransitionKind.Pop -> popTransition()
-                NavTransitionKind.Push -> pushTransition()
-            }
-        },
-        popTransitionSpec = { popTransition() },
+        transitionSpec = { navigationState.currentTransition() },
+        popTransitionSpec = { navigationState.currentTransition() },
         predictivePopTransitionSpec = { popTransition() },
     )
+}
+
+private fun NavigationState.currentTransition() = when (lastTransitionKind) {
+    NavTransitionKind.TabSwitch -> tabSwitchTransition()
+    NavTransitionKind.Pop -> popTransition()
+    NavTransitionKind.Push -> pushTransition()
 }
 
 @Composable
