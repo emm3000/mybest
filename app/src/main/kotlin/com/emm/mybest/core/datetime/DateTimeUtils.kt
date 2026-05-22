@@ -1,7 +1,6 @@
 package com.emm.mybest.core.datetime
 
 import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
@@ -13,20 +12,6 @@ import kotlin.time.Clock
 private const val FIRST_MONTH = 1
 private const val MONTHS_PER_YEAR = 12
 private const val TWO_DIGIT_YEAR_DIVISOR = 100
-private val SPANISH_MONTHS = listOf(
-    "enero",
-    "febrero",
-    "marzo",
-    "abril",
-    "mayo",
-    "junio",
-    "julio",
-    "agosto",
-    "septiembre",
-    "octubre",
-    "noviembre",
-    "diciembre",
-)
 
 fun currentDate(): LocalDate = Clock.System.now()
     .toLocalDateTime(TimeZone.currentSystemDefault())
@@ -62,63 +47,14 @@ data class YearMonthValue(
     companion object {
         fun now(): YearMonthValue {
             val today = currentDate()
-            return YearMonthValue(today.year, today.monthValue)
+            return YearMonthValue(today.year, today.month.ordinal + 1)
         }
 
-        fun from(date: LocalDate): YearMonthValue = YearMonthValue(date.year, date.monthValue)
+        fun from(date: LocalDate): YearMonthValue = YearMonthValue(date.year, date.month.ordinal + 1)
     }
 }
 
 fun LocalDate.minusDays(days: Int): LocalDate = this.plus(DatePeriod(days = -days))
 
-fun DayOfWeek.shortEs(): String = when (this) {
-    DayOfWeek.MONDAY -> "LUN"
-    DayOfWeek.TUESDAY -> "MAR"
-    DayOfWeek.WEDNESDAY -> "MIÉ"
-    DayOfWeek.THURSDAY -> "JUE"
-    DayOfWeek.FRIDAY -> "VIE"
-    DayOfWeek.SATURDAY -> "SÁB"
-    DayOfWeek.SUNDAY -> "DOM"
-}
-
-fun DayOfWeek.narrowEs(): String = when (this) {
-    DayOfWeek.MONDAY -> "L"
-    DayOfWeek.TUESDAY -> "M"
-    DayOfWeek.WEDNESDAY -> "X"
-    DayOfWeek.THURSDAY -> "J"
-    DayOfWeek.FRIDAY -> "V"
-    DayOfWeek.SATURDAY -> "S"
-    DayOfWeek.SUNDAY -> "D"
-}
-
-fun LocalDate.formatDdMmYy(): String = "%02d/%02d/%02d".format(day, monthValue, year % TWO_DIGIT_YEAR_DIVISOR)
-
-fun LocalDate.formatEsLongDate(): String = "$day de ${monthNameEs(monthValue)}, $year"
-
-fun LocalDate.formatEsWeekdayDayMonth(): String {
-    val weekday = dayNameEs(dayOfWeek).replaceFirstChar { it.uppercase() }
-    return "$weekday $day ${monthNameEs(monthValue)}"
-}
-
-fun YearMonthValue.formatEsMonthYear(): String {
-    val value = "${monthNameEs(month)} $year"
-    return value.replaceFirstChar { it.uppercase() }
-}
-
-private fun monthNameEs(month: Int): String = when (month) {
-    in FIRST_MONTH..MONTHS_PER_YEAR -> SPANISH_MONTHS[month - FIRST_MONTH]
-    else -> error("Invalid month: $month")
-}
-
-private fun dayNameEs(dayOfWeek: DayOfWeek): String = when (dayOfWeek) {
-    DayOfWeek.MONDAY -> "lunes"
-    DayOfWeek.TUESDAY -> "martes"
-    DayOfWeek.WEDNESDAY -> "miercoles"
-    DayOfWeek.THURSDAY -> "jueves"
-    DayOfWeek.FRIDAY -> "viernes"
-    DayOfWeek.SATURDAY -> "sabado"
-    DayOfWeek.SUNDAY -> "domingo"
-}
-
-private val LocalDate.monthValue: Int
-    get() = month.ordinal + 1
+fun LocalDate.formatDdMmYy(): String =
+    "%02d/%02d/%02d".format(day, month.ordinal + 1, year % TWO_DIGIT_YEAR_DIVISOR)
