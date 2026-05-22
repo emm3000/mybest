@@ -63,7 +63,6 @@ import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewerViewModel
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
-import com.emm.mybest.viewmodel.MainViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -152,5 +151,4 @@ val appModule = module {
     viewModel { SettingsViewModel(get(), get(), get(), get()) }
     viewModel { MealPlanViewModel(get(), get()) }
     viewModel { ExercisePlanViewModel(get(), get()) }
-    viewModel { MainViewModel(get()) }
 }

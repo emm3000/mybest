@@ -23,7 +23,6 @@ class UserPreferencesRepositoryImpl(
     constructor(context: Context) : this(context.dataStore)
 
     private object PreferencesKeys {
-        val DARK_MODE_ENABLED = booleanPreferencesKey("dark_mode_enabled")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val WEIGHT_REMINDER_HOUR = intPreferencesKey("weight_reminder_hour")
         val WEIGHT_REMINDER_MINUTE = intPreferencesKey("weight_reminder_minute")
@@ -40,16 +39,6 @@ class UserPreferencesRepositoryImpl(
         DailySlot.SNACK -> PreferencesKeys.SLOT_TIME_SNACK_MIN
         DailySlot.DINNER -> PreferencesKeys.SLOT_TIME_DINNER_MIN
         DailySlot.EXERCISE -> PreferencesKeys.SLOT_TIME_EXERCISE_MIN
-    }
-
-    override val isDarkMode: Flow<Boolean?> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.DARK_MODE_ENABLED]
-    }
-
-    override suspend fun updateDarkMode(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.DARK_MODE_ENABLED] = enabled
-        }
     }
 
     override val notificationsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->

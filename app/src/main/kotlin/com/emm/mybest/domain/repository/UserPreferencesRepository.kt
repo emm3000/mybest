@@ -6,8 +6,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalTime
 
 interface UserPreferencesRepository {
-    val isDarkMode: Flow<Boolean?>
-
     val notificationsEnabled: Flow<Boolean>
 
     /** Null means the user has not configured a weight reminder yet (no scheduling). */
@@ -15,8 +13,6 @@ interface UserPreferencesRepository {
 
     /** Times shown on Home for each daily slot. Defaults from [DailySlotTimes.DEFAULT_TIMES]. */
     val dailySlotTimes: Flow<DailySlotTimes>
-
-    suspend fun updateDarkMode(enabled: Boolean)
 
     suspend fun updateNotificationsEnabled(enabled: Boolean)
 

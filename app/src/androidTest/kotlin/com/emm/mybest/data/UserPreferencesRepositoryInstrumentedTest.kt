@@ -7,11 +7,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -43,34 +41,6 @@ class UserPreferencesRepositoryInstrumentedTest {
 
     @Test
     fun default_values_are_expected() = runBlocking {
-        assertNull(repository.isDarkMode.first())
         assertEquals(true, repository.notificationsEnabled.first())
-    }
-
-    @Test
-    fun updates_are_persisted_in_flow() = runBlocking {
-        repository.updateDarkMode(enabled = true)
-
-        assertEquals(true, repository.isDarkMode.first())
-    }
-
-    @Test
-    fun latest_update_wins_for_dark_mode() = runBlocking {
-        repository.updateDarkMode(enabled = false)
-        repository.updateDarkMode(enabled = true)
-        repository.updateDarkMode(enabled = false)
-
-        assertEquals(false, repository.isDarkMode.first())
-    }
-
-    @Test
-    fun concurrent_updates_are_persisted_without_crash() = runBlocking {
-        val j1 = launch { repeat(10) { repository.updateDarkMode(enabled = it % 2 == 0) } }
-        val j2 = launch { repeat(10) { repository.updateDarkMode(enabled = it % 2 == 1) } }
-        j1.join()
-        j2.join()
-
-        // Only assert that value is readable and consistent with one of the final writes.
-        assertEquals(true, repository.isDarkMode.first())
     }
 }
