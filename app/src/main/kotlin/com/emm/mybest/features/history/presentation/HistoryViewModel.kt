@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
-import com.emm.mybest.domain.usecase.history.HistoryRange
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,7 +16,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModel(
@@ -28,25 +26,22 @@ class HistoryViewModel(
 ) : ViewModel() {
 
     private val _selectedMonth = MutableStateFlow(initialMonth)
-    private val _selectedRange = MutableStateFlow(HistoryRange.MONTH)
-    private val _selectedDate = MutableStateFlow<LocalDate?>(null)
+    private val _selectedDate = MutableStateFlow<kotlinx.datetime.LocalDate?>(null)
 
     val state: StateFlow<HistoryState> = combine(
         _selectedMonth,
-        _selectedRange,
         _selectedDate,
-    ) { month, range, selectedDate ->
-        Triple(month, range, selectedDate)
-    }.flatMapLatest { (month, range, selectedDate) ->
-        getHistoryUseCase(month, range).combine(_selectedDate) { result, date ->
+    ) { month, selectedDate ->
+        Pair(month, selectedDate)
+    }.flatMapLatest { (month, _) ->
+        getHistoryUseCase(month).combine(_selectedDate) { result, date ->
             HistoryState(
                 selectedMonth = month,
-                selectedRange = range,
                 selectedDate = date,
                 monthlyData = result.monthlyData,
-                weightTrend = result.weightTrend,
-                streak = result.streak,
-                activeDays = result.activeDays,
+                monthWeightCount = result.monthWeightCount,
+                monthPhotoCount = result.monthPhotoCount,
+                recentEntries = result.recentEntries,
                 isLoading = false,
                 errorMessage = null,
             )
@@ -55,7 +50,6 @@ class HistoryViewModel(
         emit(
             HistoryState(
                 selectedMonth = _selectedMonth.value,
-                selectedRange = _selectedRange.value,
                 selectedDate = _selectedDate.value,
                 isLoading = false,
                 errorMessage = throwable.message ?: "No se pudo cargar el historial.",
@@ -70,7 +64,6 @@ class HistoryViewModel(
     fun onIntent(intent: HistoryIntent) {
         when (intent) {
             is HistoryIntent.OnMonthChange -> _selectedMonth.value = intent.newMonth
-            is HistoryIntent.OnRangeChange -> _selectedRange.value = intent.range
             is HistoryIntent.OnDateSelected -> _selectedDate.value = intent.date
             HistoryIntent.OnDateDismiss -> _selectedDate.value = null
             is HistoryIntent.OnDeleteWeight -> viewModelScope.launch {

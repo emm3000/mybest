@@ -1,45 +1,34 @@
 package com.emm.mybest.domain.usecase.history
 
 import com.emm.mybest.core.datetime.YearMonthValue
+import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.plus
-
-private const val DAYS_IN_WEEK = 7
-private const val MONTHS_IN_YEAR = 12
 
 class GetHistoryUseCase(
     private val weightRepository: WeightRepository,
     private val photoRepository: PhotoRepository,
 ) {
-    operator fun invoke(
-        month: YearMonthValue,
-        range: HistoryRange,
-    ): Flow<HistoryResult> = combine(
+    operator fun invoke(month: YearMonthValue): Flow<HistoryResult> = combine(
         weightRepository.getWeightProgress(),
         photoRepository.getAllPhotos(),
     ) { weights, photos ->
         val monthlyData = buildDaySummaryMap(weights, photos)
-        val rangeDates = computeRangeDates(month, range)
-        val rangeData = monthlyData.filterKeys { it in rangeDates }
-        val activeDays = rangeData.values.count { it.hasActivity }
-        val streak = computeStreak(rangeDates, monthlyData)
-        val weightTrend = weights
-            .filter { it.date in rangeDates }
-            .sortedBy { it.date }
-            .map { WeightTrendPoint(it.date, it.weight) }
+        val monthDates = buildMonthDates(month)
+        val monthWeightCount = weights.count { it.date in monthDates }
+        val monthPhotoCount = photos.count { it.date in monthDates }
+        val recentEntries = buildRecentEntries(monthDates, monthlyData)
 
         HistoryResult(
             monthlyData = monthlyData,
-            weightTrend = weightTrend,
-            streak = streak,
-            activeDays = activeDays,
+            monthWeightCount = monthWeightCount,
+            monthPhotoCount = monthPhotoCount,
+            recentEntries = recentEntries,
         )
     }
 }
@@ -65,33 +54,22 @@ fun buildDaySummaryMap(
     return days.toMap()
 }
 
-fun computeRangeDates(
-    anchor: YearMonthValue,
-    range: HistoryRange,
-): Set<LocalDate> = when (range) {
-    HistoryRange.WEEK -> {
-        val anchorDay = anchor.atDay(1)
-        val weekStart = anchorDay.plus(DatePeriod(days = -anchorDay.dayOfWeek.ordinal))
-        (0 until DAYS_IN_WEEK).map { weekStart.plus(DatePeriod(days = it)) }.toSet()
-    }
-    HistoryRange.MONTH -> {
-        val daysInMonth = anchor.lengthOfMonth()
-        (1..daysInMonth).map { anchor.atDay(it) }.toSet()
-    }
-    HistoryRange.YEAR -> {
-        val start = YearMonthValue(anchor.year, 1)
-        (0 until MONTHS_IN_YEAR).flatMap { monthOffset ->
-            val ym = start.plusMonths(monthOffset)
-            (1..ym.lengthOfMonth()).map { ym.atDay(it) }
-        }.toSet()
-    }
+private fun buildMonthDates(month: YearMonthValue): Set<LocalDate> {
+    val daysInMonth = month.lengthOfMonth()
+    return (1..daysInMonth).map { month.atDay(it) }.toSet()
 }
 
-fun computeStreak(
-    rangeDates: Set<LocalDate>,
+private fun buildRecentEntries(
+    monthDates: Set<LocalDate>,
     monthlyData: Map<LocalDate, DaySummary>,
-): Int = rangeDates.sorted()
-    .fold(intArrayOf(0, 0)) { (max, current), date ->
-        val next = if (monthlyData[date]?.hasActivity == true) current + 1 else 0
-        intArrayOf(maxOf(max, next), next)
-    }[0]
+): List<HistoryRecentEntry> = monthDates
+    .mapNotNull { date ->
+        val summary = monthlyData[date] ?: return@mapNotNull null
+        if (!summary.hasActivity) return@mapNotNull null
+        HistoryRecentEntry(
+            date = date,
+            weight = summary.weight?.weight,
+            photoTypes = summary.photos.map { it.type }.sortedBy(PhotoType::ordinal),
+        )
+    }
+    .sortedByDescending { it.date }

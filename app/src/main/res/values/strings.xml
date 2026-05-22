@@ -77,6 +77,20 @@
     <string name="photos_camera_permission_settings">Ajustes</string>
     <string name="photos_camera_permission_required">Se necesita acceso a la cámara para tomar fotos.</string>
 
+    <!-- History screen (C16) -->
+    <string name="history_title">HISTORIAL</string>
+    <string name="history_nav_label">DIARIO</string>
+    <string name="history_legend_weight">PESO REGISTRADO</string>
+    <string name="history_legend_photo">FOTO</string>
+    <string name="history_today_chip">HOY</string>
+    <string name="history_empty_day">Sin actividad</string>
+    <string name="history_view_photos">VER FOTOS ↗</string>
+    <string name="history_detail_weight_label">PESO</string>
+    <string name="history_detail_photo_label">FOTO</string>
+    <string name="history_month_stats">%1$d PESO · %2$d FOTOS</string>
+    <string name="history_loading">CARGANDO</string>
+    <string name="history_error_label">ERROR</string>
+
     <!-- Insights screen (C12) -->
     <string name="insights_header_title">PROGRESO</string>
     <string name="insights_days_format">%d DÍAS</string>
