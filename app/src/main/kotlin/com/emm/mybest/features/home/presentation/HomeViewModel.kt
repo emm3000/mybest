@@ -6,12 +6,12 @@ import com.emm.mybest.domain.models.DailyCompliance
 import com.emm.mybest.domain.models.DailySlot
 import com.emm.mybest.domain.models.DailySlotTimes
 import com.emm.mybest.domain.models.MealType
+import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeeklyExercisePlan
 import com.emm.mybest.domain.models.WeeklyMealPlan
+import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.usecase.compliance.GetCompletionStreakUseCase
 import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
-import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
-import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
 import com.emm.mybest.domain.usecase.preferences.ObserveDailySlotTimesUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
@@ -54,15 +54,22 @@ private data class PlanContext(
     val slotTimes: DailySlotTimes,
 )
 
+private data class HomeComplianceSnapshot(
+    val compliance: DailyCompliance,
+    val streak: Int,
+)
+
+private data class HomeMetricsSnapshot(
+    val weights: List<WeightEntry>,
+    val photos: List<ProgressPhoto>,
+)
+
 private fun MealType.toDailySlot(): DailySlot = when (this) {
     MealType.BREAKFAST -> DailySlot.BREAKFAST
     MealType.LUNCH -> DailySlot.LUNCH
     MealType.SNACK -> DailySlot.SNACK
     MealType.DINNER -> DailySlot.DINNER
 }
-
-private fun computeWeekNumber(date: LocalDate): Int =
-    date.toJavaLocalDate().get(WeekFields.ISO.weekOfWeekBasedYear())
 
 private fun buildMealRows(
     context: PlanContext,
@@ -85,22 +92,28 @@ private fun buildExerciseRow(context: PlanContext, compliance: DailyCompliance):
         done = compliance.exerciseDone,
     )
 
+private fun buildPlanRows(context: PlanContext, compliance: DailyCompliance): List<PlanRow> =
+    buildMealRows(context, compliance) + buildExerciseRow(context, compliance)
+
 private fun buildHomeState(
-    compliance: DailyCompliance,
-    streak: Int,
+    complianceSnapshot: HomeComplianceSnapshot,
     context: PlanContext,
-): HomeState {
-    val rows = buildMealRows(context, compliance) + buildExerciseRow(context, compliance)
-    val completedCount = rows.count { it.done }
-    return HomeState(
+    metrics: HomeMetricsSnapshot,
+): HomeState = buildPlanRows(context, complianceSnapshot.compliance).let { rows ->
+    HomeState(
         isLoading = false,
         today = context.today,
         dayOfWeek = context.todayDow,
-        weekNumber = computeWeekNumber(context.today),
+        weekNumber = context.today.toJavaLocalDate().get(WeekFields.ISO.weekOfWeekBasedYear()),
         planRows = rows,
-        completionRatio = compliance.completionRatio,
-        completedCount = completedCount,
-        streakDays = streak,
+        completionRatio = complianceSnapshot.compliance.completionRatio,
+        completedCount = rows.count { it.done },
+        streakDays = complianceSnapshot.streak,
+        lastWeightKg = computeLastWeight(metrics.weights),
+        previousWeightKg = computePreviousWeight(metrics.weights),
+        photoCount = metrics.photos.size,
+        lastPhotoType = computeLastPhotoType(metrics.photos),
+        lastPhotoDaysAgo = computeLastPhotoDaysAgo(metrics.photos, context.today),
     )
 }
 
@@ -108,10 +121,10 @@ private fun buildHomeState(
 class HomeViewModel(
     private val observeDailyCompliance: ObserveDailyComplianceUseCase,
     private val toggleUseCases: HomeToggleUseCases,
-    private val getMealPlan: GetWeeklyMealPlanUseCase,
-    private val getExercisePlan: GetWeeklyExercisePlanUseCase,
+    private val planUseCases: HomePlanUseCases,
     private val getCompletionStreak: GetCompletionStreakUseCase,
     private val observeDailySlotTimes: ObserveDailySlotTimesUseCase,
+    private val metricsUseCases: HomeMetricsUseCases,
     clock: Clock = Clock.System,
 ) : ViewModel() {
 
@@ -149,8 +162,8 @@ class HomeViewModel(
 
     init {
         combine(
-            getMealPlan(),
-            getExercisePlan(),
+            planUseCases.getMealPlan(),
+            planUseCases.getExercisePlan(),
             dateFlow,
             observeDailySlotTimes(),
         ) { mealPlan, exPlan, today, slotTimes ->
@@ -160,8 +173,14 @@ class HomeViewModel(
                 combine(
                     observeDailyCompliance(context.today),
                     getCompletionStreak(context.today),
-                ) { compliance, streak ->
-                    buildHomeState(compliance, streak, context)
+                    metricsUseCases.observeWeightProgress(),
+                    metricsUseCases.observePhotos(),
+                ) { compliance, streak, weights, photos ->
+                    buildHomeState(
+                        complianceSnapshot = HomeComplianceSnapshot(compliance, streak),
+                        context = context,
+                        metrics = HomeMetricsSnapshot(weights, photos),
+                    )
                 }
             }
             .onEach { _state.value = it }

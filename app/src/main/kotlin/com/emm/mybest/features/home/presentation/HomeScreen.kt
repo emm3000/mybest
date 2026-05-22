@@ -2,7 +2,6 @@ package com.emm.mybest.features.home.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -53,14 +52,13 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
 private val HERO_NUMBER_FONT_SIZE = 128.sp
-private val HERO_SLASH_FONT_SIZE = 56.sp
+internal val HERO_SLASH_FONT_SIZE = 56.sp
 private val PLAN_ROW_MIN_HEIGHT = 60.dp
 private val PLAN_ROW_PADDING_HORIZONTAL = 28.dp
 private val PLAN_ROW_PADDING_VERTICAL = 14.dp
 private val PLAN_ROW_SPACING = 16.dp
 private val SLOT_LABEL_WIDTH = 54.dp
 private val QUICK_ACTION_HEIGHT = 80.dp
-private val QUICK_ACTION_DIVIDER_VERTICAL_PADDING = 14.dp
 private val QUICK_ACTION_CELL_SPACER = 4.dp
 private const val PERCENT_FACTOR = 100
 
@@ -71,6 +69,13 @@ data class HomeCallbacks(
     val onExercisePlanClick: () -> Unit,
     val onSettingsClick: () -> Unit,
     val onHistoryClick: () -> Unit,
+)
+
+data class QuickActionCellContent(
+    val label: String,
+    val number: String,
+    val unit: String? = null,
+    val caption: String? = null,
 )
 
 @Composable
@@ -146,7 +151,7 @@ private fun HomeLazyContent(
             }
         }
         item { Hairline() }
-        item { HomeQuickActionsRow(callbacks) }
+        item { HomeQuickActionsRow(state, callbacks) }
     }
 }
 
@@ -248,27 +253,20 @@ private fun HomePlanRow(
 }
 
 @Composable
-private fun HomeQuickActionsRow(callbacks: HomeCallbacks) {
+private fun HomeQuickActionsRow(state: HomeState, callbacks: HomeCallbacks) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(QUICK_ACTION_HEIGHT),
     ) {
         HomeQuickActionCell(
-            label = stringResource(R.string.home_register_weight).uppercase(),
+            content = weightCellContent(state),
             onClick = callbacks.onWeightClick,
             modifier = Modifier.weight(1f),
         )
-        Box(
-            modifier = Modifier
-                .width(1.dp)
-                .fillMaxHeight()
-                .padding(vertical = QUICK_ACTION_DIVIDER_VERTICAL_PADDING),
-        ) {
-            Hairline()
-        }
+        QuickActionDivider()
         HomeQuickActionCell(
-            label = stringResource(R.string.home_photo).uppercase(),
+            content = photoCellContent(state),
             onClick = callbacks.onPhotoClick,
             modifier = Modifier.weight(1f),
         )
@@ -277,7 +275,7 @@ private fun HomeQuickActionsRow(callbacks: HomeCallbacks) {
 
 @Composable
 private fun HomeQuickActionCell(
-    label: String,
+    content: QuickActionCellContent,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -289,12 +287,12 @@ private fun HomeQuickActionCell(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        MicroLabel(text = label, style = MicroLabelStyle(tone = MicroLabelTone.Dim))
+        MicroLabel(text = content.label, style = MicroLabelStyle(tone = MicroLabelTone.Dim))
         Spacer(modifier = Modifier.height(QUICK_ACTION_CELL_SPACER))
-        DisplayNumber(
-            text = stringResource(R.string.home_quick_action_placeholder),
-            style = DisplayNumberStyle(fontSize = HERO_SLASH_FONT_SIZE, color = AtelierInkTertiary),
-        )
+        QuickActionNumberRow(content.number, content.unit)
+        if (content.caption != null) {
+            MicroLabel(text = content.caption, style = MicroLabelStyle(tone = MicroLabelTone.Dim))
+        }
     }
 }
 

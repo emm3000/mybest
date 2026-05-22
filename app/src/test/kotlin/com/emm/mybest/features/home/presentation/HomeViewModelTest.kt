@@ -6,15 +6,20 @@ import com.emm.mybest.domain.models.DailySlotTimes
 import com.emm.mybest.domain.models.ExercisePlanEntry
 import com.emm.mybest.domain.models.MealPlanEntry
 import com.emm.mybest.domain.models.MealType
+import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeeklyExercisePlan
 import com.emm.mybest.domain.models.WeeklyMealPlan
+import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.usecase.compliance.GetCompletionStreakUseCase
 import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
 import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
 import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
 import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
+import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
 import com.emm.mybest.domain.usecase.preferences.ObserveDailySlotTimesUseCase
+import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -23,10 +28,13 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.minus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Clock
@@ -49,6 +57,10 @@ class HomeViewModelTest {
     private val getExercisePlan: GetWeeklyExercisePlanUseCase = mockk()
     private val getCompletionStreak: GetCompletionStreakUseCase = mockk()
     private val observeDailySlotTimes: ObserveDailySlotTimesUseCase = mockk()
+    private val observeWeightProgress: ObserveWeightProgressUseCase = mockk()
+    private val observePhotos: ObservePhotosUseCase = mockk()
+    private val planUseCases: HomePlanUseCases = HomePlanUseCases(getMealPlan, getExercisePlan)
+    private val metricsUseCases: HomeMetricsUseCases = HomeMetricsUseCases(observeWeightProgress, observePhotos)
 
     private fun emptyCompliance() = DailyCompliance(
         date = FIXED_DATE,
@@ -61,19 +73,23 @@ class HomeViewModelTest {
         exercisePlan: WeeklyExercisePlan = WeeklyExercisePlan(emptyList()),
         compliance: DailyCompliance = emptyCompliance(),
         streak: Int = 0,
+        weights: List<WeightEntry> = emptyList(),
+        photos: List<ProgressPhoto> = emptyList(),
     ): HomeViewModel {
         every { getMealPlan() } returns flowOf(mealPlan)
         every { getExercisePlan() } returns flowOf(exercisePlan)
         every { observeCompliance(any()) } returns flowOf(compliance)
         every { getCompletionStreak(any()) } returns flowOf(streak)
         every { observeDailySlotTimes() } returns flowOf(DailySlotTimes(emptyMap()))
+        every { observeWeightProgress() } returns flowOf(weights)
+        every { observePhotos() } returns flowOf(photos)
         return HomeViewModel(
             observeDailyCompliance = observeCompliance,
             toggleUseCases = HomeToggleUseCases(toggleMeal, toggleExercise),
-            getMealPlan = getMealPlan,
-            getExercisePlan = getExercisePlan,
+            planUseCases = planUseCases,
             getCompletionStreak = getCompletionStreak,
             observeDailySlotTimes = observeDailySlotTimes,
+            metricsUseCases = metricsUseCases,
             clock = FIXED_CLOCK,
         )
     }
@@ -177,5 +193,49 @@ class HomeViewModelTest {
         val viewModel = buildViewModel(streak = 7)
         advanceUntilIdle()
         assertEquals(7, viewModel.state.value.streakDays)
+    }
+
+    @Test
+    fun `empty weights produces null lastWeightKg and null previousWeightKg`() = runTest {
+        val viewModel = buildViewModel(weights = emptyList())
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertNull(state.lastWeightKg)
+        assertNull(state.previousWeightKg)
+    }
+
+    @Test
+    fun `two weights produces both lastWeightKg and previousWeightKg`() = runTest {
+        val weights = listOf(
+            WeightEntry(id = "1", date = FIXED_DATE.minus(DatePeriod(days = 1)), weight = 80.0f),
+            WeightEntry(id = "2", date = FIXED_DATE, weight = 79.5f),
+        )
+        val viewModel = buildViewModel(weights = weights)
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertEquals(79.5f, state.lastWeightKg)
+        assertEquals(80.0f, state.previousWeightKg)
+    }
+
+    @Test
+    fun `photos with type TRUNK and last 4 days ago produces correct state`() = runTest {
+        val photoDate = FIXED_DATE.minus(DatePeriod(days = 4))
+        val photos = listOf(
+            ProgressPhoto(
+                id = "p1",
+                date = photoDate,
+                type = PhotoType.TRUNK,
+                photoPath = "/path/photo.jpg",
+                createdAt = 0L,
+            ),
+        )
+        val viewModel = buildViewModel(photos = photos)
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertEquals(PhotoType.TRUNK, state.lastPhotoType)
+        assertEquals(4, state.lastPhotoDaysAgo)
     }
 }

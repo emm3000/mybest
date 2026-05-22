@@ -53,6 +53,8 @@ import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.features.diet.presentation.MealPlanViewModel
 import com.emm.mybest.features.exercise.presentation.ExercisePlanViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
+import com.emm.mybest.features.home.presentation.HomeMetricsUseCases
+import com.emm.mybest.features.home.presentation.HomePlanUseCases
 import com.emm.mybest.features.home.presentation.HomeToggleUseCases
 import com.emm.mybest.features.home.presentation.HomeViewModel
 import com.emm.mybest.features.insights.presentation.InsightsViewModel
@@ -117,6 +119,8 @@ val appModule = module {
     factory { GetCompletionStreakUseCase(get()) }
     factory { ObserveDailySlotTimesUseCase(get()) }
     factory { HomeToggleUseCases(get(), get()) }
+    factory { HomePlanUseCases(get(), get()) }
+    factory { HomeMetricsUseCases(get(), get()) }
 
     // Weight use cases
     factory { SaveWeightUseCase(get()) }

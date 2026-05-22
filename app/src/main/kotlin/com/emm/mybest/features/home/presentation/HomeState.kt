@@ -1,6 +1,7 @@
 package com.emm.mybest.features.home.presentation
 
 import androidx.compose.runtime.Stable
+import com.emm.mybest.domain.models.PhotoType
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -20,4 +21,9 @@ data class HomeState(
     val completedCount: Int = 0,
     val totalCount: Int = DEFAULT_TOTAL,
     val streakDays: Int = 0,
+    val lastWeightKg: Float? = null,
+    val previousWeightKg: Float? = null,
+    val photoCount: Int = 0,
+    val lastPhotoType: PhotoType? = null,
+    val lastPhotoDaysAgo: Int? = null,
 )
