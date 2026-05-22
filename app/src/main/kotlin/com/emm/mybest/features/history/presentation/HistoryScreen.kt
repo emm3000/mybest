@@ -9,12 +9,12 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emm.mybest.R
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.ui.components.AtelierAppBar
@@ -38,7 +38,7 @@ fun HistoryScreen(
     bottomBar: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()) }
 
     val selectedDate = state.selectedDate

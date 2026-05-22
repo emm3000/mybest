@@ -21,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.features.photo.presentation.photoTypeLabel
@@ -45,7 +45,7 @@ internal fun PhotoViewer(
     modifier: Modifier = Modifier,
 ) {
     val viewModel: PhotoViewerViewModel = koinViewModel { parametersOf(initialPhotoId) }
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     val photos = state.photos
     val initialPage = photos.indexOfFirst { it.id == state.initialPhotoId }.coerceAtLeast(0)
