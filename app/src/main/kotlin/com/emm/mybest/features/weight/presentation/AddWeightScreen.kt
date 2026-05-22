@@ -22,18 +22,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.emm.mybest.R
 import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.theme.AtelierTheme
 import kotlinx.coroutines.flow.collectLatest
-import java.util.Locale
 
 @Composable
 fun AddWeightScreen(
@@ -76,7 +77,7 @@ private fun AddWeightContent(
     Scaffold(
         modifier = modifier,
         snackbarHost = { HSnackbarHost(snackbarHostState) },
-        topBar = { AtelierAppBar(title = "Registrar peso", onBack = onBackClick) },
+        topBar = { AtelierAppBar(title = stringResource(R.string.add_weight_app_bar_title), onBack = onBackClick) },
     ) { padding ->
         AddWeightBody(state = state, padding = padding, onIntent = onIntent)
     }
@@ -97,17 +98,17 @@ private fun AddWeightBody(
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         Text(
-            text = "¿Cuánto pesas hoy?",
+            text = stringResource(R.string.add_weight_field_label),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
         )
         HInput(
             value = state.weight,
             onValueChange = { onIntent(AddWeightIntent.OnWeightChange(it)) },
-            label = "Peso (kg)",
-            placeholder = "Ej: 72.4",
+            label = stringResource(R.string.add_weight_kg_label),
+            placeholder = stringResource(R.string.add_weight_kg_placeholder),
             supportingText = state.lastRecordedWeight?.let {
-                "Ultimo registro: ${String.format(Locale.getDefault(), "%.1f", it)} kg"
+                stringResource(R.string.add_weight_last_record_format, "%.1f".format(it))
             },
             errorMessage = state.weightError,
             modifier = Modifier.fillMaxWidth(),
@@ -118,15 +119,15 @@ private fun AddWeightBody(
         HInput(
             value = state.note,
             onValueChange = { onIntent(AddWeightIntent.OnNoteChange(it)) },
-            label = "Nota (opcional)",
-            placeholder = "Ej: Después del entrenamiento",
+            label = stringResource(R.string.add_weight_note_label),
+            placeholder = stringResource(R.string.add_weight_note_placeholder),
             modifier = Modifier.fillMaxWidth(),
             singleLine = false,
             minLines = 3,
         )
         Spacer(modifier = Modifier.weight(1f))
         HButton(
-            text = "Guardar Registro",
+            text = stringResource(R.string.add_weight_save_button),
             onClick = { onIntent(AddWeightIntent.OnSaveClick) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             enabled = state.weight.isNotBlank() && state.weightError == null && !state.isLoading,

@@ -46,8 +46,8 @@ class WeightReminderWorker(
 
         val notification = NotificationCompat.Builder(context, WEIGHT_REMINDER_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_progress_monochrome)
-            .setContentTitle("Hora de registrar tu peso")
-            .setContentText("Toca para registrarlo")
+            .setContentTitle(context.getString(R.string.weight_reminder_title))
+            .setContentText(context.getString(R.string.weight_reminder_text))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

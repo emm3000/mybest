@@ -117,6 +117,20 @@
     <string name="history_loading">CARGANDO</string>
     <string name="history_error_label">ERROR</string>
 
+    <!-- Weight reminder notification -->
+    <string name="weight_reminder_title">Hora de registrar tu peso</string>
+    <string name="weight_reminder_text">Toca para registrarlo</string>
+
+    <!-- Add weight screen -->
+    <string name="add_weight_field_label">¿Cuánto pesas hoy?</string>
+    <string name="add_weight_kg_label">Peso (kg)</string>
+    <string name="add_weight_kg_placeholder">Ej: 72.4</string>
+    <string name="add_weight_note_label">Nota (opcional)</string>
+    <string name="add_weight_note_placeholder">Ej: Después del entrenamiento</string>
+    <string name="add_weight_save_button">Guardar Registro</string>
+    <string name="add_weight_last_record_format">Ultimo registro: %s kg</string>
+    <string name="add_weight_app_bar_title">Registrar peso</string>
+
     <!-- Insights screen (C12) -->
     <string name="insights_header_title">PROGRESO</string>
     <string name="insights_days_format">%d DÍAS</string>

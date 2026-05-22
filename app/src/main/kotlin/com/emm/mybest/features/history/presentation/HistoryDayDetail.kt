@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.emm.mybest.R
+import com.emm.mybest.core.datetime.longEs
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.usecase.history.DaySummary
 import com.emm.mybest.ui.components.HAlertDialog
@@ -40,7 +41,6 @@ import com.emm.mybest.ui.components.atelier.photoTypeLabel
 import com.emm.mybest.ui.theme.AtelierInk
 import com.emm.mybest.ui.theme.AtelierSansFamily
 import com.emm.mybest.ui.theme.AtelierSerifFamily
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 private val DETAIL_SERIF_SIZE = 38.sp
@@ -123,7 +123,7 @@ private fun DetailHeader(date: LocalDate, onClose: () -> Unit) {
                 style = MicroLabelStyle(tone = MicroLabelTone.Dim),
             )
             Text(
-                text = dayNameLong(date),
+                text = date.dayOfWeek.longEs(),
                 style = TextStyle(
                     fontFamily = AtelierSerifFamily,
                     fontSize = DETAIL_SERIF_SIZE,
@@ -281,15 +281,3 @@ private fun buildWeightText(weightKg: Float, note: String?): String {
     val base = "${"%.1f".format(weightKg)} kg"
     return if (!note.isNullOrBlank()) "$base · $note" else base
 }
-
-private val DAY_NAMES_LONG = mapOf(
-    DayOfWeek.MONDAY to "Lunes",
-    DayOfWeek.TUESDAY to "Martes",
-    DayOfWeek.WEDNESDAY to "Miércoles",
-    DayOfWeek.THURSDAY to "Jueves",
-    DayOfWeek.FRIDAY to "Viernes",
-    DayOfWeek.SATURDAY to "Sábado",
-    DayOfWeek.SUNDAY to "Domingo",
-)
-
-private fun dayNameLong(date: LocalDate): String = DAY_NAMES_LONG[date.dayOfWeek] ?: "?"
