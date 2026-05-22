@@ -18,22 +18,22 @@ class ComplianceRepositoryImpl(
     private val exerciseDao: ExerciseComplianceDao,
 ) : ComplianceRepository {
     override fun observeMealsByDate(date: LocalDate): Flow<List<MealCompliance>> =
-        mealDao.observeByDate(date.toString()).map { it.mapNotNull(MealComplianceEntity::toDomain) }
+        mealDao.observeByDate(date).map { it.mapNotNull(MealComplianceEntity::toDomain) }
 
     override fun observeExerciseByDate(date: LocalDate): Flow<ExerciseCompliance?> =
-        exerciseDao.observeByDate(date.toString()).map { it?.toDomain() }
+        exerciseDao.observeByDate(date).map { it?.toDomain() }
 
     override fun observeMealsRange(from: LocalDate, to: LocalDate): Flow<List<MealCompliance>> =
-        mealDao.observeRange(from.toString(), to.toString())
+        mealDao.observeRange(from, to)
             .map { it.mapNotNull(MealComplianceEntity::toDomain) }
 
     override fun observeExerciseRange(from: LocalDate, to: LocalDate): Flow<List<ExerciseCompliance>> =
-        exerciseDao.observeRange(from.toString(), to.toString())
-            .map { rows -> rows.mapNotNull { it.toDomain() } }
+        exerciseDao.observeRange(from, to)
+            .map { rows -> rows.map { it.toDomain() } }
 
     override suspend fun toggleMeal(date: LocalDate, type: MealType, done: Boolean) =
-        mealDao.upsert(MealComplianceEntity(date.toString(), type.name, done))
+        mealDao.upsert(MealComplianceEntity(date, type.name, done))
 
     override suspend fun toggleExercise(date: LocalDate, done: Boolean) =
-        exerciseDao.upsert(ExerciseComplianceEntity(date.toString(), done))
+        exerciseDao.upsert(ExerciseComplianceEntity(date, done))
 }
