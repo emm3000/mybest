@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
@@ -237,7 +238,7 @@ private fun HomePlanRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(PLAN_ROW_MIN_HEIGHT)
+            .heightIn(min = PLAN_ROW_MIN_HEIGHT)
             .combinedClickable(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
