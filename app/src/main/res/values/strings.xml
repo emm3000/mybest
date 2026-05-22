@@ -63,6 +63,8 @@
     <string name="exercise_plan_edit_volume_label">VOLUMEN</string>
 
     <!-- Photos screen (C15) -->
+    <string name="photo_type_trunk">Tronco</string>
+    <string name="photo_type_face">Cara</string>
     <string name="photos_app_bar_title">FOTOS DE PROGRESO</string>
     <string name="photos_tab_trunk">Tronco</string>
     <string name="photos_tab_face">Cara</string>

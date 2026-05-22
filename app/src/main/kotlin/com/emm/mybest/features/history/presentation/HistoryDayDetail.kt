@@ -36,6 +36,7 @@ import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
+import com.emm.mybest.ui.components.atelier.photoTypeLabel
 import com.emm.mybest.ui.theme.AtelierInk
 import com.emm.mybest.ui.theme.AtelierSansFamily
 import com.emm.mybest.ui.theme.AtelierSerifFamily
@@ -233,7 +234,7 @@ private fun DetailPhotoRow(
     isToday: Boolean,
     onDelete: () -> Unit,
 ) {
-    val typeLabel = photo.type.toSpanishLabel()
+    val typeLabel = photoTypeLabel(photo.type)
     Row(
         modifier = Modifier
             .fillMaxWidth()

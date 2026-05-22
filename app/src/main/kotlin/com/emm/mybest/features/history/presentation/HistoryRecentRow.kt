@@ -19,6 +19,7 @@ import com.emm.mybest.domain.usecase.history.HistoryRecentEntry
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
+import com.emm.mybest.ui.components.atelier.photoTypeLabel
 import com.emm.mybest.ui.theme.AtelierInk
 import com.emm.mybest.ui.theme.AtelierSansFamily
 import kotlinx.datetime.LocalDate
@@ -36,7 +37,8 @@ internal fun HistoryRecentRow(
     modifier: Modifier = Modifier,
 ) {
     val dateLabel = formatRecentDate(entry.date)
-    val description = buildDescription(entry)
+    val photoLabels = entry.photoTypes.map { photoTypeLabel(it) }
+    val description = buildDescription(entry, photoLabels)
     val isToday = entry.date == today
 
     Row(
@@ -71,12 +73,11 @@ internal fun HistoryRecentRow(
     }
 }
 
-private fun buildDescription(entry: HistoryRecentEntry): String {
+private fun buildDescription(entry: HistoryRecentEntry, photoLabels: List<String>): String {
     val parts = mutableListOf<String>()
     entry.weight?.let { parts.add("Peso ${"%.1f".format(it)}") }
-    if (entry.photoTypes.isNotEmpty()) {
-        val photoLabel = entry.photoTypes.joinToString(" · ") { it.toSpanishLabel() }
-        parts.add("Foto $photoLabel")
+    if (photoLabels.isNotEmpty()) {
+        parts.add("Foto ${photoLabels.joinToString(" · ")}")
     }
     return parts.joinToString(" · ")
 }

@@ -18,6 +18,7 @@ import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
+import com.emm.mybest.ui.components.atelier.photoTypeLabel
 
 private val DIVIDER_VERTICAL_PADDING = 14.dp
 private val QUICK_ACTION_NUMBER_FONT_SIZE = 28.sp
@@ -69,7 +70,7 @@ internal fun photoCellContent(state: HomeState): QuickActionCellContent {
     val type = state.lastPhotoType
     val daysAgo = state.lastPhotoDaysAgo
     val caption = if (type != null && daysAgo != null) {
-        val typeLabel = type.labelEs()
+        val typeLabel = photoTypeLabel(type)
         when {
             daysAgo == 0 -> stringResource(R.string.home_photo_caption_today_format, typeLabel)
             daysAgo == 1 -> stringResource(R.string.home_photo_caption_yesterday_format, typeLabel)

@@ -4,7 +4,6 @@ import com.emm.mybest.core.datetime.MONTH_ABBR_ES
 import com.emm.mybest.core.datetime.shortEs
 import com.emm.mybest.domain.models.DailySlot
 import com.emm.mybest.domain.models.MealType
-import com.emm.mybest.domain.models.PhotoType
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -47,11 +46,6 @@ internal fun LocalTime.formatHHmm(): String {
     val hh = hour.toString().padStart(2, '0')
     val mm = minute.toString().padStart(2, '0')
     return "$hh:$mm"
-}
-
-internal fun PhotoType.labelEs(): String = when (this) {
-    PhotoType.TRUNK -> "Tronco"
-    PhotoType.FACE -> "Cara"
 }
 
 internal fun formatHomeWeight(value: Float): String =

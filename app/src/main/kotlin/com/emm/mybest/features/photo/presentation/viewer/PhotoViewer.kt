@@ -36,7 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.domain.models.ProgressPhoto
-import com.emm.mybest.features.photo.presentation.photoTypeLabel
+import com.emm.mybest.ui.components.atelier.photoTypeLabel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
