@@ -77,6 +77,30 @@
     <string name="photos_camera_permission_settings">Ajustes</string>
     <string name="photos_camera_permission_required">Se necesita acceso a la cámara para tomar fotos.</string>
 
+    <!-- Settings screen (C17) -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_app_label">MYBEST</string>
+    <string name="settings_account_label">CUENTA</string>
+    <string name="settings_account_hero">Solo tú.</string>
+    <string name="settings_account_body">MyBest no tiene cuenta, ni nube, ni amigos.\nTodo vive en este teléfono.</string>
+    <string name="settings_reminder_label">RECORDATORIO MATINAL</string>
+    <string name="settings_reminder_off_value">Apagada</string>
+    <string name="settings_reminder_caption_on">Notificación local · puedes apagarla</string>
+    <string name="settings_reminder_caption_off">Tap para activar</string>
+    <string name="settings_reminder_time_fallback">—</string>
+    <string name="settings_diet_label">PLAN DE DIETA</string>
+    <string name="settings_diet_value">Editar</string>
+    <string name="settings_diet_caption">Plantilla 7 × 4</string>
+    <string name="settings_exercise_label">PLAN DE EJERCICIO</string>
+    <string name="settings_exercise_value">Editar</string>
+    <string name="settings_exercise_caption">Plantilla 7 × 1</string>
+    <string name="settings_backup_label">BACKUP</string>
+    <string name="settings_backup_export_value">Exportar</string>
+    <string name="settings_backup_import_extra">Importar</string>
+    <string name="settings_backup_caption_empty">Sin exports previos</string>
+    <string name="settings_footer_tagline">UN BOTÓN A LA VEZ</string>
+    <string name="settings_footer_version_format">v%1$s · %2$d</string>
+
     <!-- History screen (C16) -->
     <string name="history_title">HISTORIAL</string>
     <string name="history_nav_label">DIARIO</string>

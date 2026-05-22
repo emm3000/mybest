@@ -28,8 +28,8 @@ import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.photo.presentation.PhotosScreen
 import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewer
-import com.emm.mybest.features.settings.presentation.ReminderSettingsScreen
-import com.emm.mybest.features.settings.presentation.ReminderSettingsViewModel
+import com.emm.mybest.features.settings.presentation.SettingsScreen
+import com.emm.mybest.features.settings.presentation.SettingsViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightScreen
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
 import com.emm.mybest.ui.components.HBottomNavigationBar
@@ -179,10 +179,9 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
     }
 
     entry<Screen.Settings> {
-        val viewModel: ReminderSettingsViewModel = koinViewModel()
-        ReminderSettingsScreen(
+        val viewModel: SettingsViewModel = koinViewModel()
+        SettingsScreen(
             viewModel = viewModel,
-            onBackClick = { navigator.goBack() },
             onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
             onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
             bottomBar = rememberBottomBar(Screen.Settings, navigator),

@@ -2,12 +2,14 @@ package com.emm.mybest.features.settings.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.BuildConfig
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,49 +21,54 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalTime
 
-class ReminderSettingsViewModel(
+class SettingsViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val exportDatabaseBackupUseCase: ExportDatabaseBackupUseCase,
     private val restoreDatabaseBackupUseCase: RestoreDatabaseBackupUseCase,
     private val updateDefaultReminderTimeUseCase: UpdateDefaultReminderTimeUseCase,
+    appVersionName: String = BuildConfig.VERSION_NAME,
+    appVersionCode: Int = BuildConfig.VERSION_CODE,
 ) : ViewModel() {
 
-    private val _effect = MutableSharedFlow<ReminderSettingsEffect>(
+    private val appVersionLabel = "v$appVersionName · $appVersionCode"
+
+    private val _effect = MutableSharedFlow<SettingsEffect>(
         extraBufferCapacity = 1,
-        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
     val effect = _effect.asSharedFlow()
 
     private val _showDefaultTimePicker = MutableStateFlow(false)
 
-    val state: StateFlow<ReminderSettingsState> = combine(
+    val state: StateFlow<SettingsState> = combine(
         userPreferencesRepository.notificationsEnabled,
         userPreferencesRepository.weightReminderTime,
         _showDefaultTimePicker,
     ) { enabled, weightTime, showPicker ->
-        ReminderSettingsState(
+        SettingsState(
             notificationsEnabled = enabled,
             showDefaultTimePicker = showPicker,
             weightReminderTime = weightTime,
+            appVersionLabel = appVersionLabel,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
-        initialValue = ReminderSettingsState(),
+        initialValue = SettingsState(appVersionLabel = appVersionLabel),
     )
 
-    fun onIntent(intent: ReminderSettingsIntent) {
+    fun onIntent(intent: SettingsIntent) {
         when (intent) {
-            is ReminderSettingsIntent.OnNotificationsToggle -> updateNotificationsPreference(intent.enabled)
-            is ReminderSettingsIntent.OnExportBackup -> exportBackup(intent.targetUri)
-            is ReminderSettingsIntent.OnImportBackup -> importBackup(intent.sourceUri)
-            is ReminderSettingsIntent.OnDefaultTimePickerOpen -> _showDefaultTimePicker.update { true }
-            is ReminderSettingsIntent.OnDefaultTimePickerDismiss -> _showDefaultTimePicker.update { false }
-            is ReminderSettingsIntent.OnDefaultReminderTimeChange -> updateDefaultReminderTime(
+            is SettingsIntent.OnNotificationsToggle -> updateNotificationsPreference(intent.enabled)
+            is SettingsIntent.OnExportBackup -> exportBackup(intent.targetUri)
+            is SettingsIntent.OnImportBackup -> importBackup(intent.sourceUri)
+            is SettingsIntent.OnDefaultTimePickerOpen -> _showDefaultTimePicker.update { true }
+            is SettingsIntent.OnDefaultTimePickerDismiss -> _showDefaultTimePicker.update { false }
+            is SettingsIntent.OnDefaultReminderTimeChange -> updateDefaultReminderTime(
                 intent.hour,
                 intent.minute,
             )
-            is ReminderSettingsIntent.OnWeightReminderToggleOff -> updateWeightReminder(null)
+            is SettingsIntent.OnWeightReminderToggleOff -> updateWeightReminder(null)
         }
     }
 
@@ -71,7 +78,7 @@ class ReminderSettingsViewModel(
                 userPreferencesRepository.updateNotificationsEnabled(enabled)
             }.onFailure {
                 _effect.emit(
-                    ReminderSettingsEffect.ShowError(
+                    SettingsEffect.ShowError(
                         it.message ?: "No se pudo actualizar la configuración",
                     ),
                 )
@@ -85,7 +92,7 @@ class ReminderSettingsViewModel(
                 updateDefaultReminderTimeUseCase(LocalTime(hour, minute))
             }.onFailure {
                 _effect.emit(
-                    ReminderSettingsEffect.ShowError(
+                    SettingsEffect.ShowError(
                         it.message ?: "No se pudo actualizar la hora por defecto",
                     ),
                 )
@@ -100,7 +107,7 @@ class ReminderSettingsViewModel(
                 updateDefaultReminderTimeUseCase(time)
             }.onFailure {
                 _effect.emit(
-                    ReminderSettingsEffect.ShowError(
+                    SettingsEffect.ShowError(
                         it.message ?: "No se pudo actualizar el recordatorio de peso",
                     ),
                 )
@@ -112,10 +119,10 @@ class ReminderSettingsViewModel(
         viewModelScope.launch {
             exportDatabaseBackupUseCase(targetUri)
                 .onSuccess {
-                    _effect.emit(ReminderSettingsEffect.ShowMessage("Backup exportado correctamente"))
+                    _effect.emit(SettingsEffect.ShowMessage("Backup exportado correctamente"))
                 }.onFailure {
                     _effect.emit(
-                        ReminderSettingsEffect.ShowError(
+                        SettingsEffect.ShowError(
                             it.message ?: "No se pudo exportar el backup",
                         ),
                     )
@@ -129,14 +136,14 @@ class ReminderSettingsViewModel(
                 .onSuccess { result ->
                     when (result) {
                         RestoreResult.RequiresRestart -> _effect.emit(
-                            ReminderSettingsEffect.ShowMessage(
+                            SettingsEffect.ShowMessage(
                                 "Backup restaurado. Reinicia la app para aplicar.",
                             ),
                         )
                     }
                 }.onFailure {
                     _effect.emit(
-                        ReminderSettingsEffect.ShowError(
+                        SettingsEffect.ShowError(
                             it.message ?: "No se pudo importar el backup",
                         ),
                     )
