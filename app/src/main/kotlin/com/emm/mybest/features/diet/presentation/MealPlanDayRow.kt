@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -135,17 +134,16 @@ private fun MealRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onMealClick(type) },
-        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(MEAL_LABEL_GAP),
     ) {
         MicroLabel(
             text = type.labelEs(),
-            modifier = Modifier.width(MEAL_LABEL_WIDTH),
+            modifier = Modifier.width(MEAL_LABEL_WIDTH).alignByBaseline(),
             style = MicroLabelStyle(tone = MicroLabelTone.Dim, size = MEAL_LABEL_FONT_SIZE),
         )
         Text(
             text = if (hasDescription) description else "—",
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).alignByBaseline(),
             style = TextStyle(
                 fontSize = MEAL_DESC_FONT_SIZE,
                 lineHeight = MEAL_DESC_LINE_HEIGHT,

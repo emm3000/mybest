@@ -22,6 +22,12 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import kotlin.time.Clock
+import kotlin.time.Instant
+
+private val FIXED_CLOCK = object : Clock {
+    override fun now(): Instant = Instant.fromEpochSeconds(1_779_019_200L)
+}
 
 class MealPlanViewModelTest {
 
@@ -33,7 +39,7 @@ class MealPlanViewModelTest {
 
     private fun buildViewModel(plan: WeeklyMealPlan = WeeklyMealPlan(emptyList())): MealPlanViewModel {
         every { getPlan() } returns flowOf(plan)
-        return MealPlanViewModel(getPlan, upsertMeal)
+        return MealPlanViewModel(getPlan, upsertMeal, FIXED_CLOCK)
     }
 
     @Test

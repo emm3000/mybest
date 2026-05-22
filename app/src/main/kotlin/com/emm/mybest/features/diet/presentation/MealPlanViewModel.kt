@@ -17,13 +17,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 class MealPlanViewModel(
     private val getPlan: GetWeeklyMealPlanUseCase,
     private val upsertMeal: UpsertMealUseCase,
+    clock: Clock = Clock.System,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(MealPlanState())
+    private val _state = MutableStateFlow(
+        MealPlanState(today = clock.todayIn(TimeZone.currentSystemDefault())),
+    )
     val state = _state.asStateFlow()
 
     private val _effects = MutableSharedFlow<MealPlanEffect>(
