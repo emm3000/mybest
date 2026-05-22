@@ -46,6 +46,13 @@ fun rememberNavigationState(
     }
 }
 
+/**
+ * Holds the multi-backstack navigation state for top-level tabs.
+ *
+ * @param startRoute the start route. The user exits the app by pressing back from this route.
+ * @param topLevelRoute the currently active top-level route.
+ * @param backStacks one back stack per top-level route.
+ */
 @Stable
 class NavigationState(
     val startRoute: NavKey,
