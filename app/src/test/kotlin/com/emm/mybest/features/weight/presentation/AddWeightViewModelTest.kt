@@ -240,4 +240,13 @@ class AddWeightViewModelTest {
 
         assertFalse(viewModel.state.value.isLoading)
     }
+
+    @Test
+    fun `out-of-range weight sets error`() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.onIntent(AddWeightIntent.OnWeightChange("232323"))
+
+        assertNotNull(viewModel.state.value.weightError)
+    }
 }

@@ -71,7 +71,11 @@
     <string name="photos_label_before">ANTES</string>
     <string name="photos_label_after">AHORA</string>
     <string name="photos_timeline_header_format">TIMELINE · %1$d FOTOS</string>
-    <string name="photos_compare_summary_format">%1$d DÍAS · %2$s KG</string>
+    <plurals name="photos_compare_days_part">
+        <item quantity="one">%d DÍA</item>
+        <item quantity="other">%d DÍAS</item>
+    </plurals>
+    <string name="photos_compare_summary_format">%1$s · %2$s KG</string>
     <string name="photos_compare_summary_empty">— DÍAS · — KG</string>
     <string name="photos_compare_cta">COMPARAR ↗</string>
     <string name="photos_add_action_cd">Tomar foto</string>
@@ -105,7 +109,6 @@
 
     <!-- History screen (C16) -->
     <string name="history_title">HISTORIAL</string>
-    <string name="history_nav_label">DIARIO</string>
     <string name="history_legend_weight">PESO REGISTRADO</string>
     <string name="history_legend_photo">FOTO</string>
     <string name="history_today_chip">HOY</string>
@@ -133,7 +136,10 @@
 
     <!-- Insights screen (C12) -->
     <string name="insights_header_title">PROGRESO</string>
-    <string name="insights_days_format">%d DÍAS</string>
+    <plurals name="insights_days_format">
+        <item quantity="one">%d DÍA</item>
+        <item quantity="other">%d DÍAS</item>
+    </plurals>
     <string name="insights_delta_label">DELTA PESO</string>
     <string name="insights_weight_unit_kg">KG</string>
     <string name="insights_photo_tronco_label">FOTOS · TRONCO</string>

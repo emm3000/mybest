@@ -77,4 +77,29 @@ class WeightInputValidatorTest {
     fun `parse empty string returns null`() {
         assertNull(WeightInputValidator.parse(""))
     }
+
+    @Test
+    fun `isWeightInRange returns true for 20`() {
+        assertTrue(WeightInputValidator.isWeightInRange(20f))
+    }
+
+    @Test
+    fun `isWeightInRange returns true for 500`() {
+        assertTrue(WeightInputValidator.isWeightInRange(500f))
+    }
+
+    @Test
+    fun `isWeightInRange returns false for 19_99`() {
+        assertFalse(WeightInputValidator.isWeightInRange(19.99f))
+    }
+
+    @Test
+    fun `isWeightInRange returns false for 500_01`() {
+        assertFalse(WeightInputValidator.isWeightInRange(500.01f))
+    }
+
+    @Test
+    fun `isWeightInRange returns false for 232323`() {
+        assertFalse(WeightInputValidator.isWeightInRange(232323f))
+    }
 }

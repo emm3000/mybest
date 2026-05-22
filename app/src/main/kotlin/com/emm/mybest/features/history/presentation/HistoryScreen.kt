@@ -63,16 +63,7 @@ fun HistoryScreen(
         modifier = modifier,
         containerColor = AtelierBackground,
         topBar = {
-            AtelierAppBar(
-                title = stringResource(R.string.history_title),
-                actions = {
-                    MicroLabel(
-                        text = stringResource(R.string.history_nav_label),
-                        style = MicroLabelStyle(tone = MicroLabelTone.Dim),
-                        modifier = Modifier.padding(end = HISTORY_GUT),
-                    )
-                },
-            )
+            AtelierAppBar(title = stringResource(R.string.history_title))
         },
         bottomBar = bottomBar,
     ) { padding ->

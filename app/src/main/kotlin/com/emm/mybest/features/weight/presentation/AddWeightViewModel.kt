@@ -79,15 +79,20 @@ class AddWeightViewModel(
     }
 
     private fun weightErrorFor(input: String): String? {
+        if (input.isBlank()) return null
+        val isFormatValid = WeightInputValidator.isValidWeightInput(input) &&
+            !input.endsWith('.') && !input.endsWith(',')
+        if (!isFormatValid) return INVALID_WEIGHT_MESSAGE
+        val parsed = WeightInputValidator.parse(input)
         return when {
-            input.isBlank() -> null
-            !WeightInputValidator.isValidWeightInput(input) -> INVALID_WEIGHT_MESSAGE
-            input.endsWith('.') || input.endsWith(',') -> INVALID_WEIGHT_MESSAGE
+            parsed == null -> INVALID_WEIGHT_MESSAGE
+            !WeightInputValidator.isWeightInRange(parsed) -> OUT_OF_RANGE_MESSAGE
             else -> null
         }
     }
 
     companion object {
         private const val INVALID_WEIGHT_MESSAGE = "Ingresa un peso valido. Ejemplo: 72.4 o 72,4"
+        private const val OUT_OF_RANGE_MESSAGE = "Peso fuera de rango. Acepta 20–500 kg."
     }
 }

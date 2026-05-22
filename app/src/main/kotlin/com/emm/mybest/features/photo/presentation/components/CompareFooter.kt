@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
@@ -29,7 +30,7 @@ internal fun CompareFooter(
     onCompareClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val summaryText = buildSummaryText(
+    val summaryText = summaryText(
         beforePhoto = beforePhoto,
         afterPhoto = afterPhoto,
         beforeWeightKg = beforeWeightKg,
@@ -58,21 +59,23 @@ internal fun CompareFooter(
     }
 }
 
-private fun buildSummaryText(
+@Composable
+private fun summaryText(
     beforePhoto: ProgressPhoto?,
     afterPhoto: ProgressPhoto?,
     beforeWeightKg: Float?,
     afterWeightKg: Float?,
     today: LocalDate,
 ): String {
-    if (beforePhoto == null) return "— DÍAS · — KG"
+    if (beforePhoto == null) return stringResource(R.string.photos_compare_summary_empty)
     val referenceDate = afterPhoto?.date ?: today
-    val days = referenceDate.toEpochDays() - beforePhoto.date.toEpochDays()
-    val deltaText = buildDeltaText(beforeWeightKg = beforeWeightKg, afterWeightKg = afterWeightKg)
-    return "$days DÍAS · $deltaText KG"
+    val days = (referenceDate.toEpochDays() - beforePhoto.date.toEpochDays()).toInt()
+    val daysLabel = pluralStringResource(R.plurals.photos_compare_days_part, days, days)
+    val deltaText = deltaText(beforeWeightKg = beforeWeightKg, afterWeightKg = afterWeightKg)
+    return stringResource(R.string.photos_compare_summary_format, daysLabel, deltaText)
 }
 
-private fun buildDeltaText(beforeWeightKg: Float?, afterWeightKg: Float?): String {
+private fun deltaText(beforeWeightKg: Float?, afterWeightKg: Float?): String {
     if (beforeWeightKg == null || afterWeightKg == null) return "—"
     val delta = afterWeightKg - beforeWeightKg
     val sign = if (delta >= 0f) "+" else ""
