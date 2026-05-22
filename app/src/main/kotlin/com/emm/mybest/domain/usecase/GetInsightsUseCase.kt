@@ -2,9 +2,9 @@ package com.emm.mybest.domain.usecase
 
 import com.emm.mybest.domain.models.InsightsData
 import com.emm.mybest.domain.models.InsightsRecommendation
-import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.domain.models.InsightsRecommendationKind
 import com.emm.mybest.domain.models.PeriodLabel
+import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
@@ -49,6 +49,9 @@ class GetInsightsUseCase(
                 deltaWeightKg = computeDeltaKg(weights),
                 deltaWeightPercent = computeDeltaPercent(weights),
                 kgPerDayRate14d = computeRate14d(weights, today),
+                daysSinceFirstWeight = computeDaysSinceFirstWeight(weights, today),
+                troncoPhotoCount = photos.count { it.type == PhotoType.TRUNK },
+                caraPhotoCount = photos.count { it.type == PhotoType.FACE },
             )
         }
     }
@@ -72,6 +75,10 @@ class GetInsightsUseCase(
         val daysBetween = last.date.toEpochDays() - baseline.date.toEpochDays()
         if (daysBetween <= 0) return null
         return (last.weight - baseline.weight) / daysBetween.toFloat()
+    }
+
+    private fun computeDaysSinceFirstWeight(weights: List<WeightEntry>, today: LocalDate): Int? {
+        return weights.firstOrNull()?.date?.let { today.toEpochDays() - it.toEpochDays() }?.toInt()
     }
 
     private fun findBaseline(weights: List<WeightEntry>, today: LocalDate): WeightEntry? {
@@ -104,17 +111,14 @@ private fun buildRecommendation(
     return when {
         hasWeightTrend && totalWeightLost <= 0f -> InsightsRecommendation(
             kind = InsightsRecommendationKind.ADJUST_WEEKLY_PLAN,
-            action = InsightsRecommendationAction.ADJUST_WEIGHT_PLAN,
         )
 
         photoCount < 2 -> InsightsRecommendation(
             kind = InsightsRecommendationKind.UPLOAD_PHOTO_TODAY,
-            action = InsightsRecommendationAction.ADD_PROGRESS_PHOTO,
         )
 
         else -> InsightsRecommendation(
             kind = InsightsRecommendationKind.KEEP_ROUTINE,
-            action = InsightsRecommendationAction.KEEP_ROUTINE,
         )
     }
 }

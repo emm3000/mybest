@@ -1,6 +1,5 @@
 package com.emm.mybest.domain.usecase
 
-import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.domain.models.InsightsRecommendationKind
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
@@ -36,7 +35,6 @@ class GetInsightsUseCaseTest {
         assertEquals(0f, result.totalWeightLost)
         assertEquals(0, result.photoCount)
         assertEquals(InsightsRecommendationKind.UPLOAD_PHOTO_TODAY, result.recommendation.kind)
-        assertEquals(InsightsRecommendationAction.ADD_PROGRESS_PHOTO, result.recommendation.action)
     }
 
     @Test
@@ -64,7 +62,6 @@ class GetInsightsUseCaseTest {
         assertEquals(5f, result.totalWeightLost)
         assertEquals(10, result.photoCount)
         assertEquals(InsightsRecommendationKind.KEEP_ROUTINE, result.recommendation.kind)
-        assertEquals(InsightsRecommendationAction.KEEP_ROUTINE, result.recommendation.action)
     }
 
     @Test
@@ -98,7 +95,6 @@ class GetInsightsUseCaseTest {
 
         assertEquals(0f, result.totalWeightLost)
         assertEquals(InsightsRecommendationKind.ADJUST_WEEKLY_PLAN, result.recommendation.kind)
-        assertEquals(InsightsRecommendationAction.ADJUST_WEIGHT_PLAN, result.recommendation.action)
     }
 
     @Test
@@ -218,5 +214,63 @@ class GetInsightsUseCaseTest {
         val result = useCase(today).first()
 
         assertEquals(-0.2f, result.kgPerDayRate14d!!, 0.001f)
+    }
+
+    @Test
+    fun `daysSinceFirstWeight is null when weights are empty`() = runTest {
+        every { weightRepository.getWeightProgress() } returns flowOf(emptyList())
+        every { photoRepository.getAllPhotos() } returns flowOf(emptyList())
+
+        val result = useCase(today).first()
+
+        assertNull(result.daysSinceFirstWeight)
+    }
+
+    @Test
+    fun `daysSinceFirstWeight computes correct days from first weight to today`() = runTest {
+        val firstDate = today.minus(DatePeriod(days = 30))
+        val weights = listOf(
+            WeightEntry(id = "1", date = firstDate, weight = 80f),
+            WeightEntry(id = "2", date = today, weight = 75f),
+        )
+        every { weightRepository.getWeightProgress() } returns flowOf(weights)
+        every { photoRepository.getAllPhotos() } returns flowOf(emptyList())
+
+        val result = useCase(today).first()
+
+        assertEquals(30, result.daysSinceFirstWeight)
+    }
+
+    @Test
+    fun `troncoPhotoCount counts only TRUNK photos`() = runTest {
+        val date = today.minus(DatePeriod(days = 5))
+        val photos = listOf(
+            ProgressPhoto(id = "p1", date = date, type = PhotoType.TRUNK, photoPath = "/p1.jpg", createdAt = 1L),
+            ProgressPhoto(id = "p2", date = date, type = PhotoType.TRUNK, photoPath = "/p2.jpg", createdAt = 2L),
+            ProgressPhoto(id = "p3", date = date, type = PhotoType.FACE, photoPath = "/p3.jpg", createdAt = 3L),
+        )
+        every { weightRepository.getWeightProgress() } returns flowOf(emptyList())
+        every { photoRepository.getAllPhotos() } returns flowOf(photos)
+
+        val result = useCase(today).first()
+
+        assertEquals(2, result.troncoPhotoCount)
+        assertEquals(1, result.caraPhotoCount)
+    }
+
+    @Test
+    fun `caraPhotoCount counts only FACE photos`() = runTest {
+        val date = today.minus(DatePeriod(days = 5))
+        val photos = listOf(
+            ProgressPhoto(id = "p1", date = date, type = PhotoType.FACE, photoPath = "/p1.jpg", createdAt = 1L),
+            ProgressPhoto(id = "p2", date = date, type = PhotoType.FACE, photoPath = "/p2.jpg", createdAt = 2L),
+        )
+        every { weightRepository.getWeightProgress() } returns flowOf(emptyList())
+        every { photoRepository.getAllPhotos() } returns flowOf(photos)
+
+        val result = useCase(today).first()
+
+        assertEquals(0, result.troncoPhotoCount)
+        assertEquals(2, result.caraPhotoCount)
     }
 }

@@ -1,7 +1,6 @@
 package com.emm.mybest.features.insights.presentation
 
 import androidx.compose.runtime.Stable
-import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.domain.models.WeightEntry
 
 @Stable
@@ -17,18 +16,12 @@ data class InsightsState(
     val photoCount: Int = 0,
     val recommendationTitle: String = "",
     val recommendationDescription: String = "",
-    val recommendationActionLabel: String = "",
-    val recommendationAction: InsightsRecommendationAction? = null,
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
+    val daysSinceFirstWeight: Int? = null,
+    val troncoPhotoCount: Int = 0,
+    val caraPhotoCount: Int = 0,
 ) {
-    val canComparePhotos: Boolean
-        get() = photoCount >= MIN_COMPARE_PHOTOS
-
     val hasRecommendation: Boolean
-        get() = recommendationAction != null
-
-    private companion object {
-        private const val MIN_COMPARE_PHOTOS = 2
-    }
+        get() = recommendationTitle.isNotEmpty()
 }

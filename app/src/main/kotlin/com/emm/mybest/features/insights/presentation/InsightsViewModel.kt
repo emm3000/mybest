@@ -32,7 +32,7 @@ class InsightsViewModel(
 
     val state: StateFlow<InsightsState> = getInsightsUseCase(clock.todayIn(TimeZone.currentSystemDefault()))
         .map { data ->
-            val (recTitle, recDesc, recLabel) = mapRecommendationStrings(data.recommendation.kind)
+            val (recTitle, recDesc) = mapRecommendationStrings(data.recommendation.kind)
             InsightsState(
                 weightHistory = data.weightEntries,
                 periodLabel = mapPeriodLabel(data.period),
@@ -45,10 +45,11 @@ class InsightsViewModel(
                 photoCount = data.photoCount,
                 recommendationTitle = recTitle,
                 recommendationDescription = recDesc,
-                recommendationActionLabel = recLabel,
-                recommendationAction = data.recommendation.action,
                 isLoading = false,
                 errorMessage = null,
+                daysSinceFirstWeight = data.daysSinceFirstWeight,
+                troncoPhotoCount = data.troncoPhotoCount,
+                caraPhotoCount = data.caraPhotoCount,
             )
         }.catch { throwable ->
             emit(
@@ -66,12 +67,6 @@ class InsightsViewModel(
     fun onIntent(intent: InsightsIntent) {
         viewModelScope.launch {
             when (intent) {
-                InsightsIntent.OnCompareClick -> _effect.emit(InsightsEffect.NavigateToCompare)
-                InsightsIntent.OnRecommendationActionClick -> {
-                    state.value.recommendationAction?.let { action ->
-                        _effect.emit(InsightsEffect.NavigateByRecommendation(action))
-                    }
-                }
                 InsightsIntent.OnHistoryClick -> _effect.emit(InsightsEffect.NavigateToHistory)
                 InsightsIntent.OnAddWeightClick -> _effect.emit(InsightsEffect.NavigateToAddWeight)
             }
@@ -85,26 +80,17 @@ private fun mapPeriodLabel(period: PeriodLabel): String = when (period) {
     is PeriodLabel.Range -> "Datos del ${period.start.formatEsLongDate()} al ${period.end.formatEsLongDate()}"
 }
 
-private data class RecommendationStrings(
-    val title: String,
-    val description: String,
-    val actionLabel: String,
-)
-
-private fun mapRecommendationStrings(kind: InsightsRecommendationKind): RecommendationStrings = when (kind) {
-    InsightsRecommendationKind.ADJUST_WEEKLY_PLAN -> RecommendationStrings(
-        title = "Ajusta tu plan semanal",
-        description = "No hay mejora reciente de peso. Ajusta alimentación o entrenamiento 3 días esta semana.",
-        actionLabel = "Define un ajuste concreto",
+private fun mapRecommendationStrings(kind: InsightsRecommendationKind): Pair<String, String> = when (kind) {
+    InsightsRecommendationKind.ADJUST_WEEKLY_PLAN -> Pair(
+        "Ajusta tu plan semanal",
+        "No hay mejora reciente de peso. Ajusta alimentación o entrenamiento 3 días esta semana.",
     )
-    InsightsRecommendationKind.UPLOAD_PHOTO_TODAY -> RecommendationStrings(
-        title = "Registra evidencia visual",
-        description = "Añade al menos 2 fotos por semana para comparar cambios reales.",
-        actionLabel = "Sube una foto hoy",
+    InsightsRecommendationKind.UPLOAD_PHOTO_TODAY -> Pair(
+        "Registra evidencia visual",
+        "Añade al menos 2 fotos por semana para comparar cambios reales.",
     )
-    InsightsRecommendationKind.KEEP_ROUTINE -> RecommendationStrings(
-        title = "Mantén el ritmo",
-        description = "Tu progreso es consistente. Conserva tu rutina y registra evidencia cada semana.",
-        actionLabel = "Sostén la rutina actual",
+    InsightsRecommendationKind.KEEP_ROUTINE -> Pair(
+        "Mantén el ritmo",
+        "Tu progreso es consistente. Conserva tu rutina y registra evidencia cada semana.",
     )
 }

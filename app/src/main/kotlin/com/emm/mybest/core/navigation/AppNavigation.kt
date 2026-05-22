@@ -14,7 +14,6 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.emm.mybest.domain.models.InsightsRecommendationAction
 import com.emm.mybest.features.diet.presentation.MealPlanScreen
 import com.emm.mybest.features.diet.presentation.MealPlanViewModel
 import com.emm.mybest.features.exercise.presentation.ExercisePlanScreen
@@ -147,16 +146,6 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         val viewModel: InsightsViewModel = koinViewModel()
         InsightsScreen(
             viewModel = viewModel,
-            onCompareClick = { navigator.navigate(Screen.ComparePhotos) },
-            onRecommendationAction = { action ->
-                when (action) {
-                    InsightsRecommendationAction.ADJUST_WEIGHT_PLAN ->
-                        navigator.navigate(Screen.MealPlan)
-                    InsightsRecommendationAction.ADD_PROGRESS_PHOTO ->
-                        navigator.navigate(Screen.AddPhoto)
-                    InsightsRecommendationAction.KEEP_ROUTINE -> Unit
-                }
-            },
             onHistoryClick = { navigator.navigate(Screen.History) },
             onAddWeightClick = { navigator.navigate(Screen.AddWeight) },
             modifier = Modifier,
