@@ -1,6 +1,7 @@
 package com.emm.mybest.features.home.presentation
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -119,6 +120,9 @@ internal fun HomeScreenContent(
     ) { paddingValues ->
         HomeLazyContent(state, onIntent, callbacks, paddingValues)
     }
+    state.editingMeal?.let { draft ->
+        EditMealSheet(draft = draft, onIntent = onIntent)
+    }
 }
 
 @Composable
@@ -139,12 +143,18 @@ private fun HomeLazyContent(
         item { HomeHero(state) }
         item { Hairline() }
         itemsIndexed(state.planRows) { index, row ->
+            val onEditRequest: () -> Unit = if (row.slot == DailySlot.EXERCISE) {
+                {}
+            } else {
+                { onIntent(HomeIntent.StartEditMeal(row.slot)) }
+            }
             HomePlanRow(
                 label = row.slot.labelEs(),
                 time = row.time.formatHHmm(),
                 description = row.description,
                 done = row.done,
                 onToggle = { onIntent(HomeIntent.ToggleSlot(row.slot, !row.done)) },
+                onEditRequest = onEditRequest,
             )
             if (index < state.planRows.lastIndex) {
                 Hairline(inset = PLAN_ROW_PADDING_HORIZONTAL)
@@ -219,6 +229,7 @@ private fun HomePlanRow(
     description: String,
     done: Boolean,
     onToggle: () -> Unit,
+    onEditRequest: () -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
     val hasDescription = description.isNotBlank()
@@ -226,10 +237,16 @@ private fun HomePlanRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(PLAN_ROW_MIN_HEIGHT)
-            .clickable {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onToggle()
-            }
+            .combinedClickable(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onToggle()
+                },
+                onLongClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onEditRequest()
+                },
+            )
             .padding(horizontal = PLAN_ROW_PADDING_HORIZONTAL, vertical = PLAN_ROW_PADDING_VERTICAL),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(PLAN_ROW_SPACING),

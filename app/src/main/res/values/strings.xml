@@ -34,4 +34,11 @@
     <string name="home_photo_caption_with_days_format">%1$s · hace %2$dd</string>
     <string name="home_photo_caption_today_format">%1$s · hoy</string>
     <string name="home_photo_caption_yesterday_format">%1$s · ayer</string>
+
+    <!-- Edit-meal sheet (C11) -->
+    <string name="edit_meal_header_template">EDITAR · PLANTILLA</string>
+    <string name="edit_meal_description">DESCRIPCIÓN</string>
+    <string name="edit_meal_repeats_format">SE REPITE CADA %1$s</string>
+    <string name="edit_meal_cancel">CANCELAR</string>
+    <string name="edit_meal_save">GUARDAR</string>
 </resources>

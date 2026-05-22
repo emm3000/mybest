@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.emm.mybest.domain.models.DailyCompliance
 import com.emm.mybest.domain.models.DailySlot
 import com.emm.mybest.domain.models.DailySlotTimes
+import com.emm.mybest.domain.models.MealPlanEntry
 import com.emm.mybest.domain.models.MealType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeeklyExercisePlan
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
@@ -38,6 +40,8 @@ import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.todayIn
 import java.time.temporal.WeekFields
 import kotlin.time.Clock
+
+private const val MAX_MEAL_DESCRIPTION_LENGTH = 160
 
 private val PLAN_MEAL_ORDER = listOf(
     MealType.BREAKFAST,
@@ -69,6 +73,14 @@ private fun MealType.toDailySlot(): DailySlot = when (this) {
     MealType.LUNCH -> DailySlot.LUNCH
     MealType.SNACK -> DailySlot.SNACK
     MealType.DINNER -> DailySlot.DINNER
+}
+
+private fun DailySlot.toMealType(): MealType? = when (this) {
+    DailySlot.BREAKFAST -> MealType.BREAKFAST
+    DailySlot.LUNCH -> MealType.LUNCH
+    DailySlot.SNACK -> MealType.SNACK
+    DailySlot.DINNER -> MealType.DINNER
+    DailySlot.EXERCISE -> null
 }
 
 private fun buildMealRows(
@@ -120,7 +132,7 @@ private fun buildHomeState(
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val observeDailyCompliance: ObserveDailyComplianceUseCase,
-    private val toggleUseCases: HomeToggleUseCases,
+    private val mutationUseCases: HomeMutationUseCases,
     private val planUseCases: HomePlanUseCases,
     private val getCompletionStreak: GetCompletionStreakUseCase,
     private val observeDailySlotTimes: ObserveDailySlotTimesUseCase,
@@ -183,13 +195,19 @@ class HomeViewModel(
                     )
                 }
             }
-            .onEach { _state.value = it }
+            .onEach { newState ->
+                _state.update { current -> newState.copy(editingMeal = current.editingMeal) }
+            }
             .launchIn(viewModelScope)
     }
 
     fun onIntent(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.ToggleSlot -> handleSlotToggle(intent.slot, intent.done)
+            is HomeIntent.StartEditMeal -> handleStartEditMeal(intent.slot)
+            is HomeIntent.UpdateMealDraft -> handleUpdateMealDraft(intent.description)
+            is HomeIntent.SaveMealDraft -> handleSaveMealDraft()
+            is HomeIntent.CancelEditMeal -> handleCancelEditMeal()
         }
     }
 
@@ -197,15 +215,54 @@ class HomeViewModel(
         viewModelScope.launch {
             runCatching {
                 when (slot) {
-                    DailySlot.BREAKFAST -> toggleUseCases.toggleMeal(_state.value.today, MealType.BREAKFAST, done)
-                    DailySlot.LUNCH -> toggleUseCases.toggleMeal(_state.value.today, MealType.LUNCH, done)
-                    DailySlot.SNACK -> toggleUseCases.toggleMeal(_state.value.today, MealType.SNACK, done)
-                    DailySlot.DINNER -> toggleUseCases.toggleMeal(_state.value.today, MealType.DINNER, done)
-                    DailySlot.EXERCISE -> toggleUseCases.toggleExercise(_state.value.today, done)
+                    DailySlot.BREAKFAST -> mutationUseCases.toggleMeal(_state.value.today, MealType.BREAKFAST, done)
+                    DailySlot.LUNCH -> mutationUseCases.toggleMeal(_state.value.today, MealType.LUNCH, done)
+                    DailySlot.SNACK -> mutationUseCases.toggleMeal(_state.value.today, MealType.SNACK, done)
+                    DailySlot.DINNER -> mutationUseCases.toggleMeal(_state.value.today, MealType.DINNER, done)
+                    DailySlot.EXERCISE -> mutationUseCases.toggleExercise(_state.value.today, done)
                 }
             }.onFailure { error ->
                 _effect.tryEmit(HomeEffect.ShowError(error.message ?: "Error al actualizar"))
             }
         }
+    }
+
+    private fun handleStartEditMeal(slot: DailySlot) {
+        val type = slot.toMealType() ?: return
+        val row = _state.value.planRows.firstOrNull { it.slot == slot } ?: return
+        val draft = EditingMealDraft(
+            day = _state.value.dayOfWeek,
+            slot = slot,
+            type = type,
+            description = row.description,
+        )
+        _state.update { it.copy(editingMeal = draft) }
+    }
+
+    private fun handleUpdateMealDraft(description: String) {
+        val current = _state.value.editingMeal ?: return
+        _state.update {
+            it.copy(
+                editingMeal = current.copy(description = description.take(MAX_MEAL_DESCRIPTION_LENGTH)),
+            )
+        }
+    }
+
+    private fun handleSaveMealDraft() {
+        val draft = _state.value.editingMeal ?: return
+        viewModelScope.launch {
+            runCatching {
+                val entry = MealPlanEntry(draft.day, draft.type, draft.description.trim())
+                mutationUseCases.upsertMeal(entry)
+            }.onFailure { error ->
+                _effect.tryEmit(HomeEffect.ShowError(error.message ?: "Error al guardar"))
+            }.onSuccess {
+                _state.update { it.copy(editingMeal = null) }
+            }
+        }
+    }
+
+    private fun handleCancelEditMeal() {
+        _state.update { it.copy(editingMeal = null) }
     }
 }
