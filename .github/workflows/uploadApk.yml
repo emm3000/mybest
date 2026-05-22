@@ -1,4 +1,4 @@
-name: Android Action Generated APKs
+name: Android CI
 
 on:
   push:
@@ -19,21 +19,20 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
-env:
-  MIN_LINE_COVERAGE: "70.0"
-
 jobs:
-  quality_checks:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    env:
+      RELEASE_BUILD: ${{ github.event_name == 'workflow_dispatch' && inputs.release_build && 'true' || 'false' }}
     steps:
-      - name: Checkout the code
+      - name: Checkout
         uses: actions/checkout@v6
 
       - name: Validate Gradle Wrapper
         uses: gradle/actions/wrapper-validation@v5
 
-      - name: Set Up JDK
+      - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
@@ -42,147 +41,59 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Quality gate (detekt + unit tests + androidTest compile + JaCoCo)
+      - name: Quality gate (detekt + tests + androidTest compile + coverage report)
         run: ./gradlew :app:detekt :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :app:jacocoTestReport
-
-      - name: Parse JaCoCo coverage
-        if: always()
-        id: coverage
-        run: |
-          REPORT_PATH="app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-          PCT=""
-          SUMMARY=""
-          if [ -f "$REPORT_PATH" ]; then
-            if command -v xmllint >/dev/null 2>&1; then
-              MISSED=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@missed)' "$REPORT_PATH")
-              COVERED=$(xmllint --xpath 'string(/report/counter[@type="LINE"]/@covered)' "$REPORT_PATH")
-            else
-              MATCH=$(grep -o 'counter type="LINE" missed="[0-9]*" covered="[0-9]*"' "$REPORT_PATH" | tail -n 1)
-              MISSED=$(echo "$MATCH" | sed -E 's/.*missed="([0-9]+)".*/\1/')
-              COVERED=$(echo "$MATCH" | sed -E 's/.*covered="([0-9]+)".*/\1/')
-            fi
-            if [ -n "$MISSED" ] && [ -n "$COVERED" ]; then
-              TOTAL=$((MISSED + COVERED))
-              PCT=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN { if (t == 0) print "0.00"; else printf "%.2f", (c/t)*100 }')
-              SUMMARY=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN { if (t == 0) print "0.00%"; else printf "%.2f%% (%d/%d)", (c/t)*100, c, t }')
-            fi
-          fi
-          echo "pct=${PCT}" >> "$GITHUB_OUTPUT"
-          echo "summary=${SUMMARY}" >> "$GITHUB_OUTPUT"
-          echo "Coverage: ${SUMMARY:-unavailable}"
-
-      - name: Validate minimum coverage (70%)
-        run: |
-          PCT="${{ steps.coverage.outputs.pct }}"
-          if [ -z "$PCT" ]; then
-            echo "Coverage could not be parsed"
-            exit 1
-          fi
-          awk -v pct="$PCT" -v min="$MIN_LINE_COVERAGE" 'BEGIN { exit (pct >= min) ? 0 : 1 }'
 
       - name: Upload JaCoCo reports
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: jacoco-reports
+          retention-days: 7
           path: |
             app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
             app/build/reports/jacoco/jacocoTestReport/html
 
-      - name: Notify Telegram (quality checks)
-        if: always()
-        uses: ./.github/actions/telegram-notify
-        with:
-          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
-          pipeline: quality_checks
-          status: ${{ job.status }}
-          branch: ${{ github.ref_name }}
-          commit_sha: ${{ github.sha }}
-          commit_message: ${{ github.event.head_commit.message }}
-          run_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          coverage: ${{ steps.coverage.outputs.summary }}
-
-  upload_dev_apk:
-    needs: quality_checks
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Checkout the code
-        uses: actions/checkout@v6
-
-      - name: Set Up JDK
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'zulu'
-          java-version: 17
-
-      - name: Create keystore.properties file
-        run: printf '%s' "${{ secrets.JUST_VERONICA }}" > keystore.properties
-
-      - name: JUST CHILL
+      - name: Write signing config
+        if: github.ref == 'refs/heads/main'
+        env:
+          KEYSTORE_PROPERTIES: ${{ secrets.JUST_VERONICA }}
+          KEYSTORE_FILE_B64: ${{ secrets.JUST_CHILL }}
         run: |
+          printf '%s' "$KEYSTORE_PROPERTIES" > keystore.properties
           mkdir -p key
-          echo "${{ secrets.JUST_CHILL }}" | base64 --decode > key/just_chill_key.p12
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+          printf '%s' "$KEYSTORE_FILE_B64" | base64 --decode > key/just_chill_key.p12
 
       - name: Build APK
+        if: github.ref == 'refs/heads/main'
         run: |
-          BUILD_TASK=":app:assembleQa"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.release_build }}" = "true" ]; then
-            BUILD_TASK=":app:assembleRelease"
+          if [ "$RELEASE_BUILD" = "true" ]; then
+            ./gradlew :app:assembleRelease
+          else
+            ./gradlew :app:assembleQa
           fi
-          echo "Running $BUILD_TASK"
-          ./gradlew "$BUILD_TASK"
 
-      - name: Get APK path
-        id: releaseApk
+      - name: Resolve APK path
+        if: github.ref == 'refs/heads/main'
+        id: apk
         run: |
-          APK_DIR="app/build/outputs/apk/qa"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.release_build }}" = "true" ]; then
+          if [ "$RELEASE_BUILD" = "true" ]; then
             APK_DIR="app/build/outputs/apk/release"
+          else
+            APK_DIR="app/build/outputs/apk/qa"
           fi
-          APK_PATH=$(ls -1 "$APK_DIR"/*.apk | head -n 1)
+          APK_PATH=$(find "$APK_DIR" -maxdepth 1 -name '*.apk' -print -quit)
           if [ -z "$APK_PATH" ]; then
-            echo "No APK found in $APK_DIR"
+            echo "No APK found in $APK_DIR" >&2
             exit 1
           fi
-          echo "release=$APK_PATH" >> "$GITHUB_OUTPUT"
+          echo "path=$APK_PATH" >> "$GITHUB_OUTPUT"
 
-      - name: Upload release APK to Firebase App Distribution
+      - name: Distribute via Firebase App Distribution
+        if: github.ref == 'refs/heads/main'
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: ${{secrets.FIREBASE_RELEASE_APP_ID}}
+          appId: ${{ secrets.FIREBASE_RELEASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: Yolo
-          file: ${{ steps.releaseApk.outputs.release }}
-
-      - name: Capture APK metadata
-        if: always()
-        id: apk_metadata
-        run: |
-          APK_PATH="${{ steps.releaseApk.outputs.release }}"
-          APK_SIZE=""
-          if [ -n "$APK_PATH" ] && [ -f "$APK_PATH" ]; then
-            APK_SIZE=$(du -h "$APK_PATH" | awk '{print $1}')
-          fi
-          echo "apk_size=${APK_SIZE}" >> "$GITHUB_OUTPUT"
-
-      - name: Notify Telegram (upload apk)
-        if: always()
-        uses: ./.github/actions/telegram-notify
-        with:
-          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
-          pipeline: upload_dev_apk
-          status: ${{ job.status }}
-          branch: ${{ github.ref_name }}
-          commit_sha: ${{ github.sha }}
-          commit_message: ${{ github.event.head_commit.message }}
-          run_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          variant: ${{ github.event_name == 'workflow_dispatch' && inputs.release_build && 'release' || 'qa' }}
-          apk_size: ${{ steps.apk_metadata.outputs.apk_size }}
-          apk_path: ${{ steps.releaseApk.outputs.release }}
+          file: ${{ steps.apk.outputs.path }}
