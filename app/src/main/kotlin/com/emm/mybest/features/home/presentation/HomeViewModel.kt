@@ -11,9 +11,6 @@ import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeeklyExercisePlan
 import com.emm.mybest.domain.models.WeeklyMealPlan
 import com.emm.mybest.domain.models.WeightEntry
-import com.emm.mybest.domain.usecase.compliance.GetCompletionStreakUseCase
-import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
-import com.emm.mybest.domain.usecase.preferences.ObserveDailySlotTimesUseCase
 import com.emm.mybest.features.diet.presentation.edit.EditingMealDraft
 import com.emm.mybest.features.diet.presentation.edit.toDailySlot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -126,12 +123,7 @@ private fun buildHomeState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
-    private val observeDailyCompliance: ObserveDailyComplianceUseCase,
-    private val mutationUseCases: HomeMutationUseCases,
-    private val planUseCases: HomePlanUseCases,
-    private val getCompletionStreak: GetCompletionStreakUseCase,
-    private val observeDailySlotTimes: ObserveDailySlotTimesUseCase,
-    private val metricsUseCases: HomeMetricsUseCases,
+    private val useCases: HomeUseCases,
     clock: Clock = Clock.System,
 ) : ViewModel() {
 
@@ -169,19 +161,19 @@ class HomeViewModel(
 
     init {
         combine(
-            planUseCases.getMealPlan(),
-            planUseCases.getExercisePlan(),
+            useCases.getMealPlan(),
+            useCases.getExercisePlan(),
             dateFlow,
-            observeDailySlotTimes(),
+            useCases.observeDailySlotTimes(),
         ) { mealPlan, exPlan, today, slotTimes ->
             PlanContext(today, today.dayOfWeek, mealPlan, exPlan, slotTimes)
         }
             .flatMapLatest { context ->
                 combine(
-                    observeDailyCompliance(context.today),
-                    getCompletionStreak(context.today),
-                    metricsUseCases.observeWeightProgress(),
-                    metricsUseCases.observePhotos(),
+                    useCases.observeDailyCompliance(context.today),
+                    useCases.getCompletionStreak(context.today),
+                    useCases.observeWeightProgress(),
+                    useCases.observePhotos(),
                 ) { compliance, streak, weights, photos ->
                     buildHomeState(
                         complianceSnapshot = HomeComplianceSnapshot(compliance, streak),
@@ -210,11 +202,11 @@ class HomeViewModel(
         viewModelScope.launch {
             runCatching {
                 when (slot) {
-                    DailySlot.BREAKFAST -> mutationUseCases.toggleMeal(_state.value.today, MealType.BREAKFAST, done)
-                    DailySlot.LUNCH -> mutationUseCases.toggleMeal(_state.value.today, MealType.LUNCH, done)
-                    DailySlot.SNACK -> mutationUseCases.toggleMeal(_state.value.today, MealType.SNACK, done)
-                    DailySlot.DINNER -> mutationUseCases.toggleMeal(_state.value.today, MealType.DINNER, done)
-                    DailySlot.EXERCISE -> mutationUseCases.toggleExercise(_state.value.today, done)
+                    DailySlot.BREAKFAST -> useCases.toggleMeal(_state.value.today, MealType.BREAKFAST, done)
+                    DailySlot.LUNCH -> useCases.toggleMeal(_state.value.today, MealType.LUNCH, done)
+                    DailySlot.SNACK -> useCases.toggleMeal(_state.value.today, MealType.SNACK, done)
+                    DailySlot.DINNER -> useCases.toggleMeal(_state.value.today, MealType.DINNER, done)
+                    DailySlot.EXERCISE -> useCases.toggleExercise(_state.value.today, done)
                 }
             }.onFailure { error ->
                 _effect.tryEmit(HomeEffect.ShowError(error.message ?: "Error al actualizar"))
@@ -248,7 +240,7 @@ class HomeViewModel(
         viewModelScope.launch {
             runCatching {
                 val entry = MealPlanEntry(draft.day, draft.type, draft.description.trim())
-                mutationUseCases.upsertMeal(entry)
+                useCases.upsertMeal(entry)
             }.onFailure { error ->
                 _effect.tryEmit(HomeEffect.ShowError(error.message ?: "Error al guardar"))
             }.onSuccess {

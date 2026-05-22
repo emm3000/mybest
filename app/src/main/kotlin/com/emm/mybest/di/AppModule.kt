@@ -53,9 +53,7 @@ import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.features.diet.presentation.MealPlanViewModel
 import com.emm.mybest.features.exercise.presentation.ExercisePlanViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
-import com.emm.mybest.features.home.presentation.HomeMetricsUseCases
-import com.emm.mybest.features.home.presentation.HomeMutationUseCases
-import com.emm.mybest.features.home.presentation.HomePlanUseCases
+import com.emm.mybest.features.home.presentation.HomeUseCases
 import com.emm.mybest.features.home.presentation.HomeViewModel
 import com.emm.mybest.features.insights.presentation.InsightsViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
@@ -117,9 +115,7 @@ val appModule = module {
     factory { ToggleExerciseComplianceUseCase(get()) }
     factory { GetCompletionStreakUseCase(get()) }
     factory { ObserveDailySlotTimesUseCase(get()) }
-    factory { HomeMutationUseCases(get(), get(), get()) }
-    factory { HomePlanUseCases(get(), get()) }
-    factory { HomeMetricsUseCases(get(), get()) }
+    factory { HomeUseCases(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 
     // Weight use cases
     factory { SaveWeightUseCase(get()) }
@@ -139,7 +135,7 @@ val appModule = module {
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
-    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { HomeViewModel(get()) }
     viewModel { AddWeightViewModel(get(), get()) }
     viewModel { PhotosViewModel(get(), get(), get(), Clock.System) }
     viewModel { HistoryViewModel(get(), get(), get()) }

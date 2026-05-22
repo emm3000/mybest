@@ -62,9 +62,18 @@ class HomeViewModelTest {
     private val observeDailySlotTimes: ObserveDailySlotTimesUseCase = mockk()
     private val observeWeightProgress: ObserveWeightProgressUseCase = mockk()
     private val observePhotos: ObservePhotosUseCase = mockk()
-    private val planUseCases: HomePlanUseCases = HomePlanUseCases(getMealPlan, getExercisePlan)
-    private val metricsUseCases: HomeMetricsUseCases = HomeMetricsUseCases(observeWeightProgress, observePhotos)
-    private val mutationUseCases: HomeMutationUseCases = HomeMutationUseCases(toggleMeal, toggleExercise, upsertMeal)
+    private val useCases: HomeUseCases = HomeUseCases(
+        observeDailyCompliance = observeCompliance,
+        getCompletionStreak = getCompletionStreak,
+        observeDailySlotTimes = observeDailySlotTimes,
+        getMealPlan = getMealPlan,
+        getExercisePlan = getExercisePlan,
+        toggleMeal = toggleMeal,
+        toggleExercise = toggleExercise,
+        upsertMeal = upsertMeal,
+        observeWeightProgress = observeWeightProgress,
+        observePhotos = observePhotos,
+    )
 
     private fun emptyCompliance() = DailyCompliance(
         date = FIXED_DATE,
@@ -88,12 +97,7 @@ class HomeViewModelTest {
         every { observeWeightProgress() } returns flowOf(weights)
         every { observePhotos() } returns flowOf(photos)
         return HomeViewModel(
-            observeDailyCompliance = observeCompliance,
-            mutationUseCases = mutationUseCases,
-            planUseCases = planUseCases,
-            getCompletionStreak = getCompletionStreak,
-            observeDailySlotTimes = observeDailySlotTimes,
-            metricsUseCases = metricsUseCases,
+            useCases = useCases,
             clock = FIXED_CLOCK,
         )
     }
