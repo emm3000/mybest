@@ -30,6 +30,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
 import com.emm.mybest.core.navigation.Screen
+import com.emm.mybest.ui.components.atelier.Hairline
+import com.emm.mybest.ui.theme.AtelierHairline
 
 private val NAV_BAR_HEIGHT = 60.dp
 private val ACTIVE_INDICATOR_WIDTH = 26.dp
@@ -64,7 +66,7 @@ fun HBottomNavigationBar(
             .fillMaxWidth()
             .background(cs.background),
     ) {
-        HSeparator(color = cs.outlineVariant)
+        Hairline(color = AtelierHairline)
         Row(modifier = Modifier.fillMaxWidth().heightIn(min = NAV_BAR_HEIGHT)) {
             NAV_ITEMS.forEach { item ->
                 AtelierNavCell(

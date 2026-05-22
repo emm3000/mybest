@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
+import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.theme.AtelierTheme
 
 private val APP_BAR_HEIGHT = 56.dp
@@ -76,7 +77,7 @@ fun AtelierAppBar(
                     Row(verticalAlignment = Alignment.CenterVertically, content = actions)
                 }
             }
-            HSeparator()
+            Hairline()
         }
     }
 }
