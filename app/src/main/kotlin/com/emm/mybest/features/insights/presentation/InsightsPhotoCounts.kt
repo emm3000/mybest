@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emm.mybest.R
@@ -22,11 +23,12 @@ import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
 import com.emm.mybest.ui.theme.AtelierHairline
+import com.emm.mybest.ui.theme.AtelierTheme
 
 private val PHOTOS_PADDING_VERTICAL = 18.dp
 private val PHOTOS_DIVIDER_INSET = 22.dp
 private val PHOTO_COUNT_CELL_HEIGHT = 96.dp
-private val DISPLAY_PHOTO_SIZE = 36.sp
+private val DISPLAY_PHOTO_SIZE = 20.sp
 
 @Composable
 internal fun InsightsPhotoCounts(tronco: Int, cara: Int) {
@@ -65,6 +67,17 @@ private fun InsightsPhotoCell(label: String, count: Int, modifier: Modifier = Mo
             text = count.toString(),
             style = DisplayNumberStyle(fontSize = DISPLAY_PHOTO_SIZE),
             modifier = Modifier.padding(top = 6.dp),
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0C)
+@Composable
+private fun InsightsPhotoCountsPreview() {
+    AtelierTheme {
+        InsightsPhotoCounts(
+            tronco = 5,
+            cara = 2,
         )
     }
 }
