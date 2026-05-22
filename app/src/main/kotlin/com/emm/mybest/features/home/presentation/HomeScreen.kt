@@ -56,13 +56,14 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
 private val HERO_NUMBER_FONT_SIZE = 128.sp
-internal val HERO_SLASH_FONT_SIZE = 56.sp
+private val HERO_SLASH_FONT_SIZE = 56.sp
+private val HERO_LABEL_GAP = 6.dp
 private val PLAN_ROW_MIN_HEIGHT = 60.dp
 private val PLAN_ROW_PADDING_HORIZONTAL = 28.dp
 private val PLAN_ROW_PADDING_VERTICAL = 14.dp
 private val PLAN_ROW_SPACING = 16.dp
 private val SLOT_LABEL_WIDTH = 84.dp
-private val QUICK_ACTION_HEIGHT = 80.dp
+private val QUICK_ACTION_HEIGHT_MIN = 80.dp
 private val QUICK_ACTION_CELL_SPACER = 4.dp
 private const val PERCENT_FACTOR = 100
 
@@ -205,31 +206,36 @@ private fun HomeHeroMetrics(state: HomeState) {
             text = stringResource(R.string.home_streak_days_format, state.streakDays).uppercase(),
             style = MicroLabelStyle(tone = MicroLabelTone.Dim),
         )
-        MicroLabel(
-            text = stringResource(R.string.home_completed_today).uppercase(),
-            style = MicroLabelStyle(tone = MicroLabelTone.Dim),
-        )
     }
 }
 
 @Composable
 private fun HomeHero(state: HomeState) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = PLAN_ROW_PADDING_HORIZONTAL, vertical = PLAN_ROW_PADDING_VERTICAL),
-        verticalAlignment = Alignment.Bottom,
     ) {
-        DisplayNumber(
-            text = state.completedCount.toString(),
-            style = DisplayNumberStyle(fontSize = HERO_NUMBER_FONT_SIZE, italic = true),
+        MicroLabel(
+            text = stringResource(R.string.home_completed_today).uppercase(),
+            style = MicroLabelStyle(tone = MicroLabelTone.Dim),
         )
-        DisplayNumber(
-            text = "/${state.totalCount}",
-            style = DisplayNumberStyle(fontSize = HERO_SLASH_FONT_SIZE, color = AtelierInkTertiary),
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        HomeHeroMetrics(state)
+        Spacer(modifier = Modifier.height(HERO_LABEL_GAP))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            DisplayNumber(
+                text = state.completedCount.toString(),
+                style = DisplayNumberStyle(fontSize = HERO_NUMBER_FONT_SIZE, italic = true),
+            )
+            DisplayNumber(
+                text = "/${state.totalCount}",
+                style = DisplayNumberStyle(fontSize = HERO_SLASH_FONT_SIZE, color = AtelierInkTertiary),
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            HomeHeroMetrics(state)
+        }
     }
 }
 
@@ -285,7 +291,7 @@ private fun HomeQuickActionsRow(state: HomeState, callbacks: HomeCallbacks) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(QUICK_ACTION_HEIGHT),
+            .heightIn(min = QUICK_ACTION_HEIGHT_MIN),
     ) {
         HomeQuickActionCell(
             content = weightCellContent(state),
@@ -312,7 +318,7 @@ private fun HomeQuickActionCell(
             .fillMaxHeight()
             .clickable(onClick = onClick)
             .padding(horizontal = PLAN_ROW_PADDING_HORIZONTAL, vertical = PLAN_ROW_PADDING_VERTICAL),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center,
     ) {
         MicroLabel(text = content.label, style = MicroLabelStyle(tone = MicroLabelTone.Dim))

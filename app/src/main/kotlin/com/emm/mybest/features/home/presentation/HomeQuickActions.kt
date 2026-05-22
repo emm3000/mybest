@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.emm.mybest.R
 import com.emm.mybest.ui.components.atelier.DisplayNumber
 import com.emm.mybest.ui.components.atelier.DisplayNumberStyle
@@ -17,9 +18,9 @@ import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
-import com.emm.mybest.ui.theme.AtelierInkTertiary
 
 private val DIVIDER_VERTICAL_PADDING = 14.dp
+private val QUICK_ACTION_NUMBER_FONT_SIZE = 28.sp
 
 @Composable
 internal fun QuickActionDivider() {
@@ -40,7 +41,7 @@ internal fun QuickActionNumberRow(number: String, unit: String?, isPlaceholder: 
     Row(verticalAlignment = Alignment.Bottom) {
         DisplayNumber(
             text = number,
-            style = DisplayNumberStyle(fontSize = HERO_SLASH_FONT_SIZE, color = AtelierInkTertiary),
+            style = DisplayNumberStyle(fontSize = QUICK_ACTION_NUMBER_FONT_SIZE),
         )
         if (unit != null) {
             MicroLabel(text = unit, style = MicroLabelStyle(tone = MicroLabelTone.Dim))
