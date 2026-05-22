@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.formatEsLongDate
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
+import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.models.InsightsRecommendationKind
 import com.emm.mybest.domain.models.PeriodLabel
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -25,10 +25,7 @@ class InsightsViewModel(
     clock: Clock = Clock.System,
 ) : ViewModel() {
 
-    private val _effect = MutableSharedFlow<InsightsEffect>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
-    )
+    private val _effect = effectFlow<InsightsEffect>()
     val effect = _effect.asSharedFlow()
 
     val state: StateFlow<InsightsState> = getInsightsUseCase(clock.todayIn(TimeZone.currentSystemDefault()))

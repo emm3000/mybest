@@ -2,6 +2,7 @@ package com.emm.mybest.features.exercise.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.models.ExercisePlanEntry
 import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
 import com.emm.mybest.domain.usecase.exercise.UpsertExerciseRoutineUseCase
@@ -9,8 +10,6 @@ import com.emm.mybest.features.exercise.presentation.edit.EditingExerciseDraft
 import com.emm.mybest.features.exercise.presentation.edit.MAX_DETAIL_LENGTH
 import com.emm.mybest.features.exercise.presentation.edit.MAX_NAME_LENGTH
 import com.emm.mybest.features.exercise.presentation.edit.MAX_VOLUME_LENGTH
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,10 +31,7 @@ class ExercisePlanViewModel(
     )
     val state = _state.asStateFlow()
 
-    private val _effects = MutableSharedFlow<ExercisePlanEffect>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
+    private val _effects = effectFlow<ExercisePlanEffect>()
     val effects = _effects.asSharedFlow()
 
     init {

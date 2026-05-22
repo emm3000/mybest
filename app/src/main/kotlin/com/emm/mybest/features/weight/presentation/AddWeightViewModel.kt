@@ -2,11 +2,10 @@ package com.emm.mybest.features.weight.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.domain.validation.WeightInputValidator
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,10 +20,7 @@ class AddWeightViewModel(
     private val _state = MutableStateFlow(AddWeightState())
     val state = _state.asStateFlow()
 
-    private val _effect = MutableSharedFlow<AddWeightEffect>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
+    private val _effect = effectFlow<AddWeightEffect>()
     val effect = _effect.asSharedFlow()
 
     init {

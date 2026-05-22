@@ -3,9 +3,8 @@ package com.emm.mybest.features.photo.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
+import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.repository.PhotoRepository
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -19,10 +18,7 @@ class ComparePhotosViewModel(
     private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
-    private val _effect = MutableSharedFlow<ComparePhotosEffect>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
+    private val _effect = effectFlow<ComparePhotosEffect>()
     val effect = _effect.asSharedFlow()
 
     val state: StateFlow<ComparePhotosState> = photoRepository.getAllPhotos()

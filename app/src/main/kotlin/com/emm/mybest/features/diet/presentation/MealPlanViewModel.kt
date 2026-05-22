@@ -2,6 +2,7 @@ package com.emm.mybest.features.diet.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.models.MealPlanEntry
 import com.emm.mybest.domain.models.MealType
 import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
@@ -9,8 +10,6 @@ import com.emm.mybest.domain.usecase.diet.UpsertMealUseCase
 import com.emm.mybest.features.diet.presentation.edit.EditingMealDraft
 import com.emm.mybest.features.diet.presentation.edit.MAX_MEAL_DESCRIPTION_LENGTH
 import com.emm.mybest.features.diet.presentation.edit.toDailySlot
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,10 +31,7 @@ class MealPlanViewModel(
     )
     val state = _state.asStateFlow()
 
-    private val _effects = MutableSharedFlow<MealPlanEffect>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
+    private val _effects = effectFlow<MealPlanEffect>()
     val effects = _effects.asSharedFlow()
 
     init {

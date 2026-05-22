@@ -3,13 +3,12 @@ package com.emm.mybest.features.photo.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
+import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.models.NewProgressPhoto
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
 import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,10 +32,7 @@ class PhotosViewModel(
 
     private val _selectedType = MutableStateFlow(PhotoType.TRUNK)
 
-    private val _effect = MutableSharedFlow<PhotosEffect>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
+    private val _effect = effectFlow<PhotosEffect>()
     val effect = _effect.asSharedFlow()
 
     val state: StateFlow<PhotosState> = combine(

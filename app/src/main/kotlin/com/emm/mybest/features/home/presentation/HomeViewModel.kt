@@ -2,6 +2,7 @@ package com.emm.mybest.features.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.models.DailyCompliance
 import com.emm.mybest.domain.models.DailySlot
 import com.emm.mybest.domain.models.DailySlotTimes
@@ -15,10 +16,8 @@ import com.emm.mybest.features.diet.presentation.edit.EditingMealDraft
 import com.emm.mybest.features.diet.presentation.edit.toDailySlot
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -154,10 +153,7 @@ class HomeViewModel(
     )
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
-    private val _effect = MutableSharedFlow<HomeEffect>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
+    private val _effect = effectFlow<HomeEffect>()
     val effect = _effect.asSharedFlow()
 
     init {
