@@ -6,6 +6,10 @@ import com.emm.mybest.domain.models.MealPlanEntry
 import com.emm.mybest.domain.models.MealType
 import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
 import com.emm.mybest.domain.usecase.diet.UpsertMealUseCase
+import com.emm.mybest.features.diet.presentation.edit.EditingMealDraft
+import com.emm.mybest.features.diet.presentation.edit.MAX_MEAL_DESCRIPTION_LENGTH
+import com.emm.mybest.features.diet.presentation.edit.toDailySlot
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -24,7 +28,7 @@ class MealPlanViewModel(
 
     private val _effects = MutableSharedFlow<MealPlanEffect>(
         extraBufferCapacity = 1,
-        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
     val effects = _effects.asSharedFlow()
 
@@ -43,22 +47,35 @@ class MealPlanViewModel(
 
     fun onIntent(intent: MealPlanIntent) {
         when (intent) {
-            is MealPlanIntent.StartEdit -> _state.update {
-                val current = it.entries[intent.day]?.get(intent.type).orEmpty()
-                it.copy(editing = EditingMeal(intent.day, intent.type, current))
-            }
-            is MealPlanIntent.UpdateDraft -> _state.update {
-                it.copy(editing = it.editing?.copy(draftDescription = intent.description))
-            }
+            is MealPlanIntent.StartEdit -> handleStartEdit(intent.day, intent.type)
+            is MealPlanIntent.UpdateDraft -> handleUpdateDraft(intent.description)
             MealPlanIntent.SaveMeal -> saveMeal()
             MealPlanIntent.CancelEdit -> _state.update { it.copy(editing = null) }
+        }
+    }
+
+    private fun handleStartEdit(day: DayOfWeek, type: MealType) {
+        val current = _state.value.entries[day]?.get(type).orEmpty()
+        val draft = EditingMealDraft(
+            day = day,
+            slot = type.toDailySlot(),
+            type = type,
+            description = current,
+        )
+        _state.update { it.copy(editing = draft) }
+    }
+
+    private fun handleUpdateDraft(description: String) {
+        val current = _state.value.editing ?: return
+        _state.update {
+            it.copy(editing = current.copy(description = description.take(MAX_MEAL_DESCRIPTION_LENGTH)))
         }
     }
 
     private fun saveMeal() {
         val editing = _state.value.editing ?: return
         viewModelScope.launch {
-            upsertMeal(MealPlanEntry(editing.day, editing.type, editing.draftDescription.trim()))
+            upsertMeal(MealPlanEntry(editing.day, editing.type, editing.description.trim()))
             _state.update { it.copy(editing = null) }
             _effects.emit(MealPlanEffect.DismissSheet)
         }

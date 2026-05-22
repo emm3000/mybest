@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.sp
 import com.emm.mybest.R
 import com.emm.mybest.domain.models.DailySlot
 import com.emm.mybest.domain.models.DailySlotTimes
+import com.emm.mybest.features.diet.presentation.edit.EditMealSheet
+import com.emm.mybest.features.diet.presentation.edit.EditMealSheetCallbacks
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.atelier.CompletionCheck
 import com.emm.mybest.ui.components.atelier.DisplayNumber
@@ -123,7 +125,14 @@ internal fun HomeScreenContent(
         HomeLazyContent(state, onIntent, callbacks, paddingValues)
     }
     state.editingMeal?.let { draft ->
-        EditMealSheet(draft = draft, onIntent = onIntent)
+        EditMealSheet(
+            draft = draft,
+            callbacks = EditMealSheetCallbacks(
+                onDescriptionChange = { onIntent(HomeIntent.UpdateMealDraft(it)) },
+                onSave = { onIntent(HomeIntent.SaveMealDraft) },
+                onCancel = { onIntent(HomeIntent.CancelEditMeal) },
+            ),
+        )
     }
 }
 

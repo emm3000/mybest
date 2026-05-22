@@ -1,4 +1,4 @@
-package com.emm.mybest.features.home.presentation
+package com.emm.mybest.features.diet.presentation.edit
 
 import com.emm.mybest.domain.models.DailySlot
 import com.emm.mybest.domain.models.MealType

@@ -14,6 +14,8 @@ import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.usecase.compliance.GetCompletionStreakUseCase
 import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
 import com.emm.mybest.domain.usecase.preferences.ObserveDailySlotTimesUseCase
+import com.emm.mybest.features.diet.presentation.edit.EditingMealDraft
+import com.emm.mybest.features.diet.presentation.edit.toDailySlot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -67,13 +69,6 @@ private data class HomeMetricsSnapshot(
     val weights: List<WeightEntry>,
     val photos: List<ProgressPhoto>,
 )
-
-private fun MealType.toDailySlot(): DailySlot = when (this) {
-    MealType.BREAKFAST -> DailySlot.BREAKFAST
-    MealType.LUNCH -> DailySlot.LUNCH
-    MealType.SNACK -> DailySlot.SNACK
-    MealType.DINNER -> DailySlot.DINNER
-}
 
 private fun DailySlot.toMealType(): MealType? = when (this) {
     DailySlot.BREAKFAST -> MealType.BREAKFAST

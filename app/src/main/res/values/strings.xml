@@ -42,6 +42,14 @@
     <string name="edit_meal_cancel">CANCELAR</string>
     <string name="edit_meal_save">GUARDAR</string>
 
+    <!-- Diet screen (C13) -->
+    <string name="meal_plan_app_bar_title">DIETA · PLANTILLA 7×4</string>
+    <string name="meal_plan_app_bar_right">SEMANA</string>
+    <string name="meal_plan_hero_label">PLAN SEMANAL</string>
+    <string name="meal_plan_hero_line1">Comer</string>
+    <string name="meal_plan_hero_line2">en bucle.</string>
+    <string name="meal_plan_empty_meal">—</string>
+
     <!-- Insights screen (C12) -->
     <string name="insights_header_title">PROGRESO</string>
     <string name="insights_days_format">%d DÍAS</string>

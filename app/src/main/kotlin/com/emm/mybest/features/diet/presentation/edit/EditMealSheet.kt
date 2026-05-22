@@ -1,4 +1,4 @@
-package com.emm.mybest.features.home.presentation
+package com.emm.mybest.features.diet.presentation.edit
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.emm.mybest.R
 import com.emm.mybest.core.datetime.shortEs
+import com.emm.mybest.features.home.presentation.labelEs
+import com.emm.mybest.features.home.presentation.longEs
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
@@ -70,15 +72,17 @@ private const val SAVE_BUTTON_WEIGHT = 1.4f
 private const val CANCEL_BUTTON_WEIGHT = 1f
 private const val DISABLED_ALPHA = 0.4f
 
+internal const val MAX_MEAL_DESCRIPTION_LENGTH = 160
+
 @Composable
 fun EditMealSheet(
     draft: EditingMealDraft,
-    onIntent: (HomeIntent) -> Unit,
+    callbacks: EditMealSheetCallbacks,
     modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
-        onDismissRequest = { onIntent(HomeIntent.CancelEditMeal) },
+        onDismissRequest = callbacks.onCancel,
         modifier = modifier,
         sheetState = sheetState,
         containerColor = AtelierBackgroundSheet,
@@ -90,9 +94,9 @@ fun EditMealSheet(
         SheetHeader(draft)
         SheetHero(draft)
         Hairline()
-        SheetBody(draft, onIntent)
+        SheetBody(draft, callbacks.onDescriptionChange)
         Hairline()
-        SheetActions(draft, onIntent)
+        SheetActions(draft, callbacks)
     }
 }
 
@@ -156,7 +160,7 @@ private fun SheetHero(draft: EditingMealDraft) {
 }
 
 @Composable
-private fun SheetBody(draft: EditingMealDraft, onIntent: (HomeIntent) -> Unit) {
+private fun SheetBody(draft: EditingMealDraft, onDescriptionChange: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -168,17 +172,17 @@ private fun SheetBody(draft: EditingMealDraft, onIntent: (HomeIntent) -> Unit) {
             style = MicroLabelStyle(tone = MicroLabelTone.Dim),
         )
         Spacer(modifier = Modifier.height(TEXTAREA_MARGIN_TOP))
-        SheetTextArea(draft, onIntent)
+        SheetTextArea(draft, onDescriptionChange)
         Spacer(modifier = Modifier.height(TEXTAREA_MARGIN_TOP))
         SheetBodyFooter(draft)
     }
 }
 
 @Composable
-private fun SheetTextArea(draft: EditingMealDraft, onIntent: (HomeIntent) -> Unit) {
+private fun SheetTextArea(draft: EditingMealDraft, onDescriptionChange: (String) -> Unit) {
     BasicTextField(
         value = draft.description,
-        onValueChange = { onIntent(HomeIntent.UpdateMealDraft(it)) },
+        onValueChange = onDescriptionChange,
         modifier = Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = TEXTAREA_MIN_HEIGHT)
@@ -216,7 +220,7 @@ private fun SheetBodyFooter(draft: EditingMealDraft) {
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         MicroLabel(
-            text = "${draft.description.length} / 160",
+            text = "${draft.description.length} / $MAX_MEAL_DESCRIPTION_LENGTH",
             style = MicroLabelStyle(tone = MicroLabelTone.Dim),
         )
         MicroLabel(
@@ -227,7 +231,7 @@ private fun SheetBodyFooter(draft: EditingMealDraft) {
 }
 
 @Composable
-private fun SheetActions(draft: EditingMealDraft, onIntent: (HomeIntent) -> Unit) {
+private fun SheetActions(draft: EditingMealDraft, callbacks: EditMealSheetCallbacks) {
     val isSaveDisabled = draft.description.trim().isBlank()
     Row(
         modifier = Modifier
@@ -237,23 +241,23 @@ private fun SheetActions(draft: EditingMealDraft, onIntent: (HomeIntent) -> Unit
         horizontalArrangement = Arrangement.spacedBy(ACTIONS_GAP),
     ) {
         CancelButton(
-            onIntent = onIntent,
+            onCancel = callbacks.onCancel,
             modifier = Modifier.weight(CANCEL_BUTTON_WEIGHT),
         )
         SaveButton(
             isDisabled = isSaveDisabled,
-            onIntent = onIntent,
+            onSave = callbacks.onSave,
             modifier = Modifier.weight(SAVE_BUTTON_WEIGHT),
         )
     }
 }
 
 @Composable
-private fun CancelButton(onIntent: (HomeIntent) -> Unit, modifier: Modifier = Modifier) {
+private fun CancelButton(onCancel: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .border(TEXTAREA_BORDER_WIDTH, AtelierInkMuted, RectangleShape)
-            .clickable { onIntent(HomeIntent.CancelEditMeal) }
+            .clickable(onClick = onCancel)
             .padding(vertical = BUTTON_PADDING_VERTICAL),
         contentAlignment = Alignment.Center,
     ) {
@@ -272,14 +276,14 @@ private fun CancelButton(onIntent: (HomeIntent) -> Unit, modifier: Modifier = Mo
 @Composable
 private fun SaveButton(
     isDisabled: Boolean,
-    onIntent: (HomeIntent) -> Unit,
+    onSave: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val bgColor = if (isDisabled) AtelierInk.copy(alpha = DISABLED_ALPHA) else AtelierInk
     Box(
         modifier = modifier
             .background(bgColor, RectangleShape)
-            .clickable(enabled = !isDisabled) { onIntent(HomeIntent.SaveMealDraft) }
+            .clickable(enabled = !isDisabled, onClick = onSave)
             .padding(vertical = BUTTON_PADDING_VERTICAL),
         contentAlignment = Alignment.Center,
     ) {

@@ -68,7 +68,7 @@ class MealPlanViewModelTest {
         assertNotNull(editing)
         assertEquals(DayOfWeek.MONDAY, editing!!.day)
         assertEquals(MealType.BREAKFAST, editing.type)
-        assertEquals("Avena", editing.draftDescription)
+        assertEquals("Avena", editing.description)
     }
 
     @Test
@@ -80,18 +80,18 @@ class MealPlanViewModelTest {
 
         val editing = viewModel.state.value.editing
         assertNotNull(editing)
-        assertEquals("", editing!!.draftDescription)
+        assertEquals("", editing!!.description)
     }
 
     @Test
-    fun `UpdateDraft updates draftDescription in editing`() = runTest {
+    fun `UpdateDraft updates description in editing`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
         viewModel.onIntent(MealPlanIntent.StartEdit(DayOfWeek.WEDNESDAY, MealType.DINNER))
         viewModel.onIntent(MealPlanIntent.UpdateDraft("Pasta con pollo"))
 
-        assertEquals("Pasta con pollo", viewModel.state.value.editing?.draftDescription)
+        assertEquals("Pasta con pollo", viewModel.state.value.editing?.description)
     }
 
     @Test
