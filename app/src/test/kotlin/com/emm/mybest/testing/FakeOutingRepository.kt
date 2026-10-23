@@ -14,10 +14,12 @@ import kotlinx.datetime.LocalDate
 class FakeOutingRepository(
     initialOutings: List<Outing> = emptyList(),
     initialWonNights: List<WonNight> = emptyList(),
+    initialNoOutingAnswers: Set<LocalDate> = emptySet(),
 ) : OutingRepository {
 
     private val outings = MutableStateFlow(initialOutings)
     private val wonNights = MutableStateFlow(initialWonNights)
+    private val noOutingAnswers = MutableStateFlow(initialNoOutingAnswers)
 
     override fun observeAll(): Flow<List<Outing>> = outings
 
@@ -48,9 +50,11 @@ class FakeOutingRepository(
     }
 
     override fun observeNoOutingAnswers(from: LocalDate, to: LocalDate): Flow<Set<LocalDate>> =
-        MutableStateFlow(emptySet())
+        noOutingAnswers.map { all -> all.filter { it in from..to }.toSet() }
 
-    override suspend fun recordNoOuting(appDay: LocalDate) = Unit
+    override suspend fun recordNoOuting(appDay: LocalDate) {
+        noOutingAnswers.value = noOutingAnswers.value + appDay
+    }
 
     private fun nextId(): Long = outings.value.size + 1L
 
