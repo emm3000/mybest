@@ -33,7 +33,7 @@ fun SummaryContent(
     ) {
         item { SummaryHeader(state = state, onIntent = onIntent) }
         items(items = state.sections, key = { it.titleRes }) { section ->
-            SummarySection(section = section, onPromptClick = { onIntent(SummaryIntent.OnSetupPromptClick) })
+            SummarySection(section = section, onPromptClick = { onIntent(SummaryIntent.OnSetupPromptClick(it)) })
         }
     }
 }
@@ -53,7 +53,7 @@ private fun SummaryHeader(
 @Composable
 private fun SummarySection(
     section: SummarySectionState,
-    onPromptClick: () -> Unit,
+    onPromptClick: (SummaryDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -73,7 +73,9 @@ private val PREVIEW_STATE = SummaryState(
         ),
         SummarySectionState(
             titleRes = R.string.summary_section_checks,
-            rows = listOf(SummaryRowState.SetupPrompt(SummaryText(R.string.summary_checks_setup))),
+            rows = listOf(
+                SummaryRowState.SetupPrompt(SummaryText(R.string.summary_checks_setup), SummaryDestination.SETTINGS),
+            ),
         ),
     ),
 )

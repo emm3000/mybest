@@ -12,7 +12,7 @@ internal fun EntryProviderScope<NavKey>.weeklySummaryEntry(navigator: Navigator)
         val viewModel: SummaryViewModel = koinViewModel()
         SummaryScreen(
             viewModel = viewModel,
-            onOpenSettings = { navigator.navigate(Screen.Settings) },
+            callbacks = summaryCallbacks(navigator),
             onBack = { navigator.goBack() },
             modifier = Modifier,
         )

@@ -9,7 +9,12 @@ import kotlin.math.abs
 
 internal fun WeighInTrend.toWeightSection(): SummarySectionState = SummarySectionState(
     titleRes = R.string.summary_section_weight,
-    rows = latestKg?.let { toRows(it) } ?: listOf(SummaryRowState.SetupPrompt(SummaryText(R.string.summary_weight_setup))),
+    rows = latestKg?.let { toRows(it) } ?: listOf(WEIGHT_SETUP_PROMPT),
+)
+
+private val WEIGHT_SETUP_PROMPT = SummaryRowState.SetupPrompt(
+    SummaryText(R.string.summary_weight_setup),
+    SummaryDestination.ADD_WEIGHT,
 )
 
 private fun WeighInTrend.toRows(latest: Float): List<SummaryRowState> = listOfNotNull(
