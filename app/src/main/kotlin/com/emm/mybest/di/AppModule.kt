@@ -76,6 +76,12 @@ import com.emm.mybest.domain.usecase.preouting.PreOutingUseCases
 import com.emm.mybest.domain.usecase.preouting.RecordWonNightUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveReturnTimesUseCase
+import com.emm.mybest.domain.usecase.summary.ObserveWeekDebtUseCase
+import com.emm.mybest.domain.usecase.summary.ObserveWeekMoneyUseCase
+import com.emm.mybest.domain.usecase.summary.ObserveWeekOutingsUseCase
+import com.emm.mybest.domain.usecase.summary.ObserveWeekRecoveryUseCase
+import com.emm.mybest.domain.usecase.summary.ObserveWeeklySummaryUseCase
+import com.emm.mybest.domain.usecase.summary.WeeklySummarySections
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.usecase.weight.GetNearestWeightOnDateUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeighInTrendUseCase
@@ -239,4 +245,11 @@ val appModule = module {
     factory { RecordNoOutingUseCase(get()) }
     factory { CheckInUseCases(get(), get(), get(), get()) }
     viewModel { CheckInViewModel(get()) }
+
+    factory { ObserveWeekOutingsUseCase(get()) }
+    factory { ObserveWeekRecoveryUseCase(get(), get()) }
+    factory { ObserveWeekDebtUseCase(get(), get()) }
+    factory { ObserveWeekMoneyUseCase(get(), get(), get()) }
+    factory { WeeklySummarySections(get(), get(), get(), get(), get()) }
+    factory { ObserveWeeklySummaryUseCase(get()) }
 }
