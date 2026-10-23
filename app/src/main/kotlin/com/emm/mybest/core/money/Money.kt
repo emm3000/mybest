@@ -16,6 +16,8 @@ value class Money(val cents: Long) : Comparable<Money> {
     override fun compareTo(other: Money): Int = cents.compareTo(other.cents)
 
     companion object {
+        const val CENTS_PER_SOL = 100L
+
         val ZERO = Money(0)
     }
 }

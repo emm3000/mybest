@@ -38,4 +38,19 @@ class MoneyTest {
     fun zeroHasNoCents() {
         assertEquals(0L, Money.ZERO.cents)
     }
+
+    @Test
+    fun formatPenGroupsThousandsWithTwoDecimals() {
+        assertEquals("S/ 1,234.50", Money(123450).formatPen())
+    }
+
+    @Test
+    fun formatPenShowsZero() {
+        assertEquals("S/ 0.00", Money(0).formatPen())
+    }
+
+    @Test
+    fun formatPenPutsSignBeforeSymbol() {
+        assertEquals("-S/ 5.00", Money(-500).formatPen())
+    }
 }
