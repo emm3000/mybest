@@ -31,3 +31,5 @@ Last 20 PRs, oldest first. Model:effort is what actually ran, which may differ f
 | #35 | #6 | 5 | opus:high | MERGE | - |
 | #36 | #9 | 3 | sonnet:medium | MERGE | - |
 | #38 | #11 | 3 | sonnet:medium | MERGE | - |
+| #39 | #7 | 5 | opus:high | MERGE | - |
+| #40 | #10 | 5 | opus:high | MERGE | - |
