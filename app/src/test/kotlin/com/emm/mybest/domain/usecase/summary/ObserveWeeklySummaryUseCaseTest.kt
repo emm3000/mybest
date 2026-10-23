@@ -237,6 +237,18 @@ class ObserveWeeklySummaryUseCaseTest {
     }
 
     @Test
+    fun `a past week leaves out the relapses that came after it from the history`() = runTest {
+        val records = Records(
+            outings = listOf(unplanned(1, PREVIOUS_FRIDAY), unplanned(2, FRIDAY)),
+            checks = listOf(dietDone(PREVIOUS_SATURDAY), dietDone(SATURDAY)),
+        )
+
+        val history = summaryOf(records, appDay = PREVIOUS_SUNDAY).recovery.returnTimeHistory
+
+        assertEquals(listOf(ReturnTime(PREVIOUS_FRIDAY, PREVIOUS_SATURDAY, days = 1)), history)
+    }
+
+    @Test
     fun `counts the checks done this week against each weekly target`() = runTest {
         val gymDays = listOf(PREVIOUS_SUNDAY, MONDAY, FRIDAY, NEXT_MONDAY)
         val records = Records(
