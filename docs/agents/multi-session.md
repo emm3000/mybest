@@ -80,7 +80,15 @@ Every dispatch includes:
 Required for any ticket that changes a screen or a shared component.
 
 1. Install on the assigned emulator only; screenshot every changed screen with `adb -s <serial> exec-out screencap -p > <file>.png`.
-2. Publish the images on a branch `assets/<N>-visual-check` with the PR head short SHA in every file name (`home-<sha>.png`).
+2. Publish the images on a branch `assets/<N>-visual-check` with the PR head short SHA in every file name (`home-<sha>.png`). Build it in a throwaway orphan worktree and run each step as its own command:
+   ```sh
+   git worktree add --orphan -b assets/<N>-visual-check <scratchpad>/assets-<N>
+   cp <scratchpad>/*-<sha>.png <scratchpad>/assets-<N>/
+   git -C <scratchpad>/assets-<N> add . && git -C <scratchpad>/assets-<N> commit --no-verify -m "chore: add visual check for #<N>"
+   git push -u origin assets/<N>-visual-check
+   git worktree remove --force <scratchpad>/assets-<N>
+   ```
+   Never `rm -rf` (a `deny` rule blocks it even in bypass mode and takes the whole compound command down with it), and never force-push the assets branch; new screenshots after a fix are a new commit on it (`git worktree add <scratchpad>/assets-<N> assets/<N>-visual-check`, then the same copy, commit, push and remove). `--no-verify` skips the Detekt hook, which cannot run on an images-only tree.
 3. Link them in the PR body with `raw.githubusercontent.com` URLs. *Why: the `gh` CLI and API cannot attach images to a PR.*
 4. The assets branch is deleted when the cycle closes.
 
