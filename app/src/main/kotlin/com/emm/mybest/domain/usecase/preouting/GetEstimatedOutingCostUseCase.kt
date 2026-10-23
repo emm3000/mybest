@@ -7,7 +7,7 @@ import com.emm.mybest.domain.repository.SetupRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-private const val OUTINGS_NEEDED_TO_AVERAGE = 3
+internal const val OUTINGS_NEEDED_TO_AVERAGE = 3
 
 class GetEstimatedOutingCostUseCase(
     private val setupRepository: SetupRepository,
