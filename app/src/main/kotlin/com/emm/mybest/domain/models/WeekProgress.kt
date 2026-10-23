@@ -1,4 +1,4 @@
-package com.emm.mybest.domain.usecase.dailycheck
+package com.emm.mybest.domain.models
 
 /**
  * Days of one daily check counted in an app week against its weekly [target]. For alcohol, [count] is days drank.

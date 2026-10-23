@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
 import com.emm.mybest.domain.models.DailyCheckType
-import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
+import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle

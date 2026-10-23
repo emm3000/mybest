@@ -3,6 +3,7 @@ package com.emm.mybest.domain.usecase.dailycheck
 import com.emm.mybest.core.datetime.appWeekOf
 import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.domain.repository.DailyCheckRepository
 import com.emm.mybest.domain.repository.SetupRepository
 import kotlinx.coroutines.flow.Flow

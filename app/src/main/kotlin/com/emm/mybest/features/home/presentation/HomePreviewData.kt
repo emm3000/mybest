@@ -1,7 +1,7 @@
 package com.emm.mybest.features.home.presentation
 
 import com.emm.mybest.domain.models.DailyCheckType
-import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
+import com.emm.mybest.domain.models.WeekProgress
 
 private const val PREVIEW_GYM_COUNT = 3
 private const val PREVIEW_GYM_TARGET = 4

@@ -14,10 +14,10 @@ import com.emm.mybest.domain.models.ReturnTime
 import com.emm.mybest.domain.models.WeekDebt
 import com.emm.mybest.domain.models.WeekMoney
 import com.emm.mybest.domain.models.WeekOutings
+import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.domain.models.WeekRecovery
 import com.emm.mybest.domain.models.WeeklySummary
 import com.emm.mybest.domain.models.WeighInTrend
-import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
 import com.emm.mybest.domain.usecase.summary.ObserveWeeklySummaryUseCase
 import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule

@@ -7,11 +7,11 @@ import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.usecase.dailycheck.ObserveDailyChecksUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
-import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.testing.FakeDailyCheckRepository
