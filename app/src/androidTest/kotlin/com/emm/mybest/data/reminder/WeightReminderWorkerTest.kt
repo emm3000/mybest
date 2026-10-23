@@ -106,6 +106,10 @@ private class FakeUserPreferencesRepository(enabled: Boolean) : UserPreferencesR
     override val notificationsEnabled: Flow<Boolean> = flowOf(enabled)
 
     override suspend fun updateNotificationsEnabled(enabled: Boolean) = Unit
+
+    override val onboardingCompleted: Flow<Boolean> = flowOf(true)
+
+    override suspend fun updateOnboardingCompleted(completed: Boolean) = Unit
 }
 
 private class FakeSetupRepository(private val setup: Setup) : SetupRepository {
