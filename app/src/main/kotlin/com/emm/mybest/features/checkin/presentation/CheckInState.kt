@@ -1,5 +1,7 @@
 package com.emm.mybest.features.checkin.presentation
 
+import com.emm.mybest.ui.components.LimitOutcomeState
+
 data class CheckInState(
     val isLoaded: Boolean = false,
     val step: CheckInStep = CheckInStep.NO_TASK,

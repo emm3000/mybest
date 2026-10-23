@@ -10,7 +10,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,8 +17,10 @@ import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
 import com.emm.mybest.domain.models.LimitKind
 import com.emm.mybest.ui.components.HButton
+import com.emm.mybest.ui.components.LimitOutcomeState
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
+import com.emm.mybest.ui.components.message
 import com.emm.mybest.ui.theme.AtelierTheme
 
 private val BUTTON_MIN_HEIGHT = 56.dp
@@ -55,15 +56,6 @@ private fun OutcomeRow(outcome: LimitOutcomeState, modifier: Modifier = Modifier
         )
     }
     Hairline()
-}
-
-@Composable
-private fun LimitOutcomeState.message(): String = when (this) {
-    is LimitOutcomeState.Kept -> stringResource(R.string.check_in_result_kept)
-    is LimitOutcomeState.MoneyExceeded -> stringResource(R.string.check_in_result_money_exceeded, amountLabel)
-    is LimitOutcomeState.DrinksExceeded ->
-        pluralStringResource(R.plurals.check_in_result_drinks_exceeded, count, count)
-    is LimitOutcomeState.ReturnTimeExceeded -> stringResource(R.string.check_in_result_minutes_exceeded, minutes)
 }
 
 @Composable

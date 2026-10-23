@@ -1,4 +1,4 @@
-package com.emm.mybest.features.checkin.presentation
+package com.emm.mybest.ui.components
 
 import com.emm.mybest.domain.models.LimitKind
 
