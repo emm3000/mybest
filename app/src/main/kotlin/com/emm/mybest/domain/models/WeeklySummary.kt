@@ -4,7 +4,7 @@ import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
 
 /**
  * Everything the weekly summary shows for one Monday to Sunday app week. [checks] holds the daily checks that have a
- * weekly target; the [weighInTrend] is the latest one, not limited to the week.
+ * weekly target; the [weighInTrend] is as of the week's end.
  */
 data class WeeklySummary(
     val outings: WeekOutings,

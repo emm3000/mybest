@@ -49,6 +49,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 private val LIMA = TimeZone.of("America/Lima")
+private val SATURDAY_BEFORE_PREVIOUS = LocalDate(2026, 10, 10)
 private val PREVIOUS_FRIDAY = LocalDate(2026, 10, 16)
 private val PREVIOUS_SATURDAY = LocalDate(2026, 10, 17)
 private val PREVIOUS_SUNDAY = LocalDate(2026, 10, 18)
@@ -66,6 +67,7 @@ private data class Records(
     val checks: List<DailyCheck> = emptyList(),
     val setup: Setup = Setup(),
     val weights: List<Float> = emptyList(),
+    val weighIns: List<WeightEntry> = emptyList(),
     val wonNights: List<WonNight> = emptyList(),
     val debts: List<Debt> = emptyList(),
     val payments: List<DebtPayment> = emptyList(),
@@ -99,7 +101,7 @@ class ObserveWeeklySummaryUseCaseTest {
                     ObserveReturnTimesUseCase(relapses, checkRepository, appDayClock),
                 ),
                 weekProgress = ObserveWeekProgressUseCase(checkRepository, setupRepository),
-                weighInTrend = ObserveWeighInTrendUseCase(weightRepositoryOf(records.weights), setupRepository),
+                weighInTrend = ObserveWeighInTrendUseCase(weightRepositoryOf(records), setupRepository),
                 money = moneyOf(records, outingRepository),
             ),
         )
@@ -115,10 +117,10 @@ class ObserveWeeklySummaryUseCaseTest {
         )
     }
 
-    private fun weightRepositoryOf(weights: List<Float>): WeightRepository {
-        val entries = weights.mapIndexed { index, kg ->
+    private fun weightRepositoryOf(records: Records): WeightRepository {
+        val entries = records.weights.mapIndexed { index, kg ->
             WeightEntry(id = "w$index", date = LocalDate(2026, 10, 1 + index), weight = kg)
-        }
+        } + records.weighIns
         val repository = mockk<WeightRepository>()
         every { repository.getWeightProgress() } returns flowOf(entries)
         return repository
@@ -266,6 +268,35 @@ class ObserveWeeklySummaryUseCaseTest {
 
         val expected = WeighInTrend(latestKg = 80.5f, changeSincePreviousKg = -1.5f, remainingToTargetKg = 2.5f)
         assertEquals(expected, summaryOf(records).weighInTrend)
+    }
+
+    private fun weighIn(day: LocalDate, kg: Float) = WeightEntry(id = "w$day", date = day, weight = kg)
+
+    @Test
+    fun `a past week gives the weigh-in trend as of its Sunday`() = runTest {
+        val weighIns = listOf(
+            weighIn(SATURDAY_BEFORE_PREVIOUS, 82f),
+            weighIn(PREVIOUS_SATURDAY, 80.5f),
+            weighIn(SATURDAY, 79f),
+        )
+        val records = Records(weighIns = weighIns, setup = Setup(targetWeightKg = 78f))
+
+        assertEquals(WeighInTrend(80.5f, -1.5f, 2.5f), summaryOf(records, PREVIOUS_SUNDAY).weighInTrend)
+        assertEquals(WeighInTrend(79f, -1.5f, 1f), summaryOf(records, SUNDAY).weighInTrend)
+    }
+
+    @Test
+    fun `a past week counts the weigh-in dated on its Sunday and not the one on the next Monday`() = runTest {
+        val records = Records(weighIns = listOf(weighIn(PREVIOUS_SUNDAY, 80f), weighIn(MONDAY, 79f)))
+
+        assertEquals(WeighInTrend(latestKg = 80f), summaryOf(records, PREVIOUS_SUNDAY).weighInTrend)
+    }
+
+    @Test
+    fun `a past week before the first weigh-in gives an empty trend`() = runTest {
+        val records = Records(weighIns = listOf(weighIn(SATURDAY, 79f)))
+
+        assertEquals(WeighInTrend(), summaryOf(records, PREVIOUS_SUNDAY).weighInTrend)
     }
 
     private fun debt(id: Long, balance: Long) =

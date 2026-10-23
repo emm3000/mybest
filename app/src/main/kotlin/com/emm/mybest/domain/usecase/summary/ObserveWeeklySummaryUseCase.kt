@@ -1,5 +1,6 @@
 package com.emm.mybest.domain.usecase.summary
 
+import com.emm.mybest.core.datetime.appWeekOf
 import com.emm.mybest.domain.models.WeeklySummary
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -17,7 +18,7 @@ class ObserveWeeklySummaryUseCase(
         sections.outings(appDay),
         sections.recovery(appDay),
         sections.weekProgress(appDay),
-        sections.weighInTrend(),
+        sections.weighInTrend(appWeekOf(appDay).endInclusive),
         sections.money(appDay),
         ::WeeklySummary,
     )
