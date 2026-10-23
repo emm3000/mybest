@@ -61,15 +61,20 @@ class HistoryViewModelTest {
         createdAt = 1L,
     )
 
-    private fun emptyResult() = HistoryResult(
-        monthlyData = emptyMap(),
-        monthWeightCount = 0,
-        monthPhotoCount = 0,
-        recentEntries = emptyList(),
+    private fun historyResult(
+        summaries: List<DaySummary> = emptyList(),
+        recentEntries: List<HistoryRecentEntry> = emptyList(),
+    ) = HistoryResult(
+        monthlyData = summaries.associateBy { it.date },
+        monthWeightCount = summaries.count { it.hasWeight },
+        monthPhotoCount = summaries.count { it.hasPhoto },
+        monthOutingCount = 0,
+        monthWonNightCount = 0,
+        recentEntries = recentEntries,
     )
 
     private fun buildViewModel(
-        result: HistoryResult = emptyResult(),
+        result: HistoryResult = historyResult(),
         appDayClock: AppDayClock = mayAppDayClock,
     ): HistoryViewModel {
         every { getHistoryUseCase(any()) } returns flowOf(result)
@@ -107,7 +112,7 @@ class HistoryViewModelTest {
 
     @Test
     fun `initial state has isLoading true before data arrives`() = runTest {
-        every { getHistoryUseCase(any()) } returns flowOf(emptyResult())
+        every { getHistoryUseCase(any()) } returns flowOf(historyResult())
         val viewModel = buildViewModel()
 
         viewModel.state.test {
@@ -133,15 +138,8 @@ class HistoryViewModelTest {
     @Test
     fun `monthWeightCount reflects result from use case`() = runTest {
         val summary = DaySummary(weightEntry.date, weight = weightEntry)
-        val result = HistoryResult(
-            monthlyData = mapOf(weightEntry.date to summary),
-            monthWeightCount = 1,
-            monthPhotoCount = 0,
-            recentEntries = listOf(
-                HistoryRecentEntry(date = weightEntry.date, weight = weightEntry.weight, photoTypes = emptyList()),
-            ),
-        )
-        val viewModel = buildViewModel(result)
+        val entry = HistoryRecentEntry(date = weightEntry.date, weight = weightEntry.weight, photoTypes = emptyList())
+        val viewModel = buildViewModel(historyResult(listOf(summary), listOf(entry)))
 
         viewModel.state.test {
             awaitItem()
@@ -155,15 +153,8 @@ class HistoryViewModelTest {
     @Test
     fun `monthPhotoCount reflects result from use case`() = runTest {
         val summary = DaySummary(photo.date, photos = listOf(photo))
-        val result = HistoryResult(
-            monthlyData = mapOf(photo.date to summary),
-            monthWeightCount = 0,
-            monthPhotoCount = 1,
-            recentEntries = listOf(
-                HistoryRecentEntry(date = photo.date, weight = null, photoTypes = listOf(PhotoType.TRUNK)),
-            ),
-        )
-        val viewModel = buildViewModel(result)
+        val entry = HistoryRecentEntry(date = photo.date, weight = null, photoTypes = listOf(PhotoType.TRUNK))
+        val viewModel = buildViewModel(historyResult(listOf(summary), listOf(entry)))
 
         viewModel.state.test {
             awaitItem()
@@ -181,13 +172,7 @@ class HistoryViewModelTest {
             weight = weightEntry.weight,
             photoTypes = emptyList(),
         )
-        val result = HistoryResult(
-            monthlyData = emptyMap(),
-            monthWeightCount = 1,
-            monthPhotoCount = 0,
-            recentEntries = listOf(entry),
-        )
-        val viewModel = buildViewModel(result)
+        val viewModel = buildViewModel(historyResult(recentEntries = listOf(entry)))
 
         viewModel.state.test {
             awaitItem()
@@ -281,7 +266,7 @@ class HistoryViewModelTest {
 
     @Test
     fun `state updates reactively when use case emits new data`() = runTest {
-        val resultFlow = MutableStateFlow(emptyResult())
+        val resultFlow = MutableStateFlow(historyResult())
         every { getHistoryUseCase(any()) } returns resultFlow
         val viewModel = HistoryViewModel(getHistoryUseCase, deleteWeightByDate, deletePhoto, mayAppDayClock)
 
@@ -291,14 +276,7 @@ class HistoryViewModelTest {
             assertTrue(empty.monthlyData.isEmpty())
 
             val summary = DaySummary(weightEntry.date, weight = weightEntry)
-            resultFlow.value = HistoryResult(
-                monthlyData = mapOf(weightEntry.date to summary),
-                monthWeightCount = 1,
-                monthPhotoCount = 0,
-                recentEntries = listOf(
-                    HistoryRecentEntry(date = weightEntry.date, weight = weightEntry.weight, photoTypes = emptyList()),
-                ),
-            )
+            resultFlow.value = historyResult(listOf(summary))
             val updated = awaitItem()
             assertEquals(1, updated.monthlyData.size)
             cancelAndIgnoreRemainingEvents()
