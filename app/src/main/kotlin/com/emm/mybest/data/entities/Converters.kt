@@ -1,6 +1,7 @@
 package com.emm.mybest.data.entities
 
 import androidx.room.TypeConverter
+import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.PhotoType
 import kotlinx.datetime.LocalDate
 
@@ -19,4 +20,12 @@ class Converters {
     fun toPhotoType(value: String): PhotoType =
         PhotoType.entries.firstOrNull { it.name == value }
             ?: throw IllegalArgumentException("Unknown PhotoType value: $value")
+
+    @TypeConverter
+    fun fromDailyCheckType(type: DailyCheckType): String = type.name
+
+    @TypeConverter
+    fun toDailyCheckType(value: String): DailyCheckType =
+        DailyCheckType.entries.firstOrNull { it.name == value }
+            ?: throw IllegalArgumentException("Unknown DailyCheckType value: $value")
 }
