@@ -24,8 +24,6 @@ import com.emm.mybest.features.goal.presentation.PurchaseGoalScreen
 import com.emm.mybest.features.goal.presentation.PurchaseGoalViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
 import com.emm.mybest.features.history.presentation.HistoryViewModel
-import com.emm.mybest.features.home.presentation.HomeCallbacks
-import com.emm.mybest.features.home.presentation.HomeScreen
 import com.emm.mybest.features.insights.presentation.InsightsScreen
 import com.emm.mybest.features.insights.presentation.InsightsViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosScreen
@@ -91,18 +89,7 @@ private fun NavigationState.currentTransition() = when (lastTransitionKind) {
 }
 
 @Composable
-private fun rememberHomeCallbacks(navigator: Navigator): HomeCallbacks =
-    remember(navigator) {
-        HomeCallbacks(
-            onWeightClick = { navigator.navigate(Screen.AddWeight) },
-            onPhotoClick = { navigator.navigate(Screen.Photos) },
-            onSettingsClick = { navigator.navigate(Screen.Settings) },
-            onHistoryClick = { navigator.navigate(Screen.History) },
-        )
-    }
-
-@Composable
-private fun rememberBottomBar(current: Screen, navigator: Navigator): @Composable () -> Unit =
+internal fun rememberBottomBar(current: Screen, navigator: Navigator): @Composable () -> Unit =
     remember(current, navigator) {
         {
             HBottomNavigationBar(
@@ -113,13 +100,7 @@ private fun rememberBottomBar(current: Screen, navigator: Navigator): @Composabl
     }
 
 private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey> = entryProvider {
-    entry<Screen.Home> {
-        HomeScreen(
-            callbacks = rememberHomeCallbacks(navigator),
-            bottomBar = rememberBottomBar(Screen.Home, navigator),
-            modifier = Modifier,
-        )
-    }
+    homeEntry(navigator)
     entry<Screen.AddWeight> {
         val viewModel: AddWeightViewModel = koinViewModel()
         val openSettings = { navigator.navigate(Screen.Settings) }
