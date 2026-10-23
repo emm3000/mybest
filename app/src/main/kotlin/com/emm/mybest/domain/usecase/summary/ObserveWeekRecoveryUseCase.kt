@@ -15,16 +15,17 @@ class ObserveWeekRecoveryUseCase(
 
     /**
      * Emits the relapses whose app day is in the app week containing [appDay], oldest first, and the return times of
-     * every relapse as the relapse and return rules define them. The latest return time belongs to the newest relapse
-     * of that week.
+     * every relapse up to the end of that week as the relapse and return rules define them, so a past week never
+     * shows a later relapse. The latest return time belongs to the newest relapse of that week.
      */
     operator fun invoke(appDay: LocalDate): Flow<WeekRecovery> {
         val week = appWeekOf(appDay)
         return combine(observeRelapses(), observeReturnTimes()) { relapses, returnTimes ->
+            val history = returnTimes.filter { it.relapseAppDay <= week.endInclusive }
             WeekRecovery(
                 relapses = relapses.filter { it.outing.appDay in week },
-                latestReturnTime = returnTimes.firstOrNull { it.relapseAppDay in week },
-                returnTimeHistory = returnTimes,
+                latestReturnTime = history.firstOrNull { it.relapseAppDay in week },
+                returnTimeHistory = history,
             )
         }
     }
