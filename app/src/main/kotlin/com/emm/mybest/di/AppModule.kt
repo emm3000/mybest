@@ -59,6 +59,8 @@ import com.emm.mybest.domain.usecase.goal.AddGoalContributionUseCase
 import com.emm.mybest.domain.usecase.goal.ObserveGoalProgressUseCase
 import com.emm.mybest.domain.usecase.goal.SavePurchaseGoalUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
+import com.emm.mybest.domain.usecase.history.HistoryBodySources
+import com.emm.mybest.domain.usecase.history.HistoryNightSources
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
@@ -193,7 +195,7 @@ val appModule = module {
     factory { GetPhotosOverviewUseCase(get(), get()) }
 
     // History use cases
-    factory { GetHistoryUseCase(get(), get()) }
+    factory { GetHistoryUseCase(HistoryBodySources(get(), get()), HistoryNightSources(get(), get()), get()) }
 
     factory { GetEstimatedOutingCostUseCase(get(), get()) }
     factory { ObserveNotSpentThisMonthUseCase(get(), get()) }

@@ -6,5 +6,7 @@ data class HistoryResult(
     val monthlyData: Map<LocalDate, DaySummary>,
     val monthWeightCount: Int,
     val monthPhotoCount: Int,
+    val monthOutingCount: Int,
+    val monthWonNightCount: Int,
     val recentEntries: List<HistoryRecentEntry>,
 )
