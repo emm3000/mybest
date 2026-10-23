@@ -24,4 +24,5 @@ data class HomeState(
     val totalChecks: Int = 0,
     val destination: HomeDestination = HomeDestination.DAILY_CHECKS,
     val shortcuts: List<HomeShortcut> = emptyList(),
+    val nextInstallment: HomeInstallment? = null,
 )

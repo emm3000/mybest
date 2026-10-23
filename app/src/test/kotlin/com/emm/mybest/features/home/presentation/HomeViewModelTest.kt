@@ -5,6 +5,7 @@ import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.models.Debt
 import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.OutingKind
@@ -14,17 +15,13 @@ import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.usecase.home.HomeDestination
-import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
-import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.testing.FakeDailyCheckRepository
+import com.emm.mybest.testing.FakeDebtRepository
 import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
 import com.emm.mybest.testing.MutableClock
 import com.emm.mybest.testing.VirtualTimeClock
-import io.mockk.every
-import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -58,22 +55,12 @@ class HomeViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val observeWeightProgress: ObserveWeightProgressUseCase = mockk()
-    private val observePhotos: ObservePhotosUseCase = mockk()
-
     private fun buildViewModel(
-        weights: List<WeightEntry> = emptyList(),
-        photos: List<ProgressPhoto> = emptyList(),
         clock: Clock = FIXED_CLOCK,
-        dailyChecks: FakeDailyCheckRepository = FakeDailyCheckRepository(),
-        setup: Setup = Setup(),
-        outings: FakeOutingRepository = FakeOutingRepository(),
+        fixture: HomeUseCasesFixture = HomeUseCasesFixture(),
     ): HomeViewModel {
-        every { observeWeightProgress() } returns flowOf(weights)
-        every { observePhotos() } returns flowOf(photos)
         val appDayClock = AppDayClock(clock, TimeZone.UTC)
-        val fixture = HomeUseCasesFixture(dailyChecks, outings, setup)
-        return HomeViewModel(fixture.build(appDayClock, observeWeightProgress, observePhotos), appDayClock)
+        return HomeViewModel(fixture.build(appDayClock), appDayClock)
     }
 
     @Test
@@ -88,7 +75,7 @@ class HomeViewModelTest {
 
     @Test
     fun `empty weights produces null lastWeightKg and null previousWeightKg`() = runTest {
-        val viewModel = buildViewModel(weights = emptyList())
+        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(weights = emptyList()))
         advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -102,7 +89,7 @@ class HomeViewModelTest {
             WeightEntry(id = "1", date = FIXED_DATE.minus(DatePeriod(days = 1)), weight = 80.0f),
             WeightEntry(id = "2", date = FIXED_DATE, weight = 79.5f),
         )
-        val viewModel = buildViewModel(weights = weights)
+        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(weights = weights))
         advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -122,7 +109,7 @@ class HomeViewModelTest {
                 createdAt = 0L,
             ),
         )
-        val viewModel = buildViewModel(photos = photos)
+        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(photos = photos))
         advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -133,7 +120,7 @@ class HomeViewModelTest {
     @Test
     fun `state lists the four daily checks in order with their done flag`() = runTest {
         val dailyChecks = FakeDailyCheckRepository(listOf(DailyCheck(FIXED_DATE, DailyCheckType.DIET, true)))
-        val viewModel = buildViewModel(dailyChecks = dailyChecks)
+        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(dailyChecks = dailyChecks))
         advanceUntilIdle()
 
         val checks = viewModel.state.value.checks
@@ -156,7 +143,7 @@ class HomeViewModelTest {
     fun `a check with a weekly target carries the week count`() = runTest {
         val dailyChecks = FakeDailyCheckRepository(listOf(DailyCheck(FIXED_DATE, DailyCheckType.GYM, true)))
         val setup = Setup(weeklyTargets = mapOf(DailyCheckType.GYM to 4))
-        val viewModel = buildViewModel(dailyChecks = dailyChecks, setup = setup)
+        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(dailyChecks = dailyChecks, setup = setup))
         advanceUntilIdle()
 
         val gym = viewModel.state.value.checks.first { it.type == DailyCheckType.GYM }
@@ -166,7 +153,7 @@ class HomeViewModelTest {
     @Test
     fun `toggling a check persists it for today`() = runTest {
         val dailyChecks = FakeDailyCheckRepository()
-        val viewModel = buildViewModel(dailyChecks = dailyChecks)
+        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(dailyChecks = dailyChecks))
         advanceUntilIdle()
 
         viewModel.onIntent(HomeIntent.ToggleDailyCheck(DailyCheckType.GYM))
@@ -179,7 +166,10 @@ class HomeViewModelTest {
     @Test
     fun `a toggle at Saturday 02 00 writes Friday`() = runTest {
         val dailyChecks = FakeDailyCheckRepository()
-        val viewModel = buildViewModel(clock = FixedClock(SATURDAY_AT_TWO), dailyChecks = dailyChecks)
+        val viewModel = buildViewModel(
+            clock = FixedClock(SATURDAY_AT_TWO),
+            fixture = HomeUseCasesFixture(dailyChecks = dailyChecks),
+        )
         advanceUntilIdle()
 
         viewModel.onIntent(HomeIntent.ToggleDailyCheck(DailyCheckType.DIET))
@@ -248,7 +238,9 @@ class HomeViewModelTest {
     @Test
     fun `a pending outing adds the check-in shortcut`() = runTest {
         val outing = Outing(1, FRIDAY, OutingKind.PLANNED, Limits(Money(150_00), 4, LocalTime(1, 30)), checkIn = null)
-        val viewModel = buildViewModel(outings = FakeOutingRepository(initialOutings = listOf(outing)))
+        val viewModel = buildViewModel(
+            fixture = HomeUseCasesFixture(outings = FakeOutingRepository(initialOutings = listOf(outing))),
+        )
         advanceUntilIdle()
 
         assertEquals(HomeShortcut.entries, viewModel.state.value.shortcuts)
@@ -266,7 +258,9 @@ class HomeViewModelTest {
     }
 
     private fun TestScope.keptChecks(vararg checks: DailyCheck): Int {
-        val viewModel = buildViewModel(dailyChecks = FakeDailyCheckRepository(checks.toList()))
+        val viewModel = buildViewModel(
+            fixture = HomeUseCasesFixture(dailyChecks = FakeDailyCheckRepository(checks.toList())),
+        )
         advanceUntilIdle()
         return viewModel.state.value.keptChecks
     }
@@ -306,5 +300,34 @@ class HomeViewModelTest {
         val gym = DailyCheck(FIXED_DATE, DailyCheckType.GYM, true)
 
         assertEquals(2, keptChecks(gym, DailyCheck(FIXED_DATE, DailyCheckType.DIET, true)))
+    }
+
+    @Test
+    fun `the next installment is formatted for the board row`() = runTest {
+        val card =
+            Debt(
+                id = 1,
+                name = "Tarjeta de crédito",
+                balance = Money(5_000_00),
+                installment = Money(420_00),
+                paymentDay = 15,
+            )
+        val viewModel = buildViewModel(
+            fixture = HomeUseCasesFixture(debts = FakeDebtRepository(initialDebts = listOf(card))),
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            HomeInstallment("15 JUN", "Tarjeta de crédito", "S/ 420.00"),
+            viewModel.state.value.nextInstallment,
+        )
+    }
+
+    @Test
+    fun `without debts there is no next installment`() = runTest {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertNull(viewModel.state.value.nextInstallment)
     }
 }

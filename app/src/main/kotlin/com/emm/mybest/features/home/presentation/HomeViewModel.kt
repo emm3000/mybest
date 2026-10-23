@@ -35,7 +35,8 @@ private fun buildHomeState(inputs: HomeInputs, destination: HomeDestination): Ho
         keptChecks = computeKeptChecks(inputs.recordedChecks),
         totalChecks = DailyCheckType.entries.size,
         destination = destination,
-        shortcuts = computeShortcuts(inputs.routing.hasPendingCheckIn),
+        shortcuts = computeShortcuts(inputs.agenda.hasPendingCheckIn),
+        nextInstallment = computeNextInstallment(inputs.agenda.nextInstallment),
     )
 }
 
@@ -63,7 +64,7 @@ class HomeViewModel(
     init {
         appDayClock.observeToday()
             .flatMapLatest(::observeInputs)
-            .onEach { _state.value = buildHomeState(it, visibleDestination(it.routing.destination)) }
+            .onEach { _state.value = buildHomeState(it, visibleDestination(it.agenda.destination)) }
             .launchIn(viewModelScope)
     }
 
@@ -96,14 +97,15 @@ class HomeViewModel(
         useCases.observePhotos(),
         useCases.observeDailyChecks(today),
         useCases.observeWeekProgress(today),
-        observeRouting(),
-    ) { weights, photos, recordedChecks, weekProgress, routing ->
-        HomeInputs(today, weights, photos, recordedChecks, weekProgress, routing)
+        observeAgenda(),
+    ) { weights, photos, recordedChecks, weekProgress, agenda ->
+        HomeInputs(today, weights, photos, recordedChecks, weekProgress, agenda)
     }
 
-    private fun observeRouting(): Flow<HomeRouting> = combine(
+    private fun observeAgenda(): Flow<HomeAgenda> = combine(
         resumes.flatMapLatest { useCases.resolveDestination() },
         useCases.observeHasPendingCheckIn(),
-        ::HomeRouting,
+        useCases.observeNextInstallment(),
+        ::HomeAgenda,
     )
 }

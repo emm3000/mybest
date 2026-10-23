@@ -37,6 +37,7 @@ private fun rememberHomeCallbacks(navigator: Navigator): HomeCallbacks =
             onSettingsClick = { navigator.navigate(Screen.Settings) },
             onHistoryClick = { navigator.navigate(Screen.History) },
             onShortcutClick = { shortcut -> navigator.navigate(shortcut.screen()) },
+            onInstallmentClick = { navigator.navigate(Screen.Debts) },
         )
     }
 

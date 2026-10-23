@@ -1,7 +1,9 @@
 package com.emm.mybest.features.home.presentation
 
+import com.emm.mybest.core.money.formatPen
 import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.models.InstallmentShare
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
@@ -34,3 +36,7 @@ internal fun computeShortcuts(hasPendingCheckIn: Boolean): List<HomeShortcut> =
     HomeShortcut.entries.filter { hasPendingCheckIn || it != HomeShortcut.CHECK_IN }
 
 internal fun computeKeptChecks(recordedChecks: List<DailyCheck>): Int = recordedChecks.count { it.isKept() }
+
+internal fun computeNextInstallment(share: InstallmentShare?): HomeInstallment? = share?.let {
+    HomeInstallment(it.paymentDate.formatShortMonthDay(), it.debtName, it.installment.formatPen())
+}

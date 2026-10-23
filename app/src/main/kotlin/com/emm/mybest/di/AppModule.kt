@@ -198,7 +198,7 @@ val appModule = module {
     factory { ObserveWeekProgressUseCase(get(), get()) }
     factory { ToggleDailyCheckUseCase(get()) }
     factory { ObserveHasPendingCheckInUseCase(get()) }
-    factory { HomeUseCases(get(), get(), get(), get(), get(), get(), get()) }
+    factory { HomeUseCases(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { ResolveHomeDestinationUseCase(get(), get(), get()) }
 
     // Settings use cases
