@@ -29,27 +29,32 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emm.mybest.R
+import com.emm.mybest.domain.models.WeighInTrend
 import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.theme.AtelierTheme
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.datetime.DayOfWeek
 
 @Composable
 fun AddWeightScreen(
     viewModel: AddWeightViewModel,
     onBackClick: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val currentOnBackClick by rememberUpdatedState(onBackClick)
+    val currentOnOpenSettings by rememberUpdatedState(onOpenSettings)
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 AddWeightEffect.NavigateBack -> currentOnBackClick()
+                AddWeightEffect.OpenSettings -> currentOnOpenSettings()
                 is AddWeightEffect.ShowError -> {
                     snackbarHostState.showSnackbar(effect.message)
                 }
@@ -97,6 +102,7 @@ private fun AddWeightBody(
             .imePadding(),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
+        WeighInSummary(state = state, onOpenSettings = { onIntent(AddWeightIntent.OnOpenSettingsClick) })
         Text(
             text = stringResource(R.string.add_weight_field_label),
             style = MaterialTheme.typography.headlineSmall,
@@ -107,9 +113,6 @@ private fun AddWeightBody(
             onValueChange = { onIntent(AddWeightIntent.OnWeightChange(it)) },
             label = stringResource(R.string.add_weight_kg_label),
             placeholder = stringResource(R.string.add_weight_kg_placeholder),
-            supportingText = state.lastRecordedWeight?.let {
-                stringResource(R.string.add_weight_last_record_format, "%.1f".format(it))
-            },
             errorMessage = state.weightError,
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -144,7 +147,9 @@ private fun AddWeightScreenPreview() {
             state = AddWeightState(
                 weight = "80.5",
                 note = "Después del entrenamiento",
-                lastRecordedWeight = 81.2f,
+                trend = WeighInTrend(latestKg = 81.2f, changeSincePreviousKg = -0.6f, remainingToTargetKg = 3.2f),
+                targetWeightKg = 78f,
+                weighInDay = DayOfWeek.MONDAY,
                 isLoading = false,
             ),
             snackbarHostState = remember { SnackbarHostState() },

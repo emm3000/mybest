@@ -1,9 +1,11 @@
 package com.emm.mybest.features.weight.presentation
 
 import app.cash.turbine.test
-import com.emm.mybest.domain.models.WeightEntry
-import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
+import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.models.WeighInTrend
+import com.emm.mybest.domain.usecase.weight.ObserveWeighInTrendUseCase
 import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
+import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -12,7 +14,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.DayOfWeek
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -27,13 +29,14 @@ class AddWeightViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val saveWeightUseCase = mockk<SaveWeightUseCase>(relaxed = true)
-    private val observeWeightProgressUseCase = mockk<ObserveWeightProgressUseCase>(relaxed = true)
+    private val observeWeighInTrendUseCase = mockk<ObserveWeighInTrendUseCase>(relaxed = true)
 
     private fun buildViewModel(
-        existingEntries: List<WeightEntry> = emptyList(),
+        trend: WeighInTrend = WeighInTrend(),
+        setup: Setup = Setup(),
     ): AddWeightViewModel {
-        every { observeWeightProgressUseCase() } returns flowOf(existingEntries)
-        return AddWeightViewModel(saveWeightUseCase, observeWeightProgressUseCase)
+        every { observeWeighInTrendUseCase() } returns flowOf(trend)
+        return AddWeightViewModel(saveWeightUseCase, observeWeighInTrendUseCase, FakeSetupRepository(setup))
     }
 
     @Test
@@ -48,20 +51,42 @@ class AddWeightViewModelTest {
     }
 
     @Test
-    fun `lastRecordedWeight is set from first repository entry`() = runTest {
-        val entry = WeightEntry(id = "w1", date = LocalDate(2026, 3, 10), weight = 74.5f)
-        val viewModel = buildViewModel(existingEntries = listOf(entry))
+    fun `state exposes the weigh-in trend`() = runTest {
+        val trend = WeighInTrend(latestKg = 74.5f, changeSincePreviousKg = -0.6f, remainingToTargetKg = 4.2f)
+        val viewModel = buildViewModel(trend = trend)
         advanceUntilIdle()
 
-        assertEquals(74.5f, viewModel.state.value.lastRecordedWeight)
+        assertEquals(trend, viewModel.state.value.trend)
     }
 
     @Test
-    fun `lastRecordedWeight is null when no entries exist`() = runTest {
+    fun `state exposes target weight and weigh-in day from setup`() = runTest {
+        val setup = Setup(targetWeightKg = 78f, weighInDay = DayOfWeek.MONDAY)
+        val viewModel = buildViewModel(setup = setup)
+        advanceUntilIdle()
+
+        assertEquals(78f, viewModel.state.value.targetWeightKg)
+        assertEquals(DayOfWeek.MONDAY, viewModel.state.value.weighInDay)
+    }
+
+    @Test
+    fun `unset setup leaves target and weigh-in day null`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        assertNull(viewModel.state.value.lastRecordedWeight)
+        assertNull(viewModel.state.value.targetWeightKg)
+        assertNull(viewModel.state.value.weighInDay)
+    }
+
+    @Test
+    fun `OnOpenSettingsClick emits OpenSettings`() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.effect.test {
+            viewModel.onIntent(AddWeightIntent.OnOpenSettingsClick)
+            assertEquals(AddWeightEffect.OpenSettings, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
