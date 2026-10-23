@@ -34,6 +34,7 @@
 - Configurable desde Settings con "Día de pesaje" y "Hora de pesaje" (`Setup.weighInDay`, `Setup.weighInReminderTime`; sin default forzado — hasta que el usuario elija ambos, no se agenda nada).
 - Notificación local "Hoy te toca pesarte" cada 7 días, el día y la hora elegidos, con CTA → AddWeight.
 - `SyncRemindersUseCase` agenda o cancela el trabajo al cambiar el setup y al abrir la app; borrar el día o la hora lo cancela.
+- Foto de progreso (`Setup.isPhotoReminderEnabled`, apagada por defecto): ese mismo trabajo publica también "Toca tu foto de progreso" (CTA → Fotos) cuando la última foto tiene 28 días o más, o no hay ninguna.
 
 ## 8. Historial y Timeline
 - Calendario con días que tienen registros (peso, fotos).

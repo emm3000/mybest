@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import androidx.annotation.StringRes
 import com.emm.mybest.core.coroutines.APP_SCOPE_NAME
 import com.emm.mybest.core.notification.CHECK_IN_REMINDER_CHANNEL_ID
+import com.emm.mybest.core.notification.PHOTO_REMINDER_CHANNEL_ID
 import com.emm.mybest.core.notification.PRE_OUTING_REMINDER_CHANNEL_ID
 import com.emm.mybest.core.notification.WEIGHT_REMINDER_CHANNEL_ID
 import com.emm.mybest.di.appModule
@@ -39,6 +40,11 @@ private val CHANNEL_SPECS = listOf(
         CHECK_IN_REMINDER_CHANNEL_ID,
         R.string.check_in_reminder_channel_name,
         R.string.check_in_reminder_channel_description,
+    ),
+    ChannelSpec(
+        PHOTO_REMINDER_CHANNEL_ID,
+        R.string.photo_reminder_channel_name,
+        R.string.photo_reminder_channel_description,
     ),
 )
 

@@ -88,6 +88,7 @@ import com.emm.mybest.domain.usecase.preouting.RecordWonNightUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveReturnTimesUseCase
 import com.emm.mybest.domain.usecase.reminder.IsCheckInReminderDueUseCase
+import com.emm.mybest.domain.usecase.reminder.IsPhotoReminderDueUseCase
 import com.emm.mybest.domain.usecase.reminder.IsPreOutingReminderDueUseCase
 import com.emm.mybest.domain.usecase.reminder.SyncRemindersUseCase
 import com.emm.mybest.domain.usecase.summary.ObserveWeekDebtUseCase
@@ -285,6 +286,7 @@ val appModule = module {
     factory { WeekendReminderSchedulers(get(), get()) }
     single<WeightReminderScheduler> { WeightReminderSchedulerImpl(get(), get()) }
     factory { SyncRemindersUseCase(get(), get(), get()) }
+    factory { IsPhotoReminderDueUseCase(get(), get(), get()) }
     factory { IsCheckInReminderDueUseCase(get(), get(), get()) }
     factory { IsPreOutingReminderDueUseCase(get()) }
 }
