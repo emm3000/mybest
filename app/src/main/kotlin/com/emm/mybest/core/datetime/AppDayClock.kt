@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
@@ -15,8 +14,6 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
-
-private const val APP_DAY_START_HOUR = 5
 
 /**
  * Maps instants to app days: the 24 hours from 05:00 to 05:00 local time that every record belongs to.
@@ -49,9 +46,5 @@ class AppDayClock(
                 emit(current)
             }
         }
-    }
-
-    private companion object {
-        val APP_DAY_START = LocalTime(APP_DAY_START_HOUR, 0)
     }
 }
