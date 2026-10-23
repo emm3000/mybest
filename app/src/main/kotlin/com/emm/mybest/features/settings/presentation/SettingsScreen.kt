@@ -76,6 +76,7 @@ fun SettingsScreen(
                 onCaptureClick = callbacks.onCaptureClick,
                 onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
                 onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
+                onReplayOnboardingClick = { viewModel.onIntent(SettingsIntent.OnReplayOnboarding) },
             ),
         )
     }
@@ -136,6 +137,7 @@ private fun SettingsBody(
         SettingsCaptureRow(capture = state.capture, onClick = actions.onCaptureClick)
         SettingsRemindersSection(setup = state.goals.setup, onIntent = actions.onReminderIntent)
         BackupRow(onExportClick = actions.onExportClick, onImportClick = actions.onImportClick)
+        OnboardingReplayRow(onClick = actions.onReplayOnboardingClick)
         Hairline()
         SettingsFooter(versionLabel = state.appVersionLabel)
     }
@@ -154,6 +156,17 @@ private fun BackupRow(
             extra = stringResource(R.string.settings_backup_import_extra),
             onValueClick = onExportClick,
             onExtraClick = onImportClick,
+        ),
+    )
+}
+
+@Composable
+private fun OnboardingReplayRow(onClick: () -> Unit) {
+    SettingsRow(
+        params = SettingsRowParams(
+            label = stringResource(R.string.settings_onboarding_label),
+            value = stringResource(R.string.settings_onboarding_value),
+            onValueClick = onClick,
         ),
     )
 }
