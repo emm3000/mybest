@@ -8,13 +8,11 @@ import com.emm.mybest.data.entities.DebtDao
 import com.emm.mybest.data.entities.DebtEntity
 import com.emm.mybest.data.entities.DebtPaymentEntity
 import com.emm.mybest.domain.models.DebtPayment
-import com.emm.mybest.domain.models.PurchaseGoal
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.LocalDate
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -64,14 +62,17 @@ class DebtDaoIntegrationTest {
     }
 
     @Test
-    fun clearing_the_purchase_goal_removes_its_contributions() = runBlocking {
-        val goalRepository = PurchaseGoalRepositoryImpl(database.purchaseGoalDao())
-        goalRepository.saveGoal(PurchaseGoal("Bicicleta", Money(150_000)))
-        goalRepository.addContribution(LocalDate(2026, 10, 23), Money(5_000))
+    fun a_failing_balance_update_rolls_back_the_payment() = runBlocking {
+        val repository = DebtRepositoryImpl(dao)
+        val id = dao.insert(debt)
+        database.openHelper.writableDatabase.execSQL(
+            "CREATE TRIGGER reject_update BEFORE UPDATE ON debt BEGIN SELECT RAISE(ABORT, 'rejected'); END",
+        )
 
-        goalRepository.clearGoal()
+        val failure = runCatching { repository.markInstallmentPaid(id, october) }.exceptionOrNull()
 
-        assertNull(goalRepository.observeGoal().first())
-        assertTrue(goalRepository.observeContributions().first().isEmpty())
+        assertNotNull(failure)
+        assertTrue(dao.observePayments().first().isEmpty())
+        assertEquals(50_000L, dao.findById(id)?.balanceCents)
     }
 }
