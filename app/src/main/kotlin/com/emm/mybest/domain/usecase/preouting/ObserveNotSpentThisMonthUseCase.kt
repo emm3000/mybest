@@ -3,6 +3,7 @@ package com.emm.mybest.domain.usecase.preouting
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.money.Money
+import com.emm.mybest.domain.models.estimatedTotal
 import com.emm.mybest.domain.repository.OutingRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -20,7 +21,5 @@ class ObserveNotSpentThisMonthUseCase(
     operator fun invoke(): Flow<Money> = appDayClock.observeToday().flatMapLatest { today ->
         val month = YearMonthValue.from(today).days()
         outingRepository.observeWonNights(month.start, month.endInclusive)
-    }.map { wonNights ->
-        wonNights.fold(Money.ZERO) { total, night -> total + (night.estimatedCost ?: Money.ZERO) }
-    }
+    }.map { wonNights -> wonNights.estimatedTotal() }
 }
