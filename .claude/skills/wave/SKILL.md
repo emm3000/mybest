@@ -30,7 +30,7 @@ Rows are ordered by blast radius. A ticket that matches several rows takes the h
 |---|---|---|---|
 | 1 | Docs, strings, renames; every criterion is a command with empty output | sonnet:low | none: the gate and the criteria fail loudly |
 | 2 | One screen, layout or restyle only | sonnet:medium | visual check |
-| 3 | ViewModel or use-case behavior | sonnet:medium | load `mattpocock-skills:tdd`, red-green-refactor |
+| 3 | ViewModel or use-case behavior | sonnet:high | load `mattpocock-skills:tdd`, red-green-refactor |
 | 4 | Shared `ui/components` or theme change | sonnet:high | visual check of every affected screen |
 | 5 | Room schema or migration, DI wiring, WorkManager or reminders, backup import/export | opus:high | visual check if a screen changes |
 
@@ -39,6 +39,8 @@ Sonnet writes the code on rows 1-4. Row 5 is the only Opus implementation row: i
 Other roles: every PR review opus:high (the reviewer is the only judgment check, and a review costs far less than an implementation), post-review fixes sonnet:low, ticket-writer opus:high.
 
 Every row is a bet until `docs/agents/dispatch-log.md` says otherwise. When a row shows two or more first-review FIX FIRST verdicts with cause `judgment`, raise it one step and note why here.
+
+- Row 3 moved from sonnet:medium to sonnet:high (2026-10-23): PRs #44, #45 and #48 each got a first-review FIX FIRST with cause `judgment` (ignored use-case result, unguarded save/delete, view logic left in composables).
 
 ## Execution Steps
 
