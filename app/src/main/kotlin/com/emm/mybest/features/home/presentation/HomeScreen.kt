@@ -1,7 +1,6 @@
 package com.emm.mybest.features.home.presentation
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,65 +12,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emm.mybest.R
-import com.emm.mybest.domain.models.DailySlot
-import com.emm.mybest.domain.models.DailySlotTimes
-import com.emm.mybest.features.diet.presentation.edit.EditMealSheet
-import com.emm.mybest.features.diet.presentation.edit.EditMealSheetCallbacks
-import com.emm.mybest.ui.components.HSnackbarHost
-import com.emm.mybest.ui.components.atelier.CompletionCheck
-import com.emm.mybest.ui.components.atelier.DisplayNumber
-import com.emm.mybest.ui.components.atelier.DisplayNumberStyle
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
-import com.emm.mybest.ui.theme.AtelierInkTertiary
 import com.emm.mybest.ui.theme.AtelierTheme
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
-private enum class HomeContentType { Header, Hairline, Hero, PlanRow, QuickActions }
+private enum class HomeContentType { Header, Hairline, QuickActions }
 
-private val HERO_NUMBER_FONT_SIZE = 128.sp
-private val HERO_SLASH_FONT_SIZE = 56.sp
-private val HERO_LABEL_GAP = 6.dp
-private val PLAN_ROW_MIN_HEIGHT = 60.dp
-private val PLAN_ROW_PADDING_HORIZONTAL = 28.dp
-private val PLAN_ROW_PADDING_VERTICAL = 14.dp
-private val PLAN_ROW_SPACING = 16.dp
-private val SLOT_LABEL_WIDTH = 84.dp
+private val ROW_PADDING_HORIZONTAL = 28.dp
+private val ROW_PADDING_VERTICAL = 14.dp
 private val QUICK_ACTION_HEIGHT_MIN = 80.dp
 private val QUICK_ACTION_CELL_SPACER = 4.dp
-private const val PERCENT_FACTOR = 100
 
 data class HomeCallbacks(
     val onWeightClick: () -> Unit,
     val onPhotoClick: () -> Unit,
-    val onMealPlanClick: () -> Unit,
-    val onExercisePlanClick: () -> Unit,
     val onSettingsClick: () -> Unit,
     val onHistoryClick: () -> Unit,
 )
@@ -92,22 +61,10 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(Unit) {
-        viewModel.effect.collectLatest { effect ->
-            when (effect) {
-                is HomeEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
-            }
-        }
-    }
-
     HomeScreenContent(
         modifier = modifier,
         state = state,
-        onIntent = viewModel::onIntent,
         callbacks = callbacks,
-        snackbarHostState = snackbarHostState,
         bottomBar = bottomBar,
     )
 }
@@ -115,36 +72,22 @@ fun HomeScreen(
 @Composable
 internal fun HomeScreenContent(
     state: HomeState,
-    onIntent: (HomeIntent) -> Unit,
     callbacks: HomeCallbacks,
     modifier: Modifier = Modifier,
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     bottomBar: @Composable () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { HSnackbarHost(hostState = snackbarHostState) },
         bottomBar = bottomBar,
     ) { paddingValues ->
-        HomeLazyContent(state, onIntent, callbacks, paddingValues)
-    }
-    state.editingMeal?.let { draft ->
-        EditMealSheet(
-            draft = draft,
-            callbacks = EditMealSheetCallbacks(
-                onDescriptionChange = { onIntent(HomeIntent.UpdateMealDraft(it)) },
-                onSave = { onIntent(HomeIntent.SaveMealDraft) },
-                onCancel = { onIntent(HomeIntent.CancelEditMeal) },
-            ),
-        )
+        HomeLazyContent(state, callbacks, paddingValues)
     }
 }
 
 @Composable
 private fun HomeLazyContent(
     state: HomeState,
-    onIntent: (HomeIntent) -> Unit,
     callbacks: HomeCallbacks,
     paddingValues: PaddingValues,
 ) {
@@ -155,27 +98,6 @@ private fun HomeLazyContent(
     ) {
         item(contentType = HomeContentType.Header) { HomeHeaderRow(state) }
         item(contentType = HomeContentType.Hairline) { Hairline() }
-        item(contentType = HomeContentType.Hero) { HomeHero(state) }
-        item(contentType = HomeContentType.Hairline) { Hairline() }
-        itemsIndexed(state.planRows, contentType = { _, _ -> HomeContentType.PlanRow }) { index, row ->
-            val onEditRequest: () -> Unit = if (row.slot == DailySlot.EXERCISE) {
-                {}
-            } else {
-                { onIntent(HomeIntent.StartEditMeal(row.slot)) }
-            }
-            HomePlanRow(
-                label = row.slot.labelEs(),
-                time = row.time.formatHHmm(),
-                description = row.description,
-                done = row.done,
-                onToggle = { onIntent(HomeIntent.ToggleSlot(row.slot, !row.done)) },
-                onEditRequest = onEditRequest,
-            )
-            if (index < state.planRows.lastIndex) {
-                Hairline(inset = PLAN_ROW_PADDING_HORIZONTAL)
-            }
-        }
-        item(contentType = HomeContentType.Hairline) { Hairline() }
         item(contentType = HomeContentType.QuickActions) { HomeQuickActionsRow(state, callbacks) }
     }
 }
@@ -185,7 +107,7 @@ private fun HomeHeaderRow(state: HomeState) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = PLAN_ROW_PADDING_HORIZONTAL, vertical = PLAN_ROW_PADDING_VERTICAL),
+            .padding(horizontal = ROW_PADDING_HORIZONTAL, vertical = ROW_PADDING_VERTICAL),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -197,95 +119,6 @@ private fun HomeHeaderRow(state: HomeState) {
             text = stringResource(R.string.home_week_format, state.weekNumber).uppercase(),
             style = MicroLabelStyle(tone = MicroLabelTone.Dim),
         )
-    }
-}
-
-@Composable
-private fun HomeHeroMetrics(state: HomeState) {
-    val percentText = "${(state.completionRatio * PERCENT_FACTOR).toInt()}%"
-    Column(horizontalAlignment = Alignment.End) {
-        MicroLabel(text = percentText, style = MicroLabelStyle(tone = MicroLabelTone.Default))
-        MicroLabel(
-            text = stringResource(R.string.home_streak_days_format, state.streakDays).uppercase(),
-            style = MicroLabelStyle(tone = MicroLabelTone.Dim),
-        )
-    }
-}
-
-@Composable
-private fun HomeHero(state: HomeState) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = PLAN_ROW_PADDING_HORIZONTAL, vertical = PLAN_ROW_PADDING_VERTICAL),
-    ) {
-        MicroLabel(
-            text = stringResource(R.string.home_completed_today).uppercase(),
-            style = MicroLabelStyle(tone = MicroLabelTone.Dim),
-        )
-        Spacer(modifier = Modifier.height(HERO_LABEL_GAP))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            DisplayNumber(
-                text = state.completedCount.toString(),
-                style = DisplayNumberStyle(fontSize = HERO_NUMBER_FONT_SIZE, italic = true),
-            )
-            DisplayNumber(
-                text = "/${state.totalCount}",
-                style = DisplayNumberStyle(fontSize = HERO_SLASH_FONT_SIZE, color = AtelierInkTertiary),
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            HomeHeroMetrics(state)
-        }
-    }
-}
-
-@Composable
-private fun HomePlanRow(
-    label: String,
-    time: String,
-    description: String,
-    done: Boolean,
-    onToggle: () -> Unit,
-    onEditRequest: () -> Unit,
-) {
-    val haptic = LocalHapticFeedback.current
-    val hasDescription = description.isNotBlank()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = PLAN_ROW_MIN_HEIGHT)
-            .combinedClickable(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onToggle()
-                },
-                onLongClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onEditRequest()
-                },
-            )
-            .padding(horizontal = PLAN_ROW_PADDING_HORIZONTAL, vertical = PLAN_ROW_PADDING_VERTICAL),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(PLAN_ROW_SPACING),
-    ) {
-        Column(modifier = Modifier.width(SLOT_LABEL_WIDTH)) {
-            MicroLabel(
-                text = label,
-                style = MicroLabelStyle(tone = if (done) MicroLabelTone.Done else MicroLabelTone.Default),
-            )
-            MicroLabel(text = time, style = MicroLabelStyle(tone = MicroLabelTone.Dim))
-        }
-        Text(
-            text = if (hasDescription) description else "—",
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (done) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-            textDecoration = if (done && hasDescription) TextDecoration.LineThrough else TextDecoration.None,
-            modifier = Modifier.weight(1f),
-        )
-        CompletionCheck(done = done)
     }
 }
 
@@ -320,7 +153,7 @@ private fun HomeQuickActionCell(
         modifier = modifier
             .fillMaxHeight()
             .clickable(onClick = onClick)
-            .padding(horizontal = PLAN_ROW_PADDING_HORIZONTAL, vertical = PLAN_ROW_PADDING_VERTICAL),
+            .padding(horizontal = ROW_PADDING_HORIZONTAL, vertical = ROW_PADDING_VERTICAL),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -340,25 +173,11 @@ private fun HomeScreenPreview() {
         HomeScreenContent(
             state = HomeState(
                 isLoading = false,
-                planRows = DailySlot.entries.map { slot ->
-                    PlanRow(
-                        slot = slot,
-                        time = DailySlotTimes.DEFAULT_TIMES.getValue(slot),
-                        description = "",
-                        done = false,
-                    )
-                }.toImmutableList(),
-                completedCount = 2,
-                totalCount = 5,
-                completionRatio = 0.4f,
                 weekNumber = 20,
             ),
-            onIntent = {},
             callbacks = HomeCallbacks(
                 onWeightClick = {},
                 onPhotoClick = {},
-                onMealPlanClick = {},
-                onExercisePlanClick = {},
                 onSettingsClick = {},
                 onHistoryClick = {},
             ),

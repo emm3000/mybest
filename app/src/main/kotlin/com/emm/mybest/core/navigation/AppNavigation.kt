@@ -88,8 +88,6 @@ private fun rememberHomeCallbacks(navigator: Navigator): HomeCallbacks =
         HomeCallbacks(
             onWeightClick = { navigator.navigate(Screen.AddWeight) },
             onPhotoClick = { navigator.navigate(Screen.Photos) },
-            onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
-            onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
             onSettingsClick = { navigator.navigate(Screen.Settings) },
             onHistoryClick = { navigator.navigate(Screen.History) },
         )
