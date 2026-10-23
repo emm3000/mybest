@@ -1,4 +1,4 @@
-package com.emm.mybest.core.datetime
+package com.emm.mybest.domain.models
 
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate

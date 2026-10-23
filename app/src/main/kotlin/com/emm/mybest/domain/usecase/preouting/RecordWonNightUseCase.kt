@@ -1,8 +1,8 @@
 package com.emm.mybest.domain.usecase.preouting
 
 import com.emm.mybest.core.datetime.AppDayClock
-import com.emm.mybest.core.datetime.isWonNightDay
 import com.emm.mybest.domain.models.WonNight
+import com.emm.mybest.domain.models.isWonNightDay
 import com.emm.mybest.domain.repository.OutingRepository
 import kotlinx.coroutines.flow.first
 
