@@ -2,29 +2,35 @@ package com.emm.mybest.features.home.presentation
 
 import app.cash.turbine.test
 import com.emm.mybest.core.datetime.AppDayClock
+import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.models.Limits
+import com.emm.mybest.domain.models.Outing
+import com.emm.mybest.domain.models.OutingKind
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.domain.models.WeightEntry
-import com.emm.mybest.domain.usecase.dailycheck.ObserveDailyChecksUseCase
-import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
-import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
+import com.emm.mybest.domain.usecase.home.HomeDestination
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.testing.FakeDailyCheckRepository
-import com.emm.mybest.testing.FakeSetupRepository
+import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
+import com.emm.mybest.testing.MutableClock
+import com.emm.mybest.testing.VirtualTimeClock
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import org.junit.Assert.assertEquals
@@ -42,6 +48,9 @@ private val FIXED_CLOCK = object : Clock {
 }
 private val SATURDAY_AT_TWO = Instant.parse("2026-10-24T02:00:00Z")
 private val FRIDAY = LocalDate(2026, 10, 23)
+private val FRIDAY_BEFORE_EVENING = Instant.parse("2026-10-23T17:59:00Z")
+private val FRIDAY_EVENING_ENDS = Instant.parse("2026-10-23T18:00:30Z")
+private val FRIDAY_EVENING = Instant.parse("2026-10-23T20:00:00Z")
 
 class HomeViewModelTest {
 
@@ -57,20 +66,13 @@ class HomeViewModelTest {
         clock: Clock = FIXED_CLOCK,
         dailyChecks: FakeDailyCheckRepository = FakeDailyCheckRepository(),
         setup: Setup = Setup(),
+        outings: FakeOutingRepository = FakeOutingRepository(),
     ): HomeViewModel {
         every { observeWeightProgress() } returns flowOf(weights)
         every { observePhotos() } returns flowOf(photos)
-        val setupRepository = FakeSetupRepository(setup)
-        return HomeViewModel(
-            useCases = HomeUseCases(
-                observeWeightProgress = observeWeightProgress,
-                observePhotos = observePhotos,
-                observeDailyChecks = ObserveDailyChecksUseCase(dailyChecks),
-                observeWeekProgress = ObserveWeekProgressUseCase(dailyChecks, setupRepository),
-                toggleDailyCheck = ToggleDailyCheckUseCase(dailyChecks),
-            ),
-            appDayClock = AppDayClock(clock, TimeZone.UTC),
-        )
+        val appDayClock = AppDayClock(clock, TimeZone.UTC)
+        val fixture = HomeUseCasesFixture(dailyChecks, outings, setup)
+        return HomeViewModel(fixture.build(appDayClock, observeWeightProgress, observePhotos), appDayClock)
     }
 
     @Test
@@ -196,5 +198,59 @@ class HomeViewModelTest {
             viewModel.onIntent(HomeIntent.DefineWeeklyTarget)
             assertEquals(HomeEffect.NavigateToSettings, awaitItem())
         }
+    }
+
+    @Test
+    fun `a friday evening routes home to the pre-outing`() = runTest {
+        val viewModel = buildViewModel(clock = FixedClock(FRIDAY_EVENING))
+        advanceUntilIdle()
+
+        assertEquals(HomeDestination.PRE_OUTING, viewModel.state.value.destination)
+    }
+
+    @Test
+    fun `the destination follows the window change when the evening begins`() = runTest {
+        val clock = VirtualTimeClock(FRIDAY_BEFORE_EVENING, this, FRIDAY_EVENING_ENDS)
+        val viewModel = buildViewModel(clock = clock)
+        runCurrent()
+        assertEquals(HomeDestination.DAILY_CHECKS, viewModel.state.value.destination)
+
+        advanceUntilIdle()
+
+        assertEquals(HomeDestination.PRE_OUTING, viewModel.state.value.destination)
+    }
+
+    @Test
+    fun `resuming re-evaluates the destination`() = runTest {
+        val clock = MutableClock(FRIDAY_BEFORE_EVENING)
+        val viewModel = buildViewModel(clock = clock)
+        advanceUntilIdle()
+
+        clock.instant = FRIDAY_EVENING
+        viewModel.onIntent(HomeIntent.Resume)
+        advanceUntilIdle()
+
+        assertEquals(HomeDestination.PRE_OUTING, viewModel.state.value.destination)
+    }
+
+    @Test
+    fun `showing the daily checks hides the routed screen until the route changes`() = runTest {
+        val viewModel = buildViewModel(clock = FixedClock(FRIDAY_EVENING))
+        advanceUntilIdle()
+
+        viewModel.onIntent(HomeIntent.ShowDailyChecks)
+        viewModel.onIntent(HomeIntent.Resume)
+        advanceUntilIdle()
+
+        assertEquals(HomeDestination.DAILY_CHECKS, viewModel.state.value.destination)
+    }
+
+    @Test
+    fun `a pending outing is flagged on the state`() = runTest {
+        val outing = Outing(1, FRIDAY, OutingKind.PLANNED, Limits(Money(150_00), 4, LocalTime(1, 30)), checkIn = null)
+        val viewModel = buildViewModel(outings = FakeOutingRepository(initialOutings = listOf(outing)))
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.hasPendingCheckIn)
     }
 }

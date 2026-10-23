@@ -2,6 +2,7 @@ package com.emm.mybest.features.home.presentation
 
 import androidx.compose.runtime.Stable
 import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.domain.usecase.home.HomeDestination
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -20,4 +21,6 @@ data class HomeState(
     val lastPhotoType: PhotoType? = null,
     val lastPhotoDaysAgo: Int? = null,
     val checks: List<DailyCheckItem> = emptyList(),
+    val destination: HomeDestination = HomeDestination.DAILY_CHECKS,
+    val hasPendingCheckIn: Boolean = false,
 )

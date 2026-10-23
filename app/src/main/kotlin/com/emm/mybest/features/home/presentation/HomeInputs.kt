@@ -12,4 +12,5 @@ internal data class HomeInputs(
     val photos: List<ProgressPhoto>,
     val doneToday: Set<DailyCheckType>,
     val weekProgress: Map<DailyCheckType, WeekProgress>,
+    val routing: HomeRouting,
 )
