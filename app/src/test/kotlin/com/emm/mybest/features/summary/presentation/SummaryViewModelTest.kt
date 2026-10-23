@@ -2,9 +2,11 @@ package com.emm.mybest.features.summary.presentation
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
+import app.cash.turbine.test
 import com.emm.mybest.R
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
+import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.LimitsKept
 import com.emm.mybest.domain.models.ReturnTime
 import com.emm.mybest.domain.models.WeekDebt
@@ -13,6 +15,7 @@ import com.emm.mybest.domain.models.WeekOutings
 import com.emm.mybest.domain.models.WeekRecovery
 import com.emm.mybest.domain.models.WeeklySummary
 import com.emm.mybest.domain.models.WeighInTrend
+import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
 import com.emm.mybest.domain.usecase.summary.ObserveWeeklySummaryUseCase
 import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
@@ -185,6 +188,94 @@ class SummaryViewModelTest {
             ),
             section.rows,
         )
+    }
+
+    private fun checkLine(@StringRes label: Int, value: SummaryText, color: Color) =
+        SummaryRowState.Line(SummaryText(label), value, color)
+
+    @Test
+    fun `checks section lists each check against its target with alcohol as a maximum`() = runTest {
+        val checks = mapOf(DailyCheckType.ALCOHOL to WeekProgress(1, 2), DailyCheckType.GYM to WeekProgress(4, 4))
+
+        val section = sectionOf(EMPTY_SUMMARY.copy(checks = checks), R.string.summary_section_checks)
+
+        assertEquals(
+            listOf(
+                checkLine(
+                    R.string.summary_check_gym,
+                    SummaryText(R.string.summary_checks_progress, listOf(4, 4)),
+                    AtelierDone,
+                ),
+                checkLine(
+                    R.string.summary_check_alcohol,
+                    SummaryText(R.string.summary_checks_maximum, listOf(1, 2)),
+                    AtelierDone,
+                ),
+            ),
+            section.rows,
+        )
+    }
+
+    @Test
+    fun `checks section is not done below the target or above the alcohol maximum`() = runTest {
+        val checks = mapOf(DailyCheckType.DIET to WeekProgress(3, 5), DailyCheckType.ALCOHOL to WeekProgress(3, 2))
+
+        val section = sectionOf(EMPTY_SUMMARY.copy(checks = checks), R.string.summary_section_checks)
+
+        assertEquals(listOf(AtelierInk, AtelierInk), section.rows.map { (it as SummaryRowState.Line).valueColor })
+    }
+
+    @Test
+    fun `checks section asks to set the weekly targets when there are none`() = runTest {
+        val section = sectionOf(EMPTY_SUMMARY, R.string.summary_section_checks)
+
+        assertEquals(listOf(SummaryRowState.SetupPrompt(SummaryText(R.string.summary_checks_setup))), section.rows)
+    }
+
+    @Test
+    fun `weight section shows the latest weight, the change and what is left to the target`() = runTest {
+        val trend = WeighInTrend(latestKg = 92.4f, changeSincePreviousKg = -0.8f, remainingToTargetKg = 1.4f)
+
+        val section = sectionOf(EMPTY_SUMMARY.copy(weighInTrend = trend), R.string.summary_section_weight)
+
+        assertEquals(
+            listOf(
+                line(R.string.summary_weight_latest, SummaryText(R.string.summary_weight_value, listOf(92.4f))),
+                line(R.string.summary_weight_change, SummaryText(R.string.summary_weight_change_down, listOf(0.8f))),
+                line(R.string.summary_weight_remaining, SummaryText(R.string.summary_weight_value, listOf(1.4f))),
+            ),
+            section.rows,
+        )
+    }
+
+    @Test
+    fun `weight section shows only the latest weight without a previous weigh-in or target`() = runTest {
+        val section = sectionOf(
+            EMPTY_SUMMARY.copy(weighInTrend = WeighInTrend(latestKg = 92.4f)),
+            R.string.summary_section_weight,
+        )
+
+        assertEquals(
+            listOf(line(R.string.summary_weight_latest, SummaryText(R.string.summary_weight_value, listOf(92.4f)))),
+            section.rows,
+        )
+    }
+
+    @Test
+    fun `weight section asks for a first weigh-in when there is none`() = runTest {
+        val section = sectionOf(EMPTY_SUMMARY, R.string.summary_section_weight)
+
+        assertEquals(listOf(SummaryRowState.SetupPrompt(SummaryText(R.string.summary_weight_setup))), section.rows)
+    }
+
+    @Test
+    fun `clicking a setup prompt opens the settings`() = runTest {
+        val viewModel = started(viewModel())
+
+        viewModel.effect.test {
+            viewModel.onIntent(SummaryIntent.OnSetupPromptClick)
+            assertEquals(SummaryEffect.OpenSettings, awaitItem())
+        }
     }
 
     @Test

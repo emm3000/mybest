@@ -11,6 +11,8 @@ internal fun WeeklySummary.toState(week: SummaryWeek): SummaryState = SummarySta
         outings.toOutingsSection(),
         outings.limitsKept.toLimitsSection(),
         recovery.toRecoverySection(week.today),
+        checks.toChecksSection(),
+        weighInTrend.toWeightSection(),
     ),
 )
 

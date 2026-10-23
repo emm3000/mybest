@@ -391,4 +391,20 @@
     <string name="summary_recovery_history_open">Aún sin regreso</string>
     <string name="summary_days_one">%1$d día</string>
     <string name="summary_days_other">%1$d días</string>
+    <string name="summary_section_checks">CHECKS</string>
+    <string name="summary_check_gym">Gym</string>
+    <string name="summary_check_diet">Dieta</string>
+    <string name="summary_check_english">Inglés</string>
+    <string name="summary_check_alcohol">Alcohol</string>
+    <string name="summary_checks_progress">%1$d de %2$d</string>
+    <string name="summary_checks_maximum">%1$d · máx. %2$d</string>
+    <string name="summary_checks_setup">Define cuántos días a la semana quieres cumplir cada check</string>
+    <string name="summary_section_weight">PESO</string>
+    <string name="summary_weight_latest">Último peso</string>
+    <string name="summary_weight_change">Cambio</string>
+    <string name="summary_weight_value">%1$.1f kg</string>
+    <string name="summary_weight_change_down">−%1$.1f kg</string>
+    <string name="summary_weight_change_up">+%1$.1f kg</string>
+    <string name="summary_weight_remaining">Para tu meta</string>
+    <string name="summary_weight_setup">Registra tu peso para ver la tendencia</string>
 </resources>

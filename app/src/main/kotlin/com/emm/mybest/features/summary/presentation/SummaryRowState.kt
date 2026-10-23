@@ -8,4 +8,6 @@ sealed interface SummaryRowState {
         val value: SummaryText,
         val valueColor: Color,
     ) : SummaryRowState
+
+    data class SetupPrompt(val text: SummaryText) : SummaryRowState
 }
