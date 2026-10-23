@@ -49,11 +49,13 @@ private fun PreOutingEffects(
 ) {
     val currentOnOpenSettings by rememberUpdatedState(onOpenSettings)
     val dayAlreadyDecidedMessage = stringResource(R.string.pre_outing_day_already_decided)
+    val notWonNightDayMessage = stringResource(R.string.pre_outing_not_won_night_day)
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 PreOutingEffect.OpenSettings -> currentOnOpenSettings()
                 PreOutingEffect.DayAlreadyDecided -> launch { snackbarHostState.showSnackbar(dayAlreadyDecidedMessage) }
+                PreOutingEffect.NotWonNightDay -> launch { snackbarHostState.showSnackbar(notWonNightDayMessage) }
             }
         }
     }

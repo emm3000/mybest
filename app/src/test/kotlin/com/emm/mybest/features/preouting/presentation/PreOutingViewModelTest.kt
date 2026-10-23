@@ -208,6 +208,18 @@ class PreOutingViewModelTest {
     }
 
     @Test
+    fun `staying in outside Friday and Saturday warns and leaves the night undecided`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT, scenario = Scenario(now = LocalDateTime(THURSDAY, LocalTime(21, 0))))
+        stateOf(viewModel)
+
+        viewModel.effect.test {
+            viewModel.onIntent(PreOutingIntent.OnStayInClick)
+            assertEquals(PreOutingEffect.NotWonNightDay, awaitItem())
+        }
+        assertEquals(PreOutingDecisionState.Undecided, stateNow(viewModel).decision)
+    }
+
+    @Test
     fun `going out opens the form and dismissing closes it`() = runTest {
         val viewModel = viewModel(EMPTY_SNAPSHOT)
         stateOf(viewModel)
