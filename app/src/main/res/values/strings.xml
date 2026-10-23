@@ -423,4 +423,9 @@
     <string name="photo_reminder_channel_description">Aviso en tu día de pesaje cuando toca una foto de progreso</string>
     <string name="photo_reminder_title">Toca tu foto de progreso</string>
     <string name="photo_reminder_text">Tómala hoy junto a tu pesaje.</string>
+    <!-- Debt reminder notification (#21) -->
+    <string name="debt_reminder_channel_name">Cuotas por vencer</string>
+    <string name="debt_reminder_channel_description">Aviso tres días antes del día de pago de una cuota sin pagar</string>
+    <string name="debt_reminder_title">Cuota por vencer</string>
+    <string name="debt_reminder_text">Tu cuota de %1$s (%2$s) vence el %3$d</string>
 </resources>

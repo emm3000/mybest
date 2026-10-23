@@ -28,6 +28,11 @@ data class Debt(
     fun afterInstallmentPaid(): Debt = copy(balance = maxOf(balance - installment, Money.ZERO))
 
     /**
+     * What the next installment asks for: the installment, or the balance left when it is smaller.
+     */
+    val nextInstallment: Money get() = minOf(installment, balance)
+
+    /**
      * The date this debt's installment falls due in [month]; a payment day past the end of the month falls on its
      * last day.
      */
