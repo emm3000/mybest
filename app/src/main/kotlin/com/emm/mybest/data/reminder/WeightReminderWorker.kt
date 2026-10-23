@@ -23,7 +23,7 @@ private val WEIGH_IN_NOTIFICATION = ReminderNotification(
     content = ReminderContent(
         action = ACTION_ADD_WEIGHT,
         titleRes = R.string.weight_reminder_title,
-        textRes = R.string.weight_reminder_text,
+        text = reminderText(R.string.weight_reminder_text),
     ),
 )
 
@@ -33,7 +33,7 @@ private val PHOTO_NOTIFICATION = ReminderNotification(
     content = ReminderContent(
         action = ACTION_ADD_PHOTO,
         titleRes = R.string.photo_reminder_title,
-        textRes = R.string.photo_reminder_text,
+        text = reminderText(R.string.photo_reminder_text),
     ),
 )
 
