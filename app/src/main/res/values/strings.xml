@@ -360,4 +360,6 @@
     <string name="capture_delete_confirm">Borrar</string>
     <string name="capture_cancel">Cancelar</string>
     <string name="capture_action_failed">No se pudo completar la acción</string>
+    <string name="weight_reminder_channel_name">Recordatorio de peso</string>
+    <string name="weight_reminder_channel_description">Recordatorio diario para registrar el peso</string>
 </resources>
