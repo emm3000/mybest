@@ -2,7 +2,7 @@ package com.emm.mybest.domain.usecase.summary
 
 import com.emm.mybest.domain.models.WeeklySummary
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.datetime.LocalDate
 
 class ObserveWeeklySummaryUseCase(
@@ -14,5 +14,5 @@ class ObserveWeeklySummaryUseCase(
      * own each rule.
      */
     operator fun invoke(appDay: LocalDate): Flow<WeeklySummary> =
-        sections.outings(appDay).map { WeeklySummary(outings = it) }
+        combine(sections.outings(appDay), sections.recovery(appDay), ::WeeklySummary)
 }

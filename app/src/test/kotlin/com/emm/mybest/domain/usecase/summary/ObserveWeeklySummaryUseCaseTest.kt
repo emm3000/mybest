@@ -3,12 +3,19 @@ package com.emm.mybest.domain.usecase.summary
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.CheckIn
+import com.emm.mybest.domain.models.DailyCheck
+import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.LimitsKept
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.OutingKind
+import com.emm.mybest.domain.models.ReturnTime
 import com.emm.mybest.domain.models.WeeklySummary
+import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase
+import com.emm.mybest.domain.usecase.relapse.ObserveReturnTimesUseCase
+import com.emm.mybest.testing.FakeDailyCheckRepository
 import com.emm.mybest.testing.FakeOutingRepository
+import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.FixedClock
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -18,9 +25,12 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 private val LIMA = TimeZone.of("America/Lima")
+private val PREVIOUS_FRIDAY = LocalDate(2026, 10, 16)
+private val PREVIOUS_SATURDAY = LocalDate(2026, 10, 17)
 private val PREVIOUS_SUNDAY = LocalDate(2026, 10, 18)
 private val MONDAY = LocalDate(2026, 10, 19)
 private val FRIDAY = LocalDate(2026, 10, 23)
@@ -31,6 +41,7 @@ private val LIMITS = Limits(money = Money(100_00), drinks = 4, returnTime = Loca
 
 private data class Records(
     val outings: List<Outing> = emptyList(),
+    val checks: List<DailyCheck> = emptyList(),
 )
 
 class ObserveWeeklySummaryUseCaseTest {
@@ -46,9 +57,19 @@ class ObserveWeeklySummaryUseCaseTest {
     private fun checkIn(spent: Long, drinks: Int = 2, returnTime: LocalTime = LocalTime(1, 0)) =
         CheckIn(totalSpent = Money(spent), drinks = drinks, returnTime = returnTime, mood = 3)
 
-    private fun useCaseOf(records: Records) = ObserveWeeklySummaryUseCase(
-        WeeklySummarySections(outings = ObserveWeekOutingsUseCase(FakeOutingRepository(records.outings))),
-    )
+    private fun useCaseOf(records: Records): ObserveWeeklySummaryUseCase {
+        val outingRepository = FakeOutingRepository(records.outings)
+        val relapses = ObserveRelapsesUseCase(outingRepository, FakeSetupRepository())
+        val returnTimes = ObserveReturnTimesUseCase(relapses, FakeDailyCheckRepository(records.checks), appDayClock)
+        return ObserveWeeklySummaryUseCase(
+            WeeklySummarySections(
+                outings = ObserveWeekOutingsUseCase(outingRepository),
+                recovery = ObserveWeekRecoveryUseCase(relapses, returnTimes),
+            ),
+        )
+    }
+
+    private fun dietDone(day: LocalDate) = DailyCheck(day, DailyCheckType.DIET, isDone = true)
 
     private suspend fun summaryOf(records: Records, appDay: LocalDate = SUNDAY): WeeklySummary =
         useCaseOf(records)(appDay).first()
@@ -109,5 +130,54 @@ class ObserveWeeklySummaryUseCaseTest {
 
         assertEquals(SUNDAY, appDay)
         assertEquals(1, summaryOf(Records(outings), appDay).outings.count)
+    }
+
+    @Test
+    fun `lists the relapses of the week`() = runTest {
+        val outings = listOf(
+            unplanned(1, PREVIOUS_SUNDAY),
+            planned(2, MONDAY, checkIn(90_00)),
+            unplanned(3, FRIDAY),
+            planned(4, SATURDAY, checkIn(120_00)),
+        )
+
+        assertEquals(listOf(3L, 4L), summaryOf(Records(outings)).recovery.relapses.map { it.outing.id })
+    }
+
+    @Test
+    fun `gives the latest return time`() = runTest {
+        val records = Records(listOf(unplanned(1, FRIDAY)), listOf(dietDone(SATURDAY)))
+
+        assertEquals(ReturnTime(FRIDAY, SATURDAY, days = 1), summaryOf(records).recovery.latestReturnTime)
+    }
+
+    @Test
+    fun `a past week gives the latest return time of its own relapses`() = runTest {
+        val records = Records(
+            outings = listOf(unplanned(1, PREVIOUS_FRIDAY), unplanned(2, FRIDAY)),
+            checks = listOf(dietDone(PREVIOUS_SATURDAY), dietDone(SATURDAY)),
+        )
+
+        val latest = summaryOf(records, appDay = PREVIOUS_SUNDAY).recovery.latestReturnTime
+
+        assertEquals(ReturnTime(PREVIOUS_FRIDAY, PREVIOUS_SATURDAY, days = 1), latest)
+    }
+
+    @Test
+    fun `has no latest return time when the week has no relapse`() = runTest {
+        val records = Records(listOf(unplanned(1, PREVIOUS_FRIDAY)), listOf(dietDone(PREVIOUS_SATURDAY)))
+
+        assertNull(summaryOf(records).recovery.latestReturnTime)
+    }
+
+    @Test
+    fun `gives the return time history of every relapse newest first`() = runTest {
+        val records = Records(
+            outings = listOf(unplanned(1, PREVIOUS_SUNDAY), unplanned(2, FRIDAY)),
+            checks = listOf(dietDone(MONDAY), dietDone(SATURDAY)),
+        )
+
+        val history = listOf(ReturnTime(FRIDAY, SATURDAY, days = 1), ReturnTime(PREVIOUS_SUNDAY, MONDAY, days = 1))
+        assertEquals(history, summaryOf(records).recovery.returnTimeHistory)
     }
 }

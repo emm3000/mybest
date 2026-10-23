@@ -5,4 +5,5 @@ package com.emm.mybest.domain.models
  */
 data class WeeklySummary(
     val outings: WeekOutings,
+    val recovery: WeekRecovery,
 )

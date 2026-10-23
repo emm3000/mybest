@@ -5,4 +5,5 @@ package com.emm.mybest.domain.usecase.summary
  */
 data class WeeklySummarySections(
     val outings: ObserveWeekOutingsUseCase,
+    val recovery: ObserveWeekRecoveryUseCase,
 )
