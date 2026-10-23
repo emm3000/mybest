@@ -3,6 +3,7 @@ package com.emm.mybest.domain.usecase.dailycheck
 import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.testing.FakeDailyCheckRepository
 import com.emm.mybest.testing.FakeSetupRepository
 import kotlinx.coroutines.flow.first

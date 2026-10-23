@@ -17,13 +17,13 @@ import com.emm.mybest.domain.models.OutingKind
 import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.ReturnTime
 import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.domain.models.WeeklySummary
 import com.emm.mybest.domain.models.WeighInTrend
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.models.WonNight
 import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
-import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
 import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
 import com.emm.mybest.domain.usecase.goal.ObserveGoalProgressUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase

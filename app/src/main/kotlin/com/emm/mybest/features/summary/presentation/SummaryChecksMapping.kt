@@ -3,7 +3,7 @@ package com.emm.mybest.features.summary.presentation
 import androidx.annotation.StringRes
 import com.emm.mybest.R
 import com.emm.mybest.domain.models.DailyCheckType
-import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
+import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.ui.theme.AtelierDone
 import com.emm.mybest.ui.theme.AtelierInk
 
