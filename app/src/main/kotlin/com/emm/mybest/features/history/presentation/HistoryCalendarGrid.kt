@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.emm.mybest.core.datetime.YearMonthValue
-import com.emm.mybest.domain.usecase.history.DaySummary
 import com.emm.mybest.ui.theme.AtelierInkTertiary
 import com.emm.mybest.ui.theme.AtelierMonoFamily
 import kotlinx.datetime.LocalDate
@@ -35,7 +34,7 @@ internal data class CalendarCell(
 @Composable
 internal fun HistoryCalendarGrid(
     month: YearMonthValue,
-    monthlyData: Map<LocalDate, DaySummary>,
+    dayMarks: Map<LocalDate, DayMarksState>,
     today: LocalDate,
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
@@ -48,7 +47,7 @@ internal fun HistoryCalendarGrid(
     rows.forEach { rowCells ->
         CalendarRow(
             cells = rowCells,
-            monthlyData = monthlyData,
+            dayMarks = dayMarks,
             today = today,
             onDateClick = onDateClick,
             modifier = modifier
@@ -63,7 +62,7 @@ internal fun HistoryCalendarGrid(
 @Composable
 private fun CalendarRow(
     cells: List<CalendarCell>,
-    monthlyData: Map<LocalDate, DaySummary>,
+    dayMarks: Map<LocalDate, DayMarksState>,
     today: LocalDate,
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
@@ -79,7 +78,7 @@ private fun CalendarRow(
                 HistoryDayCell(
                     day = cell.day,
                     date = cell.date,
-                    summary = monthlyData[cell.date],
+                    marks = dayMarks.getOrDefault(cell.date, DayMarksState.NONE),
                     isToday = cell.date == today,
                     isFuture = cell.date > today,
                     onClick = onDateClick,

@@ -2,7 +2,6 @@ package com.emm.mybest.features.history.presentation
 
 import androidx.compose.runtime.Stable
 import com.emm.mybest.core.datetime.YearMonthValue
-import com.emm.mybest.domain.usecase.history.DaySummary
 import com.emm.mybest.domain.usecase.history.HistoryRecentEntry
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -15,7 +14,6 @@ data class HistoryState(
     val today: LocalDate,
     val currentMonth: YearMonthValue,
     val selectedMonth: YearMonthValue,
-    val monthlyData: ImmutableMap<LocalDate, DaySummary> = persistentMapOf(),
     val monthNavigationLabel: String = "",
     val monthWeightCount: Int = 0,
     val monthPhotoCount: Int = 0,

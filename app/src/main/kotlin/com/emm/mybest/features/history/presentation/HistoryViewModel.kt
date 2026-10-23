@@ -55,7 +55,6 @@ class HistoryViewModel(
                 selectedMonth = month,
                 monthNavigationLabel = month.toNavigationLabel(),
                 selectedDate = date,
-                monthlyData = result.monthlyData.toImmutableMap(),
                 monthWeightCount = result.monthWeightCount,
                 monthPhotoCount = result.monthPhotoCount,
                 monthOutingCount = result.monthOutingCount,
