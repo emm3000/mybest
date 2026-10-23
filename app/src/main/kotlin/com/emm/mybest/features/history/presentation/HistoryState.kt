@@ -12,7 +12,9 @@ import kotlinx.datetime.LocalDate
 
 @Stable
 data class HistoryState(
-    val selectedMonth: YearMonthValue = YearMonthValue.now(),
+    val today: LocalDate,
+    val currentMonth: YearMonthValue,
+    val selectedMonth: YearMonthValue,
     val monthlyData: ImmutableMap<LocalDate, DaySummary> = persistentMapOf(),
     val monthWeightCount: Int = 0,
     val monthPhotoCount: Int = 0,

@@ -10,7 +10,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,9 +23,6 @@ import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
 import com.emm.mybest.ui.theme.AtelierBackground
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import kotlin.time.Clock
 
 private const val PAGER_COUNT = Int.MAX_VALUE
 private const val PAGER_INITIAL = PAGER_COUNT / 2
@@ -39,7 +35,7 @@ fun HistoryScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()) }
+    val today = state.today
 
     val selectedDate = state.selectedDate
     if (selectedDate != null) {
@@ -111,7 +107,7 @@ private fun HistoryPagedContent(
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val referenceMonth = remember { YearMonthValue.now() }
+    val referenceMonth = state.currentMonth
     val pagerState = rememberPagerState(
         initialPage = PAGER_INITIAL,
         pageCount = { PAGER_COUNT },

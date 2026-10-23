@@ -1,6 +1,7 @@
 package com.emm.mybest.features.history.presentation
 
 import app.cash.turbine.test
+import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
@@ -11,6 +12,7 @@ import com.emm.mybest.domain.usecase.history.HistoryRecentEntry
 import com.emm.mybest.domain.usecase.history.HistoryResult
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
+import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coVerify
 import io.mockk.every
@@ -20,12 +22,19 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+
+private val LIMA = TimeZone.of("America/Lima")
+
+private fun appDayClockAt(dateTime: LocalDateTime) = AppDayClock(FixedClock(dateTime.toInstant(LIMA)), LIMA)
 
 class HistoryViewModelTest {
 
@@ -36,7 +45,7 @@ class HistoryViewModelTest {
     private val deleteWeightByDate = mockk<DeleteWeightByDateUseCase>(relaxed = true)
     private val deletePhoto = mockk<DeletePhotoUseCase>(relaxed = true)
 
-    private val fixedMonth = YearMonthValue(2026, 5)
+    private val mayAppDayClock = appDayClockAt(LocalDateTime(2026, 5, 15, 12, 0))
 
     private val weightEntry = WeightEntry(
         id = "w1",
@@ -61,10 +70,39 @@ class HistoryViewModelTest {
 
     private fun buildViewModel(
         result: HistoryResult = emptyResult(),
-        initialMonth: YearMonthValue = fixedMonth,
+        appDayClock: AppDayClock = mayAppDayClock,
     ): HistoryViewModel {
         every { getHistoryUseCase(any()) } returns flowOf(result)
-        return HistoryViewModel(getHistoryUseCase, deleteWeightByDate, deletePhoto, initialMonth)
+        return HistoryViewModel(getHistoryUseCase, deleteWeightByDate, deletePhoto, appDayClock)
+    }
+
+    @Test
+    fun `month and today come from the app day before 05_00`() = runTest {
+        val viewModel = buildViewModel(appDayClock = appDayClockAt(LocalDateTime(2026, 11, 1, 2, 0)))
+
+        viewModel.state.test {
+            val initial = awaitItem()
+            assertEquals(LocalDate(2026, 10, 31), initial.today)
+            assertEquals(YearMonthValue(2026, 10), initial.currentMonth)
+            assertEquals(YearMonthValue(2026, 10), initial.selectedMonth)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `current month and today stay fixed when the selected month changes`() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.state.test {
+            awaitItem()
+            awaitItem()
+
+            viewModel.onIntent(HistoryIntent.OnMonthChange(YearMonthValue(2026, 6)))
+            val updated = awaitItem()
+            assertEquals(LocalDate(2026, 5, 15), updated.today)
+            assertEquals(YearMonthValue(2026, 5), updated.currentMonth)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -245,7 +283,7 @@ class HistoryViewModelTest {
     fun `state updates reactively when use case emits new data`() = runTest {
         val resultFlow = MutableStateFlow(emptyResult())
         every { getHistoryUseCase(any()) } returns resultFlow
-        val viewModel = HistoryViewModel(getHistoryUseCase, deleteWeightByDate, deletePhoto, fixedMonth)
+        val viewModel = HistoryViewModel(getHistoryUseCase, deleteWeightByDate, deletePhoto, mayAppDayClock)
 
         viewModel.state.test {
             awaitItem()
