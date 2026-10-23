@@ -407,4 +407,12 @@
     <string name="summary_weight_change_up">+%1$.1f kg</string>
     <string name="summary_weight_remaining">Para tu meta</string>
     <string name="summary_weight_setup">Registra tu peso para ver la tendencia</string>
+    <string name="summary_section_money">DINERO</string>
+    <string name="summary_money_debt_balance">Deuda total</string>
+    <string name="summary_money_installments_paid">Cuotas pagadas este mes</string>
+    <string name="summary_money_debts_setup">Registra tus deudas para ver cuánto te queda</string>
+    <string name="summary_money_goal_label">Meta: %1$s</string>
+    <string name="summary_money_goal_value">%1$s · %2$d%%</string>
+    <string name="summary_money_goal_setup">Define una meta de compra para ver tu avance</string>
+    <string name="summary_money_not_spent">No gastado (estimado)</string>
 </resources>

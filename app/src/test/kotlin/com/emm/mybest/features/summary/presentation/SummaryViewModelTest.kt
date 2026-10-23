@@ -7,7 +7,9 @@ import com.emm.mybest.R
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.models.GoalProgress
 import com.emm.mybest.domain.models.LimitsKept
+import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.ReturnTime
 import com.emm.mybest.domain.models.WeekDebt
 import com.emm.mybest.domain.models.WeekMoney
@@ -276,6 +278,42 @@ class SummaryViewModelTest {
             viewModel.onIntent(SummaryIntent.OnSetupPromptClick)
             assertEquals(SummaryEffect.OpenSettings, awaitItem())
         }
+    }
+
+    @Test
+    fun `money section shows debt, goal progress and the estimated not spent`() = runTest {
+        val goal = GoalProgress(PurchaseGoal("Moto", Money(570_00)), Money(300_00), Money(270_00), 52, emptyList())
+        val money = WeekMoney(emptyList(), Money(380_00), WeekDebt(Money(3_200_00), 1, 2), goal)
+
+        val section = sectionOf(EMPTY_SUMMARY.copy(money = money), R.string.summary_section_money)
+
+        assertEquals(
+            listOf(
+                line(R.string.summary_money_debt_balance, SummaryText.literal("S/ 3,200.00")),
+                line(R.string.summary_money_installments_paid, SummaryText.literal("1")),
+                SummaryRowState.Line(
+                    SummaryText(R.string.summary_money_goal_label, listOf("Moto")),
+                    SummaryText(R.string.summary_money_goal_value, listOf("S/ 300.00", 52)),
+                    AtelierInk,
+                ),
+                line(R.string.summary_money_not_spent, SummaryText.literal("S/ 380.00")),
+            ),
+            section.rows,
+        )
+    }
+
+    @Test
+    fun `money section asks to set the debts and the goal when missing`() = runTest {
+        val section = sectionOf(EMPTY_SUMMARY, R.string.summary_section_money)
+
+        assertEquals(
+            listOf(
+                SummaryRowState.SetupPrompt(SummaryText(R.string.summary_money_debts_setup)),
+                SummaryRowState.SetupPrompt(SummaryText(R.string.summary_money_goal_setup)),
+                line(R.string.summary_money_not_spent, SummaryText.literal("S/ 0.00")),
+            ),
+            section.rows,
+        )
     }
 
     @Test
