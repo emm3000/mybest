@@ -16,7 +16,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,7 +33,7 @@ import com.emm.mybest.ui.components.atelier.MicroLabelTone
 import com.emm.mybest.ui.theme.AtelierTheme
 import org.koin.androidx.compose.koinViewModel
 
-private enum class HomeContentType { Header, Hairline, QuickActions }
+private enum class HomeContentType { Header, Hairline, QuickActions, Checks, Week }
 
 private val ROW_PADDING_HORIZONTAL = 28.dp
 private val ROW_PADDING_VERTICAL = 14.dp
@@ -61,10 +63,19 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val currentCallbacks by rememberUpdatedState(callbacks)
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                HomeEffect.NavigateToSettings -> currentCallbacks.onSettingsClick()
+            }
+        }
+    }
     HomeScreenContent(
         modifier = modifier,
         state = state,
         callbacks = callbacks,
+        onIntent = viewModel::onIntent,
         bottomBar = bottomBar,
     )
 }
@@ -73,6 +84,7 @@ fun HomeScreen(
 internal fun HomeScreenContent(
     state: HomeState,
     callbacks: HomeCallbacks,
+    onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier,
     bottomBar: @Composable () -> Unit = {},
 ) {
@@ -81,7 +93,7 @@ internal fun HomeScreenContent(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = bottomBar,
     ) { paddingValues ->
-        HomeLazyContent(state, callbacks, paddingValues)
+        HomeLazyContent(state, callbacks, onIntent, paddingValues)
     }
 }
 
@@ -89,6 +101,7 @@ internal fun HomeScreenContent(
 private fun HomeLazyContent(
     state: HomeState,
     callbacks: HomeCallbacks,
+    onIntent: (HomeIntent) -> Unit,
     paddingValues: PaddingValues,
 ) {
     LazyColumn(
@@ -99,6 +112,19 @@ private fun HomeLazyContent(
         item(contentType = HomeContentType.Header) { HomeHeaderRow(state) }
         item(contentType = HomeContentType.Hairline) { Hairline() }
         item(contentType = HomeContentType.QuickActions) { HomeQuickActionsRow(state, callbacks) }
+        item(contentType = HomeContentType.Hairline) { Hairline() }
+        item(contentType = HomeContentType.Checks) {
+            HomeChecksSection(
+                checks = state.checks,
+                onToggle = { onIntent(HomeIntent.ToggleDailyCheck(it)) },
+            )
+        }
+        item(contentType = HomeContentType.Week) {
+            HomeWeekSection(
+                checks = state.checks,
+                onDefineTarget = { onIntent(HomeIntent.DefineWeeklyTarget) },
+            )
+        }
     }
 }
 
@@ -174,6 +200,7 @@ private fun HomeScreenPreview() {
             state = HomeState(
                 isLoading = false,
                 weekNumber = 20,
+                checks = previewDailyChecks(),
             ),
             callbacks = HomeCallbacks(
                 onWeightClick = {},
@@ -181,6 +208,7 @@ private fun HomeScreenPreview() {
                 onSettingsClick = {},
                 onHistoryClick = {},
             ),
+            onIntent = {},
         )
     }
 }
