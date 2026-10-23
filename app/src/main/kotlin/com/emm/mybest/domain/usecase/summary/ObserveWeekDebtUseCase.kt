@@ -16,7 +16,8 @@ class ObserveWeekDebtUseCase(
 ) {
 
     /**
-     * Emits the debt balance with how many installments are paid in the month of [appDay] against the number of debts.
+     * Emits the current debt balance, which is never rebuilt for a past week, with how many installments are paid in
+     * the month of [appDay] against the number of debts.
      */
     operator fun invoke(appDay: LocalDate): Flow<WeekDebt> = combine(
         observeDebtSummary(),

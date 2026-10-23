@@ -4,7 +4,8 @@ import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
 
 /**
  * Everything the weekly summary shows for one Monday to Sunday app week. [checks] holds the daily checks that have a
- * weekly target; the [weighInTrend] and the goal progress in [money] are as of the week's end.
+ * weekly target; the [weighInTrend] and the goal progress in [money] are as of the week's end, while the debt
+ * balance in [money] is today's.
  */
 data class WeeklySummary(
     val outings: WeekOutings,

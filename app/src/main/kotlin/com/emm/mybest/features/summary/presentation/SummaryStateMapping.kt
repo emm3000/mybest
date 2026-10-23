@@ -13,7 +13,7 @@ internal fun WeeklySummary.toState(week: SummaryWeek): SummaryState = SummarySta
         recovery.toRecoverySection(week.today),
         checks.toChecksSection(),
         weighInTrend.toWeightSection(),
-        money.toMoneySection(),
+        money.toMoneySection(week.isCurrent),
     ),
 )
 
