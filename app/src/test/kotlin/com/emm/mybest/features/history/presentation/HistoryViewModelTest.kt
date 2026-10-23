@@ -122,14 +122,14 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `loaded state with empty data has empty monthlyData`() = runTest {
+    fun `loaded state with empty data has no day marks`() = runTest {
         val viewModel = buildViewModel()
 
         viewModel.state.test {
             awaitItem()
             val loaded = awaitItem()
             assertFalse(loaded.isLoading)
-            assertTrue(loaded.monthlyData.isEmpty())
+            assertTrue(loaded.dayMarks.isEmpty())
             assertNull(loaded.errorMessage)
             cancelAndIgnoreRemainingEvents()
         }
@@ -273,12 +273,12 @@ class HistoryViewModelTest {
         viewModel.state.test {
             awaitItem()
             val empty = awaitItem()
-            assertTrue(empty.monthlyData.isEmpty())
+            assertTrue(empty.dayMarks.isEmpty())
 
             val summary = DaySummary(weightEntry.date, weight = weightEntry)
             resultFlow.value = historyResult(listOf(summary))
             val updated = awaitItem()
-            assertEquals(1, updated.monthlyData.size)
+            assertEquals(1, updated.dayMarks.size)
             cancelAndIgnoreRemainingEvents()
         }
     }

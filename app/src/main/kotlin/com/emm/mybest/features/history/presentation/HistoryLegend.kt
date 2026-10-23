@@ -1,64 +1,50 @@
 package com.emm.mybest.features.history.presentation
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.emm.mybest.R
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
-import com.emm.mybest.ui.theme.AtelierDone
-import com.emm.mybest.ui.theme.AtelierInk
 
-private val DOT_SIZE = 5.dp
-private val RING_SIZE = 6.dp
+private const val LEGEND_COLUMNS = 2
+private val LEGEND_ROW_GAP = 10.dp
+private val LEGEND_ITEM_GAP = 8.dp
 
 @Composable
 internal fun HistoryLegend(modifier: Modifier = Modifier) {
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = HISTORY_GUT)
             .padding(top = 12.dp, bottom = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(LEGEND_ROW_GAP),
     ) {
-        LegendItem(isRing = false, label = stringResource(R.string.history_legend_weight))
-        LegendItem(isRing = true, label = stringResource(R.string.history_legend_photo))
+        HistoryMarkKind.entries.chunked(LEGEND_COLUMNS).forEach { kinds ->
+            Row(horizontalArrangement = Arrangement.spacedBy(LEGEND_ITEM_GAP)) {
+                kinds.forEach { LegendItem(kind = it, modifier = Modifier.weight(1f)) }
+            }
+        }
     }
 }
 
 @Composable
-private fun LegendItem(isRing: Boolean, label: String) {
+private fun LegendItem(kind: HistoryMarkKind, modifier: Modifier = Modifier) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(LEGEND_ITEM_GAP),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (isRing) {
-            Box(
-                modifier = Modifier
-                    .size(RING_SIZE)
-                    .border(width = 1.dp, color = AtelierDone),
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .size(DOT_SIZE)
-                    .drawBehind { drawRect(AtelierInk) },
-            )
-        }
+        HistoryMark(kind = kind)
         MicroLabel(
-            text = label,
+            text = stringResource(kind.legendRes()),
             style = MicroLabelStyle(tone = MicroLabelTone.Dim),
         )
     }

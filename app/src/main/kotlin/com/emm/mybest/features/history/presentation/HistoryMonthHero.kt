@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.emm.mybest.R
-import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
@@ -34,14 +33,13 @@ private val TRACKING_012 = 0.12.em
 
 @Composable
 internal fun HistoryMonthHero(
-    month: YearMonthValue,
-    weightCount: Int,
-    photoCount: Int,
+    state: HistoryState,
     modifier: Modifier = Modifier,
 ) {
-    val monthLabel = formatMonthLabel(month)
-    val monthName = formatMonthName(month)
-    val statsText = stringResource(R.string.history_month_stats, weightCount, photoCount)
+    val monthLabel = formatMonthLabel(state.selectedMonth)
+    val monthName = formatMonthName(state.selectedMonth)
+    val nightsText = stringResource(R.string.history_month_outings, state.monthOutingCount, state.monthWonNightCount)
+    val statsText = stringResource(R.string.history_month_stats, state.monthWeightCount, state.monthPhotoCount)
 
     Row(
         modifier = modifier
@@ -52,7 +50,7 @@ internal fun HistoryMonthHero(
         verticalAlignment = Alignment.Bottom,
     ) {
         HeroLeft(monthLabel = monthLabel, monthName = monthName)
-        HeroRight(statsText = statsText)
+        HeroRight(navigationLabel = state.monthNavigationLabel, nightsText = nightsText, statsText = statsText)
     }
 }
 
@@ -78,13 +76,13 @@ private fun HeroLeft(monthLabel: String, monthName: String) {
 }
 
 @Composable
-private fun HeroRight(statsText: String) {
+private fun HeroRight(navigationLabel: String, nightsText: String, statsText: String) {
     Column(
         horizontalAlignment = Alignment.End,
         modifier = Modifier.padding(bottom = 4.dp),
     ) {
         Text(
-            text = "← ABR · JUN →",
+            text = navigationLabel,
             style = TextStyle(
                 fontFamily = AtelierMonoFamily,
                 fontSize = MONO_10,
@@ -92,15 +90,21 @@ private fun HeroRight(statsText: String) {
                 letterSpacing = TRACKING_018,
             ),
         )
-        Text(
-            text = statsText,
-            style = TextStyle(
-                fontFamily = AtelierMonoFamily,
-                fontSize = MONO_10,
-                color = AtelierInkSecondary,
-                letterSpacing = TRACKING_012,
-            ),
-            modifier = Modifier.padding(top = 8.dp),
-        )
+        HeroStat(text = nightsText, modifier = Modifier.padding(top = 8.dp))
+        HeroStat(text = statsText, modifier = Modifier.padding(top = 4.dp))
     }
+}
+
+@Composable
+private fun HeroStat(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text,
+        style = TextStyle(
+            fontFamily = AtelierMonoFamily,
+            fontSize = MONO_10,
+            color = AtelierInkSecondary,
+            letterSpacing = TRACKING_012,
+        ),
+        modifier = modifier,
+    )
 }

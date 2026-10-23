@@ -37,18 +37,15 @@ fun HistoryScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val today = state.today
 
-    val selectedDate = state.selectedDate
-    if (selectedDate != null) {
+    state.dayDetail?.let { detail ->
         HBottomSheet(
             onDismissRequest = { viewModel.onIntent(HistoryIntent.OnDateDismiss) },
             containerColor = AtelierBackground,
         ) {
             DayDetailContent(
-                date = selectedDate,
-                summary = state.monthlyData[selectedDate],
-                today = today,
+                detail = detail,
                 onClose = { viewModel.onIntent(HistoryIntent.OnDateDismiss) },
-                onDeleteWeight = { viewModel.onIntent(HistoryIntent.OnDeleteWeight(selectedDate)) },
+                onDeleteWeight = { viewModel.onIntent(HistoryIntent.OnDeleteWeight(detail.date)) },
                 onDeletePhoto = { viewModel.onIntent(HistoryIntent.OnDeletePhoto(it)) },
                 onSeePhotosClick = onSeePhotosClick,
             )

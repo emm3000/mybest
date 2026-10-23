@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,45 +17,36 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import com.emm.mybest.R
 import com.emm.mybest.core.datetime.longEs
 import com.emm.mybest.domain.models.ProgressPhoto
-import com.emm.mybest.domain.usecase.history.DaySummary
 import com.emm.mybest.ui.components.HAlertDialog
 import com.emm.mybest.ui.components.HIconButton
-import com.emm.mybest.ui.components.IconButtonVariant
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
-import com.emm.mybest.ui.components.atelier.photoTypeLabel
 import com.emm.mybest.ui.theme.AtelierInk
-import com.emm.mybest.ui.theme.AtelierSansFamily
 import com.emm.mybest.ui.theme.AtelierSerifFamily
 import kotlinx.datetime.LocalDate
 
 private val DETAIL_SERIF_SIZE = 38.sp
-private val THUMBNAIL_SIZE = 88.dp
 
 @Composable
 internal fun DayDetailContent(
-    date: LocalDate,
-    summary: DaySummary?,
-    today: LocalDate,
+    detail: DayDetailState,
     onClose: () -> Unit,
     onDeleteWeight: () -> Unit,
     onDeletePhoto: (String) -> Unit,
     onSeePhotosClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isToday = date == today
     var photoToDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
 
     if (photoToDelete != null) {
@@ -81,24 +70,23 @@ internal fun DayDetailContent(
             .padding(horizontal = HISTORY_GUT)
             .padding(top = 20.dp, bottom = 32.dp),
     ) {
-        DetailHeader(date = date, onClose = onClose)
+        DetailHeader(date = detail.date, onClose = onClose)
         Hairline(modifier = Modifier.padding(top = 12.dp))
 
-        if (summary?.hasActivity != true) {
+        if (detail.isEmpty) {
             DetailEmptyState()
         } else {
-            DetailItems(
-                summary = summary,
-                isToday = isToday,
+            DetailSections(
+                detail = detail,
                 onDeleteWeight = onDeleteWeight,
                 onDeletePhoto = { photoToDelete = it },
             )
         }
 
-        if (summary?.hasPhoto == true) {
+        if (detail.photos.isNotEmpty()) {
             Surface(
                 onClick = onSeePhotosClick,
-                color = androidx.compose.ui.graphics.Color.Transparent,
+                color = Color.Transparent,
                 modifier = Modifier.padding(top = 20.dp),
             ) {
                 MicroLabel(
@@ -157,127 +145,14 @@ private fun DetailEmptyState() {
 }
 
 @Composable
-private fun DetailItems(
-    summary: DaySummary,
-    isToday: Boolean,
+private fun DetailSections(
+    detail: DayDetailState,
     onDeleteWeight: () -> Unit,
     onDeletePhoto: (ProgressPhoto) -> Unit,
 ) {
-    val hasWeight = summary.hasWeight
-    val photos = summary.photos
-
-    summary.weight?.let { weight ->
-        DetailWeightRow(
-            weightKg = weight.weight,
-            note = weight.note,
-            isToday = isToday,
-            onDelete = onDeleteWeight,
-        )
-    }
-
-    photos.forEachIndexed { index, photo ->
-        val showHairline = hasWeight || index > 0
-        if (showHairline) {
-            Hairline(inset = HISTORY_GUT)
-        }
-        DetailPhotoRow(
-            photo = photo,
-            isToday = isToday,
-            onDelete = { onDeletePhoto(photo) },
-        )
-    }
-}
-
-@Composable
-private fun DetailWeightRow(
-    weightKg: Float,
-    note: String?,
-    isToday: Boolean,
-    onDelete: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        MicroLabel(
-            text = stringResource(R.string.history_detail_weight_label),
-            style = MicroLabelStyle(tone = MicroLabelTone.Dim),
-            modifier = Modifier
-                .padding(end = 14.dp),
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = buildWeightText(weightKg, note),
-                style = TextStyle(
-                    fontFamily = AtelierSansFamily,
-                    fontSize = 13.sp,
-                    color = AtelierInk,
-                ),
-            )
-        }
-        if (isToday) {
-            HIconButton(
-                icon = Icons.Rounded.Delete,
-                contentDescription = "Eliminar peso",
-                onClick = onDelete,
-                variant = IconButtonVariant.Destructive,
-            )
-        }
-    }
-}
-
-@Composable
-private fun DetailPhotoRow(
-    photo: ProgressPhoto,
-    isToday: Boolean,
-    onDelete: () -> Unit,
-) {
-    val typeLabel = photoTypeLabel(photo.type)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp),
-        verticalAlignment = Alignment.Top,
-    ) {
-        MicroLabel(
-            text = stringResource(R.string.history_detail_photo_label),
-            style = MicroLabelStyle(tone = MicroLabelTone.Dim),
-            modifier = Modifier
-                .padding(end = 14.dp)
-                .padding(top = 2.dp),
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = typeLabel,
-                style = TextStyle(
-                    fontFamily = AtelierSansFamily,
-                    fontSize = 13.sp,
-                    color = AtelierInk,
-                ),
-            )
-            AsyncImage(
-                model = photo.photoPath,
-                contentDescription = "Foto de ${typeLabel.lowercase()}",
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .size(THUMBNAIL_SIZE),
-                contentScale = ContentScale.Crop,
-            )
-        }
-        if (isToday) {
-            HIconButton(
-                icon = Icons.Rounded.Delete,
-                contentDescription = "Eliminar foto",
-                onClick = onDelete,
-                variant = IconButtonVariant.Destructive,
-            )
-        }
-    }
-}
-
-private fun buildWeightText(weightKg: Float, note: String?): String {
-    val base = "${"%.1f".format(weightKg)} kg"
-    return if (!note.isNullOrBlank()) "$base · $note" else base
+    detail.outing?.let { HistoryOutingDetail(outing = it) }
+    detail.wonNight?.let { HistoryWonNightDetail(wonNight = it) }
+    HistoryChecksDetail(checks = detail.checks)
+    detail.weight?.let { DetailWeightRow(row = it, onDelete = onDeleteWeight) }
+    detail.photos.forEach { row -> DetailPhotoRow(row = row, onDelete = { onDeletePhoto(row.photo) }) }
 }

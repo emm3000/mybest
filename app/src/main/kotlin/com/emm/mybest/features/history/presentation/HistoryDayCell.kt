@@ -8,17 +8,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.emm.mybest.domain.usecase.history.DaySummary
 import com.emm.mybest.ui.theme.AtelierDone
 import com.emm.mybest.ui.theme.AtelierInk
 import com.emm.mybest.ui.theme.AtelierInkMuted
@@ -26,13 +23,16 @@ import com.emm.mybest.ui.theme.AtelierSerifFamily
 import kotlinx.datetime.LocalDate
 
 private val CELL_DAY_SIZE = 17.sp
-private val INDICATOR_SIZE = 4.dp
+private val CHECK_ROW_HEIGHT = 4.dp
+private val MARK_ROW_HEIGHT = 5.dp
+private val CHECK_GAP = 2.dp
+private val MARK_GAP = 3.dp
 
 @Composable
 internal fun HistoryDayCell(
     day: Int,
     date: LocalDate,
-    summary: DaySummary?,
+    marks: DayMarksState,
     isToday: Boolean,
     isFuture: Boolean,
     onClick: (LocalDate) -> Unit,
@@ -61,44 +61,25 @@ internal fun HistoryDayCell(
                     lineHeight = CELL_DAY_SIZE,
                 ),
             )
-            DayCellIndicatorRow(
-                hasWeight = summary?.hasWeight == true,
-                hasPhoto = summary?.hasPhoto == true,
-            )
+            DayMarkRows(marks = marks)
         }
     }
 }
 
 @Composable
-private fun DayCellIndicatorRow(hasWeight: Boolean, hasPhoto: Boolean) {
+private fun DayMarkRows(marks: DayMarksState) {
     Row(
-        modifier = Modifier.height(5.dp),
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = Modifier.height(CHECK_ROW_HEIGHT),
+        horizontalArrangement = Arrangement.spacedBy(CHECK_GAP),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (hasWeight) {
-            WeightDot()
-        }
-        if (hasPhoto) {
-            PhotoRing()
-        }
+        repeat(marks.checkCount) { HistoryMark(HistoryMarkKind.CHECK) }
     }
-}
-
-@Composable
-private fun WeightDot() {
-    Box(
-        modifier = Modifier
-            .size(INDICATOR_SIZE)
-            .drawBehind { drawRect(AtelierInk) },
-    )
-}
-
-@Composable
-private fun PhotoRing() {
-    Box(
-        modifier = Modifier
-            .size(INDICATOR_SIZE)
-            .border(width = 1.dp, color = AtelierDone),
-    )
+    Row(
+        modifier = Modifier.height(MARK_ROW_HEIGHT),
+        horizontalArrangement = Arrangement.spacedBy(MARK_GAP),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        marks.marks.forEach { HistoryMark(it) }
+    }
 }

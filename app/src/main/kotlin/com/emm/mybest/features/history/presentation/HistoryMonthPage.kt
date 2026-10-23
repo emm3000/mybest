@@ -5,10 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.emm.mybest.core.datetime.YearMonthValue
-import com.emm.mybest.domain.usecase.history.DaySummary
 import com.emm.mybest.ui.components.atelier.Hairline
 import kotlinx.datetime.LocalDate
 
@@ -24,19 +21,11 @@ internal fun HistoryMonthPage(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        val monthData = remember(state.monthlyData, state.selectedMonth) {
-            monthDataOnly(state.monthlyData, state.selectedMonth)
-        }
-
-        HistoryMonthHero(
-            month = state.selectedMonth,
-            weightCount = state.monthWeightCount,
-            photoCount = state.monthPhotoCount,
-        )
+        HistoryMonthHero(state = state)
         Hairline()
         HistoryCalendarGrid(
             month = state.selectedMonth,
-            monthlyData = monthData,
+            dayMarks = state.dayMarks,
             today = today,
             onDateClick = onDateClick,
         )
@@ -50,8 +39,3 @@ internal fun HistoryMonthPage(
         )
     }
 }
-
-private fun monthDataOnly(
-    monthlyData: Map<LocalDate, DaySummary>,
-    month: YearMonthValue,
-): Map<LocalDate, DaySummary> = monthlyData.filterKeys { YearMonthValue.from(it) == month }
