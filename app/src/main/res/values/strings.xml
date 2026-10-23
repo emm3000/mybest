@@ -275,4 +275,26 @@
     <string name="purchase_goal_action_failed">No se pudo completar la acción</string>
     <string name="settings_purchase_goal_label">META DE COMPRA</string>
     <string name="settings_purchase_goal_value">%1$s · %2$s</string>
+    <string name="settings_capture_label">CAPTURA DE NOTIFICACIONES</string>
+    <plurals name="settings_capture_active">
+        <item quantity="one">Activa · %1$d app</item>
+        <item quantity="other">Activa · %1$d apps</item>
+    </plurals>
+    <string name="settings_capture_off">Desactivada</string>
+    <string name="capture_title">Captura de notificaciones</string>
+    <string name="capture_privacy">Todo se queda en tu teléfono y nada se interpreta todavía. Solo se guardan el título, el texto y la hora de las notificaciones de las apps que elijas.</string>
+    <string name="capture_access_label">ACCESO A NOTIFICACIONES</string>
+    <string name="capture_access_explanation">Para guardar notificaciones, MyBest necesita que lo permitas en los ajustes del sistema.</string>
+    <string name="capture_access_open_settings">Abrir ajustes</string>
+    <string name="capture_apps_label">APPS A CAPTURAR</string>
+    <string name="capture_turn_off">DESACTIVAR CAPTURA</string>
+    <string name="capture_list_label">NOTIFICACIONES GUARDADAS</string>
+    <string name="capture_list_empty">Aún no hay notificaciones guardadas</string>
+    <string name="capture_posted_at">%1$s · %2$s</string>
+    <string name="capture_delete_all">BORRAR TODO</string>
+    <string name="capture_delete_title">¿Borrar todo?</string>
+    <string name="capture_delete_message">Se borrarán todas las notificaciones guardadas. No se puede deshacer.</string>
+    <string name="capture_delete_confirm">Borrar</string>
+    <string name="capture_cancel">Cancelar</string>
+    <string name="capture_action_failed">No se pudo completar la acción</string>
 </resources>
