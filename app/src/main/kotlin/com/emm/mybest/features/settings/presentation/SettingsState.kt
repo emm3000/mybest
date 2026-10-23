@@ -5,4 +5,5 @@ data class SettingsState(
     val reminderPicker: ReminderField? = null,
     val appVersionLabel: String = "",
     val goals: SettingsGoals = SettingsGoals(),
+    val debts: SettingsDebtsState = SettingsDebtsState(),
 )

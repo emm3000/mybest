@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.emm.mybest.BuildConfig
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
+import com.emm.mybest.core.money.formatPen
 import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
+import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -22,6 +24,7 @@ class SettingsViewModel(
     private val restoreDatabaseBackupUseCase: RestoreDatabaseBackupUseCase,
     private val goalsEditor: SettingsGoalsEditor,
     private val remindersEditor: SettingsRemindersEditor,
+    observeDebtSummary: ObserveDebtSummaryUseCase,
     appVersionName: String = BuildConfig.VERSION_NAME,
     appVersionCode: Int = BuildConfig.VERSION_CODE,
 ) : ViewModel() {
@@ -35,12 +38,17 @@ class SettingsViewModel(
         userPreferencesRepository.notificationsEnabled,
         goalsEditor.goals,
         remindersEditor.picker,
-    ) { enabled, goals, picker ->
+        observeDebtSummary(),
+    ) { enabled, goals, picker, debtSummary ->
         SettingsState(
             notificationsEnabled = enabled,
             reminderPicker = picker,
             appVersionLabel = appVersionLabel,
             goals = goals,
+            debts = SettingsDebtsState(
+                count = debtSummary.count,
+                totalLabel = debtSummary.totalBalance.formatPen().takeIf { debtSummary.count > 0 },
+            ),
         )
     }.stateIn(
         scope = viewModelScope,

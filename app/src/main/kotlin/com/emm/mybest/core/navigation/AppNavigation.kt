@@ -13,6 +13,8 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.emm.mybest.features.debts.presentation.DebtsScreen
+import com.emm.mybest.features.debts.presentation.DebtsViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeCallbacks
@@ -26,6 +28,7 @@ import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewer
 import com.emm.mybest.features.preouting.presentation.PreOutingScreen
 import com.emm.mybest.features.preouting.presentation.PreOutingViewModel
+import com.emm.mybest.features.settings.presentation.SettingsCallbacks
 import com.emm.mybest.features.settings.presentation.SettingsScreen
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightScreen
@@ -156,7 +159,10 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         val viewModel: SettingsViewModel = koinViewModel()
         SettingsScreen(
             viewModel = viewModel,
-            bottomBar = rememberBottomBar(Screen.Settings, navigator),
+            callbacks = SettingsCallbacks(
+                onDebtsClick = { navigator.navigate(Screen.Debts) },
+                bottomBar = rememberBottomBar(Screen.Settings, navigator),
+            ),
             modifier = Modifier,
         )
     }
@@ -168,6 +174,10 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             onBack = { navigator.goBack() },
             modifier = Modifier,
         )
+    }
+    entry<Screen.Debts> {
+        val viewModel: DebtsViewModel = koinViewModel()
+        DebtsScreen(viewModel = viewModel, onBack = { navigator.goBack() }, modifier = Modifier)
     }
 }
 
@@ -184,6 +194,7 @@ private fun HandleIntentAction(
             "com.emm.mybest.ACTION_ADD_WEIGHT" -> navigator.navigate(Screen.AddWeight)
             "com.emm.mybest.ACTION_ADD_PHOTO" -> navigator.navigate(Screen.Photos)
             ACTION_PRE_OUTING -> navigator.navigate(Screen.PreOuting)
+            ACTION_DEBTS -> navigator.navigate(Screen.Debts)
         }
         currentOnConsumeAction()
     }

@@ -45,6 +45,10 @@ import com.emm.mybest.domain.usecase.capture.CaptureNotificationUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveDailyChecksUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
+import com.emm.mybest.domain.usecase.debts.MarkInstallmentPaidUseCase
+import com.emm.mybest.domain.usecase.debts.ObserveDebtListUseCase
+import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
+import com.emm.mybest.domain.usecase.debts.SaveDebtUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
@@ -65,6 +69,8 @@ import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.usecase.weight.GetNearestWeightOnDateUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
+import com.emm.mybest.features.debts.presentation.DebtsUseCases
+import com.emm.mybest.features.debts.presentation.DebtsViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeUseCases
 import com.emm.mybest.features.home.presentation.HomeViewModel
@@ -184,5 +190,12 @@ val appModule = module {
         ComparePhotosViewModel(beforeId, afterId, get())
     }
     viewModel { (initialPhotoId: String) -> PhotoViewerViewModel(initialPhotoId, get()) }
-    viewModel { SettingsViewModel(get(), get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get()) }
+
+    factory { ObserveDebtListUseCase(get(), get()) }
+    factory { ObserveDebtSummaryUseCase(get()) }
+    factory { SaveDebtUseCase(get()) }
+    factory { MarkInstallmentPaidUseCase(get(), get()) }
+    factory { DebtsUseCases(get(), get(), get(), get()) }
+    viewModel { DebtsViewModel(get()) }
 }
