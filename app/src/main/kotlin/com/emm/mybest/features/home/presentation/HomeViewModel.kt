@@ -34,7 +34,7 @@ private fun buildHomeState(inputs: HomeInputs, destination: HomeDestination): Ho
     lastPhotoDaysAgo = computeLastPhotoDaysAgo(inputs.photos, inputs.today),
     checks = computeDailyCheckItems(inputs),
     destination = destination,
-    hasPendingCheckIn = inputs.routing.hasPendingCheckIn,
+    shortcuts = computeShortcuts(inputs.routing.hasPendingCheckIn),
 )
 
 class HomeViewModel(

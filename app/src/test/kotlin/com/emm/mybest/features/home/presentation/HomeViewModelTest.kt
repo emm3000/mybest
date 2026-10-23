@@ -246,11 +246,22 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `a pending outing is flagged on the state`() = runTest {
+    fun `a pending outing adds the check-in shortcut`() = runTest {
         val outing = Outing(1, FRIDAY, OutingKind.PLANNED, Limits(Money(150_00), 4, LocalTime(1, 30)), checkIn = null)
         val viewModel = buildViewModel(outings = FakeOutingRepository(initialOutings = listOf(outing)))
         advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.hasPendingCheckIn)
+        assertEquals(HomeShortcut.entries, viewModel.state.value.shortcuts)
+    }
+
+    @Test
+    fun `without a pending outing the shortcuts skip the check-in`() = runTest {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf(HomeShortcut.PRE_OUTING, HomeShortcut.WEEKLY_SUMMARY),
+            viewModel.state.value.shortcuts,
+        )
     }
 }
