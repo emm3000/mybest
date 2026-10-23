@@ -30,6 +30,7 @@ import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.reminder.CheckInReminderScheduler
 import com.emm.mybest.domain.reminder.PreOutingReminderScheduler
 import com.emm.mybest.domain.reminder.ReminderDelays
+import com.emm.mybest.domain.reminder.ReminderSchedulers
 import com.emm.mybest.domain.reminder.WeekendReminderSchedulers
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.BackupRepository
@@ -285,7 +286,8 @@ val appModule = module {
     single<CheckInReminderScheduler> { CheckInReminderSchedulerImpl(get(), get()) }
     factory { WeekendReminderSchedulers(get(), get()) }
     single<WeightReminderScheduler> { WeightReminderSchedulerImpl(get(), get()) }
-    factory { SyncRemindersUseCase(get(), get(), get()) }
+    factory { ReminderSchedulers(get(), get()) }
+    factory { SyncRemindersUseCase(get(), get()) }
     factory { IsPhotoReminderDueUseCase(get(), get(), get()) }
     factory { IsCheckInReminderDueUseCase(get(), get(), get()) }
     factory { IsPreOutingReminderDueUseCase(get()) }

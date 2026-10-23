@@ -2,8 +2,7 @@ package com.emm.mybest.domain.usecase.reminder
 
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.reminder.ReminderScheduler
-import com.emm.mybest.domain.reminder.WeekendReminderSchedulers
-import com.emm.mybest.domain.reminder.WeightReminderScheduler
+import com.emm.mybest.domain.reminder.ReminderSchedulers
 import com.emm.mybest.domain.repository.SetupRepository
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -16,8 +15,7 @@ import kotlinx.datetime.LocalTime
  */
 class SyncRemindersUseCase(
     private val setupRepository: SetupRepository,
-    private val weekendSchedulers: WeekendReminderSchedulers,
-    private val weightReminderScheduler: WeightReminderScheduler,
+    private val schedulers: ReminderSchedulers,
 ) {
 
     /**
@@ -25,8 +23,8 @@ class SyncRemindersUseCase(
      * app start.
      */
     suspend operator fun invoke() = coroutineScope {
-        launch { sync(Setup::preOutingReminderTime, weekendSchedulers.preOuting) }
-        launch { sync(Setup::checkInReminderTime, weekendSchedulers.checkIn) }
+        launch { sync(Setup::preOutingReminderTime, schedulers.weekend.preOuting) }
+        launch { sync(Setup::checkInReminderTime, schedulers.weekend.checkIn) }
         launch { syncWeighIn() }
     }
 
@@ -40,9 +38,9 @@ class SyncRemindersUseCase(
         setupRepository.observe().map { it.weighInDay to it.weighInReminderTime }.distinctUntilChanged()
             .collect { (day, time) ->
                 if (day == null || time == null) {
-                    weightReminderScheduler.cancel()
+                    schedulers.weighIn.cancel()
                 } else {
-                    weightReminderScheduler.schedule(day, time)
+                    schedulers.weighIn.schedule(day, time)
                 }
             }
     }
