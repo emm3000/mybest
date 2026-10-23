@@ -9,6 +9,7 @@ import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Debt
 import com.emm.mybest.domain.models.DebtPayment
 import com.emm.mybest.domain.models.GoalContribution
+import com.emm.mybest.domain.models.GoalProgress
 import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.LimitsKept
 import com.emm.mybest.domain.models.Outing
@@ -351,6 +352,33 @@ class ObserveWeeklySummaryUseCaseTest {
         assertEquals(Money(500_00), goal?.contributed)
         assertEquals(Money(3000_00), goal?.goal?.price)
     }
+
+    @Test
+    fun `a past week counts only the contributions made by its Sunday`() = runTest {
+        val contributions =
+            listOf(GoalContribution(1, PREVIOUS_FRIDAY, Money(100_00)), GoalContribution(2, FRIDAY, Money(50_00)))
+        val records = Records(goal = PurchaseGoal("Laptop", Money(1000_00)), contributions = contributions)
+
+        val past = summaryOf(records, PREVIOUS_SUNDAY).money.goal
+        val current = summaryOf(records, SUNDAY).money.goal
+
+        assertEquals(listOf(Money(100_00), Money(900_00), 10, 1), past?.let(::figuresOf))
+        assertEquals(listOf(Money(150_00), Money(850_00), 15, 2), current?.let(::figuresOf))
+    }
+
+    @Test
+    fun `a past week counts the contribution dated on its Sunday and not the one on the next Monday`() = runTest {
+        val contributions =
+            listOf(GoalContribution(1, PREVIOUS_SUNDAY, Money(100_00)), GoalContribution(2, MONDAY, Money(50_00)))
+        val records = Records(goal = PurchaseGoal("Laptop", Money(1000_00)), contributions = contributions)
+
+        val goal = summaryOf(records, PREVIOUS_SUNDAY).money.goal
+
+        assertEquals(listOf(Money(100_00), Money(900_00), 10, 1), goal?.let(::figuresOf))
+    }
+
+    private fun figuresOf(goal: GoalProgress) =
+        listOf(goal.contributed, goal.left, goal.percent, goal.contributions.size)
 
     @Test
     fun `has no goal progress without a purchase goal`() = runTest {

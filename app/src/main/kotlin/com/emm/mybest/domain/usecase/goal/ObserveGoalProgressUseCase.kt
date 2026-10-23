@@ -7,6 +7,7 @@ import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.repository.PurchaseGoalRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.datetime.LocalDate
 
 private const val FULL_PERCENT = 100
 
@@ -18,10 +19,17 @@ class ObserveGoalProgressUseCase(
      * Emits the progress of the purchase goal, or null without a goal. Progress is the sum of real contributions only;
      * estimated savings never count.
      */
-    operator fun invoke(): Flow<GoalProgress?> = combine(
+    operator fun invoke(): Flow<GoalProgress?> = observe { true }
+
+    /**
+     * Emits the progress of the purchase goal counting only the contributions made on or before [upTo].
+     */
+    operator fun invoke(upTo: LocalDate): Flow<GoalProgress?> = observe { it.appDay <= upTo }
+
+    private fun observe(isIncluded: (GoalContribution) -> Boolean): Flow<GoalProgress?> = combine(
         purchaseGoalRepository.observeGoal(),
         purchaseGoalRepository.observeContributions(),
-    ) { goal, contributions -> goal?.let { progressOf(it, contributions) } }
+    ) { goal, contributions -> goal?.let { progressOf(it, contributions.filter(isIncluded)) } }
 
     private fun progressOf(goal: PurchaseGoal, contributions: List<GoalContribution>): GoalProgress {
         val contributed = contributions.fold(Money.ZERO) { total, contribution -> total + contribution.amount }
