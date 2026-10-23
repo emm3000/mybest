@@ -68,6 +68,8 @@ import com.emm.mybest.domain.usecase.preouting.PlanOutingUseCase
 import com.emm.mybest.domain.usecase.preouting.PreOutingDecisionUseCases
 import com.emm.mybest.domain.usecase.preouting.PreOutingUseCases
 import com.emm.mybest.domain.usecase.preouting.RecordWonNightUseCase
+import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase
+import com.emm.mybest.domain.usecase.relapse.ObserveReturnTimesUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.usecase.weight.GetNearestWeightOnDateUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeighInTrendUseCase
@@ -213,4 +215,7 @@ val appModule = module {
     factory { SettingsMoneySources(get(), get()) }
     factory { PurchaseGoalUseCases(get(), get(), get(), get(), get()) }
     viewModel { PurchaseGoalViewModel(get()) }
+
+    factory { ObserveRelapsesUseCase(get(), get()) }
+    factory { ObserveReturnTimesUseCase(get(), get(), get()) }
 }
