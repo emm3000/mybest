@@ -9,10 +9,16 @@ import com.emm.mybest.data.entities.DailyCheckDao
 import com.emm.mybest.data.entities.DailyCheckEntity
 import com.emm.mybest.data.entities.DailyWeightDao
 import com.emm.mybest.data.entities.DailyWeightEntity
+import com.emm.mybest.data.entities.NoOutingAnswerDao
+import com.emm.mybest.data.entities.NoOutingAnswerEntity
+import com.emm.mybest.data.entities.OutingDao
+import com.emm.mybest.data.entities.OutingEntity
 import com.emm.mybest.data.entities.ProgressPhotoDao
 import com.emm.mybest.data.entities.ProgressPhotoEntity
 import com.emm.mybest.data.entities.UserSetupDao
 import com.emm.mybest.data.entities.UserSetupEntity
+import com.emm.mybest.data.entities.WonNightDao
+import com.emm.mybest.data.entities.WonNightEntity
 
 @Database(
     entities = [
@@ -20,8 +26,11 @@ import com.emm.mybest.data.entities.UserSetupEntity
         ProgressPhotoEntity::class,
         UserSetupEntity::class,
         DailyCheckEntity::class,
+        OutingEntity::class,
+        WonNightEntity::class,
+        NoOutingAnswerEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -33,6 +42,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun progressPhotoDao(): ProgressPhotoDao
     abstract fun userSetupDao(): UserSetupDao
     abstract fun dailyCheckDao(): DailyCheckDao
+    abstract fun outingDao(): OutingDao
+    abstract fun wonNightDao(): WonNightDao
+    abstract fun noOutingAnswerDao(): NoOutingAnswerDao
 
     companion object {
         const val DB_NAME = "my_best_db"
