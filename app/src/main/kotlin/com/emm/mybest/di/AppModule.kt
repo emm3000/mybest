@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.work.WorkManager
 import com.emm.mybest.core.coroutines.CoroutineDispatchers
 import com.emm.mybest.core.coroutines.DefaultCoroutineDispatchers
+import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.BackupRepositoryImpl
 import com.emm.mybest.data.ComplianceRepositoryImpl
@@ -61,6 +62,7 @@ import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewerViewModel
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
+import kotlinx.datetime.TimeZone
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -86,7 +88,9 @@ val appModule = module {
 
     single<CoroutineDispatchers> { DefaultCoroutineDispatchers() }
 
-    single<WeightRepository> { WeightRepositoryImpl(get()) }
+    single { AppDayClock(Clock.System, TimeZone.currentSystemDefault()) }
+
+    single<WeightRepository> { WeightRepositoryImpl(get(), get()) }
     single<PhotoRepository> { PhotoRepositoryImpl(androidContext(), get(), get()) }
     single<BackupRepository> { BackupRepositoryImpl(androidContext(), get(), get()) }
 
@@ -137,7 +141,7 @@ val appModule = module {
 
     viewModel { HomeViewModel(get()) }
     viewModel { AddWeightViewModel(get(), get()) }
-    viewModel { PhotosViewModel(get(), get(), get(), Clock.System) }
+    viewModel { PhotosViewModel(get(), get(), get(), get()) }
     viewModel { HistoryViewModel(get(), get(), get()) }
     viewModel { InsightsViewModel(get()) }
     viewModel { (beforeId: String, afterId: String) ->
