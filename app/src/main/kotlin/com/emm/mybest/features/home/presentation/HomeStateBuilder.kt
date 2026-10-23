@@ -27,7 +27,7 @@ internal fun computeDailyCheckItems(inputs: HomeInputs): List<DailyCheckItem> =
     DailyCheckType.entries.map { type ->
         DailyCheckItem(
             type = type,
-            isDone = inputs.recordedChecks.any { it.type == type && it.isDone },
+            answer = answerFor(inputs.recordedChecks, type),
             progress = inputs.weekProgress[type],
         )
     }
@@ -39,4 +39,9 @@ internal fun computeKeptChecks(recordedChecks: List<DailyCheck>): Int = recorded
 
 internal fun computeNextInstallment(share: InstallmentShare?): HomeInstallment? = share?.let {
     HomeInstallment(it.paymentDate.formatShortMonthDay(), it.debtName, it.installment.formatPen())
+}
+
+private fun answerFor(recordedChecks: List<DailyCheck>, type: DailyCheckType): HomeCheckAnswer {
+    val recorded = recordedChecks.firstOrNull { it.type == type } ?: return HomeCheckAnswer.UNANSWERED
+    return if (recorded.isDone) HomeCheckAnswer.YES else HomeCheckAnswer.NO
 }

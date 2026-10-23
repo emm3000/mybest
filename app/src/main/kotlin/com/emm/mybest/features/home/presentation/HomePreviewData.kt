@@ -11,12 +11,16 @@ internal const val PREVIEW_KEPT_CHECKS = 2
 internal const val PREVIEW_TOTAL_CHECKS = 4
 
 internal fun previewDailyChecks(): List<DailyCheckItem> = listOf(
-    DailyCheckItem(DailyCheckType.GYM, isDone = true, progress = WeekProgress(PREVIEW_GYM_COUNT, PREVIEW_GYM_TARGET)),
-    DailyCheckItem(DailyCheckType.DIET, isDone = false, progress = null),
-    DailyCheckItem(DailyCheckType.ENGLISH, isDone = false, progress = null),
+    DailyCheckItem(
+        DailyCheckType.GYM,
+        answer = HomeCheckAnswer.YES,
+        progress = WeekProgress(PREVIEW_GYM_COUNT, PREVIEW_GYM_TARGET),
+    ),
+    DailyCheckItem(DailyCheckType.DIET, answer = HomeCheckAnswer.UNANSWERED, progress = null),
+    DailyCheckItem(DailyCheckType.ENGLISH, answer = HomeCheckAnswer.UNANSWERED, progress = null),
     DailyCheckItem(
         DailyCheckType.ALCOHOL,
-        isDone = false,
+        answer = HomeCheckAnswer.UNANSWERED,
         progress = WeekProgress(PREVIEW_ALCOHOL_COUNT, PREVIEW_ALCOHOL_LIMIT),
     ),
 )

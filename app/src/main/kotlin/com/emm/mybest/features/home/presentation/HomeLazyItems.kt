@@ -6,7 +6,10 @@ internal fun LazyListScope.checksItem(state: HomeState, onIntent: (HomeIntent) -
     item(contentType = HomeContentType.Checks) {
         HomeChecksSection(
             model = HomeChecksModel(state.checks, state.keptChecks, state.totalChecks),
-            onToggle = { onIntent(HomeIntent.ToggleDailyCheck(it)) },
+            actions = HomeCheckActions(
+                onToggle = { onIntent(HomeIntent.ToggleDailyCheck(it)) },
+                onAnswerAlcohol = { onIntent(HomeIntent.AnswerAlcohol(it)) },
+            ),
         )
     }
 }

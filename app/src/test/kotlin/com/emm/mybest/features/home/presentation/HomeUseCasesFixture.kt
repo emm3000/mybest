@@ -8,6 +8,7 @@ import com.emm.mybest.domain.usecase.checkin.ObserveCheckInTaskUseCase
 import com.emm.mybest.domain.usecase.checkin.ObserveHasPendingCheckInUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveDailyChecksUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
+import com.emm.mybest.domain.usecase.dailycheck.RecordDailyCheckUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
 import com.emm.mybest.domain.usecase.home.ResolveHomeDestinationUseCase
 import com.emm.mybest.domain.usecase.preouting.GetEstimatedOutingCostUseCase
@@ -37,6 +38,7 @@ internal data class HomeUseCasesFixture(
         observeDailyChecks = ObserveDailyChecksUseCase(dailyChecks),
         observeWeekProgress = ObserveWeekProgressUseCase(dailyChecks, setupRepository),
         toggleDailyCheck = ToggleDailyCheckUseCase(dailyChecks),
+        recordDailyCheck = RecordDailyCheckUseCase(dailyChecks),
         resolveDestination = ResolveHomeDestinationUseCase(
             ObserveCheckInTaskUseCase(outings, appDayClock),
             ObserveTonightUseCase(outings, appDayClock),

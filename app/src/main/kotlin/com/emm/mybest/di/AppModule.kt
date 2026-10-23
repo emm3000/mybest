@@ -62,6 +62,7 @@ import com.emm.mybest.domain.usecase.checkin.RecordUnplannedOutingUseCase
 import com.emm.mybest.domain.usecase.checkin.SaveCheckInUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveDailyChecksUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
+import com.emm.mybest.domain.usecase.dailycheck.RecordDailyCheckUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
 import com.emm.mybest.domain.usecase.debts.MarkInstallmentPaidUseCase
 import com.emm.mybest.domain.usecase.debts.ObserveDebtListUseCase
@@ -197,8 +198,9 @@ val appModule = module {
     factory { ObserveDailyChecksUseCase(get()) }
     factory { ObserveWeekProgressUseCase(get(), get()) }
     factory { ToggleDailyCheckUseCase(get()) }
+    factory { RecordDailyCheckUseCase(get()) }
     factory { ObserveHasPendingCheckInUseCase(get()) }
-    factory { HomeUseCases(get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { HomeUseCases(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { ResolveHomeDestinationUseCase(get(), get(), get()) }
 
     // Settings use cases

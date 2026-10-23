@@ -56,8 +56,8 @@ class HomeViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private fun buildViewModel(
-        clock: Clock = FIXED_CLOCK,
         fixture: HomeUseCasesFixture = HomeUseCasesFixture(),
+        clock: Clock = FIXED_CLOCK,
     ): HomeViewModel {
         val appDayClock = AppDayClock(clock, TimeZone.UTC)
         return HomeViewModel(fixture.build(appDayClock), appDayClock)
@@ -75,7 +75,7 @@ class HomeViewModelTest {
 
     @Test
     fun `empty weights produces null lastWeightKg and null previousWeightKg`() = runTest {
-        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(weights = emptyList()))
+        val viewModel = buildViewModel(HomeUseCasesFixture(weights = emptyList()))
         advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -89,7 +89,7 @@ class HomeViewModelTest {
             WeightEntry(id = "1", date = FIXED_DATE.minus(DatePeriod(days = 1)), weight = 80.0f),
             WeightEntry(id = "2", date = FIXED_DATE, weight = 79.5f),
         )
-        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(weights = weights))
+        val viewModel = buildViewModel(HomeUseCasesFixture(weights = weights))
         advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -109,7 +109,7 @@ class HomeViewModelTest {
                 createdAt = 0L,
             ),
         )
-        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(photos = photos))
+        val viewModel = buildViewModel(HomeUseCasesFixture(photos = photos))
         advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -120,7 +120,7 @@ class HomeViewModelTest {
     @Test
     fun `state lists the four daily checks in order with their done flag`() = runTest {
         val dailyChecks = FakeDailyCheckRepository(listOf(DailyCheck(FIXED_DATE, DailyCheckType.DIET, true)))
-        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(dailyChecks = dailyChecks))
+        val viewModel = buildViewModel(HomeUseCasesFixture(dailyChecks = dailyChecks))
         advanceUntilIdle()
 
         val checks = viewModel.state.value.checks
@@ -128,7 +128,15 @@ class HomeViewModelTest {
             listOf(DailyCheckType.GYM, DailyCheckType.DIET, DailyCheckType.ENGLISH, DailyCheckType.ALCOHOL),
             checks.map { it.type },
         )
-        assertEquals(listOf(false, true, false, false), checks.map { it.isDone })
+        assertEquals(
+            listOf(
+                HomeCheckAnswer.UNANSWERED,
+                HomeCheckAnswer.YES,
+                HomeCheckAnswer.UNANSWERED,
+                HomeCheckAnswer.UNANSWERED,
+            ),
+            checks.map { it.answer },
+        )
     }
 
     @Test
@@ -143,7 +151,7 @@ class HomeViewModelTest {
     fun `a check with a weekly target carries the week count`() = runTest {
         val dailyChecks = FakeDailyCheckRepository(listOf(DailyCheck(FIXED_DATE, DailyCheckType.GYM, true)))
         val setup = Setup(weeklyTargets = mapOf(DailyCheckType.GYM to 4))
-        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(dailyChecks = dailyChecks, setup = setup))
+        val viewModel = buildViewModel(HomeUseCasesFixture(dailyChecks = dailyChecks, setup = setup))
         advanceUntilIdle()
 
         val gym = viewModel.state.value.checks.first { it.type == DailyCheckType.GYM }
@@ -153,7 +161,7 @@ class HomeViewModelTest {
     @Test
     fun `toggling a check persists it for today`() = runTest {
         val dailyChecks = FakeDailyCheckRepository()
-        val viewModel = buildViewModel(fixture = HomeUseCasesFixture(dailyChecks = dailyChecks))
+        val viewModel = buildViewModel(HomeUseCasesFixture(dailyChecks = dailyChecks))
         advanceUntilIdle()
 
         viewModel.onIntent(HomeIntent.ToggleDailyCheck(DailyCheckType.GYM))
@@ -166,10 +174,8 @@ class HomeViewModelTest {
     @Test
     fun `a toggle at Saturday 02 00 writes Friday`() = runTest {
         val dailyChecks = FakeDailyCheckRepository()
-        val viewModel = buildViewModel(
-            clock = FixedClock(SATURDAY_AT_TWO),
-            fixture = HomeUseCasesFixture(dailyChecks = dailyChecks),
-        )
+        val viewModel =
+            buildViewModel(HomeUseCasesFixture(dailyChecks = dailyChecks), clock = FixedClock(SATURDAY_AT_TWO))
         advanceUntilIdle()
 
         viewModel.onIntent(HomeIntent.ToggleDailyCheck(DailyCheckType.DIET))
@@ -238,9 +244,8 @@ class HomeViewModelTest {
     @Test
     fun `a pending outing adds the check-in shortcut`() = runTest {
         val outing = Outing(1, FRIDAY, OutingKind.PLANNED, Limits(Money(150_00), 4, LocalTime(1, 30)), checkIn = null)
-        val viewModel = buildViewModel(
-            fixture = HomeUseCasesFixture(outings = FakeOutingRepository(initialOutings = listOf(outing))),
-        )
+        val viewModel =
+            buildViewModel(HomeUseCasesFixture(outings = FakeOutingRepository(initialOutings = listOf(outing))))
         advanceUntilIdle()
 
         assertEquals(HomeShortcut.entries, viewModel.state.value.shortcuts)
@@ -258,9 +263,7 @@ class HomeViewModelTest {
     }
 
     private fun TestScope.keptChecks(vararg checks: DailyCheck): Int {
-        val viewModel = buildViewModel(
-            fixture = HomeUseCasesFixture(dailyChecks = FakeDailyCheckRepository(checks.toList())),
-        )
+        val viewModel = buildViewModel(HomeUseCasesFixture(dailyChecks = FakeDailyCheckRepository(checks.toList())))
         advanceUntilIdle()
         return viewModel.state.value.keptChecks
     }
@@ -312,9 +315,7 @@ class HomeViewModelTest {
                 installment = Money(420_00),
                 paymentDay = 15,
             )
-        val viewModel = buildViewModel(
-            fixture = HomeUseCasesFixture(debts = FakeDebtRepository(initialDebts = listOf(card))),
-        )
+        val viewModel = buildViewModel(HomeUseCasesFixture(debts = FakeDebtRepository(initialDebts = listOf(card))))
         advanceUntilIdle()
 
         assertEquals(
@@ -337,13 +338,12 @@ class HomeViewModelTest {
 
     private fun TestScope.alcoholItem(drinkingDays: Int): DailyCheckItem {
         val setup = Setup(weeklyTargets = mapOf(DailyCheckType.ALCOHOL to 2))
-        val viewModel =
-            buildViewModel(
-                fixture = HomeUseCasesFixture(
-                    dailyChecks = FakeDailyCheckRepository(alcoholDays(drinkingDays)),
-                    setup = setup,
-                ),
-            )
+        val viewModel = buildViewModel(
+            HomeUseCasesFixture(
+                dailyChecks = FakeDailyCheckRepository(alcoholDays(drinkingDays)),
+                setup = setup,
+            ),
+        )
         advanceUntilIdle()
         return viewModel.state.value.checks.first { it.type == DailyCheckType.ALCOHOL }
     }
@@ -356,5 +356,59 @@ class HomeViewModelTest {
     @Test
     fun `alcohol at its weekly maximum is not flagged`() = runTest {
         assertFalse(alcoholItem(drinkingDays = 2).isOverLimit)
+    }
+
+    private fun TestScope.alcoholAnswerAfter(
+        hasDrunk: Boolean,
+        dailyChecks: FakeDailyCheckRepository = FakeDailyCheckRepository(),
+    ): HomeCheckAnswer {
+        val viewModel = buildViewModel(HomeUseCasesFixture(dailyChecks = dailyChecks))
+        advanceUntilIdle()
+        viewModel.onIntent(HomeIntent.AnswerAlcohol(hasDrunk))
+        advanceUntilIdle()
+        return viewModel.state.value.checks.first { it.type == DailyCheckType.ALCOHOL }.answer
+    }
+
+    @Test
+    fun `alcohol starts unanswered`() = runTest {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        val alcohol = viewModel.state.value.checks.first { it.type == DailyCheckType.ALCOHOL }
+        assertEquals(HomeCheckAnswer.UNANSWERED, alcohol.answer)
+    }
+
+    @Test
+    fun `answering no to an unanswered alcohol records not drank`() = runTest {
+        val dailyChecks = FakeDailyCheckRepository()
+
+        assertEquals(HomeCheckAnswer.NO, alcoholAnswerAfter(hasDrunk = false, dailyChecks = dailyChecks))
+        assertEquals(listOf(DailyCheck(FIXED_DATE, DailyCheckType.ALCOHOL, false)), dailyChecks.writes)
+    }
+
+    @Test
+    fun `answering yes to an unanswered alcohol records drank`() = runTest {
+        val dailyChecks = FakeDailyCheckRepository()
+
+        assertEquals(HomeCheckAnswer.YES, alcoholAnswerAfter(hasDrunk = true, dailyChecks = dailyChecks))
+        assertEquals(listOf(DailyCheck(FIXED_DATE, DailyCheckType.ALCOHOL, true)), dailyChecks.writes)
+    }
+
+    @Test
+    fun `answering no after drinking replaces the answer`() = runTest {
+        val dailyChecks = FakeDailyCheckRepository(listOf(DailyCheck(FIXED_DATE, DailyCheckType.ALCOHOL, true)))
+
+        assertEquals(HomeCheckAnswer.NO, alcoholAnswerAfter(hasDrunk = false, dailyChecks = dailyChecks))
+    }
+
+    @Test
+    fun `answering no counts alcohol as a kept check`() = runTest {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.onIntent(HomeIntent.AnswerAlcohol(hasDrunk = false))
+        advanceUntilIdle()
+
+        assertEquals(1, viewModel.state.value.keptChecks)
     }
 }

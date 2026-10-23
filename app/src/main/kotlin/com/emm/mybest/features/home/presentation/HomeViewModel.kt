@@ -71,6 +71,7 @@ class HomeViewModel(
     fun onIntent(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.ToggleDailyCheck -> toggle(intent.type)
+            is HomeIntent.AnswerAlcohol -> answerAlcohol(intent.hasDrunk)
             HomeIntent.DefineWeeklyTarget -> _effect.tryEmit(HomeEffect.NavigateToSettings)
             HomeIntent.ShowDailyChecks -> showDailyChecks()
             HomeIntent.Resume -> resumes.update { it + 1 }
@@ -90,6 +91,10 @@ class HomeViewModel(
 
     private fun toggle(type: DailyCheckType) {
         viewModelScope.launch { useCases.toggleDailyCheck(_state.value.today, type) }
+    }
+
+    private fun answerAlcohol(hasDrunk: Boolean) {
+        viewModelScope.launch { useCases.recordDailyCheck(_state.value.today, DailyCheckType.ALCOHOL, hasDrunk) }
     }
 
     private fun observeInputs(today: LocalDate): Flow<HomeInputs> = combine(
