@@ -4,6 +4,7 @@ import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.reminder.CheckInReminderScheduler
 import com.emm.mybest.domain.reminder.PreOutingReminderScheduler
 import com.emm.mybest.domain.reminder.ReminderScheduler
+import com.emm.mybest.domain.reminder.WeekendReminderSchedulers
 import com.emm.mybest.testing.FakeSetupRepository
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -40,7 +41,7 @@ class SyncRemindersUseCaseTest {
     private val checkIn = RecordingCheckInScheduler()
 
     private fun TestScope.startSync() {
-        backgroundScope.launch { SyncRemindersUseCase(repository, preOuting, checkIn)() }
+        backgroundScope.launch { SyncRemindersUseCase(repository, WeekendReminderSchedulers(preOuting, checkIn))() }
         runCurrent()
     }
 

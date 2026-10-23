@@ -30,6 +30,7 @@ import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.reminder.CheckInReminderScheduler
 import com.emm.mybest.domain.reminder.PreOutingReminderScheduler
 import com.emm.mybest.domain.reminder.ReminderDelays
+import com.emm.mybest.domain.reminder.WeekendReminderSchedulers
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.BackupRepository
 import com.emm.mybest.domain.repository.DailyCheckRepository
@@ -284,7 +285,8 @@ val appModule = module {
     single { ReminderNotifier(androidContext()) }
     single<PreOutingReminderScheduler> { PreOutingReminderSchedulerImpl(get(), get()) }
     single<CheckInReminderScheduler> { CheckInReminderSchedulerImpl(get(), get()) }
-    factory { SyncRemindersUseCase(get(), get(), get()) }
+    factory { WeekendReminderSchedulers(get(), get()) }
+    factory { SyncRemindersUseCase(get(), get()) }
     factory { IsCheckInReminderDueUseCase(get(), get(), get()) }
     factory { IsPreOutingReminderDueUseCase(get()) }
 }
