@@ -1,6 +1,7 @@
 package com.emm.mybest.data
 
 import com.emm.mybest.core.datetime.YearMonthValue
+import com.emm.mybest.core.money.Money
 import com.emm.mybest.data.entities.DebtDao
 import com.emm.mybest.data.mappers.toDomain
 import com.emm.mybest.data.mappers.toEntity
@@ -24,6 +25,7 @@ class DebtRepositoryImpl(
 
     override suspend fun saveDebt(debt: Debt): Long {
         if (debt.id == NEW_DEBT_ID) return debtDao.insert(debt.toEntity())
+        checkNotNull(debtDao.findById(debt.id)) { "No debt with id ${debt.id}" }
         debtDao.update(debt.toEntity())
         return debt.id
     }
@@ -38,6 +40,7 @@ class DebtRepositoryImpl(
 
     private suspend fun payInstallment(debtId: Long, month: YearMonthValue) {
         val debt = checkNotNull(debtDao.findById(debtId)) { "No debt with id $debtId" }.toDomain()
+        if (debt.balance == Money.ZERO) return
         val paid = debt.afterInstallmentPaid()
         val payment = DebtPayment(debtId = debtId, month = month, amount = debt.balance - paid.balance)
         val isAlreadyPaid = debtDao.insertPayment(payment.toEntity()) == IGNORED_INSERT_ID

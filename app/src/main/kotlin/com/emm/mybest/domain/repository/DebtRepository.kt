@@ -21,6 +21,8 @@ interface DebtRepository {
 
     /**
      * Inserts [debt] when its id is 0, otherwise updates the stored debt, and returns its id.
+     *
+     * @throws IllegalStateException when [debt] has a non-zero id that no stored debt has.
      */
     suspend fun saveDebt(debt: Debt): Long
 
@@ -32,7 +34,7 @@ interface DebtRepository {
     /**
      * Records this [month]'s installment of the debt with [debtId] as paid and lowers its balance with
      * [Debt.afterInstallmentPaid], both in one transaction. The payment amount is what the balance dropped by. When
-     * that month is already paid, nothing changes.
+     * that month is already paid, or the balance is already zero, nothing changes.
      *
      * @throws IllegalStateException when no debt has [debtId].
      */
