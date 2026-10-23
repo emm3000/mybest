@@ -3,7 +3,8 @@ package com.emm.mybest.features.weight.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.flow.effectFlow
-import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
+import com.emm.mybest.domain.repository.SetupRepository
+import com.emm.mybest.domain.usecase.weight.ObserveWeighInTrendUseCase
 import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.domain.validation.WeightInputValidator
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
 
 class AddWeightViewModel(
     private val saveWeightUseCase: SaveWeightUseCase,
-    private val observeWeightProgressUseCase: ObserveWeightProgressUseCase,
+    private val observeWeighInTrendUseCase: ObserveWeighInTrendUseCase,
+    private val setupRepository: SetupRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddWeightState())
@@ -25,8 +27,11 @@ class AddWeightViewModel(
 
     init {
         viewModelScope.launch {
-            observeWeightProgressUseCase().collect { entries ->
-                _state.update { it.copy(lastRecordedWeight = entries.firstOrNull()?.weight) }
+            observeWeighInTrendUseCase().collect { trend -> _state.update { it.copy(trend = trend) } }
+        }
+        viewModelScope.launch {
+            setupRepository.observe().collect { setup ->
+                _state.update { it.copy(targetWeightKg = setup.targetWeightKg, weighInDay = setup.weighInDay) }
             }
         }
     }
@@ -45,6 +50,7 @@ class AddWeightViewModel(
                 _state.update { it.copy(note = intent.note) }
             }
             AddWeightIntent.OnSaveClick -> saveWeight()
+            AddWeightIntent.OnOpenSettingsClick -> viewModelScope.launch { _effect.emit(AddWeightEffect.OpenSettings) }
         }
     }
 

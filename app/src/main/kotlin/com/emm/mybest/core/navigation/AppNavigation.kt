@@ -115,7 +115,8 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
     }
     entry<Screen.AddWeight> {
         val viewModel: AddWeightViewModel = koinViewModel()
-        AddWeightScreen(viewModel = viewModel, onBackClick = { navigator.goBack() }, modifier = Modifier)
+        val openSettings = { navigator.navigate(Screen.Settings) }
+        AddWeightScreen(viewModel, onBackClick = { navigator.goBack() }, onOpenSettings = openSettings, Modifier)
     }
     entry<Screen.Photos> {
         val viewModel: PhotosViewModel = koinViewModel()

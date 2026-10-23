@@ -67,6 +67,7 @@ import com.emm.mybest.domain.usecase.preouting.PreOutingUseCases
 import com.emm.mybest.domain.usecase.preouting.RecordWonNightUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.usecase.weight.GetNearestWeightOnDateUseCase
+import com.emm.mybest.domain.usecase.weight.ObserveWeighInTrendUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.features.debts.presentation.DebtsUseCases
@@ -154,6 +155,7 @@ val appModule = module {
     factory { SaveWeightUseCase(get()) }
     factory { DeleteWeightByDateUseCase(get()) }
     factory { ObserveWeightProgressUseCase(get()) }
+    factory { ObserveWeighInTrendUseCase(get(), get()) }
     factory { GetNearestWeightOnDateUseCase(get()) }
 
     // Photo use cases
@@ -182,7 +184,7 @@ val appModule = module {
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
     viewModel { HomeViewModel(get(), get()) }
-    viewModel { AddWeightViewModel(get(), get()) }
+    viewModel { AddWeightViewModel(get(), get(), get()) }
     viewModel { PhotosViewModel(get(), get(), get(), get()) }
     viewModel { HistoryViewModel(get(), get(), get(), get()) }
     viewModel { InsightsViewModel(get()) }

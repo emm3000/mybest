@@ -4,4 +4,5 @@ sealed class AddWeightIntent {
     data class OnWeightChange(val weight: String) : AddWeightIntent()
     data class OnNoteChange(val note: String) : AddWeightIntent()
     object OnSaveClick : AddWeightIntent()
+    object OnOpenSettingsClick : AddWeightIntent()
 }

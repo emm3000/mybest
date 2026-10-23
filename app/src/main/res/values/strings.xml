@@ -144,8 +144,16 @@
     <string name="add_weight_note_label">Nota (opcional)</string>
     <string name="add_weight_note_placeholder">Ej: Después del entrenamiento</string>
     <string name="add_weight_save_button">Guardar Registro</string>
-    <string name="add_weight_last_record_format">Ultimo registro: %s kg</string>
-    <string name="add_weight_app_bar_title">Registrar peso</string>
+    <string name="add_weight_last_record_format">Último pesaje: %s kg</string>
+    <string name="add_weight_app_bar_title">Pesaje</string>
+    <string name="weigh_in_target_format">Meta: %1$s kg</string>
+    <string name="weigh_in_target_unset">Define tu peso objetivo</string>
+    <string name="weigh_in_change_down_format">−%1$s kg desde el último pesaje</string>
+    <string name="weigh_in_change_up_format">+%1$s kg desde el último pesaje</string>
+    <string name="weigh_in_change_none">Sin cambio desde el último pesaje</string>
+    <string name="weigh_in_remaining_format">Te faltan %1$s kg</string>
+    <string name="weigh_in_day_format">Tu día de pesaje: %1$s</string>
+    <string name="weigh_in_day_unset">Define tu día de pesaje</string>
 
     <!-- Insights screen (C12) -->
     <string name="insights_header_title">PROGRESO</string>
