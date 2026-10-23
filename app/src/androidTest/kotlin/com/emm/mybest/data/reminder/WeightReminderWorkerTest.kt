@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.work.ListenableWorker
 import androidx.work.testing.TestListenableWorkerBuilder
-import com.emm.mybest.domain.models.DailySlot
-import com.emm.mybest.domain.models.DailySlotTimes
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -72,11 +70,7 @@ private class FakeUserPreferencesRepository(enabled: Boolean) : UserPreferencesR
 
     override val weightReminderTime: Flow<LocalTime?> = flowOf(null)
 
-    override val dailySlotTimes: Flow<DailySlotTimes> = flowOf(DailySlotTimes(emptyMap()))
-
     override suspend fun updateNotificationsEnabled(enabled: Boolean) = Unit
 
     override suspend fun setReminderTime(time: LocalTime?) = Unit
-
-    override suspend fun setDailySlotTime(slot: DailySlot, time: LocalTime) = Unit
 }
