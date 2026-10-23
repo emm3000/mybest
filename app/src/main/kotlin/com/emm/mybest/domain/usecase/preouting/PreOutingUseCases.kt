@@ -5,6 +5,5 @@ data class PreOutingUseCases(
     val nearestInstallment: ObserveNearestInstallmentUseCase,
     val purchaseGoalLeft: ObservePurchaseGoalLeftUseCase,
     val estimatedOutingCost: GetEstimatedOutingCostUseCase,
-    val isEstimateAveraged: ObserveIsEstimateAveragedUseCase,
     val notSpentThisMonth: ObserveNotSpentThisMonthUseCase,
 )

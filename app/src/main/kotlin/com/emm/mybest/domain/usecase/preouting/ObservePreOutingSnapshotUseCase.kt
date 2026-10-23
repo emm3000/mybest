@@ -1,6 +1,5 @@
 package com.emm.mybest.domain.usecase.preouting
 
-import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.PreOutingSnapshot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -16,7 +15,7 @@ class ObservePreOutingSnapshotUseCase(
         useCases.outingMonth(),
         useCases.nearestInstallment(),
         useCases.purchaseGoalLeft(),
-        combine(useCases.estimatedOutingCost(), useCases.isEstimateAveraged(), ::Estimate),
+        useCases.estimatedOutingCost(),
         useCases.notSpentThisMonth(),
     ) { month, installment, goalLeft, estimate, notSpent ->
         PreOutingSnapshot(
@@ -32,5 +31,3 @@ class ObservePreOutingSnapshotUseCase(
         )
     }
 }
-
-private data class Estimate(val cost: Money?, val isAveraged: Boolean)
