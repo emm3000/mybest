@@ -63,6 +63,28 @@ class DebtRepositoryImplTest {
     }
 
     @Test
+    fun `marking an installment paid on a settled debt stores no payment`() = runTest {
+        coEvery { debtDao.findById(STORED.id) } returns STORED.copy(balanceCents = 0)
+
+        repository.markInstallmentPaid(STORED.id, OCTOBER)
+
+        coVerify(exactly = 0) { debtDao.insertPayment(any()) }
+        coVerify(exactly = 0) { debtDao.update(any()) }
+    }
+
+    @Test
+    fun `saving a debt with an unknown id fails`() = runTest {
+        coEvery { debtDao.findById(9) } returns null
+
+        val failure = runCatching {
+            repository.saveDebt(Debt(9, "Fantasma", Money(10_000), Money(5_000), paymentDay = 3))
+        }.exceptionOrNull()
+
+        assertTrue(failure is IllegalStateException)
+        coVerify(exactly = 0) { debtDao.update(any()) }
+    }
+
+    @Test
     fun `saving a debt with id 0 inserts it and returns the new id`() = runTest {
         coEvery { debtDao.insert(any()) } returns 5
 
