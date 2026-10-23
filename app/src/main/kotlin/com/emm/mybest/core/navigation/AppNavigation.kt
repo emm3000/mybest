@@ -24,6 +24,8 @@ import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.photo.presentation.PhotosScreen
 import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewer
+import com.emm.mybest.features.preouting.presentation.PreOutingScreen
+import com.emm.mybest.features.preouting.presentation.PreOutingViewModel
 import com.emm.mybest.features.settings.presentation.SettingsScreen
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightScreen
@@ -158,6 +160,15 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             modifier = Modifier,
         )
     }
+    entry<Screen.PreOuting> {
+        val viewModel: PreOutingViewModel = koinViewModel()
+        PreOutingScreen(
+            viewModel = viewModel,
+            onOpenSettings = { navigator.navigate(Screen.Settings) },
+            onBack = { navigator.goBack() },
+            modifier = Modifier,
+        )
+    }
 }
 
 @Composable
@@ -172,6 +183,7 @@ private fun HandleIntentAction(
         when (intentAction) {
             "com.emm.mybest.ACTION_ADD_WEIGHT" -> navigator.navigate(Screen.AddWeight)
             "com.emm.mybest.ACTION_ADD_PHOTO" -> navigator.navigate(Screen.Photos)
+            ACTION_PRE_OUTING -> navigator.navigate(Screen.PreOuting)
         }
         currentOnConsumeAction()
     }

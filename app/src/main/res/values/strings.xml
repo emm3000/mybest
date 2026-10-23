@@ -165,4 +165,19 @@
     <string name="insights_empty_hero">Registra tu peso.</string>
     <string name="insights_register_weight_cta">REGISTRAR PESO</string>
     <string name="insights_chart_insufficient">SIN SUFICIENTES DATOS</string>
+
+    <string name="pre_outing_title">Antes de salir</string>
+    <string name="pre_outing_headline">¿Sales\nesta noche?</string>
+    <string name="pre_outing_estimate_caption">lo que te cuesta una noche, en promedio</string>
+    <string name="pre_outing_estimate_caption_typical">tu costo típico de una salida</string>
+    <string name="pre_outing_spent_label">Gastado en salidas este mes</string>
+    <string name="pre_outing_installment_share">Una noche ≈ %1$d%% de tu cuota de %2$s del %3$d</string>
+    <string name="pre_outing_goal_left">Te falta %1$s para %2$s</string>
+    <string name="pre_outing_outings_used">Salidas este mes: %1$d de %2$d</string>
+    <string name="pre_outing_over_limit">La próxima salida pasa tu límite del mes</string>
+    <string name="pre_outing_not_spent_label">No gastado este mes (estimado)</string>
+    <string name="pre_outing_prompt_typical_cost">Define tu costo típico de salida</string>
+    <string name="pre_outing_prompt_debts">Agrega tus deudas</string>
+    <string name="pre_outing_prompt_purchase_goal">Define tu meta de compra</string>
+    <string name="pre_outing_prompt_outing_limit">Define tu límite de salidas</string>
 </resources>
