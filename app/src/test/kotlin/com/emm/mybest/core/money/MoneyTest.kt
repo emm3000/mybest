@@ -1,0 +1,41 @@
+package com.emm.mybest.core.money
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class MoneyTest {
+    @Test
+    fun plusAddsCents() {
+        assertEquals(Money(350), Money(100) + Money(250))
+    }
+
+    @Test
+    fun minusSubtractsCents() {
+        assertEquals(Money(-150), Money(100) - Money(250))
+    }
+
+    @Test
+    fun timesMultipliesCentsByCount() {
+        assertEquals(Money(750), Money(250) * 3)
+    }
+
+    @Test
+    fun compareToOrdersByCents() {
+        assertTrue(Money(100) < Money(250))
+        assertTrue(Money(250) > Money(100))
+    }
+
+    @Test
+    fun isNegativeIsTrueOnlyBelowZero() {
+        assertTrue(Money(-1).isNegative)
+        assertFalse(Money(0).isNegative)
+        assertFalse(Money(1).isNegative)
+    }
+
+    @Test
+    fun zeroHasNoCents() {
+        assertEquals(0L, Money.ZERO.cents)
+    }
+}
