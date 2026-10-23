@@ -18,6 +18,7 @@ import com.emm.mybest.testing.FakeDebtRepository
 import com.emm.mybest.testing.FakeNotificationCaptureRepository
 import com.emm.mybest.testing.FakePurchaseGoalRepository
 import com.emm.mybest.testing.FakeSetupRepository
+import com.emm.mybest.testing.FakeUserPreferencesRepository
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -48,8 +49,9 @@ class SettingsViewModelTest {
         setupRepository: FakeSetupRepository = FakeSetupRepository(),
         debtRepository: FakeDebtRepository = FakeDebtRepository(),
         purchaseGoalRepository: FakePurchaseGoalRepository = FakePurchaseGoalRepository(),
+        userPreferencesRepository: UserPreferencesRepository = preferencesRepository,
     ): SettingsViewModel = SettingsViewModel(
-        userPreferencesRepository = preferencesRepository,
+        userPreferencesRepository = userPreferencesRepository,
         exportDatabaseBackupUseCase = exportUseCase,
         restoreDatabaseBackupUseCase = restoreUseCase,
         goalsEditor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), UpdateSetupUseCase(setupRepository)),
@@ -380,5 +382,17 @@ class SettingsViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf(Setup(isPhotoReminderEnabled = true), Setup()), repository.saved)
+    }
+
+    @Test
+    fun `replaying the intro clears the onboarding flag`() = runTest {
+        stubDefaults()
+        val onboardingRepository = FakeUserPreferencesRepository(isOnboardingCompleted = true)
+        val viewModel = buildViewModel(userPreferencesRepository = onboardingRepository)
+
+        viewModel.onIntent(SettingsIntent.OnReplayOnboarding)
+        advanceUntilIdle()
+
+        assertEquals(false, onboardingRepository.onboardingCompleted.first())
     }
 }

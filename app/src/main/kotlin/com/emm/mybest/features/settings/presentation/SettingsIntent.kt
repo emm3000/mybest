@@ -7,6 +7,7 @@ sealed class SettingsIntent {
     sealed class BackupIntent : SettingsIntent()
     data class OnExportBackup(val targetUri: String) : BackupIntent()
     data class OnImportBackup(val sourceUri: String) : BackupIntent()
+    object OnReplayOnboarding : SettingsIntent()
 
     sealed class FieldIntent : SettingsIntent()
     data class OnFieldOpen(val field: SettingsField) : FieldIntent()

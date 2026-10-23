@@ -9,6 +9,7 @@ import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -59,6 +60,7 @@ class SettingsViewModel(
             is SettingsIntent.BackupIntent -> handleBackupIntent(intent)
             is SettingsIntent.FieldIntent -> handleFieldIntent(intent)
             is SettingsIntent.ReminderIntent -> handleReminderIntent(intent)
+            SettingsIntent.OnReplayOnboarding -> replayOnboarding()
         }
     }
 
@@ -75,6 +77,21 @@ class SettingsViewModel(
 
     private fun handleReminderIntent(intent: SettingsIntent.ReminderIntent) {
         viewModelScope.launch { remindersEditor.handle(intent)?.let { _effect.emit(it) } }
+    }
+
+    private fun replayOnboarding() {
+        viewModelScope.launch {
+            runCatching {
+                userPreferencesRepository.updateOnboardingCompleted(false)
+            }.onFailure {
+                if (it is CancellationException) throw it
+                _effect.emit(
+                    SettingsEffect.ShowError(
+                        it.message ?: "No se pudo actualizar la configuración",
+                    ),
+                )
+            }
+        }
     }
 
     private fun updateNotificationsPreference(enabled: Boolean) {

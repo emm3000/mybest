@@ -8,4 +8,5 @@ internal data class SettingsBodyActions(
     val onCaptureClick: () -> Unit,
     val onExportClick: () -> Unit,
     val onImportClick: () -> Unit,
+    val onReplayOnboardingClick: () -> Unit,
 )
