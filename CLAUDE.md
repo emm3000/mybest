@@ -58,7 +58,17 @@ Path-scoped rules live in `.claude/rules/` and load when matching files are touc
 | `.claude/rules/testing.md` | The three-task gate, clock-independent flows, coverage exclusions |
 | `.claude/rules/ui.md` | Container/presentational, Atelier Dark theme, previews |
 
-Commits are conventional and never carry `Co-Authored-By` or other AI attribution; a `PreToolUse` hook in `.claude/settings.json` blocks it.
+## Commits
+
+History on `main` is linear and every commit is atomic and reviewable by a human. Applies to the main session and to every peer.
+
+- Conventional commits. Never `Co-Authored-By` or other AI attribution; a `PreToolUse` hook in `.claude/settings.json` blocks it.
+- One logical change per commit. Feature code, refactors, formatting and dependency bumps go in separate commits, even when done in the same session.
+- Every commit passes `./gradlew :app:detekt :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin` on its own, so `git bisect` works.
+- No commit that adds nothing for a reader: no `wip`, no `fix review`, no `address comments`, no merge commits.
+- A defect caught before merge is folded into the commit it belongs to: `git commit --fixup=<sha>`, then `GIT_SEQUENCE_EDITOR=true git rebase --autosquash origin/main`, then `git push --force-with-lease` to the own branch. Re-run the gate on the rewritten commits.
+- Update a branch with `git rebase origin/main`, never `git merge main`.
+- Only rewrite history that is not on `main`. A defect already on `main` gets its own `fix:` commit.
 
 ## Agent workflow
 

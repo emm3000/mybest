@@ -23,7 +23,7 @@ You review exactly one pull request of `emm3000/mybest`. The PR number is in the
 - Spec axis: every acceptance criterion of the issue, and the screenshots against the issue's described states.
 - Tests: behavior tests for every new rule, clock-independent flow exits, no real time.
 - Correctness bugs and silent regressions.
-- Commit hygiene: conventional commits, no `wip` commits, no `Co-Authored-By` or other AI attribution trailer, `Closes #<issue>` in the PR body.
+- Commit hygiene, per `## Commits` in `CLAUDE.md`, reviewed commit by commit (`git log --format=%h%x20%s origin/main..<headRefOid>`, then `git show <sha>` for each): conventional message, one logical change, no mixed concerns, no `wip` / `fix review` / unfolded fix-up commits, no merge commits (`git log --merges origin/main..<headRefOid>` must be empty), no `Co-Authored-By` or other AI attribution trailer, `Closes #<issue>` in the PR body. Any violation is blocking.
 
 Only findings caused by this PR block. Pre-existing issues are follow-ups.
 

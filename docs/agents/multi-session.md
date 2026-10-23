@@ -25,7 +25,7 @@ One ticket (GitHub issue labeled `ready-for-agent`) = one peer session = one wor
 
 - One slice = one small PR. A ticket that spans more than 2 screens, or a schema change plus a screen, is split into sub-issues first.
 - Max 3 peers per wave. Waves are ordered by dependency: shared `ui/components`, theme, Room and DI first, then independent screens in parallel. A wave starts only after the previous one is merged.
-- A peer past ~60% context without a PR commits, opens a partial PR, clears, and continues.
+- A peer past ~60% context without a PR commits atomically, opens a draft PR, clears, and continues. Before marking it ready it rewrites the branch so every commit follows `## Commits` in `CLAUDE.md`.
 - Before dispatching tickets filed by an audit, re-verify each against current `main`; the finding may already be fixed.
 
 ## Dispatch checklist
@@ -35,7 +35,7 @@ Every dispatch includes:
 - Issue number, docs to read first, branch `<type>/<n>-<slug>`, and the peer's own worktree path `../mybest-<name>`.
 - The line: *"The issue's acceptance criteria are the contract and win over any file list here; run every criterion check before opening the PR."* Prefer criteria phrased as a command with expected empty output. *Why: peers otherwise stop at the file list and miss matching call sites.*
 - Gate green before commit: `./gradlew :app:detekt :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin`.
-- Conventional commits; no `Co-Authored-By` or other AI attribution (a hook blocks it).
+- Commits follow `## Commits` in `CLAUDE.md`: atomic, each one green on the gate, no fix-up or merge commits, review fixes folded with `--fixup` + `--autosquash` and pushed with `--force-with-lease`.
 - Rules live in `CLAUDE.md` and `.claude/rules/`. *Why: Claude's per-project memory is keyed by path, so a worktree peer never sees the owner's memory files.*
 - For behavior changes (use case, ViewModel rule, derived state): load `mattpocock-skills:tdd`, failing test first. Pure layout or restyle skips it.
 - For UI-touching tickets: a visual check (see below).
@@ -88,11 +88,11 @@ Required for any ticket that changes a screen or a shared component.
 - Each PR is reviewed by a fresh `pr-reviewer` subagent launched by the orchestrator, one per PR. It is read-only, does not build or rerun the gate (CI owns that), reads the diff and the issue, and pulls screenshots with `git show origin/assets/<N>-visual-check:<file>`, checking that the SHA in each file name matches the PR head. It boots an emulator in a throwaway worktree only when screenshots are missing, stale or suspicious, and shuts it down afterward. It returns MERGE or FIX FIRST. *Why: a long-lived review session fills its context and reviews worse each time.*
 - The subagent follows `mattpocock-skills:code-review` for the Standards and Spec axes, with the merge-base with `origin/main` as the fixed point.
 - Reviewer model: opus:high for every PR, restyles included. Post-review fixes run sonnet:low.
-- On FIX FIRST the orchestrator sends the blocking items back to the same peer with one `SendMessage` (`notify_when_idle: true`), then re-reviews with a new subagent.
+- On FIX FIRST the orchestrator sends the blocking items back to the same peer with one `SendMessage` (`notify_when_idle: true`). The peer folds each fix into the commit it belongs to and force-pushes with lease; it never stacks a `fix:` commit. Then a new subagent re-reviews.
 
 ## Merge
 
-- Rebase-only, linear history, CI required. Never block a turn on `gh run watch`; merge when the CI result or the peer's report arrives.
+- Rebase-only, linear history, CI required. Squash merge is not used: it would collapse atomic commits into one. Never block a turn on `gh run watch`; merge when the CI result or the peer's report arrives.
 - Check state first: `gh pr view <N> --json mergeStateStatus`. If `CLEAN`, `gh pr merge <N> --rebase`. Arm `--auto` only while checks are pending; GitHub refuses it on a clean PR, and an armed auto-merge may not fire, so confirm with `gh pr view <N> --json state` after CI passes.
 
 ## Closing a cycle
