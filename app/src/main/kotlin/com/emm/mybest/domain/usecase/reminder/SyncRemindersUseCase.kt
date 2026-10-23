@@ -1,9 +1,8 @@
 package com.emm.mybest.domain.usecase.reminder
 
 import com.emm.mybest.domain.models.Setup
-import com.emm.mybest.domain.reminder.CheckInReminderScheduler
-import com.emm.mybest.domain.reminder.PreOutingReminderScheduler
 import com.emm.mybest.domain.reminder.ReminderScheduler
+import com.emm.mybest.domain.reminder.WeekendReminderSchedulers
 import com.emm.mybest.domain.repository.SetupRepository
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -16,8 +15,7 @@ import kotlinx.datetime.LocalTime
  */
 class SyncRemindersUseCase(
     private val setupRepository: SetupRepository,
-    private val preOutingReminderScheduler: PreOutingReminderScheduler,
-    private val checkInReminderScheduler: CheckInReminderScheduler,
+    private val weekendSchedulers: WeekendReminderSchedulers,
 ) {
 
     /**
@@ -25,8 +23,8 @@ class SyncRemindersUseCase(
      * app start.
      */
     suspend operator fun invoke() = coroutineScope {
-        launch { sync(Setup::preOutingReminderTime, preOutingReminderScheduler) }
-        launch { sync(Setup::checkInReminderTime, checkInReminderScheduler) }
+        launch { sync(Setup::preOutingReminderTime, weekendSchedulers.preOuting) }
+        launch { sync(Setup::checkInReminderTime, weekendSchedulers.checkIn) }
     }
 
     private suspend fun sync(field: (Setup) -> LocalTime?, scheduler: ReminderScheduler) {
