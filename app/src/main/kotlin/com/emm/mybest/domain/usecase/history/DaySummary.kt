@@ -1,7 +1,6 @@
 package com.emm.mybest.domain.usecase.history
 
 import com.emm.mybest.domain.models.DailyCheck
-import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.RelapseReason
@@ -31,5 +30,3 @@ data class DaySummary(
     val hasChecks: Boolean get() = doneCheckCount > 0
     val hasActivity: Boolean get() = hasWeight || hasPhoto || hasOuting || hasWonNight || hasChecks
 }
-
-private fun DailyCheck.isKept(): Boolean = if (type == DailyCheckType.ALCOHOL) !isDone else isDone
