@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.emm.mybest.BuildConfig
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
-import com.emm.mybest.core.money.formatPen
 import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
@@ -23,7 +22,7 @@ class SettingsViewModel(
     private val restoreDatabaseBackupUseCase: RestoreDatabaseBackupUseCase,
     private val goalsEditor: SettingsGoalsEditor,
     private val remindersEditor: SettingsRemindersEditor,
-    moneySources: SettingsMoneySources,
+    rowSources: SettingsRowSources,
     appVersionName: String = BuildConfig.VERSION_NAME,
     appVersionCode: Int = BuildConfig.VERSION_CODE,
 ) : ViewModel() {
@@ -37,22 +36,15 @@ class SettingsViewModel(
         userPreferencesRepository.notificationsEnabled,
         goalsEditor.goals,
         remindersEditor.picker,
-        moneySources.observeDebtSummary(),
-        moneySources.purchaseGoalRepository.observeGoal(),
-    ) { enabled, goals, picker, debtSummary, purchaseGoal ->
+        rowSources.observe(),
+    ) { enabled, goals, picker, rows ->
         SettingsState(
             notificationsEnabled = enabled,
             reminderPicker = picker,
             appVersionLabel = appVersionLabel,
             goals = goals,
-            debts = SettingsDebtsState(
-                count = debtSummary.count,
-                totalLabel = debtSummary.totalBalance.formatPen().takeIf { debtSummary.count > 0 },
-            ),
-            purchaseGoal = SettingsPurchaseGoalState(
-                name = purchaseGoal?.name,
-                priceLabel = purchaseGoal?.price?.formatPen(),
-            ),
+            debts = rows.debts,
+            purchaseGoal = rows.purchaseGoal,
         )
     }.stateIn(
         scope = viewModelScope,
