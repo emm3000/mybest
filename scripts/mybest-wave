@@ -1,0 +1,72 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+if (( $# == 0 )); then
+  echo "usage: scripts/mybest-wave <name>:<model>:<effort> [...]" >&2
+  exit 64
+fi
+
+if [[ -z "${HERDR_PANE_ID:-}" ]]; then
+  echo "run inside a herdr pane: HERDR_PANE_ID is not set" >&2
+  exit 69
+fi
+
+repo="${0:A:h:h}"
+
+for spec in "$@"; do
+  IFS=':' read -r name model effort <<< "$spec"
+  if [[ -z "${name:-}" || -z "${model:-}" || -z "${effort:-}" ]]; then
+    echo "bad spec: $spec (expected name:model:effort)" >&2
+    exit 64
+  fi
+  if [[ ! "$name" =~ '^[a-z][a-z0-9_-]{0,31}$' ]]; then
+    echo "bad name: $name (herdr agent names match [a-z][a-z0-9_-]{0,31})" >&2
+    exit 64
+  fi
+done
+
+worktree_of() { print -r -- "${repo:h}/mybest-$1" }
+
+belongs_to_repo() {
+  [[ "$(git -C "$1" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" == "$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir)" ]]
+}
+
+for spec in "$@"; do
+  IFS=':' read -r name model effort <<< "$spec"
+  worktree="$(worktree_of "$name")"
+  if [[ ! -e "$worktree" ]]; then
+    git -C "$repo" fetch -q origin
+    git -C "$repo" worktree add --detach "$worktree" origin/main
+  elif ! belongs_to_repo "$worktree"; then
+    echo "refusing: $worktree exists and is not a worktree of $repo" >&2
+    exit 73
+  elif [[ -n "$(git -C "$worktree" status --porcelain)" ]]; then
+    echo "refusing: $worktree is a dirty leftover worktree; remove it first" >&2
+    exit 73
+  fi
+done
+
+panes_per_tab=3
+total=$#
+index=0
+previous_pane=""
+for spec in "$@"; do
+  IFS=':' read -r name model effort <<< "$spec"
+  worktree="$(worktree_of "$name")"
+  position=$(( index % panes_per_tab ))
+  tab_number=$(( index / panes_per_tab + 1 ))
+  tab_size=$(( total - index + position < panes_per_tab ? total - index + position : panes_per_tab ))
+  if (( position == 0 )); then
+    label="wave"
+    (( tab_number > 1 )) && label="wave-$tab_number"
+    pane="$(herdr tab create --workspace "${HERDR_PANE_ID%%:*}" --cwd "$worktree" --label "$label" --no-focus | jq -r '.result.root_pane.pane_id')"
+  else
+    ratio=$(( 1.0 / (tab_size - position + 1) ))
+    pane="$(herdr pane split "$previous_pane" --direction right --ratio "$ratio" --cwd "$worktree" --no-focus | jq -r '.result.pane.pane_id')"
+  fi
+  (( index += 1 ))
+  herdr pane rename "$pane" "$name" > /dev/null
+  herdr agent start "$name" --kind claude --pane "$pane" -- \
+    -n "$name" --model "$model" --effort "$effort" --permission-mode bypassPermissions
+  previous_pane="$pane"
+done

@@ -1,0 +1,67 @@
+{
+  "enabledPlugins": {
+    "mattpocock-skills@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git stash list:*)",
+      "Bash(git remote -v)",
+      "Bash(git worktree list:*)",
+      "Bash(git merge-base:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(rg:*)",
+      "Bash(fd:*)",
+      "Bash(bat:*)",
+      "Bash(eza:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(adb devices:*)",
+      "Bash(adb logcat:*)",
+      "Bash(adb shell:*)",
+      "Bash(adb -s:*)",
+      "Bash(herdr agent list:*)",
+      "Bash(herdr agent get:*)",
+      "Bash(herdr agent read:*)",
+      "Bash(herdr agent wait:*)",
+      "Bash(herdr pane list:*)",
+      "Bash(herdr pane layout:*)",
+      "Bash(herdr tab list:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(rm -rf:*)",
+      "Read(./keystore.properties)",
+      "Read(./local.properties)",
+      "Read(./key/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -e '.tool_input.command | ascii_downcase | (test(\"git\\\\b.*\\\\bcommit\") and test(\"co-authored-by\")) | not' > /dev/null || { echo 'Blocked: Co-Authored-By trailers are forbidden in this repo (CLAUDE.md)' >&2; exit 2; }"
+          }
+        ]
+      }
+    ]
+  }
+}

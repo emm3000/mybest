@@ -45,3 +45,28 @@ Feature areas: `home`, `habit`, `photo`, `weight`, `history`, `timeline`, `insig
 - Room schema output is committed under `app/schemas/` — update it whenever DB structure changes (KSP arg `room.schemaLocation` is wired in `app/build.gradle.kts`).
 - Opt-ins habilitados a nivel de proyecto en `kotlin.compilerOptions` (`app/build.gradle.kts`): `ExperimentalMaterial3Api`, `ExperimentalFoundationApi`, `ExperimentalCoroutinesApi`. No añadas `@OptIn` para estos marcadores en código.
 - minSdk 30, compile/target SDK 36, JVM target 17.
+
+## Rules
+
+Path-scoped rules live in `.claude/rules/` and load when matching files are touched. Peer sessions run in worktrees and do not see Claude's per-project memory, so every rule they must follow is versioned here.
+
+| File | Covers |
+|---|---|
+| `.claude/rules/architecture.md` | Layers, `ForbiddenImport`, MVI contract, Koin wiring |
+| `.claude/rules/kotlin-style.md` | Comments, function size, one type per file, forbidden constructs |
+| `.claude/rules/room.md` | Schema files, versioning, destructive migrations |
+| `.claude/rules/testing.md` | The three-task gate, clock-independent flows, coverage exclusions |
+| `.claude/rules/ui.md` | Container/presentational, Atelier Dark theme, previews |
+
+Commits are conventional and never carry `Co-Authored-By` or other AI attribution; a `PreToolUse` hook in `.claude/settings.json` blocks it.
+
+## Agent workflow
+
+Tickets are GitHub issues labeled `ready-for-agent` in `emm3000/mybest`; one peer session works one ticket in its own worktree and opens one PR with `Closes #N`. CI (`.github/workflows/ci.yml`) is the gate and merges are rebase-only. This supersedes the earlier local fast-forward merge habit for peer work.
+
+- Playbook: `docs/agents/multi-session.md`. Read before dispatching.
+- `/wave <issues>` boots peers (max 3) and dispatches (`.claude/skills/wave/SKILL.md`).
+- `/checks` runs `:app:detekt :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin` and reports per task.
+- `/agents-review` reviews the pending diff against `.claude/rules/`.
+- Issue tracker and labels: `docs/agents/issue-tracker.md`. Dispatch history: `docs/agents/dispatch-log.md`.
+- Subagents: `pr-reviewer` (read-only MERGE / FIX FIRST) and `ticket-writer` in `.claude/agents/`.
