@@ -3,6 +3,7 @@ package com.emm.mybest.domain.usecase.debts
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.DebtListItem
+import com.emm.mybest.domain.models.debtIdsPaidIn
 import com.emm.mybest.domain.repository.DebtRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -19,7 +20,7 @@ class ObserveDebtListUseCase(
     operator fun invoke(): Flow<List<DebtListItem>> = appDayClock.observeToday().flatMapLatest { today ->
         val month = YearMonthValue.from(today)
         combine(debtRepository.observeDebts(), debtRepository.observePayments()) { debts, payments ->
-            val paidDebtIds = payments.filter { it.month == month }.map { it.debtId }.toSet()
+            val paidDebtIds = payments.debtIdsPaidIn(month)
             debts.map { DebtListItem(it, it.id in paidDebtIds) }
         }
     }
