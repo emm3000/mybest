@@ -2,20 +2,13 @@ package com.emm.mybest.core.datetime
 
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDateTime
 import java.lang.Math.floorDiv
 import java.lang.Math.floorMod
-import kotlin.time.Clock
 
 private const val FIRST_MONTH = 1
 private const val MONTHS_PER_YEAR = 12
 private const val TWO_DIGIT_YEAR_DIVISOR = 100
-
-fun currentDate(): LocalDate = Clock.System.now()
-    .toLocalDateTime(TimeZone.currentSystemDefault())
-    .date
 
 data class YearMonthValue(
     val year: Int,
@@ -45,11 +38,6 @@ data class YearMonthValue(
     }
 
     companion object {
-        fun now(): YearMonthValue {
-            val today = currentDate()
-            return YearMonthValue(today.year, today.month.ordinal + 1)
-        }
-
         fun from(date: LocalDate): YearMonthValue = YearMonthValue(date.year, date.month.ordinal + 1)
     }
 }

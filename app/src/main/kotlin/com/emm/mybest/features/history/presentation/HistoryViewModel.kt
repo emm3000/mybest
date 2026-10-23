@@ -2,6 +2,7 @@ package com.emm.mybest.features.history.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
@@ -18,17 +19,25 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
+
+private fun initialHistoryState(today: LocalDate): HistoryState {
+    val month = YearMonthValue.from(today)
+    return HistoryState(today = today, currentMonth = month, selectedMonth = month)
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModel(
     private val getHistoryUseCase: GetHistoryUseCase,
     private val deleteWeightByDate: DeleteWeightByDateUseCase,
     private val deletePhoto: DeletePhotoUseCase,
-    initialMonth: YearMonthValue = YearMonthValue.now(),
+    appDayClock: AppDayClock,
 ) : ViewModel() {
 
-    private val _selectedMonth = MutableStateFlow(initialMonth)
-    private val _selectedDate = MutableStateFlow<kotlinx.datetime.LocalDate?>(null)
+    private val baseState = initialHistoryState(appDayClock.today())
+
+    private val _selectedMonth = MutableStateFlow(baseState.currentMonth)
+    private val _selectedDate = MutableStateFlow<LocalDate?>(null)
 
     val state: StateFlow<HistoryState> = combine(
         _selectedMonth,
@@ -37,7 +46,7 @@ class HistoryViewModel(
         Pair(month, selectedDate)
     }.flatMapLatest { (month, _) ->
         getHistoryUseCase(month).combine(_selectedDate) { result, date ->
-            HistoryState(
+            baseState.copy(
                 selectedMonth = month,
                 selectedDate = date,
                 monthlyData = result.monthlyData.toImmutableMap(),
@@ -50,7 +59,7 @@ class HistoryViewModel(
         }
     }.catch { throwable ->
         emit(
-            HistoryState(
+            baseState.copy(
                 selectedMonth = _selectedMonth.value,
                 selectedDate = _selectedDate.value,
                 isLoading = false,
@@ -60,7 +69,7 @@ class HistoryViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
-        initialValue = HistoryState(isLoading = true),
+        initialValue = baseState.copy(isLoading = true),
     )
 
     fun onIntent(intent: HistoryIntent) {

@@ -3,18 +3,10 @@ package com.emm.mybest.core.datetime
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class DateTimeUtilsTest {
-
-    @Test
-    fun `currentDate returns a valid date`() {
-        val today = currentDate()
-
-        assertNotNull(today)
-    }
 
     @Test
     fun `YearMonthValue validates month range`() {
