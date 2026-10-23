@@ -2,6 +2,7 @@ package com.emm.mybest.core.money
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -52,5 +53,33 @@ class MoneyTest {
     @Test
     fun formatPenPutsSignBeforeSymbol() {
         assertEquals("-S/ 5.00", Money(-500).formatPen())
+    }
+
+    @Test
+    fun parseOrNullReadsWholeSoles() {
+        assertEquals(Money(12000), Money.parseOrNull("120"))
+    }
+
+    @Test
+    fun parseOrNullReadsDotDecimals() {
+        assertEquals(Money(12050), Money.parseOrNull("120.5"))
+    }
+
+    @Test
+    fun parseOrNullReadsCommaDecimals() {
+        assertEquals(Money(12050), Money.parseOrNull("120,50"))
+    }
+
+    @Test
+    fun parseOrNullIgnoresSurroundingSpaces() {
+        assertEquals(Money(12000), Money.parseOrNull(" 120 "))
+    }
+
+    @Test
+    fun parseOrNullRejectsInvalidInput() {
+        assertNull(Money.parseOrNull(""))
+        assertNull(Money.parseOrNull("abc"))
+        assertNull(Money.parseOrNull("-5"))
+        assertNull(Money.parseOrNull("12.345"))
     }
 }
