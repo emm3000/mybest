@@ -30,9 +30,8 @@ import com.emm.mybest.ui.components.checkLabelRes
 import com.emm.mybest.ui.theme.AtelierInkMuted
 import com.emm.mybest.ui.theme.AtelierTheme
 
-private val SECTION_PADDING_HORIZONTAL = 28.dp
 private val SECTION_PADDING_VERTICAL = 14.dp
-private val CHECK_ROW_HEIGHT_MIN = 56.dp
+private val ALCOHOL_SEGMENT_BORDER_WIDTH = 1.dp
 private val SEGMENT_PADDING_HORIZONTAL = 14.dp
 private val SEGMENT_PADDING_VERTICAL = 10.dp
 
@@ -42,7 +41,7 @@ internal fun HomeChecksSection(
     onToggle: (DailyCheckType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxWidth().padding(horizontal = SECTION_PADDING_HORIZONTAL)) {
+    Column(modifier = modifier.fillMaxWidth().padding(horizontal = HOME_SECTION_PADDING_HORIZONTAL)) {
         MicroLabel(
             text = stringResource(R.string.home_checks_title_format, model.keptChecks, model.totalChecks),
             modifier = Modifier.padding(vertical = SECTION_PADDING_VERTICAL),
@@ -60,7 +59,7 @@ private fun DailyCheckRow(item: DailyCheckItem, onToggle: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = CHECK_ROW_HEIGHT_MIN)
+            .heightIn(min = HOME_ROW_HEIGHT_MIN)
             .then(rowToggleModifier(item, onToggle)),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -83,7 +82,7 @@ private fun rowToggleModifier(item: DailyCheckItem, onToggle: () -> Unit): Modif
 
 @Composable
 private fun AlcoholSegment(hasDrunk: Boolean, onSelect: () -> Unit) {
-    Row(modifier = Modifier.border(width = 1.dp, color = AtelierInkMuted)) {
+    Row(modifier = Modifier.border(width = ALCOHOL_SEGMENT_BORDER_WIDTH, color = AtelierInkMuted)) {
         Segment(text = stringResource(R.string.home_alcohol_no), isSelected = !hasDrunk, onSelect = onSelect)
         Segment(text = stringResource(R.string.home_alcohol_yes), isSelected = hasDrunk, onSelect = onSelect)
     }
@@ -97,7 +96,7 @@ private fun Segment(text: String, isSelected: Boolean, onSelect: () -> Unit) {
             .padding(horizontal = SEGMENT_PADDING_HORIZONTAL, vertical = SEGMENT_PADDING_VERTICAL),
     ) {
         val tone = if (isSelected) MicroLabelTone.Done else MicroLabelTone.Dim
-        MicroLabel(text = text.uppercase(), style = MicroLabelStyle(tone = tone))
+        MicroLabel(text = text, style = MicroLabelStyle(tone = tone))
     }
 }
 

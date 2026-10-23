@@ -34,10 +34,10 @@ import com.emm.mybest.ui.theme.AtelierTheme
 
 private const val DAYS_IN_WEEK = 7
 
-private val SECTION_PADDING_HORIZONTAL = 28.dp
 private val SECTION_PADDING_VERTICAL = 14.dp
 private val WEEK_ROW_HEIGHT_MIN = 48.dp
 private val DEFINE_TARGET_PADDING_START = 14.dp
+private val WEEK_COUNT_PADDING_START = 14.dp
 private val WEEK_BAR_SEGMENT_HEIGHT = 4.dp
 private val WEEK_BAR_SEGMENT_WIDTH = 14.dp
 private val WEEK_BAR_GAP = 3.dp
@@ -49,9 +49,9 @@ internal fun HomeWeekSection(
     onDefineTarget: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxWidth().padding(horizontal = SECTION_PADDING_HORIZONTAL)) {
+    Column(modifier = modifier.fillMaxWidth().padding(horizontal = HOME_SECTION_PADDING_HORIZONTAL)) {
         MicroLabel(
-            text = stringResource(R.string.home_week_title).uppercase(),
+            text = stringResource(R.string.home_week_title),
             modifier = Modifier.padding(vertical = SECTION_PADDING_VERTICAL),
         )
         checks.forEach { item ->
@@ -92,7 +92,7 @@ private fun DefineTargetAction(onDefineTarget: () -> Unit) {
         contentAlignment = Alignment.CenterEnd,
     ) {
         MicroLabel(
-            text = stringResource(R.string.home_define_target).uppercase(),
+            text = stringResource(R.string.home_define_target),
             style = MicroLabelStyle(tone = MicroLabelTone.Warm),
         )
     }
@@ -106,7 +106,7 @@ private fun WeekProgressValue(type: DailyCheckType, progress: WeekProgress) {
         }
         Text(
             text = weekProgressText(type, progress),
-            modifier = Modifier.width(WEEK_COUNT_WIDTH).padding(start = DEFINE_TARGET_PADDING_START),
+            modifier = Modifier.width(WEEK_COUNT_WIDTH).padding(start = WEEK_COUNT_PADDING_START),
             style = MaterialTheme.typography.labelMedium,
             textAlign = TextAlign.End,
         )

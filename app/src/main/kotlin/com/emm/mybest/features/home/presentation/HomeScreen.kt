@@ -42,7 +42,6 @@ import com.emm.mybest.ui.theme.AtelierInkSecondary
 import com.emm.mybest.ui.theme.AtelierTheme
 import org.koin.androidx.compose.koinViewModel
 
-private val ROW_PADDING_HORIZONTAL = 28.dp
 private val ROW_PADDING_VERTICAL = 14.dp
 private val QUICK_ACTION_HEIGHT_MIN = 80.dp
 private val QUICK_ACTION_CELL_SPACER = 4.dp
@@ -154,7 +153,7 @@ private fun HomeHeaderRow(state: HomeState, onSettingsClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = ROW_PADDING_HORIZONTAL, vertical = ROW_PADDING_VERTICAL),
+            .padding(horizontal = HOME_SECTION_PADDING_HORIZONTAL, vertical = ROW_PADDING_VERTICAL),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -177,7 +176,7 @@ private fun HomeHeaderRow(state: HomeState, onSettingsClick: () -> Unit) {
 private fun HomeHeadline() {
     Text(
         text = stringResource(R.string.home_headline),
-        modifier = Modifier.padding(horizontal = ROW_PADDING_HORIZONTAL, vertical = ROW_PADDING_VERTICAL),
+        modifier = Modifier.padding(horizontal = HOME_SECTION_PADDING_HORIZONTAL, vertical = ROW_PADDING_VERTICAL),
         style = MaterialTheme.typography.headlineLarge,
     )
 }
@@ -213,7 +212,7 @@ private fun HomeQuickActionCell(
         modifier = modifier
             .fillMaxHeight()
             .clickable(onClick = onClick)
-            .padding(horizontal = ROW_PADDING_HORIZONTAL, vertical = ROW_PADDING_VERTICAL),
+            .padding(horizontal = HOME_SECTION_PADDING_HORIZONTAL, vertical = ROW_PADDING_VERTICAL),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center,
     ) {
