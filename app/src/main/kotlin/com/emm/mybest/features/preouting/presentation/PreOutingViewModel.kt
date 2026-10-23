@@ -46,7 +46,7 @@ class PreOutingViewModel(
 
     fun onIntent(intent: PreOutingIntent) {
         when (intent) {
-            is PreOutingIntent.OnPromptClick -> _effect.tryEmit(PreOutingEffect.OpenSettings)
+            is PreOutingIntent.OnPromptClick -> _effect.tryEmit(intent.prompt.destination())
             PreOutingIntent.OnStayInClick -> stayIn()
             PreOutingIntent.OnConfirmOutingClick -> confirmOuting()
             else -> editForm(intent)

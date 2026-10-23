@@ -177,12 +177,26 @@ class PreOutingViewModelTest {
     }
 
     @Test
-    fun `tapping a prompt opens settings`() = runTest {
-        val viewModel = viewModel(EMPTY_SNAPSHOT)
+    fun `typical cost and outing limit prompts open settings`() = runTest {
+        assertPromptOpens(PreOutingPrompt.TYPICAL_COST, PreOutingEffect.OpenSettings)
+        assertPromptOpens(PreOutingPrompt.OUTING_LIMIT, PreOutingEffect.OpenSettings)
+    }
 
+    @Test
+    fun `the debts prompt opens debts`() = runTest {
+        assertPromptOpens(PreOutingPrompt.DEBTS, PreOutingEffect.OpenDebts)
+    }
+
+    @Test
+    fun `the purchase goal prompt opens the purchase goal`() = runTest {
+        assertPromptOpens(PreOutingPrompt.PURCHASE_GOAL, PreOutingEffect.OpenPurchaseGoal)
+    }
+
+    private suspend fun TestScope.assertPromptOpens(prompt: PreOutingPrompt, expected: PreOutingEffect) {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
         viewModel.effect.test {
-            viewModel.onIntent(PreOutingIntent.OnPromptClick(PreOutingPrompt.DEBTS))
-            assertEquals(PreOutingEffect.OpenSettings, awaitItem())
+            viewModel.onIntent(PreOutingIntent.OnPromptClick(prompt))
+            assertEquals(expected, awaitItem())
         }
         assertFalse(stateNow(viewModel).isLoaded)
     }

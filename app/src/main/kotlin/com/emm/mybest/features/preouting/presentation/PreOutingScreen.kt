@@ -21,13 +21,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun PreOutingScreen(
     viewModel: PreOutingViewModel,
-    onOpenSettings: () -> Unit,
+    callbacks: PreOutingCallbacks,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    PreOutingEffects(viewModel, snackbarHostState, onOpenSettings)
+    PreOutingEffects(viewModel, snackbarHostState, callbacks)
     Scaffold(
         modifier = modifier,
         snackbarHost = { HSnackbarHost(hostState = snackbarHostState) },
@@ -45,15 +45,17 @@ fun PreOutingScreen(
 private fun PreOutingEffects(
     viewModel: PreOutingViewModel,
     snackbarHostState: SnackbarHostState,
-    onOpenSettings: () -> Unit,
+    callbacks: PreOutingCallbacks,
 ) {
-    val currentOnOpenSettings by rememberUpdatedState(onOpenSettings)
+    val currentCallbacks by rememberUpdatedState(callbacks)
     val dayAlreadyDecidedMessage = stringResource(R.string.pre_outing_day_already_decided)
     val notWonNightDayMessage = stringResource(R.string.pre_outing_not_won_night_day)
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                PreOutingEffect.OpenSettings -> currentOnOpenSettings()
+                PreOutingEffect.OpenSettings -> currentCallbacks.onOpenSettings()
+                PreOutingEffect.OpenDebts -> currentCallbacks.onOpenDebts()
+                PreOutingEffect.OpenPurchaseGoal -> currentCallbacks.onOpenPurchaseGoal()
                 PreOutingEffect.DayAlreadyDecided -> launch { snackbarHostState.showSnackbar(dayAlreadyDecidedMessage) }
                 PreOutingEffect.NotWonNightDay -> launch { snackbarHostState.showSnackbar(notWonNightDayMessage) }
             }

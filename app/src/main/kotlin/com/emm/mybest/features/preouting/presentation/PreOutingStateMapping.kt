@@ -55,3 +55,9 @@ private fun NightDecision.toState(): PreOutingDecisionState = when (this) {
     )
     is NightDecision.StayedIn -> PreOutingDecisionState.StayedIn(wonNight.estimatedCost?.formatPen())
 }
+
+internal fun PreOutingPrompt.destination(): PreOutingEffect = when (this) {
+    PreOutingPrompt.TYPICAL_COST, PreOutingPrompt.OUTING_LIMIT -> PreOutingEffect.OpenSettings
+    PreOutingPrompt.DEBTS -> PreOutingEffect.OpenDebts
+    PreOutingPrompt.PURCHASE_GOAL -> PreOutingEffect.OpenPurchaseGoal
+}
