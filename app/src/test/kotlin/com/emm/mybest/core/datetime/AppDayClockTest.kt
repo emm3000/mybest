@@ -1,6 +1,7 @@
 package com.emm.mybest.core.datetime
 
 import com.emm.mybest.testing.FixedClock
+import com.emm.mybest.testing.VirtualTimeClock
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.TestScope
@@ -26,10 +27,6 @@ private val EVENING = LocalTime(18, 0)
 
 private fun lima(date: LocalDate, hour: Int, minute: Int = 0): Instant =
     LocalDateTime(date.year, date.month, date.day, hour, minute).toInstant(LIMA)
-
-private class VirtualTimeClock(private val start: Instant, private val scope: TestScope) : Clock {
-    override fun now(): Instant = start + scope.testScheduler.currentTime.milliseconds
-}
 
 private class EarlyWakeClock(private val start: Instant, private val scope: TestScope) : Clock {
     override fun now(): Instant {
