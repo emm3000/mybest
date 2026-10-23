@@ -82,15 +82,19 @@ One user, the owner. Single device, Android, Spanish-speaking (Peru), currency s
 
 ### 10. Notification capture (groundwork for v1.1)
 
-- The user picks which apps to capture (e.g. Yape, Plin, bank apps) from the installed apps. For those apps only, the notification text and timestamp are stored locally. The user can view, delete all, and turn capture off. Nothing is parsed in v1 (ADR 0002).
+- The user picks which apps to capture (e.g. Yape, Plin, bank apps) from the installed apps. For those apps only, the notification title, text and timestamp are stored locally, unmodified. The user can view, delete all, and turn capture off. Nothing is parsed in v1 (ADR 0002).
 
 ### 11. Backup
 
 - The existing export/import keeps working with the new schema.
 
+### 12. Data safety after v1
+
+- Once the v1 schema is complete, the destructive migration fallback is removed: from then on every schema change ships an explicit Room migration that preserves user data, tested with a migration test.
+
 ## Removed
 
-The weekly diet plan (7 days × 4 meals), the weekly exercise plan, and the five daily compliance toggles. Their tables are dropped with a destructive migration (ADR 0004).
+The weekly diet plan (7 days × 4 meals), the weekly exercise plan, the five daily compliance toggles, and the Insights tab (replaced by the weekly summary and the calendar). Their tables are dropped with a destructive migration (ADR 0004).
 
 ## Out of scope
 

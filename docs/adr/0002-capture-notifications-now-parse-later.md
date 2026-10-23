@@ -1,6 +1,6 @@
 # Capture payment notifications now, parse them later
 
-Automatic expense logging from Yape, Plin and bank notifications needs a parser for each app's text format, and those formats are unknown without real samples. v1 therefore runs a `NotificationListenerService` that stores only the raw text and timestamp of notifications from apps the user selects, and parses nothing; v1.1 writes the parser against those stored samples.
+Automatic expense logging from Yape, Plin and bank notifications needs a parser for each app's text format, and those formats are unknown without real samples. v1 therefore runs a `NotificationListenerService` that stores only the raw title, text and timestamp of notifications from apps the user selects, and parses nothing; v1.1 writes the parser against those stored samples.
 
 ## Consequences
 
