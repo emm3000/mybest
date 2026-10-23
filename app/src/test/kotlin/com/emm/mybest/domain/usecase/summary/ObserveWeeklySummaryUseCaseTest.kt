@@ -10,14 +10,24 @@ import com.emm.mybest.domain.models.LimitsKept
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.OutingKind
 import com.emm.mybest.domain.models.ReturnTime
+import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.models.WeeklySummary
+import com.emm.mybest.domain.models.WeighInTrend
+import com.emm.mybest.domain.models.WeightEntry
+import com.emm.mybest.domain.repository.WeightRepository
+import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
+import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
 import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveReturnTimesUseCase
+import com.emm.mybest.domain.usecase.weight.ObserveWeighInTrendUseCase
 import com.emm.mybest.testing.FakeDailyCheckRepository
 import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.FixedClock
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -42,6 +52,8 @@ private val LIMITS = Limits(money = Money(100_00), drinks = 4, returnTime = Loca
 private data class Records(
     val outings: List<Outing> = emptyList(),
     val checks: List<DailyCheck> = emptyList(),
+    val setup: Setup = Setup(),
+    val weights: List<Float> = emptyList(),
 )
 
 class ObserveWeeklySummaryUseCaseTest {
@@ -59,14 +71,29 @@ class ObserveWeeklySummaryUseCaseTest {
 
     private fun useCaseOf(records: Records): ObserveWeeklySummaryUseCase {
         val outingRepository = FakeOutingRepository(records.outings)
-        val relapses = ObserveRelapsesUseCase(outingRepository, FakeSetupRepository())
-        val returnTimes = ObserveReturnTimesUseCase(relapses, FakeDailyCheckRepository(records.checks), appDayClock)
+        val setupRepository = FakeSetupRepository(records.setup)
+        val checkRepository = FakeDailyCheckRepository(records.checks)
+        val relapses = ObserveRelapsesUseCase(outingRepository, setupRepository)
         return ObserveWeeklySummaryUseCase(
             WeeklySummarySections(
                 outings = ObserveWeekOutingsUseCase(outingRepository),
-                recovery = ObserveWeekRecoveryUseCase(relapses, returnTimes),
+                recovery = ObserveWeekRecoveryUseCase(
+                    relapses,
+                    ObserveReturnTimesUseCase(relapses, checkRepository, appDayClock),
+                ),
+                weekProgress = ObserveWeekProgressUseCase(checkRepository, setupRepository),
+                weighInTrend = ObserveWeighInTrendUseCase(weightRepositoryOf(records.weights), setupRepository),
             ),
         )
+    }
+
+    private fun weightRepositoryOf(weights: List<Float>): WeightRepository {
+        val entries = weights.mapIndexed { index, kg ->
+            WeightEntry(id = "w$index", date = LocalDate(2026, 10, 1 + index), weight = kg)
+        }
+        val repository = mockk<WeightRepository>()
+        every { repository.getWeightProgress() } returns flowOf(entries)
+        return repository
     }
 
     private fun dietDone(day: LocalDate) = DailyCheck(day, DailyCheckType.DIET, isDone = true)
@@ -179,5 +206,25 @@ class ObserveWeeklySummaryUseCaseTest {
 
         val history = listOf(ReturnTime(FRIDAY, SATURDAY, days = 1), ReturnTime(PREVIOUS_SUNDAY, MONDAY, days = 1))
         assertEquals(history, summaryOf(records).recovery.returnTimeHistory)
+    }
+
+    @Test
+    fun `counts the checks done this week against each weekly target`() = runTest {
+        val gymDays = listOf(PREVIOUS_SUNDAY, MONDAY, FRIDAY, NEXT_MONDAY)
+        val records = Records(
+            checks = gymDays.map { DailyCheck(it, DailyCheckType.GYM, isDone = true) },
+            setup = Setup(weeklyTargets = mapOf(DailyCheckType.GYM to 3, DailyCheckType.DIET to 5)),
+        )
+
+        val expected = mapOf(DailyCheckType.GYM to WeekProgress(2, 3), DailyCheckType.DIET to WeekProgress(0, 5))
+        assertEquals(expected, summaryOf(records).checks)
+    }
+
+    @Test
+    fun `gives the weigh-in trend`() = runTest {
+        val records = Records(weights = listOf(82f, 80.5f), setup = Setup(targetWeightKg = 78f))
+
+        val expected = WeighInTrend(latestKg = 80.5f, changeSincePreviousKg = -1.5f, remainingToTargetKg = 2.5f)
+        assertEquals(expected, summaryOf(records).weighInTrend)
     }
 }
