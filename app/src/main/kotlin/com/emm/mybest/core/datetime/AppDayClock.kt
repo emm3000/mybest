@@ -31,6 +31,8 @@ class AppDayClock(
         return local.date
     }
 
+    fun localDateTimeOf(instant: Instant): LocalDateTime = instant.toLocalDateTime(timeZone)
+
     fun startOf(appDay: LocalDate): Instant = LocalDateTime(appDay, APP_DAY_START).toInstant(timeZone)
 
     fun observeToday(): Flow<LocalDate> = flow {

@@ -69,6 +69,13 @@ class AppDayClockTest {
     }
 
     @Test
+    fun `localDateTimeOf shows an instant in the clock zone without the cutoff`() {
+        val clock = clockAt(lima(FRIDAY, 12))
+
+        assertEquals(LocalDateTime(2026, 10, 24, 2, 30), clock.localDateTimeOf(lima(SATURDAY, 2, 30)))
+    }
+
+    @Test
     fun `startOf an app day is that date at 05_00 local`() {
         val clock = clockAt(lima(FRIDAY, 12))
 
