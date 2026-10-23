@@ -180,11 +180,15 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             modifier = Modifier,
         )
     }
+    debtsEntry(navigator)
+    purchaseGoalEntry(navigator)
+}
+
+private fun EntryProviderScope<NavKey>.debtsEntry(navigator: Navigator) {
     entry<Screen.Debts> {
         val viewModel: DebtsViewModel = koinViewModel()
         DebtsScreen(viewModel = viewModel, onBack = { navigator.goBack() }, modifier = Modifier)
     }
-    purchaseGoalEntry(navigator)
 }
 
 private fun EntryProviderScope<NavKey>.purchaseGoalEntry(navigator: Navigator) {
