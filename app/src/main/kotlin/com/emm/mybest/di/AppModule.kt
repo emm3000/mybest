@@ -50,6 +50,14 @@ import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
 import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
+import com.emm.mybest.domain.usecase.preouting.GetEstimatedOutingCostUseCase
+import com.emm.mybest.domain.usecase.preouting.ObserveIsEstimateAveragedUseCase
+import com.emm.mybest.domain.usecase.preouting.ObserveNearestInstallmentUseCase
+import com.emm.mybest.domain.usecase.preouting.ObserveNotSpentThisMonthUseCase
+import com.emm.mybest.domain.usecase.preouting.ObserveOutingMonthUseCase
+import com.emm.mybest.domain.usecase.preouting.ObservePreOutingSnapshotUseCase
+import com.emm.mybest.domain.usecase.preouting.ObservePurchaseGoalLeftUseCase
+import com.emm.mybest.domain.usecase.preouting.PreOutingUseCases
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.usecase.weight.GetNearestWeightOnDateUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
@@ -61,6 +69,7 @@ import com.emm.mybest.features.insights.presentation.InsightsViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewerViewModel
+import com.emm.mybest.features.preouting.presentation.PreOutingViewModel
 import com.emm.mybest.features.settings.presentation.SettingsGoalsEditor
 import com.emm.mybest.features.settings.presentation.SettingsRemindersEditor
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
@@ -146,6 +155,16 @@ val appModule = module {
 
     // History use cases
     factory { GetHistoryUseCase(get(), get()) }
+
+    factory { GetEstimatedOutingCostUseCase(get(), get()) }
+    factory { ObserveNotSpentThisMonthUseCase(get(), get()) }
+    factory { ObserveOutingMonthUseCase(get(), get(), get()) }
+    factory { ObserveNearestInstallmentUseCase(get(), get(), get()) }
+    factory { ObservePurchaseGoalLeftUseCase(get()) }
+    factory { ObserveIsEstimateAveragedUseCase(get()) }
+    factory { PreOutingUseCases(get(), get(), get(), get(), get(), get()) }
+    factory { ObservePreOutingSnapshotUseCase(get()) }
+    viewModel { PreOutingViewModel(get(), get()) }
 
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
