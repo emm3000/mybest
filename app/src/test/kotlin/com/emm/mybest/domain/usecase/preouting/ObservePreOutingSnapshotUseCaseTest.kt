@@ -60,7 +60,6 @@ class ObservePreOutingSnapshotUseCaseTest {
                 ),
                 purchaseGoalLeft = ObservePurchaseGoalLeftUseCase(FakePurchaseGoalRepository(goal, contributions)),
                 estimatedOutingCost = estimate,
-                isEstimateAveraged = ObserveIsEstimateAveragedUseCase(outingRepository),
                 notSpentThisMonth = ObserveNotSpentThisMonthUseCase(outingRepository, clock),
             ),
         )

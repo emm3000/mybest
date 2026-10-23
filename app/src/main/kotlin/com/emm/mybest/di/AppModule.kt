@@ -51,7 +51,6 @@ import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
 import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
 import com.emm.mybest.domain.usecase.preouting.GetEstimatedOutingCostUseCase
-import com.emm.mybest.domain.usecase.preouting.ObserveIsEstimateAveragedUseCase
 import com.emm.mybest.domain.usecase.preouting.ObserveNearestInstallmentUseCase
 import com.emm.mybest.domain.usecase.preouting.ObserveNotSpentThisMonthUseCase
 import com.emm.mybest.domain.usecase.preouting.ObserveOutingMonthUseCase
@@ -161,8 +160,7 @@ val appModule = module {
     factory { ObserveOutingMonthUseCase(get(), get(), get()) }
     factory { ObserveNearestInstallmentUseCase(get(), get(), get()) }
     factory { ObservePurchaseGoalLeftUseCase(get()) }
-    factory { ObserveIsEstimateAveragedUseCase(get()) }
-    factory { PreOutingUseCases(get(), get(), get(), get(), get(), get()) }
+    factory { PreOutingUseCases(get(), get(), get(), get(), get()) }
     factory { ObservePreOutingSnapshotUseCase(get()) }
     viewModel { PreOutingViewModel(get(), get()) }
 

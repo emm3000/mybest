@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 private val TYPICAL_COST = Money(380_00)
@@ -35,7 +37,7 @@ class GetEstimatedOutingCostUseCaseTest {
     fun `is null without a typical cost and fewer than three outings`() = runTest {
         val estimate = useCase(Setup(), listOf(outing(4, Money(100_00)))).invoke().first()
 
-        assertNull(estimate)
+        assertNull(estimate.cost)
     }
 
     @Test
@@ -44,7 +46,7 @@ class GetEstimatedOutingCostUseCaseTest {
 
         val estimate = useCase(Setup(typicalOutingCost = TYPICAL_COST), outings).invoke().first()
 
-        assertEquals(TYPICAL_COST, estimate)
+        assertEquals(TYPICAL_COST, estimate.cost)
     }
 
     @Test
@@ -53,7 +55,7 @@ class GetEstimatedOutingCostUseCaseTest {
 
         val estimate = useCase(Setup(typicalOutingCost = TYPICAL_COST), outings).invoke().first()
 
-        assertEquals(Money(250_00), estimate)
+        assertEquals(Money(250_00), estimate.cost)
     }
 
     @Test
@@ -62,7 +64,7 @@ class GetEstimatedOutingCostUseCaseTest {
 
         val estimate = useCase(Setup(), outings).invoke().first()
 
-        assertEquals(Money(100_00), estimate)
+        assertEquals(Money(100_00), estimate.cost)
     }
 
     @Test
@@ -76,6 +78,29 @@ class GetEstimatedOutingCostUseCaseTest {
 
         val estimate = useCase(Setup(typicalOutingCost = TYPICAL_COST), outings).invoke().first()
 
-        assertEquals(TYPICAL_COST, estimate)
+        assertEquals(TYPICAL_COST, estimate.cost)
+    }
+
+    @Test
+    fun `is not averaged with fewer than three checked-in outings`() = runTest {
+        val outings = listOf(outing(4, Money(100_00)), outing(11, Money(200_00)), outing(18, spent = null))
+
+        val estimate = useCase(Setup(typicalOutingCost = TYPICAL_COST), outings).invoke().first()
+
+        assertFalse(estimate.isAveraged)
+    }
+
+    @Test
+    fun `is averaged once three outings have a check-in`() = runTest {
+        val outings = listOf(
+            outing(4, Money(100_00)),
+            outing(11, Money(200_00)),
+            outing(18, Money(450_00)),
+            outing(25, spent = null),
+        )
+
+        val estimate = useCase(Setup(typicalOutingCost = TYPICAL_COST), outings).invoke().first()
+
+        assertTrue(estimate.isAveraged)
     }
 }
