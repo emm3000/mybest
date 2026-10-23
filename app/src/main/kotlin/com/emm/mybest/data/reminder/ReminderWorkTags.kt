@@ -8,6 +8,7 @@ import kotlinx.datetime.TimeZone
 internal fun reminderTimeTag(time: LocalTime, timeZone: TimeZone): String = "reminder-time:$time@${timeZone.id}"
 
 internal suspend fun WorkManager.isReminderScheduledAt(workName: String, time: LocalTime, timeZone: TimeZone): Boolean =
-    getWorkInfosForUniqueWorkFlow(workName).first().any { info ->
-        !info.state.isFinished && reminderTimeTag(time, timeZone) in info.tags
-    }
+    hasUnfinishedWorkTagged(workName, reminderTimeTag(time, timeZone))
+
+internal suspend fun WorkManager.hasUnfinishedWorkTagged(workName: String, tag: String): Boolean =
+    getWorkInfosForUniqueWorkFlow(workName).first().any { info -> !info.state.isFinished && tag in info.tags }
