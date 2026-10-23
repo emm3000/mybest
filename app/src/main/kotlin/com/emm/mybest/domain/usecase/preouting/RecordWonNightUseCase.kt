@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.first
 
 class RecordWonNightUseCase(
     private val outingRepository: OutingRepository,
+    private val hasDecisionOn: HasDecisionOnUseCase,
     private val getEstimatedOutingCost: GetEstimatedOutingCostUseCase,
     private val appDayClock: AppDayClock,
 ) {
@@ -20,7 +21,7 @@ class RecordWonNightUseCase(
     suspend operator fun invoke(): RecordWonNightResult {
         val today = appDayClock.today()
         if (!today.isWonNightDay()) return RecordWonNightResult.NotWonNightDay
-        if (outingRepository.hasDecisionOn(today)) return RecordWonNightResult.DayAlreadyDecided
+        if (hasDecisionOn(today)) return RecordWonNightResult.DayAlreadyDecided
         val estimatedCost = getEstimatedOutingCost().first().cost
         outingRepository.recordWonNight(WonNight(today, estimatedCost))
         return RecordWonNightResult.Recorded(estimatedCost)

@@ -32,7 +32,11 @@ class PlanOutingUseCaseTest {
             LocalTime(21, 0),
         ),
     ) =
-        PlanOutingUseCase(repository, AppDayClock(FixedClock(now.toInstant(LIMA)), LIMA))
+        PlanOutingUseCase(
+            repository,
+            HasDecisionOnUseCase(repository),
+            AppDayClock(FixedClock(now.toInstant(LIMA)), LIMA),
+        )
 
     private fun existingOuting() = Outing(1, FRIDAY, OutingKind.UNPLANNED, limits = null, checkIn = null)
 

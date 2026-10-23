@@ -34,6 +34,7 @@ class RecordWonNightUseCaseTest {
         setup: Setup = Setup(typicalOutingCost = TYPICAL_COST),
     ) = RecordWonNightUseCase(
         outingRepository = repository,
+        hasDecisionOn = HasDecisionOnUseCase(repository),
         getEstimatedOutingCost = GetEstimatedOutingCostUseCase(FakeSetupRepository(setup), repository),
         appDayClock = AppDayClock(FixedClock(now.toInstant(LIMA)), LIMA),
     )

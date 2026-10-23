@@ -8,6 +8,7 @@ import com.emm.mybest.domain.models.PreOutingSnapshot
 import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.usecase.preouting.GetEstimatedOutingCostUseCase
+import com.emm.mybest.domain.usecase.preouting.HasDecisionOnUseCase
 import com.emm.mybest.domain.usecase.preouting.ObservePreOutingSnapshotUseCase
 import com.emm.mybest.domain.usecase.preouting.ObserveTonightUseCase
 import com.emm.mybest.domain.usecase.preouting.PlanOutingUseCase
@@ -75,10 +76,11 @@ class PreOutingViewModelTest {
     private fun decisionUseCases(now: LocalDateTime, setup: Setup): PreOutingDecisionUseCases {
         val clock = AppDayClock(FixedClock(now.toInstant(LIMA)), LIMA)
         val estimate = GetEstimatedOutingCostUseCase(FakeSetupRepository(setup), outingRepository)
+        val hasDecisionOn = HasDecisionOnUseCase(outingRepository)
         return PreOutingDecisionUseCases(
             observeTonight = ObserveTonightUseCase(outingRepository, clock),
-            planOuting = PlanOutingUseCase(outingRepository, clock),
-            recordWonNight = RecordWonNightUseCase(outingRepository, estimate, clock),
+            planOuting = PlanOutingUseCase(outingRepository, hasDecisionOn, clock),
+            recordWonNight = RecordWonNightUseCase(outingRepository, hasDecisionOn, estimate, clock),
         )
     }
 

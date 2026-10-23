@@ -6,6 +6,7 @@ import com.emm.mybest.domain.repository.OutingRepository
 
 class PlanOutingUseCase(
     private val outingRepository: OutingRepository,
+    private val hasDecisionOn: HasDecisionOnUseCase,
     private val appDayClock: AppDayClock,
 ) {
 
@@ -16,7 +17,7 @@ class PlanOutingUseCase(
     suspend operator fun invoke(limits: Limits): PlanOutingResult {
         limitsRejection(limits)?.let { return it }
         val today = appDayClock.today()
-        if (outingRepository.hasDecisionOn(today)) return PlanOutingResult.DayAlreadyDecided
+        if (hasDecisionOn(today)) return PlanOutingResult.DayAlreadyDecided
         outingRepository.recordPlanned(today, limits)
         return PlanOutingResult.Planned
     }
