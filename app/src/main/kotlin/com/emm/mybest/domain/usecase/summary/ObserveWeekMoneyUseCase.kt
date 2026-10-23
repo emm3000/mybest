@@ -20,14 +20,14 @@ class ObserveWeekMoneyUseCase(
 
     /**
      * Emits the won nights of the app week containing [appDay] with their estimated total, the debt, and the goal
-     * progress.
+     * progress as of the week's end.
      */
     operator fun invoke(appDay: LocalDate): Flow<WeekMoney> {
         val week = appWeekOf(appDay)
         return combine(
             outingRepository.observeWonNights(week.start, week.endInclusive),
             observeWeekDebt(appDay),
-            observeGoalProgress(),
+            observeGoalProgress(week.endInclusive),
             ::moneyOf,
         )
     }
