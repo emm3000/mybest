@@ -72,11 +72,6 @@
     <string name="settings_account_label">CUENTA</string>
     <string name="settings_account_hero">Solo tú.</string>
     <string name="settings_account_body">MyBest no tiene cuenta, ni nube, ni amigos.\nTodo vive en este teléfono.</string>
-    <string name="settings_reminder_label">RECORDATORIO MATINAL</string>
-    <string name="settings_reminder_off_value">Apagada</string>
-    <string name="settings_reminder_caption_on">Notificación local · puedes apagarla</string>
-    <string name="settings_reminder_caption_off">Tap para activar</string>
-    <string name="settings_reminder_time_fallback">—</string>
     <string name="settings_backup_label">BACKUP</string>
     <string name="settings_backup_export_value">Exportar</string>
     <string name="settings_backup_import_extra">+ Importar</string>
@@ -108,6 +103,22 @@
     <string name="settings_goal_error_negative">El valor no puede ser negativo.</string>
     <string name="settings_goal_saved">Guardado</string>
     <string name="settings_goal_save_failed">No se pudo guardar. Intenta de nuevo.</string>
+
+    <!-- Settings reminders and weigh-in day (#10) -->
+    <string name="settings_reminders_section">RECORDATORIOS</string>
+    <string name="settings_reminder_pre_outing_label">ANTES DE SALIR (VIE Y SÁB)</string>
+    <string name="settings_reminder_check_in_label">CHECK-IN DE LA MAÑANA</string>
+    <string name="settings_reminder_weigh_in_day_label">DÍA DE PESAJE</string>
+    <string name="settings_reminder_weigh_in_time_label">HORA DE PESAJE</string>
+    <string name="settings_reminder_photo_label">FOTO DE PROGRESO CADA 4 SEMANAS</string>
+    <string name="settings_reminder_debt_label">CUOTAS POR VENCER</string>
+    <string name="settings_weekday_monday">Lunes</string>
+    <string name="settings_weekday_tuesday">Martes</string>
+    <string name="settings_weekday_wednesday">Miércoles</string>
+    <string name="settings_weekday_thursday">Jueves</string>
+    <string name="settings_weekday_friday">Viernes</string>
+    <string name="settings_weekday_saturday">Sábado</string>
+    <string name="settings_weekday_sunday">Domingo</string>
 
     <!-- History screen (C16) -->
     <string name="history_title">HISTORIAL</string>

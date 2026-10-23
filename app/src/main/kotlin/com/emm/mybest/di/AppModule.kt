@@ -55,6 +55,7 @@ import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewerViewModel
 import com.emm.mybest.features.settings.presentation.SettingsGoalsEditor
+import com.emm.mybest.features.settings.presentation.SettingsRemindersEditor
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
 import kotlinx.datetime.TimeZone
@@ -116,6 +117,7 @@ val appModule = module {
     factory { ObserveSetupUseCase(get()) }
     factory { UpdateSetupUseCase(get()) }
     factory { SettingsGoalsEditor(get(), get()) }
+    factory { SettingsRemindersEditor(get(), get(), get()) }
 
     // Weight use cases
     factory { SaveWeightUseCase(get()) }

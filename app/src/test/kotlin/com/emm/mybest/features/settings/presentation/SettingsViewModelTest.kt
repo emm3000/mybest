@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
@@ -20,6 +21,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalTime
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -33,7 +35,7 @@ class SettingsViewModelTest {
     private val preferencesRepository = mockk<UserPreferencesRepository>()
     private val exportUseCase = mockk<ExportDatabaseBackupUseCase>()
     private val restoreUseCase = mockk<RestoreDatabaseBackupUseCase>()
-    private val updateWeighInReminderTimeUseCase = mockk<UpdateWeighInReminderTimeUseCase>()
+    private val scheduler = mockk<WeightReminderScheduler>()
 
     private fun buildViewModel(
         versionName: String = "1.0",
@@ -43,8 +45,12 @@ class SettingsViewModelTest {
         userPreferencesRepository = preferencesRepository,
         exportDatabaseBackupUseCase = exportUseCase,
         restoreDatabaseBackupUseCase = restoreUseCase,
-        updateWeighInReminderTimeUseCase = updateWeighInReminderTimeUseCase,
         goalsEditor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), UpdateSetupUseCase(setupRepository)),
+        remindersEditor = SettingsRemindersEditor(
+            ObserveSetupUseCase(setupRepository),
+            UpdateSetupUseCase(setupRepository),
+            UpdateWeighInReminderTimeUseCase(setupRepository, scheduler),
+        ),
         appVersionName = versionName,
         appVersionCode = versionCode,
     )
@@ -54,7 +60,8 @@ class SettingsViewModelTest {
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
-        coEvery { updateWeighInReminderTimeUseCase.invoke(any()) } returns Unit
+        coEvery { scheduler.schedule(any()) } returns Unit
+        coEvery { scheduler.cancel() } returns Unit
     }
 
     @Test
@@ -75,7 +82,8 @@ class SettingsViewModelTest {
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
-        coEvery { updateWeighInReminderTimeUseCase.invoke(any()) } returns Unit
+        coEvery { scheduler.schedule(any()) } returns Unit
+        coEvery { scheduler.cancel() } returns Unit
         val viewModel = buildViewModel()
 
         viewModel.state.test {
@@ -116,32 +124,6 @@ class SettingsViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { restoreUseCase.invoke("content://backup") }
-    }
-
-    @Test
-    fun `OnDefaultReminderTimeChange invokes update use case with LocalTime`() = runTest {
-        stubDefaults()
-        val viewModel = buildViewModel()
-
-        viewModel.onIntent(SettingsIntent.OnDefaultReminderTimeChange(7, 30))
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { updateWeighInReminderTimeUseCase.invoke(LocalTime(7, 30)) }
-    }
-
-    @Test
-    fun `OnWeightReminderToggleOff invokes update use case with null`() = runTest {
-        every { preferencesRepository.notificationsEnabled } returns flowOf(true)
-        coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
-        coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
-        coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
-        coEvery { updateWeighInReminderTimeUseCase.invoke(any()) } returns Unit
-        val viewModel = buildViewModel()
-
-        viewModel.onIntent(SettingsIntent.OnWeightReminderToggleOff)
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { updateWeighInReminderTimeUseCase.invoke(null) }
     }
 
     @Test
@@ -271,5 +253,106 @@ class SettingsViewModelTest {
             assertEquals(null, expectMostRecentItem().goals.editor)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `opening a reminder shows its picker and dismissing closes it`() = runTest {
+        stubDefaults()
+        val viewModel = buildViewModel()
+
+        viewModel.state.test {
+            viewModel.onIntent(SettingsIntent.OnReminderOpen(ReminderField.CHECK_IN_TIME))
+            advanceUntilIdle()
+            assertEquals(ReminderField.CHECK_IN_TIME, expectMostRecentItem().reminderPicker)
+            viewModel.onIntent(SettingsIntent.OnReminderDismiss)
+            advanceUntilIdle()
+            assertEquals(null, expectMostRecentItem().reminderPicker)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `setting a reminder time saves it and closes the picker`() = runTest {
+        stubDefaults()
+        val repository = FakeSetupRepository(Setup(monthlyOutingLimit = 2))
+        val viewModel = buildViewModel(setupRepository = repository)
+
+        viewModel.state.test {
+            viewModel.onIntent(SettingsIntent.OnReminderOpen(ReminderField.PRE_OUTING_TIME))
+            viewModel.onIntent(SettingsIntent.OnReminderTimeChange(20, 30))
+            advanceUntilIdle()
+            assertEquals(null, expectMostRecentItem().reminderPicker)
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertEquals(listOf(Setup(monthlyOutingLimit = 2, preOutingReminderTime = LocalTime(20, 30))), repository.saved)
+        coVerify(exactly = 0) { scheduler.schedule(any()) }
+    }
+
+    @Test
+    fun `clearing a reminder time leaves it unset`() = runTest {
+        stubDefaults()
+        val repository = FakeSetupRepository(Setup(debtReminderTime = LocalTime(9, 0)))
+        val viewModel = buildViewModel(setupRepository = repository)
+
+        viewModel.onIntent(SettingsIntent.OnReminderClear(ReminderField.DEBT_TIME))
+        advanceUntilIdle()
+
+        assertEquals(listOf(Setup()), repository.saved)
+    }
+
+    @Test
+    fun `setting the weigh-in time saves it and schedules the weight reminder`() = runTest {
+        stubDefaults()
+        val repository = FakeSetupRepository()
+        val viewModel = buildViewModel(setupRepository = repository)
+
+        viewModel.onIntent(SettingsIntent.OnReminderOpen(ReminderField.WEIGH_IN_TIME))
+        viewModel.onIntent(SettingsIntent.OnReminderTimeChange(7, 0))
+        advanceUntilIdle()
+
+        assertEquals(listOf(Setup(weighInReminderTime = LocalTime(7, 0))), repository.saved)
+        coVerify(exactly = 1) { scheduler.schedule(LocalTime(7, 0)) }
+    }
+
+    @Test
+    fun `clearing the weigh-in time cancels the weight reminder`() = runTest {
+        stubDefaults()
+        val repository = FakeSetupRepository(Setup(weighInReminderTime = LocalTime(7, 0)))
+        val viewModel = buildViewModel(setupRepository = repository)
+
+        viewModel.onIntent(SettingsIntent.OnReminderClear(ReminderField.WEIGH_IN_TIME))
+        advanceUntilIdle()
+
+        assertEquals(listOf(Setup()), repository.saved)
+        coVerify(exactly = 1) { scheduler.cancel() }
+    }
+
+    @Test
+    fun `setting and clearing the weigh-in day`() = runTest {
+        stubDefaults()
+        val repository = FakeSetupRepository()
+        val viewModel = buildViewModel(setupRepository = repository)
+
+        viewModel.onIntent(SettingsIntent.OnReminderOpen(ReminderField.WEIGH_IN_DAY))
+        viewModel.onIntent(SettingsIntent.OnWeighInDayChange(DayOfWeek.MONDAY))
+        advanceUntilIdle()
+        viewModel.onIntent(SettingsIntent.OnReminderClear(ReminderField.WEIGH_IN_DAY))
+        advanceUntilIdle()
+
+        assertEquals(listOf(Setup(weighInDay = DayOfWeek.MONDAY), Setup()), repository.saved)
+    }
+
+    @Test
+    fun `toggling the photo reminder saves it`() = runTest {
+        stubDefaults()
+        val repository = FakeSetupRepository()
+        val viewModel = buildViewModel(setupRepository = repository)
+
+        viewModel.onIntent(SettingsIntent.OnPhotoReminderToggle(isEnabled = true))
+        advanceUntilIdle()
+        viewModel.onIntent(SettingsIntent.OnPhotoReminderToggle(isEnabled = false))
+        advanceUntilIdle()
+
+        assertEquals(listOf(Setup(isPhotoReminderEnabled = true), Setup()), repository.saved)
     }
 }
