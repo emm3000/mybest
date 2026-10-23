@@ -77,6 +77,8 @@ import com.emm.mybest.domain.usecase.weight.GetNearestWeightOnDateUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeighInTrendUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
+import com.emm.mybest.features.capture.presentation.NotificationCaptureUseCases
+import com.emm.mybest.features.capture.presentation.NotificationCaptureViewModel
 import com.emm.mybest.features.debts.presentation.DebtsUseCases
 import com.emm.mybest.features.debts.presentation.DebtsViewModel
 import com.emm.mybest.features.goal.presentation.PurchaseGoalUseCases
@@ -146,6 +148,8 @@ val appModule = module {
     factory { CaptureNotificationUseCase(get()) }
     factory { ObserveCaptureOverviewUseCase(get(), get()) }
     factory { ObserveCaptureSummaryUseCase(get()) }
+    factory { NotificationCaptureUseCases(get(), get(), get()) }
+    viewModel { NotificationCaptureViewModel(get(), get()) }
 
     factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
