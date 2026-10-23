@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
+import com.emm.mybest.core.datetime.formatHhMm
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.ui.components.HSwitch
 import com.emm.mybest.ui.components.atelier.Hairline
@@ -71,7 +72,7 @@ private fun reminderValueText(field: ReminderField, setup: Setup): String {
     val time = field.timeIn(setup)
     return when {
         day != null -> stringResource(day.weekdayRes)
-        time != null -> formatReminderTime(time)
+        time != null -> time.formatHhMm()
         else -> stringResource(R.string.settings_goal_unset)
     }
 }
