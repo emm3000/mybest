@@ -220,7 +220,7 @@ val appModule = module {
     factory { ObserveGoalProgressUseCase(get()) }
     factory { SavePurchaseGoalUseCase(get()) }
     factory { AddGoalContributionUseCase(get(), get()) }
-    factory { SettingsRowSources(get(), get()) }
+    factory { SettingsRowSources(get(), get(), get()) }
     factory { PurchaseGoalUseCases(get(), get(), get(), get(), get()) }
     viewModel { PurchaseGoalViewModel(get()) }
 

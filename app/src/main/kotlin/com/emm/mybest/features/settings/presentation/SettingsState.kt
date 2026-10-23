@@ -7,4 +7,5 @@ data class SettingsState(
     val goals: SettingsGoals = SettingsGoals(),
     val debts: SettingsDebtsState = SettingsDebtsState(),
     val purchaseGoal: SettingsPurchaseGoalState = SettingsPurchaseGoalState(),
+    val capture: SettingsCaptureState = SettingsCaptureState(),
 )
