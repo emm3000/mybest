@@ -10,6 +10,7 @@ internal fun WeeklySummary.toState(week: SummaryWeek): SummaryState = SummarySta
     sections = listOf(
         outings.toOutingsSection(),
         outings.limitsKept.toLimitsSection(),
+        recovery.toRecoverySection(week.today),
     ),
 )
 
