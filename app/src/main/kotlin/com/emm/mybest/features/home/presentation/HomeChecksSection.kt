@@ -38,7 +38,7 @@ private val SEGMENT_PADDING_VERTICAL = 10.dp
 @Composable
 internal fun HomeChecksSection(
     model: HomeChecksModel,
-    onToggle: (DailyCheckType) -> Unit,
+    actions: HomeCheckActions,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = HOME_SECTION_PADDING_HORIZONTAL)) {
@@ -48,43 +48,51 @@ internal fun HomeChecksSection(
         )
         model.items.forEach { item ->
             Hairline()
-            DailyCheckRow(item = item, onToggle = { onToggle(item.type) })
+            DailyCheckRow(item = item, actions = actions)
         }
     }
 }
 
 @Composable
-private fun DailyCheckRow(item: DailyCheckItem, onToggle: () -> Unit) {
+private fun DailyCheckRow(item: DailyCheckItem, actions: HomeCheckActions) {
     val label = stringResource(checkLabelRes(item.type))
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = HOME_ROW_HEIGHT_MIN)
-            .then(rowToggleModifier(item, onToggle)),
+            .then(rowToggleModifier(item, actions.onToggle)),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(text = label, style = MaterialTheme.typography.bodyLarge)
-        if (item.type == DailyCheckType.ALCOHOL) {
-            AlcoholSegment(hasDrunk = item.isDone, onSelect = onToggle)
+        if (item.isLimit) {
+            AlcoholSegment(item = item, onAnswer = actions.onAnswerAlcohol)
         } else {
             CompletionCheck(done = item.isDone)
         }
     }
 }
 
-private fun rowToggleModifier(item: DailyCheckItem, onToggle: () -> Unit): Modifier =
-    if (item.type == DailyCheckType.ALCOHOL) {
+private fun rowToggleModifier(item: DailyCheckItem, onToggle: (DailyCheckType) -> Unit): Modifier =
+    if (item.isLimit) {
         Modifier
     } else {
-        Modifier.toggleable(value = item.isDone, role = Role.Checkbox, onValueChange = { onToggle() })
+        Modifier.toggleable(value = item.isDone, role = Role.Checkbox, onValueChange = { onToggle(item.type) })
     }
 
 @Composable
-private fun AlcoholSegment(hasDrunk: Boolean, onSelect: () -> Unit) {
+private fun AlcoholSegment(item: DailyCheckItem, onAnswer: (Boolean) -> Unit) {
     Row(modifier = Modifier.border(width = ALCOHOL_SEGMENT_BORDER_WIDTH, color = AtelierInkMuted)) {
-        Segment(text = stringResource(R.string.home_alcohol_no), isSelected = !hasDrunk, onSelect = onSelect)
-        Segment(text = stringResource(R.string.home_alcohol_yes), isSelected = hasDrunk, onSelect = onSelect)
+        Segment(
+            text = stringResource(R.string.home_alcohol_no),
+            isSelected = item.isAnsweredNo,
+            onSelect = { onAnswer(false) },
+        )
+        Segment(
+            text = stringResource(R.string.home_alcohol_yes),
+            isSelected = item.isDone,
+            onSelect = { onAnswer(true) },
+        )
     }
 }
 
@@ -92,7 +100,7 @@ private fun AlcoholSegment(hasDrunk: Boolean, onSelect: () -> Unit) {
 private fun Segment(text: String, isSelected: Boolean, onSelect: () -> Unit) {
     Box(
         modifier = Modifier
-            .selectable(selected = isSelected, role = Role.RadioButton, onClick = { if (!isSelected) onSelect() })
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onSelect)
             .padding(horizontal = SEGMENT_PADDING_HORIZONTAL, vertical = SEGMENT_PADDING_VERTICAL),
     ) {
         val tone = if (isSelected) MicroLabelTone.Done else MicroLabelTone.Dim
@@ -106,7 +114,7 @@ private fun HomeChecksSectionPreview() {
     AtelierTheme {
         HomeChecksSection(
             model = HomeChecksModel(previewDailyChecks(), PREVIEW_KEPT_CHECKS, PREVIEW_TOTAL_CHECKS),
-            onToggle = {},
+            actions = HomeCheckActions(onToggle = {}, onAnswerAlcohol = {}),
         )
     }
 }

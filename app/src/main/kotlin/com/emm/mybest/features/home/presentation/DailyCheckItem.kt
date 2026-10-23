@@ -8,9 +8,13 @@ import com.emm.mybest.domain.models.WeekProgress
  */
 data class DailyCheckItem(
     val type: DailyCheckType,
-    val isDone: Boolean,
+    val answer: HomeCheckAnswer,
     val progress: WeekProgress?,
 ) {
+    val isDone: Boolean get() = answer == HomeCheckAnswer.YES
+
+    val isAnsweredNo: Boolean get() = answer == HomeCheckAnswer.NO
+
     val isLimit: Boolean get() = type == DailyCheckType.ALCOHOL
 
     val isOverLimit: Boolean get() = isLimit && (progress?.exceededBy ?: 0) > 0
