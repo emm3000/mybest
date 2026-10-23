@@ -13,7 +13,7 @@ import kotlin.time.Duration
  */
 class ReminderDelays(
     private val clock: Clock,
-    private val timeZone: TimeZone,
+    val timeZone: TimeZone,
 ) {
 
     /**
