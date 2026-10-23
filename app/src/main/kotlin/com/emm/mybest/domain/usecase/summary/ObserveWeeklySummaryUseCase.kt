@@ -13,6 +13,11 @@ class ObserveWeeklySummaryUseCase(
      * Emits the summary of the Monday to Sunday app week containing [appDay]. It is composed from the use cases that
      * own each rule.
      */
-    operator fun invoke(appDay: LocalDate): Flow<WeeklySummary> =
-        combine(sections.outings(appDay), sections.recovery(appDay), ::WeeklySummary)
+    operator fun invoke(appDay: LocalDate): Flow<WeeklySummary> = combine(
+        sections.outings(appDay),
+        sections.recovery(appDay),
+        sections.weekProgress(appDay),
+        sections.weighInTrend(),
+        ::WeeklySummary,
+    )
 }
