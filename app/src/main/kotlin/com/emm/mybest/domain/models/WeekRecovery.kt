@@ -1,0 +1,11 @@
+package com.emm.mybest.domain.models
+
+/**
+ * The [relapses] of one app week, with the [latestReturnTime] of the newest of those relapses, null when the week has
+ * none, and the [returnTimeHistory] of every relapse, newest first.
+ */
+data class WeekRecovery(
+    val relapses: List<Relapse>,
+    val latestReturnTime: ReturnTime?,
+    val returnTimeHistory: List<ReturnTime>,
+)
