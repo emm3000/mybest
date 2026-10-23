@@ -22,9 +22,10 @@ private val HERO_GAP = 4.dp
 @Composable
 fun PreOutingContent(
     state: PreOutingState,
-    onPromptClick: (PreOutingPrompt) -> Unit,
+    onIntent: (PreOutingIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val onPromptClick: (PreOutingPrompt) -> Unit = { onIntent(PreOutingIntent.OnPromptClick(it)) }
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -39,6 +40,7 @@ fun PreOutingContent(
             OutingLines(state = state, onPromptClick = onPromptClick)
             ValueRow(stringResource(R.string.pre_outing_not_spent_label), state.notSpentLabel)
         }
+        PreOutingDecisionArea(state = state, onIntent = onIntent)
     }
 }
 
@@ -126,7 +128,7 @@ private fun PreOutingContentPreview() {
                 isNextOutingOverLimit = true,
                 notSpentLabel = "S/ 380.00",
             ),
-            onPromptClick = {},
+            onIntent = {},
         )
     }
 }
