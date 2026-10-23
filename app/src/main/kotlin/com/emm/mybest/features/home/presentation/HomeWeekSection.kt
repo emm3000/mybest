@@ -37,11 +37,11 @@ private const val DAYS_IN_WEEK = 7
 private val SECTION_PADDING_VERTICAL = 14.dp
 private val WEEK_ROW_HEIGHT_MIN = 48.dp
 private val DEFINE_TARGET_PADDING_START = 14.dp
-private val WEEK_COUNT_PADDING_START = 14.dp
+private val WEEK_COUNT_PADDING_START = 12.dp
 private val WEEK_BAR_SEGMENT_HEIGHT = 4.dp
-private val WEEK_BAR_SEGMENT_WIDTH = 14.dp
+private val WEEK_BAR_WIDTH = 112.dp
 private val WEEK_BAR_GAP = 3.dp
-private val WEEK_COUNT_WIDTH = 104.dp
+private val WEEK_COUNT_WIDTH = 44.dp
 
 @Composable
 internal fun HomeWeekSection(
@@ -125,11 +125,14 @@ private fun weekToneColor(tone: WeekTone): Color = when (tone) {
 
 @Composable
 private fun WeekBar(count: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(WEEK_BAR_GAP)) {
+    Row(
+        modifier = Modifier.width(WEEK_BAR_WIDTH),
+        horizontalArrangement = Arrangement.spacedBy(WEEK_BAR_GAP),
+    ) {
         repeat(DAYS_IN_WEEK) { index ->
             Box(
                 modifier = Modifier
-                    .width(WEEK_BAR_SEGMENT_WIDTH)
+                    .weight(1f)
                     .height(WEEK_BAR_SEGMENT_HEIGHT)
                     .background(if (index < count) AtelierDone else AtelierHairline),
             )
