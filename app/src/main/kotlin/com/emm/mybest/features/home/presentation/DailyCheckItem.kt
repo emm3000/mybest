@@ -10,4 +10,10 @@ data class DailyCheckItem(
     val type: DailyCheckType,
     val isDone: Boolean,
     val progress: WeekProgress?,
-)
+) {
+    val isLimit: Boolean get() = type == DailyCheckType.ALCOHOL
+
+    val isOverLimit: Boolean get() = isLimit && (progress?.exceededBy ?: 0) > 0
+
+    val weekTone: WeekTone get() = if (isOverLimit) WeekTone.BROKEN else WeekTone.NEUTRAL
+}

@@ -330,4 +330,31 @@ class HomeViewModelTest {
 
         assertNull(viewModel.state.value.nextInstallment)
     }
+
+    private fun alcoholDays(count: Int) = (0 until count).map {
+        DailyCheck(FIXED_DATE.minus(DatePeriod(days = it)), DailyCheckType.ALCOHOL, true)
+    }
+
+    private fun TestScope.alcoholItem(drinkingDays: Int): DailyCheckItem {
+        val setup = Setup(weeklyTargets = mapOf(DailyCheckType.ALCOHOL to 2))
+        val viewModel =
+            buildViewModel(
+                fixture = HomeUseCasesFixture(
+                    dailyChecks = FakeDailyCheckRepository(alcoholDays(drinkingDays)),
+                    setup = setup,
+                ),
+            )
+        advanceUntilIdle()
+        return viewModel.state.value.checks.first { it.type == DailyCheckType.ALCOHOL }
+    }
+
+    @Test
+    fun `alcohol over its weekly maximum is flagged as a broken limit`() = runTest {
+        assertTrue(alcoholItem(drinkingDays = 3).isOverLimit)
+    }
+
+    @Test
+    fun `alcohol at its weekly maximum is not flagged`() = runTest {
+        assertFalse(alcoholItem(drinkingDays = 2).isOverLimit)
+    }
 }

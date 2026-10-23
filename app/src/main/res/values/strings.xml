@@ -43,7 +43,8 @@
     <string name="home_week_title">ESTA SEMANA</string>
     <string name="home_week_alcohol_label">Alcohol</string>
     <string name="home_week_progress_format">%1$d/%2$d</string>
-    <string name="home_week_alcohol_progress_format">%1$d / máx. %2$d</string>
+    <string name="home_week_alcohol_progress_format">%1$d · MÁX %2$d</string>
+    <string name="home_week_alcohol_over_format">%1$d · MÁX %2$d · %3$d DE MÁS</string>
     <string name="home_define_target">DEFINE TU META</string>
     <string name="home_shortcut_pre_outing">Antes de salir</string>
     <string name="home_shortcut_check_in">Check-in pendiente</string>
