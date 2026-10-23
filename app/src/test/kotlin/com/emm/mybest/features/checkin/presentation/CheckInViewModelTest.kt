@@ -16,6 +16,7 @@ import com.emm.mybest.domain.usecase.checkin.SaveCheckInUseCase
 import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
+import com.emm.mybest.ui.components.LimitOutcomeState
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
