@@ -23,7 +23,12 @@ import kotlinx.datetime.LocalDate
 
 private fun initialHistoryState(today: LocalDate): HistoryState {
     val month = YearMonthValue.from(today)
-    return HistoryState(today = today, currentMonth = month, selectedMonth = month)
+    return HistoryState(
+        today = today,
+        currentMonth = month,
+        selectedMonth = month,
+        monthNavigationLabel = month.toNavigationLabel(),
+    )
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -48,10 +53,15 @@ class HistoryViewModel(
         getHistoryUseCase(month).combine(_selectedDate) { result, date ->
             baseState.copy(
                 selectedMonth = month,
+                monthNavigationLabel = month.toNavigationLabel(),
                 selectedDate = date,
                 monthlyData = result.monthlyData.toImmutableMap(),
                 monthWeightCount = result.monthWeightCount,
                 monthPhotoCount = result.monthPhotoCount,
+                monthOutingCount = result.monthOutingCount,
+                monthWonNightCount = result.monthWonNightCount,
+                dayMarks = result.monthlyData.mapValues { it.value.toMarks() }.toImmutableMap(),
+                dayDetail = date?.let { toDayDetailState(it, result.monthlyData[it], baseState.today) },
                 recentEntries = result.recentEntries.toImmutableList(),
                 isLoading = false,
                 errorMessage = null,
