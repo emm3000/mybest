@@ -26,6 +26,7 @@ import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
+import com.emm.mybest.ui.components.checkLabelRes
 import com.emm.mybest.ui.theme.AtelierInkMuted
 import com.emm.mybest.ui.theme.AtelierTheme
 
