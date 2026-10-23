@@ -62,6 +62,14 @@ class SetupValidatorTest {
     }
 
     @Test
+    fun `NaN target weight is rejected`() {
+        assertEquals(
+            listOf(SetupValidationError.NonPositiveTargetWeight),
+            SetupValidator.validate(Setup(targetWeightKg = Float.NaN)),
+        )
+    }
+
+    @Test
     fun `positive target weight is valid`() {
         assertEquals(emptyList<SetupValidationError>(), SetupValidator.validate(Setup(targetWeightKg = 72.5f)))
     }
