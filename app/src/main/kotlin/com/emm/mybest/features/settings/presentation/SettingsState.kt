@@ -7,4 +7,5 @@ data class SettingsState(
     val showDefaultTimePicker: Boolean = false,
     val weightReminderTime: LocalTime? = null,
     val appVersionLabel: String = "",
+    val goals: SettingsGoals = SettingsGoals(),
 )

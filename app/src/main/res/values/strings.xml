@@ -72,6 +72,31 @@
     <string name="settings_footer_tagline">UN BOTÓN A LA VEZ</string>
     <string name="settings_footer_version_format">v%1$s · %2$d</string>
 
+    <!-- Settings goals and limits (#9) -->
+    <string name="settings_goals_section">METAS Y LÍMITES</string>
+    <string name="settings_goal_unset">Sin definir</string>
+    <string name="settings_goal_target_weight_label">PESO OBJETIVO</string>
+    <string name="settings_goal_target_weight_value">%1$s kg</string>
+    <string name="settings_goal_monthly_limit_label">LÍMITE DE SALIDAS AL MES</string>
+    <string name="settings_goal_typical_cost_label">COSTO TÍPICO DE UNA SALIDA</string>
+    <string name="settings_goal_weekly_gym_label">GYM</string>
+    <string name="settings_goal_weekly_diet_label">DIETA</string>
+    <string name="settings_goal_weekly_english_label">INGLÉS</string>
+    <string name="settings_goal_weekly_alcohol_label">ALCOHOL · MÁX. DÍAS POR SEMANA</string>
+    <plurals name="settings_goal_days_per_week">
+        <item quantity="one">%1$d día por semana</item>
+        <item quantity="other">%1$d días por semana</item>
+    </plurals>
+    <string name="settings_goal_save">Guardar</string>
+    <string name="settings_goal_clear">Borrar</string>
+    <string name="settings_goal_cancel">Cancelar</string>
+    <string name="settings_goal_error_invalid_number">Escribe un número válido.</string>
+    <string name="settings_goal_error_out_of_range">Elige entre 0 y 7 días.</string>
+    <string name="settings_goal_error_not_positive">El peso debe ser mayor que cero.</string>
+    <string name="settings_goal_error_negative">El valor no puede ser negativo.</string>
+    <string name="settings_goal_saved">Guardado</string>
+    <string name="settings_goal_save_failed">No se pudo guardar. Intenta de nuevo.</string>
+
     <!-- History screen (C16) -->
     <string name="history_title">HISTORIAL</string>
     <string name="history_legend_weight">PESO REGISTRADO</string>

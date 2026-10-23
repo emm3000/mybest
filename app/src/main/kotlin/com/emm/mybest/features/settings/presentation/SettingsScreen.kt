@@ -25,6 +25,7 @@ import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 
 private val SETTINGS_GUT = 28.dp
@@ -44,14 +45,7 @@ fun SettingsScreen(
     val backupImportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { viewModel.onIntent(SettingsIntent.OnImportBackup(it.toString())) }
     }
-    LaunchedEffect(Unit) {
-        viewModel.effect.collectLatest { effect ->
-            when (effect) {
-                is SettingsEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
-                is SettingsEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
-            }
-        }
-    }
+    SettingsEffectsHandler(effects = viewModel.effect, snackbarHostState = snackbarHostState)
     if (state.showDefaultTimePicker) {
         ReminderTimePickerDialog(
             initialHour = state.weightReminderTime?.hour ?: 8,
@@ -64,6 +58,17 @@ fun SettingsScreen(
             onDismiss = { viewModel.onIntent(SettingsIntent.OnDefaultTimePickerDismiss) },
         )
     }
+    state.goals.editor?.let { editor ->
+        SettingsFieldEditor(
+            editor = editor,
+            actions = SettingsFieldEditorActions(
+                onInputChange = { viewModel.onIntent(SettingsIntent.OnFieldInputChange(it)) },
+                onSave = { viewModel.onIntent(SettingsIntent.OnFieldSave) },
+                onClear = { viewModel.onIntent(SettingsIntent.OnFieldClear) },
+                onDismiss = { viewModel.onIntent(SettingsIntent.OnFieldDismiss) },
+            ),
+        )
+    }
     Scaffold(
         modifier = modifier,
         topBar = { SettingsAppBar() },
@@ -74,9 +79,30 @@ fun SettingsScreen(
             state = state,
             paddingValues = paddingValues,
             onOpenPicker = { viewModel.onIntent(SettingsIntent.OnDefaultTimePickerOpen) },
+            onFieldOpen = { viewModel.onIntent(SettingsIntent.OnFieldOpen(it)) },
             onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
             onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
         )
+    }
+}
+
+@Composable
+private fun SettingsEffectsHandler(
+    effects: Flow<SettingsEffect>,
+    snackbarHostState: SnackbarHostState,
+) {
+    val savedMessage = stringResource(R.string.settings_goal_saved)
+    val saveFailedMessage = stringResource(R.string.settings_goal_save_failed)
+    LaunchedEffect(Unit) {
+        effects.collectLatest { effect ->
+            val message = when (effect) {
+                is SettingsEffect.ShowError -> effect.message
+                is SettingsEffect.ShowMessage -> effect.message
+                is SettingsEffect.GoalSaved -> savedMessage
+                is SettingsEffect.GoalSaveFailed -> saveFailedMessage
+            }
+            snackbarHostState.showSnackbar(message)
+        }
     }
 }
 
@@ -99,6 +125,7 @@ private fun SettingsBody(
     state: SettingsState,
     paddingValues: androidx.compose.foundation.layout.PaddingValues,
     onOpenPicker: () -> Unit,
+    onFieldOpen: (SettingsField) -> Unit,
     onExportClick: () -> Unit,
     onImportClick: () -> Unit,
 ) {
@@ -110,6 +137,7 @@ private fun SettingsBody(
     ) {
         SettingsHero()
         Hairline()
+        SettingsGoalsSection(setup = state.goals.setup, onFieldOpen = onFieldOpen)
         ReminderRow(state = state, onOpenPicker = onOpenPicker)
         Hairline(inset = SETTINGS_GUT)
         BackupRow(onExportClick = onExportClick, onImportClick = onImportClick)
