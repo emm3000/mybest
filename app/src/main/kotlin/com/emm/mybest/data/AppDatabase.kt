@@ -4,6 +4,8 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.emm.mybest.data.entities.CaptureAppEntity
+import com.emm.mybest.data.entities.CapturedNotificationEntity
 import com.emm.mybest.data.entities.Converters
 import com.emm.mybest.data.entities.DailyCheckDao
 import com.emm.mybest.data.entities.DailyCheckEntity
@@ -15,6 +17,7 @@ import com.emm.mybest.data.entities.DebtPaymentEntity
 import com.emm.mybest.data.entities.GoalContributionEntity
 import com.emm.mybest.data.entities.NoOutingAnswerDao
 import com.emm.mybest.data.entities.NoOutingAnswerEntity
+import com.emm.mybest.data.entities.NotificationCaptureDao
 import com.emm.mybest.data.entities.OutingDao
 import com.emm.mybest.data.entities.OutingEntity
 import com.emm.mybest.data.entities.ProgressPhotoDao
@@ -39,8 +42,10 @@ import com.emm.mybest.data.entities.WonNightEntity
         DebtPaymentEntity::class,
         PurchaseGoalEntity::class,
         GoalContributionEntity::class,
+        CaptureAppEntity::class,
+        CapturedNotificationEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -57,6 +62,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun noOutingAnswerDao(): NoOutingAnswerDao
     abstract fun debtDao(): DebtDao
     abstract fun purchaseGoalDao(): PurchaseGoalDao
+    abstract fun notificationCaptureDao(): NotificationCaptureDao
 
     companion object {
         const val DB_NAME = "my_best_db"

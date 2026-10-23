@@ -1,0 +1,571 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 10,
+    "identityHash": "6bd62271070669e8ddd8de9e9a02bffc",
+    "entities": [
+      {
+        "tableName": "daily_weight",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `date` TEXT NOT NULL, `weight` REAL NOT NULL, `photo_path` TEXT, `note` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weight",
+            "columnName": "weight",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photoPath",
+            "columnName": "photo_path",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_daily_weight_date",
+            "unique": true,
+            "columnNames": [
+              "date"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_daily_weight_date` ON `${TABLE_NAME}` (`date`)"
+          }
+        ]
+      },
+      {
+        "tableName": "progress_photo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `date` TEXT NOT NULL, `type` TEXT NOT NULL, `photo_path` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photoPath",
+            "columnName": "photo_path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_progress_photo_type",
+            "unique": false,
+            "columnNames": [
+              "type"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_progress_photo_type` ON `${TABLE_NAME}` (`type`)"
+          }
+        ]
+      },
+      {
+        "tableName": "user_setup",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `target_weight_kg` REAL, `monthly_outing_limit` INTEGER, `typical_outing_cost_cents` INTEGER, `gym_weekly_target` INTEGER, `diet_weekly_target` INTEGER, `english_weekly_target` INTEGER, `alcohol_weekly_target` INTEGER, `pre_outing_reminder_minutes` INTEGER, `check_in_reminder_minutes` INTEGER, `weigh_in_day` INTEGER, `weigh_in_reminder_minutes` INTEGER, `is_photo_reminder_enabled` INTEGER NOT NULL, `debt_reminder_minutes` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetWeightKg",
+            "columnName": "target_weight_kg",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "monthlyOutingLimit",
+            "columnName": "monthly_outing_limit",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "typicalOutingCostCents",
+            "columnName": "typical_outing_cost_cents",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "gymWeeklyTarget",
+            "columnName": "gym_weekly_target",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "dietWeeklyTarget",
+            "columnName": "diet_weekly_target",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "englishWeeklyTarget",
+            "columnName": "english_weekly_target",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "alcoholWeeklyTarget",
+            "columnName": "alcohol_weekly_target",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "preOutingReminderMinutes",
+            "columnName": "pre_outing_reminder_minutes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "checkInReminderMinutes",
+            "columnName": "check_in_reminder_minutes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "weighInDay",
+            "columnName": "weigh_in_day",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "weighInReminderMinutes",
+            "columnName": "weigh_in_reminder_minutes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "isPhotoReminderEnabled",
+            "columnName": "is_photo_reminder_enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "debtReminderMinutes",
+            "columnName": "debt_reminder_minutes",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "daily_check",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`app_day` TEXT NOT NULL, `type` TEXT NOT NULL, `is_done` INTEGER NOT NULL, PRIMARY KEY(`app_day`, `type`))",
+        "fields": [
+          {
+            "fieldPath": "appDay",
+            "columnName": "app_day",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDone",
+            "columnName": "is_done",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "app_day",
+            "type"
+          ]
+        }
+      },
+      {
+        "tableName": "outing",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `app_day` TEXT NOT NULL, `kind` TEXT NOT NULL, `limit_money_cents` INTEGER, `limit_drinks` INTEGER, `limit_return_minutes` INTEGER, `spent_cents` INTEGER, `drinks` INTEGER, `return_minutes` INTEGER, `mood` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appDay",
+            "columnName": "app_day",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "limitMoneyCents",
+            "columnName": "limit_money_cents",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "limitDrinks",
+            "columnName": "limit_drinks",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "limitReturnMinutes",
+            "columnName": "limit_return_minutes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "spentCents",
+            "columnName": "spent_cents",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "drinks",
+            "columnName": "drinks",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "returnMinutes",
+            "columnName": "return_minutes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "mood",
+            "columnName": "mood",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_outing_app_day",
+            "unique": true,
+            "columnNames": [
+              "app_day"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_outing_app_day` ON `${TABLE_NAME}` (`app_day`)"
+          }
+        ]
+      },
+      {
+        "tableName": "won_night",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`app_day` TEXT NOT NULL, `estimated_cost_cents` INTEGER, PRIMARY KEY(`app_day`))",
+        "fields": [
+          {
+            "fieldPath": "appDay",
+            "columnName": "app_day",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estimatedCostCents",
+            "columnName": "estimated_cost_cents",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "app_day"
+          ]
+        }
+      },
+      {
+        "tableName": "no_outing_answer",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`app_day` TEXT NOT NULL, PRIMARY KEY(`app_day`))",
+        "fields": [
+          {
+            "fieldPath": "appDay",
+            "columnName": "app_day",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "app_day"
+          ]
+        }
+      },
+      {
+        "tableName": "debt",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `balance_cents` INTEGER NOT NULL, `installment_cents` INTEGER NOT NULL, `payment_day` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "balanceCents",
+            "columnName": "balance_cents",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "installmentCents",
+            "columnName": "installment_cents",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paymentDay",
+            "columnName": "payment_day",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "debt_payment",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`debt_id` INTEGER NOT NULL, `month` TEXT NOT NULL, `amount_cents` INTEGER NOT NULL, PRIMARY KEY(`debt_id`, `month`), FOREIGN KEY(`debt_id`) REFERENCES `debt`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "debtId",
+            "columnName": "debt_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "month",
+            "columnName": "month",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountCents",
+            "columnName": "amount_cents",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "debt_id",
+            "month"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "debt",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "debt_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "purchase_goal",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `price_cents` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceCents",
+            "columnName": "price_cents",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "goal_contribution",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `app_day` TEXT NOT NULL, `amount_cents` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appDay",
+            "columnName": "app_day",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountCents",
+            "columnName": "amount_cents",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "capture_app",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`package_name` TEXT NOT NULL, PRIMARY KEY(`package_name`))",
+        "fields": [
+          {
+            "fieldPath": "packageName",
+            "columnName": "package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "package_name"
+          ]
+        }
+      },
+      {
+        "tableName": "captured_notification",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `package_name` TEXT NOT NULL, `title` TEXT, `text` TEXT, `posted_at_epoch_ms` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "text",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "postedAtEpochMs",
+            "columnName": "posted_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6bd62271070669e8ddd8de9e9a02bffc')"
+    ]
+  }
+}
