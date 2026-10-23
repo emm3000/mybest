@@ -33,33 +33,6 @@
     <string name="home_photo_caption_today_format">%1$s · hoy</string>
     <string name="home_photo_caption_yesterday_format">%1$s · ayer</string>
 
-    <!-- Edit-meal sheet (C11) -->
-    <string name="edit_meal_header_template">EDITAR · PLANTILLA</string>
-    <string name="edit_meal_description">DESCRIPCIÓN</string>
-    <string name="edit_meal_repeats_format">SE REPITE CADA %1$s</string>
-    <string name="edit_meal_cancel">CANCELAR</string>
-    <string name="edit_meal_save">GUARDAR</string>
-
-    <!-- Diet screen (C13) -->
-    <string name="meal_plan_app_bar_title">DIETA · PLANTILLA 7×4</string>
-    <string name="meal_plan_app_bar_right">SEMANA</string>
-    <string name="meal_plan_hero_label">PLAN SEMANAL</string>
-    <string name="meal_plan_hero_line1">Comer</string>
-    <string name="meal_plan_hero_line2">en bucle.</string>
-    <string name="meal_plan_empty_meal">—</string>
-
-    <!-- Exercise screen (C14) -->
-    <string name="exercise_plan_app_bar_title">EJERCICIO · PLANTILLA 7×1</string>
-    <string name="exercise_plan_app_bar_right">SEMANA</string>
-    <string name="exercise_plan_hero_label">RUTINA SEMANAL</string>
-    <string name="exercise_plan_hero_line1">Mover</string>
-    <string name="exercise_plan_hero_line2">el cuerpo.</string>
-    <string name="exercise_plan_volume_format">VOL · %s</string>
-    <string name="exercise_plan_empty_value">—</string>
-    <string name="exercise_plan_edit_name_label">NOMBRE</string>
-    <string name="exercise_plan_edit_detail_label">DETALLE</string>
-    <string name="exercise_plan_edit_volume_label">VOLUMEN</string>
-
     <!-- Photos screen (C15) -->
     <string name="photo_type_trunk">Tronco</string>
     <string name="photo_type_face">Cara</string>
@@ -92,12 +65,6 @@
     <string name="settings_reminder_caption_on">Notificación local · puedes apagarla</string>
     <string name="settings_reminder_caption_off">Tap para activar</string>
     <string name="settings_reminder_time_fallback">—</string>
-    <string name="settings_diet_label">PLAN DE DIETA</string>
-    <string name="settings_diet_value">Editar</string>
-    <string name="settings_diet_caption">Plantilla 7 × 4</string>
-    <string name="settings_exercise_label">PLAN DE EJERCICIO</string>
-    <string name="settings_exercise_value">Editar</string>
-    <string name="settings_exercise_caption">Plantilla 7 × 1</string>
     <string name="settings_backup_label">BACKUP</string>
     <string name="settings_backup_export_value">Exportar</string>
     <string name="settings_backup_import_extra">Importar</string>

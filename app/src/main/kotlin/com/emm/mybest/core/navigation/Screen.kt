@@ -28,10 +28,4 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object Settings : Screen
-
-    @Serializable
-    data object MealPlan : Screen
-
-    @Serializable
-    data object ExercisePlan : Screen
 }
