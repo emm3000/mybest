@@ -72,6 +72,7 @@ import com.emm.mybest.domain.usecase.goal.SavePurchaseGoalUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.HistoryBodySources
 import com.emm.mybest.domain.usecase.history.HistoryNightSources
+import com.emm.mybest.domain.usecase.home.ResolveHomeDestinationUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
@@ -196,6 +197,7 @@ val appModule = module {
     factory { ObserveWeekProgressUseCase(get(), get()) }
     factory { ToggleDailyCheckUseCase(get()) }
     factory { HomeUseCases(get(), get(), get(), get(), get()) }
+    factory { ResolveHomeDestinationUseCase(get(), get(), get()) }
 
     // Settings use cases
     factory { ObserveSetupUseCase(get()) }
