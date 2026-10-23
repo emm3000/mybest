@@ -1,26 +1,45 @@
 package com.emm.mybest.features.preouting.presentation
 
 import app.cash.turbine.test
+import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.InstallmentShare
 import com.emm.mybest.domain.models.PreOutingSnapshot
 import com.emm.mybest.domain.models.PurchaseGoal
+import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.usecase.preouting.GetEstimatedOutingCostUseCase
 import com.emm.mybest.domain.usecase.preouting.ObservePreOutingSnapshotUseCase
+import com.emm.mybest.domain.usecase.preouting.ObserveTonightUseCase
+import com.emm.mybest.domain.usecase.preouting.PlanOutingUseCase
+import com.emm.mybest.domain.usecase.preouting.PreOutingDecisionUseCases
+import com.emm.mybest.domain.usecase.preouting.RecordWonNightUseCase
+import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FakePurchaseGoalRepository
+import com.emm.mybest.testing.FakeSetupRepository
+import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+
+private val LIMA = TimeZone.of("America/Lima")
+private val FRIDAY = LocalDate(2026, 10, 23)
+private val THURSDAY = LocalDate(2026, 10, 22)
 
 private val EMPTY_SNAPSHOT = PreOutingSnapshot(
     spentOnOutingsThisMonth = Money.ZERO,
@@ -51,19 +70,56 @@ class PreOutingViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
+    private val outingRepository = FakeOutingRepository()
+
+    private fun decisionUseCases(now: LocalDateTime, setup: Setup): PreOutingDecisionUseCases {
+        val clock = AppDayClock(FixedClock(now.toInstant(LIMA)), LIMA)
+        val estimate = GetEstimatedOutingCostUseCase(FakeSetupRepository(setup), outingRepository)
+        return PreOutingDecisionUseCases(
+            observeTonight = ObserveTonightUseCase(outingRepository, clock),
+            planOuting = PlanOutingUseCase(outingRepository, clock),
+            recordWonNight = RecordWonNightUseCase(outingRepository, estimate, clock),
+        )
+    }
+
+    private data class Scenario(
+        val now: LocalDateTime = LocalDateTime(FRIDAY, LocalTime(21, 0)),
+        val setup: Setup = Setup(typicalOutingCost = Money(380_00)),
+    )
+
     private fun viewModel(
         snapshot: PreOutingSnapshot,
         goal: PurchaseGoal? = null,
+        scenario: Scenario = Scenario(),
     ): PreOutingViewModel {
         val observeSnapshot = mockk<ObservePreOutingSnapshotUseCase>()
         every { observeSnapshot() } returns flowOf(snapshot)
-        return PreOutingViewModel(observeSnapshot, FakePurchaseGoalRepository(goal))
+        return PreOutingViewModel(
+            observeSnapshot,
+            FakePurchaseGoalRepository(goal),
+            decisionUseCases(scenario.now, scenario.setup),
+        )
     }
 
-    private suspend fun kotlinx.coroutines.test.TestScope.stateOf(viewModel: PreOutingViewModel): PreOutingState {
-        backgroundScope.launch { viewModel.state.collect {} }
+    private fun TestScope.fillForm(viewModel: PreOutingViewModel) {
+        viewModel.onIntent(PreOutingIntent.OnGoOutClick)
+        viewModel.onIntent(PreOutingIntent.OnMoneyChange("150"))
+        viewModel.onIntent(PreOutingIntent.OnDrinksChange("4"))
+        viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(1, 30))
+        viewModel.onIntent(PreOutingIntent.OnCardsOffToggle)
+        viewModel.onIntent(PreOutingIntent.OnAccountLoadedToggle)
+        advanceUntilIdle()
+    }
+
+    private fun TestScope.stateNow(viewModel: PreOutingViewModel): PreOutingState {
         advanceUntilIdle()
         return viewModel.state.value
+    }
+
+    private suspend fun TestScope.stateOf(viewModel: PreOutingViewModel): PreOutingState {
+        backgroundScope.launch { viewModel.state.collect {} }
+        advanceUntilIdle()
+        return stateNow(viewModel)
     }
 
     @Test
@@ -126,6 +182,170 @@ class PreOutingViewModelTest {
             viewModel.onIntent(PreOutingIntent.OnPromptClick(PreOutingPrompt.DEBTS))
             assertEquals(PreOutingEffect.OpenSettings, awaitItem())
         }
-        assertFalse(viewModel.state.value.isLoaded)
+        assertFalse(stateNow(viewModel).isLoaded)
+    }
+
+    @Test
+    fun `starts undecided with both actions on a Friday`() = runTest {
+        val state = stateOf(viewModel(EMPTY_SNAPSHOT))
+
+        assertEquals(PreOutingDecisionState.Undecided, state.decision)
+        assertTrue(state.canStayIn)
+        assertFalse(state.form.isOpen)
+        assertEquals("VIE · 23 OCT", state.tonightLabel)
+    }
+
+    @Test
+    fun `staying in is not offered outside Friday and Saturday`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT, scenario = Scenario(now = LocalDateTime(THURSDAY, LocalTime(21, 0))))
+
+        val state = stateOf(viewModel)
+        viewModel.onIntent(PreOutingIntent.OnStayInClick)
+        advanceUntilIdle()
+
+        assertFalse(state.canStayIn)
+        assertEquals(PreOutingDecisionState.Undecided, stateNow(viewModel).decision)
+    }
+
+    @Test
+    fun `going out opens the form and dismissing closes it`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+
+        viewModel.onIntent(PreOutingIntent.OnGoOutClick)
+        assertTrue(stateNow(viewModel).form.isOpen)
+        viewModel.onIntent(PreOutingIntent.OnFormDismiss)
+
+        assertFalse(stateNow(viewModel).form.isOpen)
+    }
+
+    @Test
+    fun `confirming needs the three limits and both checklist items`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        viewModel.onIntent(PreOutingIntent.OnGoOutClick)
+        viewModel.onIntent(PreOutingIntent.OnMoneyChange("150"))
+        viewModel.onIntent(PreOutingIntent.OnDrinksChange("4"))
+        viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(1, 30))
+        viewModel.onIntent(PreOutingIntent.OnCardsOffToggle)
+        assertFalse(stateNow(viewModel).canConfirmOuting)
+
+        viewModel.onIntent(PreOutingIntent.OnAccountLoadedToggle)
+
+        assertTrue(stateNow(viewModel).canConfirmOuting)
+        assertEquals("S/ 150.00", stateNow(viewModel).moneyLimitLabel)
+        assertEquals("01:30", stateNow(viewModel).returnTimeLabel)
+    }
+
+    @Test
+    fun `a money limit of zero or text cannot be confirmed`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        fillForm(viewModel)
+
+        viewModel.onIntent(PreOutingIntent.OnMoneyChange("0"))
+        assertFalse(stateNow(viewModel).canConfirmOuting)
+        viewModel.onIntent(PreOutingIntent.OnMoneyChange("abc"))
+
+        assertFalse(stateNow(viewModel).canConfirmOuting)
+    }
+
+    @Test
+    fun `confirming records the planned outing and shows it`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        fillForm(viewModel)
+
+        viewModel.onIntent(PreOutingIntent.OnConfirmOutingClick)
+        advanceUntilIdle()
+
+        val decision = stateNow(viewModel).decision
+        assertEquals(PreOutingDecisionState.WentOut("S/ 150.00", "4", "01:30"), decision)
+        assertFalse(stateNow(viewModel).form.isOpen)
+    }
+
+    @Test
+    fun `an incomplete form records nothing`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        viewModel.onIntent(PreOutingIntent.OnGoOutClick)
+
+        viewModel.onIntent(PreOutingIntent.OnConfirmOutingClick)
+        advanceUntilIdle()
+
+        assertEquals(PreOutingDecisionState.Undecided, stateNow(viewModel).decision)
+    }
+
+    @Test
+    fun `staying in records the won night with the estimate`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+
+        viewModel.onIntent(PreOutingIntent.OnStayInClick)
+        advanceUntilIdle()
+
+        assertEquals(PreOutingDecisionState.StayedIn("S/ 380.00"), stateNow(viewModel).decision)
+    }
+
+    @Test
+    fun `staying in without an estimate shows no amount`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT, scenario = Scenario(setup = Setup()))
+        stateOf(viewModel)
+
+        viewModel.onIntent(PreOutingIntent.OnStayInClick)
+        advanceUntilIdle()
+
+        assertEquals(PreOutingDecisionState.StayedIn(estimateLabel = null), stateNow(viewModel).decision)
+    }
+
+    @Test
+    fun `the return time picker opens and closes`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        viewModel.onIntent(PreOutingIntent.OnGoOutClick)
+
+        viewModel.onIntent(PreOutingIntent.OnReturnTimeClick)
+        assertTrue(stateNow(viewModel).form.isTimePickerOpen)
+        viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(2, 0))
+
+        assertFalse(stateNow(viewModel).form.isTimePickerOpen)
+        assertEquals("02:00", stateNow(viewModel).returnTimeLabel)
+    }
+
+    @Test
+    fun `the picker starts at 02-00 until a return time is chosen`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        assertEquals(LocalTime(2, 0), stateNow(viewModel).form.pickerTime)
+
+        viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(1, 30))
+
+        assertEquals(LocalTime(1, 30), stateNow(viewModel).form.pickerTime)
+    }
+
+    @Test
+    fun `confirming on a day that already has a decision keeps the form and warns`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        fillForm(viewModel)
+        outingRepository.recordUnplanned(FRIDAY)
+
+        viewModel.effect.test {
+            viewModel.onIntent(PreOutingIntent.OnConfirmOutingClick)
+            assertEquals(PreOutingEffect.DayAlreadyDecided, awaitItem())
+        }
+        assertTrue(stateNow(viewModel).form.isOpen)
+    }
+
+    @Test
+    fun `staying in on a day that already has a decision warns`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        outingRepository.recordUnplanned(FRIDAY)
+
+        viewModel.effect.test {
+            viewModel.onIntent(PreOutingIntent.OnStayInClick)
+            assertEquals(PreOutingEffect.DayAlreadyDecided, awaitItem())
+        }
     }
 }
