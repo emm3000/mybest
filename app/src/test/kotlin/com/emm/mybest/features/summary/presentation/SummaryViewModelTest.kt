@@ -1,5 +1,8 @@
 package com.emm.mybest.features.summary.presentation
 
+import androidx.annotation.StringRes
+import androidx.compose.ui.graphics.Color
+import com.emm.mybest.R
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.LimitsKept
@@ -12,6 +15,8 @@ import com.emm.mybest.domain.models.WeighInTrend
 import com.emm.mybest.domain.usecase.summary.ObserveWeeklySummaryUseCase
 import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
+import com.emm.mybest.ui.theme.AtelierDone
+import com.emm.mybest.ui.theme.AtelierInk
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -48,8 +53,8 @@ class SummaryViewModelTest {
 
     private val observeSummary = mockk<ObserveWeeklySummaryUseCase>()
 
-    private fun viewModel(): SummaryViewModel {
-        every { observeSummary(any()) } returns flowOf(EMPTY_SUMMARY)
+    private fun viewModel(summary: WeeklySummary = EMPTY_SUMMARY): SummaryViewModel {
+        every { observeSummary(any()) } returns flowOf(summary)
         val clock = AppDayClock(FixedClock(FRIDAY_EVENING.toInstant(LIMA)), LIMA)
         return SummaryViewModel(observeSummary, clock)
     }
@@ -58,6 +63,59 @@ class SummaryViewModelTest {
         backgroundScope.launch { viewModel.state.collect {} }
         advanceUntilIdle()
         return viewModel
+    }
+
+    private fun TestScope.sectionOf(summary: WeeklySummary, @StringRes title: Int): SummarySectionState =
+        started(viewModel(summary)).state.value.sections.first { it.titleRes == title }
+
+    private fun line(@StringRes label: Int, value: SummaryText, color: Color = AtelierInk) =
+        SummaryRowState.Line(SummaryText(label), value, color)
+
+    @Test
+    fun `outings section lists count, spend and pending check-ins`() = runTest {
+        val outings = WeekOutings(2, Money(260_00), 1, LimitsKept(0, 0))
+
+        val section = sectionOf(EMPTY_SUMMARY.copy(outings = outings), R.string.summary_section_outings)
+
+        assertEquals(
+            listOf(
+                line(R.string.summary_outings_count, SummaryText.literal("2")),
+                line(R.string.summary_outings_spent, SummaryText.literal("S/ 260.00")),
+                line(R.string.summary_outings_pending, SummaryText.literal("1")),
+            ),
+            section.rows,
+        )
+    }
+
+    @Test
+    fun `limits section says how many outings kept every limit`() = runTest {
+        val outings = WeekOutings(3, Money.ZERO, 0, LimitsKept(kept = 2, checkedIn = 3))
+
+        val section = sectionOf(EMPTY_SUMMARY.copy(outings = outings), R.string.summary_section_limits)
+
+        assertEquals(
+            listOf(line(R.string.summary_limits_label, SummaryText(R.string.summary_limits_kept, listOf(2, 3)))),
+            section.rows,
+        )
+    }
+
+    @Test
+    fun `limits section is done when every checked-in outing kept its limits`() = runTest {
+        val outings = WeekOutings(2, Money.ZERO, 0, LimitsKept(kept = 2, checkedIn = 2))
+
+        val section = sectionOf(EMPTY_SUMMARY.copy(outings = outings), R.string.summary_section_limits)
+
+        assertEquals(AtelierDone, (section.rows.single() as SummaryRowState.Line).valueColor)
+    }
+
+    @Test
+    fun `limits section says there is nothing to judge without check-ins`() = runTest {
+        val section = sectionOf(EMPTY_SUMMARY, R.string.summary_section_limits)
+
+        assertEquals(
+            listOf(line(R.string.summary_limits_label, SummaryText(R.string.summary_limits_none))),
+            section.rows,
+        )
     }
 
     @Test
