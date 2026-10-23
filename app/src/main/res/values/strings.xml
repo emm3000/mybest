@@ -45,7 +45,7 @@
     <string name="home_week_progress_format">%1$d/%2$d</string>
     <string name="home_week_alcohol_progress_format">%1$d · MÁX %2$d</string>
     <string name="home_week_alcohol_over_format">%1$d · MÁX %2$d · %3$d DE MÁS</string>
-    <string name="home_define_target">DEFINE TU META</string>
+    <string name="home_define_target">FIJAR META EN AJUSTES</string>
     <string name="home_shortcut_pre_outing">Antes de salir</string>
     <string name="home_shortcut_check_in">Check-in pendiente</string>
     <string name="home_shortcut_weekly_summary">Resumen semanal</string>
@@ -219,10 +219,10 @@
     <string name="pre_outing_outings_used">Salidas este mes: %1$d de %2$d</string>
     <string name="pre_outing_over_limit">La próxima salida pasa tu límite del mes</string>
     <string name="pre_outing_not_spent_label">No gastado este mes (estimado)</string>
-    <string name="pre_outing_prompt_typical_cost">Define tu costo típico de salida</string>
-    <string name="pre_outing_prompt_debts">Agrega tus deudas</string>
-    <string name="pre_outing_prompt_purchase_goal">Define tu meta de compra</string>
-    <string name="pre_outing_prompt_outing_limit">Define tu límite de salidas</string>
+    <string name="pre_outing_prompt_typical_cost">Toca para fijar tu costo típico de salida en Ajustes</string>
+    <string name="pre_outing_prompt_debts">Toca para agregar tus deudas</string>
+    <string name="pre_outing_prompt_purchase_goal">Toca para crear tu meta de compra</string>
+    <string name="pre_outing_prompt_outing_limit">Toca para fijar tu límite de salidas en Ajustes</string>
     <string name="pre_outing_action_stay_in">Me quedo</string>
     <string name="pre_outing_action_go_out">Salgo</string>
     <string name="pre_outing_form_header">SALIDA · %1$s</string>
