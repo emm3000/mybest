@@ -6,4 +6,8 @@ sealed interface HomeIntent {
     data class ToggleDailyCheck(val type: DailyCheckType) : HomeIntent
 
     data object DefineWeeklyTarget : HomeIntent
+
+    data object ShowDailyChecks : HomeIntent
+
+    data object Resume : HomeIntent
 }

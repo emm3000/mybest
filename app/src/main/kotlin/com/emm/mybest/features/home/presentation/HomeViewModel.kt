@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.usecase.home.HomeDestination
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -15,12 +16,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import java.time.temporal.WeekFields
 
-private fun buildHomeState(inputs: HomeInputs): HomeState = HomeState(
+private fun buildHomeState(inputs: HomeInputs, destination: HomeDestination): HomeState = HomeState(
     isLoading = false,
     today = inputs.today,
     dayOfWeek = inputs.today.dayOfWeek,
@@ -31,6 +33,8 @@ private fun buildHomeState(inputs: HomeInputs): HomeState = HomeState(
     lastPhotoType = computeLastPhotoType(inputs.photos),
     lastPhotoDaysAgo = computeLastPhotoDaysAgo(inputs.photos, inputs.today),
     checks = computeDailyCheckItems(inputs),
+    destination = destination,
+    hasPendingCheckIn = inputs.routing.hasPendingCheckIn,
 )
 
 class HomeViewModel(
@@ -50,10 +54,14 @@ class HomeViewModel(
     private val _effect = effectFlow<HomeEffect>()
     val effect: SharedFlow<HomeEffect> = _effect.asSharedFlow()
 
+    private val resumes = MutableStateFlow(0)
+    private var routedDestination = HomeDestination.DAILY_CHECKS
+    private var dismissedDestination: HomeDestination? = null
+
     init {
         appDayClock.observeToday()
             .flatMapLatest(::observeInputs)
-            .onEach { _state.value = buildHomeState(it) }
+            .onEach { _state.value = buildHomeState(it, visibleDestination(it.routing.destination)) }
             .launchIn(viewModelScope)
     }
 
@@ -61,7 +69,20 @@ class HomeViewModel(
         when (intent) {
             is HomeIntent.ToggleDailyCheck -> toggle(intent.type)
             HomeIntent.DefineWeeklyTarget -> _effect.tryEmit(HomeEffect.NavigateToSettings)
+            HomeIntent.ShowDailyChecks -> showDailyChecks()
+            HomeIntent.Resume -> resumes.update { it + 1 }
         }
+    }
+
+    private fun showDailyChecks() {
+        dismissedDestination = routedDestination
+        _state.update { it.copy(destination = HomeDestination.DAILY_CHECKS) }
+    }
+
+    private fun visibleDestination(routed: HomeDestination): HomeDestination {
+        routedDestination = routed
+        if (routed != dismissedDestination) dismissedDestination = null
+        return if (dismissedDestination == null) routed else HomeDestination.DAILY_CHECKS
     }
 
     private fun toggle(type: DailyCheckType) {
@@ -73,7 +94,14 @@ class HomeViewModel(
         useCases.observePhotos(),
         useCases.observeDailyChecks(today),
         useCases.observeWeekProgress(today),
-    ) { weights, photos, doneToday, weekProgress ->
-        HomeInputs(today, weights, photos, doneToday, weekProgress)
+        observeRouting(),
+    ) { weights, photos, doneToday, weekProgress, routing ->
+        HomeInputs(today, weights, photos, doneToday, weekProgress, routing)
     }
+
+    private fun observeRouting(): Flow<HomeRouting> = combine(
+        resumes.flatMapLatest { useCases.resolveDestination() },
+        useCases.observeHasPendingCheckIn(),
+        ::HomeRouting,
+    )
 }
