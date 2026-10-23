@@ -1,6 +1,7 @@
 package com.emm.mybest.features.photo.presentation
 
 import app.cash.turbine.test
+import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.domain.models.NewProgressPhoto
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
@@ -9,6 +10,7 @@ import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
 import com.emm.mybest.domain.usecase.photo.PhotoTypeOverview
 import com.emm.mybest.domain.usecase.photo.PhotosOverview
 import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
+import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -18,15 +20,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import kotlin.time.Clock
-import kotlin.time.Instant
 
-private val FIXED_CLOCK = object : Clock {
-    override fun now(): Instant = Instant.fromEpochSeconds(1_779_019_200L)
-}
+private val LIMA = TimeZone.of("America/Lima")
+private val SATURDAY_TWO_AM = LocalDateTime(2026, 10, 24, 2, 0).toInstant(LIMA)
+private val FRIDAY = LocalDate(2026, 10, 23)
+private val APP_DAY_CLOCK = AppDayClock(FixedClock(SATURDAY_TWO_AM), LIMA)
 
 private fun makePhoto(id: String, type: PhotoType, createdAt: Long): ProgressPhoto = ProgressPhoto(
     id = id,
@@ -71,7 +75,7 @@ class PhotosViewModelTest {
             getPhotosOverviewUseCase = getPhotosOverviewUseCase,
             savePhotosUseCase = savePhotosUseCase,
             deletePhotoUseCase = deletePhotoUseCase,
-            clock = FIXED_CLOCK,
+            appDayClock = APP_DAY_CLOCK,
         )
     }
 
@@ -110,7 +114,7 @@ class PhotosViewModelTest {
 
         coVerify {
             savePhotosUseCase(
-                listOf(NewProgressPhoto(photoPath = "/tmp/photo.jpg", type = PhotoType.TRUNK)),
+                listOf(NewProgressPhoto(photoPath = "/tmp/photo.jpg", type = PhotoType.TRUNK, date = FRIDAY)),
             )
         }
     }
@@ -127,9 +131,21 @@ class PhotosViewModelTest {
 
         coVerify {
             savePhotosUseCase(
-                listOf(NewProgressPhoto(photoPath = "/tmp/photo.jpg", type = PhotoType.FACE)),
+                listOf(NewProgressPhoto(photoPath = "/tmp/photo.jpg", type = PhotoType.FACE, date = FRIDAY)),
             )
         }
+    }
+
+    @Test
+    fun `a progress photo saved at 02_00 gets the previous app day`() = runTest {
+        coEvery { savePhotosUseCase(any()) } returns Unit
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.onIntent(PhotosIntent.OnPhotoCaptured("/tmp/photo.jpg"))
+        advanceUntilIdle()
+
+        coVerify { savePhotosUseCase(match { photos -> photos.single().date == FRIDAY }) }
     }
 
     @Test
@@ -159,7 +175,7 @@ class PhotosViewModelTest {
             getPhotosOverviewUseCase = getPhotosOverviewUseCase,
             savePhotosUseCase = savePhotosUseCase,
             deletePhotoUseCase = deletePhotoUseCase,
-            clock = FIXED_CLOCK,
+            appDayClock = APP_DAY_CLOCK,
         )
 
         viewModel.state.test {

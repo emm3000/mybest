@@ -1,6 +1,6 @@
 package com.emm.mybest.data
 
-import com.emm.mybest.core.datetime.currentDate
+import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.data.entities.DailyWeightDao
 import com.emm.mybest.data.entities.DailyWeightEntity
 import com.emm.mybest.data.mappers.toDomain
@@ -12,6 +12,7 @@ import kotlinx.datetime.LocalDate
 
 class WeightRepositoryImpl(
     private val dao: DailyWeightDao,
+    private val appDayClock: AppDayClock,
 ) : WeightRepository {
 
     override fun getWeightProgress(): Flow<List<WeightEntry>> {
@@ -26,7 +27,7 @@ class WeightRepositoryImpl(
     ) {
         dao.upsert(
             DailyWeightEntity(
-                date = currentDate(),
+                date = appDayClock.today(),
                 weight = weight,
                 note = note,
             ),

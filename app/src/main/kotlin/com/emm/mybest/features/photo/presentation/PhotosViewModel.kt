@@ -2,6 +2,7 @@ package com.emm.mybest.features.photo.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.models.NewProgressPhoto
@@ -17,18 +18,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock
 
 class PhotosViewModel(
     private val getPhotosOverviewUseCase: GetPhotosOverviewUseCase,
     private val savePhotosUseCase: SavePhotosUseCase,
     private val deletePhotoUseCase: DeletePhotoUseCase,
-    private val clock: Clock = Clock.System,
+    private val appDayClock: AppDayClock,
 ) : ViewModel() {
 
-    private val today = clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    private val today = appDayClock.today()
 
     private val _selectedType = MutableStateFlow(PhotoType.TRUNK)
 
@@ -67,7 +65,7 @@ class PhotosViewModel(
         viewModelScope.launch {
             val type = _selectedType.value
             runCatching {
-                savePhotosUseCase(listOf(NewProgressPhoto(photoPath = uri, type = type)))
+                savePhotosUseCase(listOf(NewProgressPhoto(photoPath = uri, type = type, date = appDayClock.today())))
             }.onFailure { error ->
                 _effect.emit(PhotosEffect.ShowError("Error al guardar: ${error.message}"))
             }
