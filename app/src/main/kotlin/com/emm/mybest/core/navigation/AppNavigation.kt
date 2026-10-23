@@ -16,6 +16,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.emm.mybest.features.capture.presentation.NotificationCaptureScreen
 import com.emm.mybest.features.capture.presentation.NotificationCaptureViewModel
+import com.emm.mybest.features.checkin.presentation.CheckInScreen
+import com.emm.mybest.features.checkin.presentation.CheckInViewModel
 import com.emm.mybest.features.debts.presentation.DebtsScreen
 import com.emm.mybest.features.debts.presentation.DebtsViewModel
 import com.emm.mybest.features.goal.presentation.PurchaseGoalScreen
@@ -186,6 +188,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
     debtsEntry(navigator)
     purchaseGoalEntry(navigator)
     notificationCaptureEntry(navigator)
+    checkInEntry(navigator)
 }
 
 private fun EntryProviderScope<NavKey>.debtsEntry(navigator: Navigator) {
@@ -209,6 +212,13 @@ private fun EntryProviderScope<NavKey>.notificationCaptureEntry(navigator: Navig
     }
 }
 
+private fun EntryProviderScope<NavKey>.checkInEntry(navigator: Navigator) {
+    entry<Screen.CheckIn> {
+        val viewModel: CheckInViewModel = koinViewModel()
+        CheckInScreen(viewModel = viewModel, onClose = { navigator.goBack() }, modifier = Modifier)
+    }
+}
+
 @Composable
 private fun HandleIntentAction(
     intentAction: String?,
@@ -223,6 +233,7 @@ private fun HandleIntentAction(
             "com.emm.mybest.ACTION_ADD_PHOTO" -> navigator.navigate(Screen.Photos)
             ACTION_PRE_OUTING -> navigator.navigate(Screen.PreOuting)
             ACTION_DEBTS -> navigator.navigate(Screen.Debts)
+            ACTION_CHECK_IN -> navigator.navigate(Screen.CheckIn)
         }
         currentOnConsumeAction()
     }

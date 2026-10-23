@@ -40,4 +40,7 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object NotificationCapture : Screen
+
+    @Serializable
+    data object CheckIn : Screen
 }

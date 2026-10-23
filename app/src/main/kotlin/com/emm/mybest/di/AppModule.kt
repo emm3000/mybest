@@ -44,6 +44,10 @@ import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
 import com.emm.mybest.domain.usecase.capture.CaptureNotificationUseCase
 import com.emm.mybest.domain.usecase.capture.ObserveCaptureOverviewUseCase
 import com.emm.mybest.domain.usecase.capture.ObserveCaptureSummaryUseCase
+import com.emm.mybest.domain.usecase.checkin.ObserveCheckInTaskUseCase
+import com.emm.mybest.domain.usecase.checkin.RecordNoOutingUseCase
+import com.emm.mybest.domain.usecase.checkin.RecordUnplannedOutingUseCase
+import com.emm.mybest.domain.usecase.checkin.SaveCheckInUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveDailyChecksUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
@@ -79,6 +83,8 @@ import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.features.capture.presentation.NotificationCaptureUseCases
 import com.emm.mybest.features.capture.presentation.NotificationCaptureViewModel
+import com.emm.mybest.features.checkin.presentation.CheckInUseCases
+import com.emm.mybest.features.checkin.presentation.CheckInViewModel
 import com.emm.mybest.features.debts.presentation.DebtsUseCases
 import com.emm.mybest.features.debts.presentation.DebtsViewModel
 import com.emm.mybest.features.goal.presentation.PurchaseGoalUseCases
@@ -226,4 +232,11 @@ val appModule = module {
 
     factory { ObserveRelapsesUseCase(get(), get()) }
     factory { ObserveReturnTimesUseCase(get(), get(), get()) }
+
+    factory { ObserveCheckInTaskUseCase(get(), get()) }
+    factory { SaveCheckInUseCase(get()) }
+    factory { RecordUnplannedOutingUseCase(get()) }
+    factory { RecordNoOutingUseCase(get()) }
+    factory { CheckInUseCases(get(), get(), get(), get()) }
+    viewModel { CheckInViewModel(get()) }
 }
