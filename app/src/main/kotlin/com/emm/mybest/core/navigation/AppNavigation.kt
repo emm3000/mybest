@@ -9,12 +9,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.emm.mybest.features.debts.presentation.DebtsScreen
 import com.emm.mybest.features.debts.presentation.DebtsViewModel
+import com.emm.mybest.features.goal.presentation.PurchaseGoalScreen
+import com.emm.mybest.features.goal.presentation.PurchaseGoalViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeCallbacks
@@ -162,6 +165,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             viewModel = viewModel,
             callbacks = SettingsCallbacks(
                 onDebtsClick = { navigator.navigate(Screen.Debts) },
+                onPurchaseGoalClick = { navigator.navigate(Screen.PurchaseGoal) },
                 bottomBar = rememberBottomBar(Screen.Settings, navigator),
             ),
             modifier = Modifier,
@@ -179,6 +183,14 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
     entry<Screen.Debts> {
         val viewModel: DebtsViewModel = koinViewModel()
         DebtsScreen(viewModel = viewModel, onBack = { navigator.goBack() }, modifier = Modifier)
+    }
+    purchaseGoalEntry(navigator)
+}
+
+private fun EntryProviderScope<NavKey>.purchaseGoalEntry(navigator: Navigator) {
+    entry<Screen.PurchaseGoal> {
+        val viewModel: PurchaseGoalViewModel = koinViewModel()
+        PurchaseGoalScreen(viewModel = viewModel, onBack = { navigator.goBack() }, modifier = Modifier)
     }
 }
 

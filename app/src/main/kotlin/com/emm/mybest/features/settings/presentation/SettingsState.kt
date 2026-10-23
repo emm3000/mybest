@@ -6,4 +6,5 @@ data class SettingsState(
     val appVersionLabel: String = "",
     val goals: SettingsGoals = SettingsGoals(),
     val debts: SettingsDebtsState = SettingsDebtsState(),
+    val purchaseGoal: SettingsPurchaseGoalState = SettingsPurchaseGoalState(),
 )

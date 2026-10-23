@@ -49,6 +49,9 @@ import com.emm.mybest.domain.usecase.debts.MarkInstallmentPaidUseCase
 import com.emm.mybest.domain.usecase.debts.ObserveDebtListUseCase
 import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
 import com.emm.mybest.domain.usecase.debts.SaveDebtUseCase
+import com.emm.mybest.domain.usecase.goal.AddGoalContributionUseCase
+import com.emm.mybest.domain.usecase.goal.ObserveGoalProgressUseCase
+import com.emm.mybest.domain.usecase.goal.SavePurchaseGoalUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
@@ -72,6 +75,8 @@ import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.domain.usecase.weight.SaveWeightUseCase
 import com.emm.mybest.features.debts.presentation.DebtsUseCases
 import com.emm.mybest.features.debts.presentation.DebtsViewModel
+import com.emm.mybest.features.goal.presentation.PurchaseGoalUseCases
+import com.emm.mybest.features.goal.presentation.PurchaseGoalViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeUseCases
 import com.emm.mybest.features.home.presentation.HomeViewModel
@@ -81,6 +86,7 @@ import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewerViewModel
 import com.emm.mybest.features.preouting.presentation.PreOutingViewModel
 import com.emm.mybest.features.settings.presentation.SettingsGoalsEditor
+import com.emm.mybest.features.settings.presentation.SettingsMoneySources
 import com.emm.mybest.features.settings.presentation.SettingsRemindersEditor
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
@@ -200,4 +206,11 @@ val appModule = module {
     factory { MarkInstallmentPaidUseCase(get(), get()) }
     factory { DebtsUseCases(get(), get(), get(), get()) }
     viewModel { DebtsViewModel(get()) }
+
+    factory { ObserveGoalProgressUseCase(get()) }
+    factory { SavePurchaseGoalUseCase(get()) }
+    factory { AddGoalContributionUseCase(get(), get()) }
+    factory { SettingsMoneySources(get(), get()) }
+    factory { PurchaseGoalUseCases(get(), get(), get(), get(), get()) }
+    viewModel { PurchaseGoalViewModel(get()) }
 }

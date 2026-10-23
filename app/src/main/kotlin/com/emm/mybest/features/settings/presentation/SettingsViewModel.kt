@@ -10,7 +10,6 @@ import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
-import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -24,7 +23,7 @@ class SettingsViewModel(
     private val restoreDatabaseBackupUseCase: RestoreDatabaseBackupUseCase,
     private val goalsEditor: SettingsGoalsEditor,
     private val remindersEditor: SettingsRemindersEditor,
-    observeDebtSummary: ObserveDebtSummaryUseCase,
+    moneySources: SettingsMoneySources,
     appVersionName: String = BuildConfig.VERSION_NAME,
     appVersionCode: Int = BuildConfig.VERSION_CODE,
 ) : ViewModel() {
@@ -38,8 +37,9 @@ class SettingsViewModel(
         userPreferencesRepository.notificationsEnabled,
         goalsEditor.goals,
         remindersEditor.picker,
-        observeDebtSummary(),
-    ) { enabled, goals, picker, debtSummary ->
+        moneySources.observeDebtSummary(),
+        moneySources.purchaseGoalRepository.observeGoal(),
+    ) { enabled, goals, picker, debtSummary, purchaseGoal ->
         SettingsState(
             notificationsEnabled = enabled,
             reminderPicker = picker,
@@ -48,6 +48,10 @@ class SettingsViewModel(
             debts = SettingsDebtsState(
                 count = debtSummary.count,
                 totalLabel = debtSummary.totalBalance.formatPen().takeIf { debtSummary.count > 0 },
+            ),
+            purchaseGoal = SettingsPurchaseGoalState(
+                name = purchaseGoal?.name,
+                priceLabel = purchaseGoal?.price?.formatPen(),
             ),
         )
     }.stateIn(
