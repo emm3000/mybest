@@ -189,6 +189,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
     purchaseGoalEntry(navigator)
     notificationCaptureEntry(navigator)
     checkInEntry(navigator)
+    weeklySummaryEntry(navigator)
 }
 
 private fun EntryProviderScope<NavKey>.debtsEntry(navigator: Navigator) {
@@ -234,6 +235,7 @@ private fun HandleIntentAction(
             ACTION_PRE_OUTING -> navigator.navigate(Screen.PreOuting)
             ACTION_DEBTS -> navigator.navigate(Screen.Debts)
             ACTION_CHECK_IN -> navigator.navigate(Screen.CheckIn)
+            ACTION_WEEKLY_SUMMARY -> navigator.navigate(Screen.WeeklySummary)
         }
         currentOnConsumeAction()
     }

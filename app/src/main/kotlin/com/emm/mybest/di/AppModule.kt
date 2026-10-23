@@ -121,6 +121,7 @@ import com.emm.mybest.features.settings.presentation.SettingsGoalsEditor
 import com.emm.mybest.features.settings.presentation.SettingsRemindersEditor
 import com.emm.mybest.features.settings.presentation.SettingsRowSources
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
+import com.emm.mybest.features.summary.presentation.SummaryViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -273,6 +274,7 @@ val appModule = module {
     factory { ObserveWeekMoneyUseCase(get(), get(), get()) }
     factory { WeeklySummarySections(get(), get(), get(), get(), get()) }
     factory { ObserveWeeklySummaryUseCase(get()) }
+    viewModel { SummaryViewModel(get(), get()) }
 
     single<CoroutineScope>(named(APP_SCOPE_NAME)) {
         val handler = CoroutineExceptionHandler { _, error -> Log.e(TAG, "Unhandled error in the app scope", error) }

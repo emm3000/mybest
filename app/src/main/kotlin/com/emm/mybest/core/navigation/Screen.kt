@@ -43,4 +43,7 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object CheckIn : Screen
+
+    @Serializable
+    data object WeeklySummary : Screen
 }
