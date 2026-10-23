@@ -9,12 +9,18 @@ import com.emm.mybest.data.entities.DailyCheckDao
 import com.emm.mybest.data.entities.DailyCheckEntity
 import com.emm.mybest.data.entities.DailyWeightDao
 import com.emm.mybest.data.entities.DailyWeightEntity
+import com.emm.mybest.data.entities.DebtDao
+import com.emm.mybest.data.entities.DebtEntity
+import com.emm.mybest.data.entities.DebtPaymentEntity
+import com.emm.mybest.data.entities.GoalContributionEntity
 import com.emm.mybest.data.entities.NoOutingAnswerDao
 import com.emm.mybest.data.entities.NoOutingAnswerEntity
 import com.emm.mybest.data.entities.OutingDao
 import com.emm.mybest.data.entities.OutingEntity
 import com.emm.mybest.data.entities.ProgressPhotoDao
 import com.emm.mybest.data.entities.ProgressPhotoEntity
+import com.emm.mybest.data.entities.PurchaseGoalDao
+import com.emm.mybest.data.entities.PurchaseGoalEntity
 import com.emm.mybest.data.entities.UserSetupDao
 import com.emm.mybest.data.entities.UserSetupEntity
 import com.emm.mybest.data.entities.WonNightDao
@@ -29,8 +35,12 @@ import com.emm.mybest.data.entities.WonNightEntity
         OutingEntity::class,
         WonNightEntity::class,
         NoOutingAnswerEntity::class,
+        DebtEntity::class,
+        DebtPaymentEntity::class,
+        PurchaseGoalEntity::class,
+        GoalContributionEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -45,6 +55,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun outingDao(): OutingDao
     abstract fun wonNightDao(): WonNightDao
     abstract fun noOutingAnswerDao(): NoOutingAnswerDao
+    abstract fun debtDao(): DebtDao
+    abstract fun purchaseGoalDao(): PurchaseGoalDao
 
     companion object {
         const val DB_NAME = "my_best_db"
