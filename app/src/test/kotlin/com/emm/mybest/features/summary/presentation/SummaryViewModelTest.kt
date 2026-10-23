@@ -6,6 +6,7 @@ import com.emm.mybest.R
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.LimitsKept
+import com.emm.mybest.domain.models.ReturnTime
 import com.emm.mybest.domain.models.WeekDebt
 import com.emm.mybest.domain.models.WeekMoney
 import com.emm.mybest.domain.models.WeekOutings
@@ -25,9 +26,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -114,6 +117,72 @@ class SummaryViewModelTest {
 
         assertEquals(
             listOf(line(R.string.summary_limits_label, SummaryText(R.string.summary_limits_none))),
+            section.rows,
+        )
+    }
+
+    private fun recoveryOf(vararg times: ReturnTime) = EMPTY_SUMMARY.copy(
+        recovery = WeekRecovery(emptyList(), times.firstOrNull(), times.toList()),
+    )
+
+    private fun returned(relapse: LocalDate, days: Int) =
+        ReturnTime(relapse, relapse.plus(days, DateTimeUnit.DAY), days)
+
+    @Test
+    fun `recovery section says the week had no relapse`() = runTest {
+        val section = sectionOf(EMPTY_SUMMARY, R.string.summary_section_recovery)
+
+        assertEquals(
+            listOf(line(R.string.summary_recovery_label, SummaryText(R.string.summary_recovery_none))),
+            section.rows,
+        )
+    }
+
+    @Test
+    fun `recovery section says how long the return took and lists the history`() = runTest {
+        val summary = recoveryOf(returned(LocalDate(2026, 10, 17), days = 2))
+
+        val section = sectionOf(summary, R.string.summary_section_recovery)
+
+        assertEquals(
+            listOf(
+                line(R.string.summary_recovery_label, SummaryText(R.string.summary_recovery_returned_other, listOf(2))),
+                SummaryRowState.Line(
+                    SummaryText(R.string.summary_recovery_history_label, listOf("SÁB 17 OCT")),
+                    SummaryText(R.string.summary_days_other, listOf(2)),
+                    AtelierInk,
+                ),
+            ),
+            section.rows,
+        )
+    }
+
+    @Test
+    fun `recovery section uses the singular for a one day return`() = runTest {
+        val section =
+            sectionOf(recoveryOf(returned(LocalDate(2026, 10, 17), days = 1)), R.string.summary_section_recovery)
+
+        assertEquals(
+            line(R.string.summary_recovery_label, SummaryText(R.string.summary_recovery_returned_one, listOf(1))),
+            section.rows.first(),
+        )
+    }
+
+    @Test
+    fun `recovery section counts the days without a return up to today`() = runTest {
+        val open = ReturnTime(LocalDate(2026, 10, 21), returnAppDay = null, days = null)
+
+        val section = sectionOf(recoveryOf(open), R.string.summary_section_recovery)
+
+        assertEquals(
+            listOf(
+                line(R.string.summary_recovery_label, SummaryText(R.string.summary_recovery_open_other, listOf(2))),
+                SummaryRowState.Line(
+                    SummaryText(R.string.summary_recovery_history_label, listOf("MIÉ 21 OCT")),
+                    SummaryText(R.string.summary_recovery_history_open),
+                    AtelierInk,
+                ),
+            ),
             section.rows,
         )
     }
