@@ -211,6 +211,41 @@
     <string name="pre_outing_decision_money">Dinero</string>
     <string name="pre_outing_decision_return_time">Hora de regreso</string>
     <string name="pre_outing_won_night_added">+ %1$s a No gastado este mes (estimado)</string>
+    <!-- Check-in (#12) -->
+    <string name="check_in_header">%1$s · CHECK-IN</string>
+    <string name="check_in_headline">¿Cómo te fue\nanoche?</string>
+    <string name="check_in_field_spent">TOTAL GASTADO (S/)</string>
+    <string name="check_in_field_spent_hint_unplanned">salida no planeada</string>
+    <string name="check_in_field_drinks">TRAGOS</string>
+    <string name="check_in_field_return_time">HORA DE REGRESO</string>
+    <string name="check_in_field_return_time_unset">--:--</string>
+    <string name="check_in_limit_hint">tope %1$s</string>
+    <string name="check_in_mood_label">ÁNIMO</string>
+    <string name="check_in_mood_low">mal</string>
+    <string name="check_in_mood_high">bien</string>
+    <string name="check_in_mood_option">Ánimo %1$d de 5</string>
+    <string name="check_in_closing_line">Lo que cuenta es cuánto tardas en volver.</string>
+    <string name="check_in_save">Guardar</string>
+    <string name="check_in_not_now">Ahora no</string>
+    <string name="check_in_question_headline">¿Saliste\nanoche?</string>
+    <string name="check_in_question_caption">No registraste ninguna salida esa noche.</string>
+    <string name="check_in_question_yes">Sí</string>
+    <string name="check_in_question_no">No</string>
+    <string name="check_in_result_headline">Anotado</string>
+    <string name="check_in_result_kept">Cumpliste</string>
+    <string name="check_in_result_money_exceeded">Te pasaste por %1$s</string>
+    <plurals name="check_in_result_drinks_exceeded">
+        <item quantity="one">Te pasaste por %1$d trago</item>
+        <item quantity="other">Te pasaste por %1$d tragos</item>
+    </plurals>
+    <string name="check_in_result_minutes_exceeded">Te pasaste por %1$d min</string>
+    <string name="check_in_result_done">Listo</string>
+    <string name="check_in_empty_headline">Nada\npendiente</string>
+    <string name="check_in_empty_caption">No tienes ningún check-in por hacer.</string>
+    <string name="check_in_empty_back">Volver</string>
+    <string name="check_in_evening_already_recorded">Esa noche ya tiene una salida registrada</string>
+    <string name="check_in_invalid_input">Revisa los datos del check-in</string>
+    <string name="check_in_action_failed">No se pudo completar la acción</string>
     <string name="pre_outing_day_already_decided">Esta noche ya tiene una decisión</string>
     <string name="pre_outing_won_night_added_unknown">Sumada a No gastado este mes (estimado)</string>
 
