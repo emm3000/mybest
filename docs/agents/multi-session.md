@@ -66,7 +66,9 @@ Every dispatch includes:
 
 ## Isolation: emulators
 
-- Each session that needs a device boots its own emulator with a fixed port so the serial is predictable: `emulator -avd Medium_Phone -port <port> -no-snapshot-save &` gives serial `emulator-<port>`. Use an even port from 5554 up, one per peer. Never install on another session's emulator.
+- Each session that needs a device boots its own emulator with a fixed port so the serial is predictable: `emulator -avd Medium_Phone_<port> -port <port> -no-snapshot-save &` gives serial `emulator-<port>`. Use an even port from 5554 up, one per peer, each with its own AVD (`Medium_Phone_5554`, `Medium_Phone_5556`, `Medium_Phone_5558`; create a missing one with `avdmanager create avd -n Medium_Phone_<port> -k "system-images;android-36;google_apis_playstore;arm64-v8a" -d medium_phone`). Never install on another session's emulator. *Why one AVD per port: the emulator refuses a second instance of the same AVD unless every instance runs `-read-only`.*
+- Wait for `adb -s <serial> shell getprop sys.boot_completed` to print `1` before any `uiautomator` call. Under host load a booting device returns a null root node or a "System UI isn't responding" dialog.
+- Close Android Studio and Docker while a wave with visual checks runs; three Gradle builds plus emulators already saturate the host.
 - Run `adb devices` to confirm the serial, then `ANDROID_SERIAL=<serial> ./gradlew :app:installDebug`, and scope every adb call with `adb -s <serial>`. *Why: `installDebug` installs on every connected device.*
 - Use `installDebug`, not `installQa`. *Why: `INSTALL_FAILED_UPDATE_INCOMPATIBLE`; the qa build type signs with a different key than an installed debug APK.*
 - Navigate with `uiautomator dump` and tap the center of the `bounds`; never guess coordinates from a screenshot. Package `com.emm.mybest`, launcher via `adb -s <serial> shell monkey -p com.emm.mybest -c android.intent.category.LAUNCHER 1`.
