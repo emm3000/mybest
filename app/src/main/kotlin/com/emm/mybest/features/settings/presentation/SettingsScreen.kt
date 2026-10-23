@@ -33,8 +33,6 @@ private val SETTINGS_GUT = 28.dp
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     modifier: Modifier = Modifier,
-    onMealPlanClick: () -> Unit = {},
-    onExercisePlanClick: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -75,8 +73,6 @@ fun SettingsScreen(
         SettingsBody(
             state = state,
             paddingValues = paddingValues,
-            onMealPlanClick = onMealPlanClick,
-            onExercisePlanClick = onExercisePlanClick,
             onOpenPicker = { viewModel.onIntent(SettingsIntent.OnDefaultTimePickerOpen) },
             onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
             onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
@@ -102,8 +98,6 @@ private fun SettingsAppBar() {
 private fun SettingsBody(
     state: SettingsState,
     paddingValues: androidx.compose.foundation.layout.PaddingValues,
-    onMealPlanClick: () -> Unit,
-    onExercisePlanClick: () -> Unit,
     onOpenPicker: () -> Unit,
     onExportClick: () -> Unit,
     onImportClick: () -> Unit,
@@ -117,10 +111,6 @@ private fun SettingsBody(
         SettingsHero()
         Hairline()
         ReminderRow(state = state, onOpenPicker = onOpenPicker)
-        Hairline(inset = SETTINGS_GUT)
-        DietRow(onMealPlanClick = onMealPlanClick)
-        Hairline(inset = SETTINGS_GUT)
-        ExerciseRow(onExercisePlanClick = onExercisePlanClick)
         Hairline(inset = SETTINGS_GUT)
         BackupRow(onExportClick = onExportClick, onImportClick = onImportClick)
         Hairline()
@@ -151,30 +141,6 @@ private fun ReminderRow(
             caption = caption,
             labelActive = labelActive,
             onValueClick = onOpenPicker,
-        ),
-    )
-}
-
-@Composable
-private fun DietRow(onMealPlanClick: () -> Unit) {
-    SettingsRow(
-        params = SettingsRowParams(
-            label = stringResource(R.string.settings_diet_label),
-            value = stringResource(R.string.settings_diet_value),
-            caption = stringResource(R.string.settings_diet_caption),
-            onValueClick = onMealPlanClick,
-        ),
-    )
-}
-
-@Composable
-private fun ExerciseRow(onExercisePlanClick: () -> Unit) {
-    SettingsRow(
-        params = SettingsRowParams(
-            label = stringResource(R.string.settings_exercise_label),
-            value = stringResource(R.string.settings_exercise_value),
-            caption = stringResource(R.string.settings_exercise_caption),
-            onValueClick = onExercisePlanClick,
         ),
     )
 }

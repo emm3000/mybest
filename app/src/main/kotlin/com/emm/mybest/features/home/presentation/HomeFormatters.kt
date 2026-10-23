@@ -2,8 +2,6 @@ package com.emm.mybest.features.home.presentation
 
 import com.emm.mybest.core.datetime.MONTH_ABBR_ES
 import com.emm.mybest.core.datetime.shortEs
-import com.emm.mybest.domain.models.DailySlot
-import com.emm.mybest.domain.models.MealType
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
@@ -24,21 +22,6 @@ internal fun formatHomeHeaderDate(date: LocalDate, dow: DayOfWeek): String {
     val dayAbbr = dow.shortEs()
     val monthAbbr = MONTH_ABBR_ES[date.month.ordinal + 1] ?: date.month.name.take(3)
     return "$dayAbbr · ${date.day} $monthAbbr"
-}
-
-internal fun MealType.labelEs(): String = when (this) {
-    MealType.BREAKFAST -> "DESAYUNO"
-    MealType.LUNCH -> "ALMUERZO"
-    MealType.DINNER -> "CENA"
-    MealType.SNACK -> "SNACK"
-}
-
-internal fun DailySlot.labelEs(): String = when (this) {
-    DailySlot.BREAKFAST -> "DESAYUNO"
-    DailySlot.LUNCH -> "ALMUERZO"
-    DailySlot.SNACK -> "SNACK"
-    DailySlot.DINNER -> "CENA"
-    DailySlot.EXERCISE -> "EJERCICIO"
 }
 
 internal fun formatHomeWeight(value: Float): String =

@@ -13,10 +13,6 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.emm.mybest.features.diet.presentation.MealPlanScreen
-import com.emm.mybest.features.diet.presentation.MealPlanViewModel
-import com.emm.mybest.features.exercise.presentation.ExercisePlanScreen
-import com.emm.mybest.features.exercise.presentation.ExercisePlanViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeCallbacks
@@ -158,19 +154,9 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         val viewModel: SettingsViewModel = koinViewModel()
         SettingsScreen(
             viewModel = viewModel,
-            onMealPlanClick = { navigator.navigate(Screen.MealPlan) },
-            onExercisePlanClick = { navigator.navigate(Screen.ExercisePlan) },
             bottomBar = rememberBottomBar(Screen.Settings, navigator),
             modifier = Modifier,
         )
-    }
-    entry<Screen.MealPlan> {
-        val viewModel: MealPlanViewModel = koinViewModel()
-        MealPlanScreen(viewModel = viewModel, modifier = Modifier)
-    }
-    entry<Screen.ExercisePlan> {
-        val viewModel: ExercisePlanViewModel = koinViewModel()
-        ExercisePlanScreen(viewModel = viewModel, modifier = Modifier)
     }
 }
 
