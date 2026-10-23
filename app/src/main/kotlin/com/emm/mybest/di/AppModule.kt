@@ -33,8 +33,8 @@ import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
-import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
+import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveDailyChecksUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
@@ -105,7 +105,7 @@ val appModule = module {
     factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
     factory { RestoreDatabaseBackupUseCase(get()) }
-    factory { UpdateDefaultReminderTimeUseCase(get(), get()) }
+    factory { UpdateWeighInReminderTimeUseCase(get(), get()) }
 
     factory { ObserveDailyChecksUseCase(get()) }
     factory { ObserveWeekProgressUseCase(get(), get()) }

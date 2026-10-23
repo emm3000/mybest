@@ -9,8 +9,8 @@ import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
-import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
+import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
 import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
@@ -33,7 +33,7 @@ class SettingsViewModelTest {
     private val preferencesRepository = mockk<UserPreferencesRepository>()
     private val exportUseCase = mockk<ExportDatabaseBackupUseCase>()
     private val restoreUseCase = mockk<RestoreDatabaseBackupUseCase>()
-    private val updateDefaultReminderTimeUseCase = mockk<UpdateDefaultReminderTimeUseCase>()
+    private val updateWeighInReminderTimeUseCase = mockk<UpdateWeighInReminderTimeUseCase>()
 
     private fun buildViewModel(
         versionName: String = "1.0",
@@ -43,7 +43,7 @@ class SettingsViewModelTest {
         userPreferencesRepository = preferencesRepository,
         exportDatabaseBackupUseCase = exportUseCase,
         restoreDatabaseBackupUseCase = restoreUseCase,
-        updateDefaultReminderTimeUseCase = updateDefaultReminderTimeUseCase,
+        updateWeighInReminderTimeUseCase = updateWeighInReminderTimeUseCase,
         goalsEditor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), UpdateSetupUseCase(setupRepository)),
         appVersionName = versionName,
         appVersionCode = versionCode,
@@ -51,11 +51,10 @@ class SettingsViewModelTest {
 
     private fun stubDefaults() {
         every { preferencesRepository.notificationsEnabled } returns flowOf(true)
-        every { preferencesRepository.weightReminderTime } returns flowOf(null)
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
-        coEvery { updateDefaultReminderTimeUseCase.invoke(any()) } returns Unit
+        coEvery { updateWeighInReminderTimeUseCase.invoke(any()) } returns Unit
     }
 
     @Test
@@ -73,11 +72,10 @@ class SettingsViewModelTest {
     @Test
     fun `state maps notifications preference`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(false)
-        every { preferencesRepository.weightReminderTime } returns flowOf(null)
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
-        coEvery { updateDefaultReminderTimeUseCase.invoke(any()) } returns Unit
+        coEvery { updateWeighInReminderTimeUseCase.invoke(any()) } returns Unit
         val viewModel = buildViewModel()
 
         viewModel.state.test {
@@ -128,23 +126,22 @@ class SettingsViewModelTest {
         viewModel.onIntent(SettingsIntent.OnDefaultReminderTimeChange(7, 30))
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { updateDefaultReminderTimeUseCase.invoke(LocalTime(7, 30)) }
+        coVerify(exactly = 1) { updateWeighInReminderTimeUseCase.invoke(LocalTime(7, 30)) }
     }
 
     @Test
     fun `OnWeightReminderToggleOff invokes update use case with null`() = runTest {
         every { preferencesRepository.notificationsEnabled } returns flowOf(true)
-        every { preferencesRepository.weightReminderTime } returns flowOf(LocalTime(8, 0))
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
-        coEvery { updateDefaultReminderTimeUseCase.invoke(any()) } returns Unit
+        coEvery { updateWeighInReminderTimeUseCase.invoke(any()) } returns Unit
         val viewModel = buildViewModel()
 
         viewModel.onIntent(SettingsIntent.OnWeightReminderToggleOff)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { updateDefaultReminderTimeUseCase.invoke(null) }
+        coVerify(exactly = 1) { updateWeighInReminderTimeUseCase.invoke(null) }
     }
 
     @Test

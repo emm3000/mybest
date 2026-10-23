@@ -1,16 +1,9 @@
 package com.emm.mybest.domain.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.LocalTime
 
 interface UserPreferencesRepository {
     val notificationsEnabled: Flow<Boolean>
 
-    /** Null means the user has not configured a weight reminder yet (no scheduling). */
-    val weightReminderTime: Flow<LocalTime?>
-
     suspend fun updateNotificationsEnabled(enabled: Boolean)
-
-    /** Persists [time] as the weight reminder time. Null clears it (disables reminder). */
-    suspend fun setReminderTime(time: LocalTime?)
 }
