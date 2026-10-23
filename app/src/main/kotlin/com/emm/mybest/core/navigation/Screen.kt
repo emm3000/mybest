@@ -34,4 +34,7 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object Debts : Screen
+
+    @Serializable
+    data object PurchaseGoal : Screen
 }
