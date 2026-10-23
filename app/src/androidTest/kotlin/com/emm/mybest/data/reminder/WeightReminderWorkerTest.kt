@@ -27,6 +27,7 @@ class WeightReminderWorkerTest {
             modules(
                 module {
                     single<UserPreferencesRepository> { FakeUserPreferencesRepository(enabled = true) }
+                    single { ReminderNotifier(context) }
                 },
             )
         }
