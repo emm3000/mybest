@@ -99,6 +99,7 @@ class SettingsViewModel(
             runCatching {
                 userPreferencesRepository.updateNotificationsEnabled(enabled)
             }.onFailure {
+                if (it is CancellationException) throw it
                 _effect.emit(
                     SettingsEffect.ShowError(
                         it.message ?: "No se pudo actualizar la configuración",
