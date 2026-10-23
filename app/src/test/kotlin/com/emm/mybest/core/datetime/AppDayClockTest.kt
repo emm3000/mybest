@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
@@ -20,6 +21,8 @@ import kotlin.time.Instant
 private val LIMA = TimeZone.of("America/Lima")
 private val FRIDAY = LocalDate(2026, 10, 23)
 private val SATURDAY = LocalDate(2026, 10, 24)
+private val NOON = LocalTime(12, 0)
+private val EVENING = LocalTime(18, 0)
 
 private fun lima(date: LocalDate, hour: Int, minute: Int = 0): Instant =
     LocalDateTime(date.year, date.month, date.day, hour, minute).toInstant(LIMA)
@@ -105,5 +108,37 @@ class AppDayClockTest {
         val days = clockAt(lima(FRIDAY, 23)).observeToday().toList()
 
         assertEquals(listOf(FRIDAY), days)
+    }
+
+    @Test
+    fun `observeLocalDateTime emits at each listed time`() = runTest {
+        val clock = AppDayClock(VirtualTimeClock(lima(FRIDAY, 11, 30), this), LIMA)
+
+        val times = clock.observeLocalDateTime(listOf(NOON, EVENING)).take(3).toList()
+
+        assertEquals(
+            listOf(
+                LocalDateTime(2026, 10, 23, 11, 30),
+                LocalDateTime(2026, 10, 23, 12, 0),
+                LocalDateTime(2026, 10, 23, 18, 0),
+            ),
+            times,
+        )
+    }
+
+    @Test
+    fun `observeLocalDateTime continues on the next day after the last time`() = runTest {
+        val clock = AppDayClock(VirtualTimeClock(lima(FRIDAY, 19), this), LIMA)
+
+        val times = clock.observeLocalDateTime(listOf(NOON, EVENING)).take(2).toList()
+
+        assertEquals(LocalDateTime(2026, 10, 24, 12, 0), times.last())
+    }
+
+    @Test
+    fun `observeLocalDateTime completes when the clock did not advance`() = runTest {
+        val times = clockAt(lima(FRIDAY, 11)).observeLocalDateTime(listOf(NOON)).toList()
+
+        assertEquals(listOf(LocalDateTime(2026, 10, 23, 11, 0)), times)
     }
 }

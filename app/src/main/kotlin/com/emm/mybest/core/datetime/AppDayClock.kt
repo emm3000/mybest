@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
@@ -48,5 +49,29 @@ class AppDayClock(
                 emit(current)
             }
         }
+    }
+
+    /**
+     * Emits the local date and time now and again each time the clock reaches one of the local times in [at].
+     */
+    fun observeLocalDateTime(at: List<LocalTime>): Flow<LocalDateTime> = flow {
+        emit(localDateTimeOf(clock.now()))
+        while (awaitNextOccurrence(at)) emit(localDateTimeOf(clock.now()))
+    }
+
+    private suspend fun awaitNextOccurrence(times: List<LocalTime>): Boolean {
+        val beforeDelay = clock.now()
+        val next = nextOccurrence(times, beforeDelay) ?: return false
+        delay((next - beforeDelay).coerceAtLeast(Duration.ZERO))
+        return clock.now() != beforeDelay
+    }
+
+    private fun nextOccurrence(times: List<LocalTime>, after: Instant): Instant? {
+        val date = localDateTimeOf(after).date
+        return times
+            .flatMap { time -> listOf(date, date.plus(1, DateTimeUnit.DAY)).map { LocalDateTime(it, time) } }
+            .map { it.toInstant(timeZone) }
+            .filter { it > after }
+            .minOrNull()
     }
 }
