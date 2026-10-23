@@ -28,3 +28,6 @@ internal fun computeDailyCheckItems(inputs: HomeInputs): List<DailyCheckItem> =
             progress = inputs.weekProgress[type],
         )
     }
+
+internal fun computeShortcuts(hasPendingCheckIn: Boolean): List<HomeShortcut> =
+    HomeShortcut.entries.filter { hasPendingCheckIn || it != HomeShortcut.CHECK_IN }

@@ -24,8 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emm.mybest.R
+import com.emm.mybest.domain.usecase.home.HomeDestination
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
@@ -33,7 +35,7 @@ import com.emm.mybest.ui.components.atelier.MicroLabelTone
 import com.emm.mybest.ui.theme.AtelierTheme
 import org.koin.androidx.compose.koinViewModel
 
-private enum class HomeContentType { Header, Hairline, QuickActions, Checks, Week }
+private enum class HomeContentType { Header, Hairline, QuickActions, Checks, Week, Shortcuts }
 
 private val ROW_PADDING_HORIZONTAL = 28.dp
 private val ROW_PADDING_VERTICAL = 14.dp
@@ -45,6 +47,7 @@ data class HomeCallbacks(
     val onPhotoClick: () -> Unit,
     val onSettingsClick: () -> Unit,
     val onHistoryClick: () -> Unit,
+    val onShortcutClick: (HomeShortcut) -> Unit,
 )
 
 data class QuickActionCellContent(
@@ -58,11 +61,36 @@ data class QuickActionCellContent(
 @Composable
 fun HomeScreen(
     callbacks: HomeCallbacks,
-    bottomBar: @Composable () -> Unit = {},
+    slots: HomeSlots,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    HomeScreenEffects(viewModel, callbacks)
+    if (state.destination == HomeDestination.DAILY_CHECKS) {
+        HomeScreenContent(
+            modifier = modifier,
+            state = state,
+            callbacks = callbacks,
+            onIntent = viewModel::onIntent,
+            bottomBar = slots.bottomBar,
+        )
+    } else {
+        HomeRoutedScreen(
+            destination = state.destination,
+            onShowDailyChecks = { viewModel.onIntent(HomeIntent.ShowDailyChecks) },
+            slots = slots,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun HomeScreenEffects(viewModel: HomeViewModel, callbacks: HomeCallbacks) {
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onIntent(HomeIntent.Resume)
+        onPauseOrDispose {}
+    }
     val currentCallbacks by rememberUpdatedState(callbacks)
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -71,13 +99,6 @@ fun HomeScreen(
             }
         }
     }
-    HomeScreenContent(
-        modifier = modifier,
-        state = state,
-        callbacks = callbacks,
-        onIntent = viewModel::onIntent,
-        bottomBar = bottomBar,
-    )
 }
 
 @Composable
@@ -124,6 +145,9 @@ private fun HomeLazyContent(
                 checks = state.checks,
                 onDefineTarget = { onIntent(HomeIntent.DefineWeeklyTarget) },
             )
+        }
+        item(contentType = HomeContentType.Shortcuts) {
+            HomeShortcutsSection(shortcuts = state.shortcuts, onShortcutClick = callbacks.onShortcutClick)
         }
     }
 }
@@ -201,12 +225,14 @@ private fun HomeScreenPreview() {
                 isLoading = false,
                 weekNumber = 20,
                 checks = previewDailyChecks(),
+                shortcuts = HomeShortcut.entries,
             ),
             callbacks = HomeCallbacks(
                 onWeightClick = {},
                 onPhotoClick = {},
                 onSettingsClick = {},
                 onHistoryClick = {},
+                onShortcutClick = {},
             ),
             onIntent = {},
         )

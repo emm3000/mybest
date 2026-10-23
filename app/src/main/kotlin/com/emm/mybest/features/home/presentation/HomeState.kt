@@ -22,5 +22,5 @@ data class HomeState(
     val lastPhotoDaysAgo: Int? = null,
     val checks: List<DailyCheckItem> = emptyList(),
     val destination: HomeDestination = HomeDestination.DAILY_CHECKS,
-    val hasPendingCheckIn: Boolean = false,
+    val shortcuts: List<HomeShortcut> = emptyList(),
 )

@@ -45,6 +45,10 @@
     <string name="home_week_progress_format">%1$d/%2$d</string>
     <string name="home_week_alcohol_progress_format">%1$d / máx. %2$d</string>
     <string name="home_define_target">Define tu meta</string>
+    <string name="home_shortcut_pre_outing">Antes de salir</string>
+    <string name="home_shortcut_check_in">Check-in pendiente</string>
+    <string name="home_shortcut_weekly_summary">Resumen semanal</string>
+    <string name="home_show_daily_checks">Ver mis checks de hoy</string>
 
     <!-- Photos screen (C15) -->
     <string name="photo_type_trunk">Tronco</string>
