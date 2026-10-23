@@ -5,10 +5,7 @@ import com.emm.mybest.data.entities.UserSetupEntity
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Setup
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalTime
 import kotlinx.datetime.isoDayNumber
-
-private const val SECONDS_PER_MINUTE = 60
 
 fun Setup.toEntity(): UserSetupEntity = UserSetupEntity(
     targetWeightKg = targetWeightKg,
@@ -45,7 +42,3 @@ private fun UserSetupEntity.weeklyTargets(): Map<DailyCheckType, Int> = listOfNo
     englishWeeklyTarget?.let { DailyCheckType.ENGLISH to it },
     alcoholWeeklyTarget?.let { DailyCheckType.ALCOHOL to it },
 ).toMap()
-
-private fun LocalTime.toMinutesSinceMidnight(): Int = toSecondOfDay() / SECONDS_PER_MINUTE
-
-private fun Int.toLocalTime(): LocalTime = LocalTime.fromSecondOfDay(this * SECONDS_PER_MINUTE)
