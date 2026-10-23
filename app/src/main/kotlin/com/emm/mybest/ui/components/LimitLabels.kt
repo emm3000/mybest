@@ -1,4 +1,4 @@
-package com.emm.mybest.features.preouting.presentation
+package com.emm.mybest.ui.components
 
 internal data class LimitLabels(
     val label: String,
