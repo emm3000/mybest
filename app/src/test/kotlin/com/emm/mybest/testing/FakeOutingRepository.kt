@@ -34,6 +34,12 @@ class FakeOutingRepository(
     override suspend fun recordUnplanned(appDay: LocalDate): Long =
         add(Outing(nextId(), appDay, OutingKind.UNPLANNED, limits = null, checkIn = null))
 
+    override suspend fun recordUnplannedReplacingWonNight(appDay: LocalDate): Long {
+        val id = recordUnplanned(appDay)
+        deleteWonNight(appDay)
+        return id
+    }
+
     override suspend fun saveCheckIn(outingId: Long, checkIn: CheckIn) {
         outings.value = outings.value.map { if (it.id == outingId) it.copy(checkIn = checkIn) else it }
     }

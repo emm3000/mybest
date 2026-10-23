@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 
 private const val NEW_OUTING_ID = 0L
-private const val IGNORED_INSERT_ID = -1L
 
 @Suppress("TooManyFunctions")
 class OutingRepositoryImpl(
@@ -39,6 +38,9 @@ class OutingRepositoryImpl(
 
     override suspend fun recordUnplanned(appDay: LocalDate): Long =
         insert(newOuting(appDay, OutingKind.UNPLANNED, limits = null))
+
+    override suspend fun recordUnplannedReplacingWonNight(appDay: LocalDate): Long =
+        outingDao.insertReplacingWonNight(newOuting(appDay, OutingKind.UNPLANNED, limits = null).toEntity())
 
     override suspend fun saveCheckIn(outingId: Long, checkIn: CheckIn) {
         val stored = checkNotNull(outingDao.findById(outingId)) { "No outing with id $outingId" }
@@ -65,7 +67,7 @@ class OutingRepositoryImpl(
 
     private suspend fun insert(outing: Outing): Long {
         val id = outingDao.insert(outing.toEntity())
-        check(id != IGNORED_INSERT_ID) { "App day ${outing.appDay} already has an outing" }
+        check(id != OutingDao.IGNORED_INSERT_ID) { "App day ${outing.appDay} already has an outing" }
         return id
     }
 

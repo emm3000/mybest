@@ -9,6 +9,7 @@ import com.emm.mybest.domain.models.CheckIn
 import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.OutingKind
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -56,6 +57,27 @@ class OutingRepositoryImplTest {
         val failure = runCatching { repository.recordUnplanned(FRIDAY) }.exceptionOrNull()
 
         assertTrue(failure is IllegalStateException)
+    }
+
+    @Test
+    fun `recordUnplannedReplacingWonNight stores an unplanned outing through one transactional dao call`() = runTest {
+        val stored = slot<OutingEntity>()
+        coEvery { outingDao.insertReplacingWonNight(capture(stored)) } returns 5
+
+        val id = repository.recordUnplannedReplacingWonNight(FRIDAY)
+
+        assertEquals(5L, id)
+        assertEquals(OutingEntity(appDay = FRIDAY, kind = OutingKind.UNPLANNED), stored.captured)
+    }
+
+    @Test
+    fun `recordUnplannedReplacingWonNight does not touch the won night outside the dao transaction`() = runTest {
+        coEvery { outingDao.insertReplacingWonNight(any()) } throws IllegalStateException("taken")
+
+        val failure = runCatching { repository.recordUnplannedReplacingWonNight(FRIDAY) }.exceptionOrNull()
+
+        assertTrue(failure is IllegalStateException)
+        coVerify(exactly = 0) { wonNightDao.deleteByAppDay(any()) }
     }
 
     @Test
