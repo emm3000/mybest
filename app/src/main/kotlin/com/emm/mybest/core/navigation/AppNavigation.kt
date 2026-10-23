@@ -230,8 +230,8 @@ private fun HandleIntentAction(
     LaunchedEffect(intentAction) {
         if (intentAction == null) return@LaunchedEffect
         when (intentAction) {
-            "com.emm.mybest.ACTION_ADD_WEIGHT" -> navigator.navigate(Screen.AddWeight)
-            "com.emm.mybest.ACTION_ADD_PHOTO" -> navigator.navigate(Screen.Photos)
+            ACTION_ADD_WEIGHT -> navigator.navigate(Screen.AddWeight)
+            ACTION_ADD_PHOTO -> navigator.navigate(Screen.Photos)
             ACTION_PRE_OUTING -> navigator.navigate(Screen.PreOuting)
             ACTION_DEBTS -> navigator.navigate(Screen.Debts)
             ACTION_CHECK_IN -> navigator.navigate(Screen.CheckIn)
