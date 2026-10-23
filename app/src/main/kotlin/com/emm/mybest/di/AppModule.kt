@@ -27,8 +27,10 @@ import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
+import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
+import com.emm.mybest.domain.usecase.UpdateSetupUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
@@ -45,6 +47,7 @@ import com.emm.mybest.features.insights.presentation.InsightsViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewerViewModel
+import com.emm.mybest.features.settings.presentation.SettingsGoalsEditor
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
 import kotlinx.datetime.TimeZone
@@ -94,6 +97,11 @@ val appModule = module {
 
     factory { HomeUseCases(get(), get()) }
 
+    // Settings use cases
+    factory { ObserveSetupUseCase(get()) }
+    factory { UpdateSetupUseCase(get()) }
+    factory { SettingsGoalsEditor(get(), get()) }
+
     // Weight use cases
     factory { SaveWeightUseCase(get()) }
     factory { DeleteWeightByDateUseCase(get()) }
@@ -121,5 +129,5 @@ val appModule = module {
         ComparePhotosViewModel(beforeId, afterId, get())
     }
     viewModel { (initialPhotoId: String) -> PhotoViewerViewModel(initialPhotoId, get()) }
-    viewModel { SettingsViewModel(get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get()) }
 }

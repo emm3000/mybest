@@ -25,6 +25,7 @@ class SettingsViewModel(
     private val exportDatabaseBackupUseCase: ExportDatabaseBackupUseCase,
     private val restoreDatabaseBackupUseCase: RestoreDatabaseBackupUseCase,
     private val updateDefaultReminderTimeUseCase: UpdateDefaultReminderTimeUseCase,
+    private val goalsEditor: SettingsGoalsEditor,
     appVersionName: String = BuildConfig.VERSION_NAME,
     appVersionCode: Int = BuildConfig.VERSION_CODE,
 ) : ViewModel() {
@@ -40,12 +41,14 @@ class SettingsViewModel(
         userPreferencesRepository.notificationsEnabled,
         userPreferencesRepository.weightReminderTime,
         _showDefaultTimePicker,
-    ) { enabled, weightTime, showPicker ->
+        goalsEditor.goals,
+    ) { enabled, weightTime, showPicker, goals ->
         SettingsState(
             notificationsEnabled = enabled,
             showDefaultTimePicker = showPicker,
             weightReminderTime = weightTime,
             appVersionLabel = appVersionLabel,
+            goals = goals,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -56,8 +59,7 @@ class SettingsViewModel(
     fun onIntent(intent: SettingsIntent) {
         when (intent) {
             is SettingsIntent.OnNotificationsToggle -> updateNotificationsPreference(intent.enabled)
-            is SettingsIntent.OnExportBackup -> exportBackup(intent.targetUri)
-            is SettingsIntent.OnImportBackup -> importBackup(intent.sourceUri)
+            is SettingsIntent.BackupIntent -> handleBackupIntent(intent)
             is SettingsIntent.OnDefaultTimePickerOpen -> _showDefaultTimePicker.update { true }
             is SettingsIntent.OnDefaultTimePickerDismiss -> _showDefaultTimePicker.update { false }
             is SettingsIntent.OnDefaultReminderTimeChange -> updateDefaultReminderTime(
@@ -65,7 +67,19 @@ class SettingsViewModel(
                 intent.minute,
             )
             is SettingsIntent.OnWeightReminderToggleOff -> updateWeightReminder(null)
+            is SettingsIntent.FieldIntent -> handleFieldIntent(intent)
         }
+    }
+
+    private fun handleBackupIntent(intent: SettingsIntent.BackupIntent) {
+        when (intent) {
+            is SettingsIntent.OnExportBackup -> exportBackup(intent.targetUri)
+            is SettingsIntent.OnImportBackup -> importBackup(intent.sourceUri)
+        }
+    }
+
+    private fun handleFieldIntent(intent: SettingsIntent.FieldIntent) {
+        viewModelScope.launch { goalsEditor.handle(intent)?.let { _effect.emit(it) } }
     }
 
     private fun updateNotificationsPreference(enabled: Boolean) {
