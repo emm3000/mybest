@@ -19,3 +19,13 @@ const val ACTION_CHECK_IN = "com.emm.mybest.ACTION_CHECK_IN"
  * Intent action that opens the weekly summary screen.
  */
 const val ACTION_WEEKLY_SUMMARY = "com.emm.mybest.ACTION_WEEKLY_SUMMARY"
+
+/**
+ * Intent action that opens the weigh-in screen.
+ */
+const val ACTION_ADD_WEIGHT = "com.emm.mybest.ACTION_ADD_WEIGHT"
+
+/**
+ * Intent action that opens the progress photos screen.
+ */
+const val ACTION_ADD_PHOTO = "com.emm.mybest.ACTION_ADD_PHOTO"

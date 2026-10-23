@@ -9,6 +9,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.emm.mybest.MainActivity
 import com.emm.mybest.R
+import com.emm.mybest.core.navigation.ACTION_ADD_WEIGHT
 import com.emm.mybest.core.notification.WEIGHT_REMINDER_CHANNEL_ID
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.first
@@ -34,7 +35,7 @@ class WeightReminderWorker(
 
     private fun showNotification() {
         val intent = Intent(context, MainActivity::class.java).apply {
-            action = "com.emm.mybest.ACTION_ADD_WEIGHT"
+            action = ACTION_ADD_WEIGHT
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         val pendingIntent = PendingIntent.getActivity(
