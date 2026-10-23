@@ -51,7 +51,7 @@ private fun HomeShortcut.screen(): Screen = when (this) {
 private fun HomeRoutedContent(destination: HomeDestination, onClose: () -> Unit, navigator: Navigator) {
     val openSettings = { navigator.navigate(Screen.Settings) }
     when (destination) {
-        HomeDestination.PRE_OUTING -> PreOutingScreen(koinViewModel(), openSettings, onClose, Modifier)
+        HomeDestination.PRE_OUTING -> PreOutingScreen(koinViewModel(), preOutingCallbacks(navigator), onClose, Modifier)
         HomeDestination.CHECK_IN -> CheckInScreen(koinViewModel(), onClose, Modifier)
         HomeDestination.WEEKLY_SUMMARY -> SummaryScreen(koinViewModel(), openSettings, onClose, Modifier)
         HomeDestination.DAILY_CHECKS -> Unit

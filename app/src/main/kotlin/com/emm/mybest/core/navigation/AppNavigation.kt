@@ -161,7 +161,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         val viewModel: PreOutingViewModel = koinViewModel()
         PreOutingScreen(
             viewModel = viewModel,
-            onOpenSettings = { navigator.navigate(Screen.Settings) },
+            callbacks = preOutingCallbacks(navigator),
             onBack = { navigator.goBack() },
             modifier = Modifier,
         )
