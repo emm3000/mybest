@@ -11,4 +11,5 @@ data class WeeklySummary(
     val recovery: WeekRecovery,
     val checks: Map<DailyCheckType, WeekProgress>,
     val weighInTrend: WeighInTrend,
+    val money: WeekMoney,
 )
