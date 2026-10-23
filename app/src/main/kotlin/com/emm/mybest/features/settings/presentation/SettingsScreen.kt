@@ -48,8 +48,8 @@ fun SettingsScreen(
     SettingsEffectsHandler(effects = viewModel.effect, snackbarHostState = snackbarHostState)
     if (state.showDefaultTimePicker) {
         ReminderTimePickerDialog(
-            initialHour = state.weightReminderTime?.hour ?: 8,
-            initialMinute = state.weightReminderTime?.minute ?: 0,
+            initialHour = state.goals.setup.weighInReminderTime?.hour ?: 8,
+            initialMinute = state.goals.setup.weighInReminderTime?.minute ?: 0,
             onConfirm = { hour, minute ->
                 viewModel.onIntent(
                     SettingsIntent.OnDefaultReminderTimeChange(hour, minute),
@@ -153,7 +153,7 @@ private fun ReminderRow(
 ) {
     val labelActive = state.notificationsEnabled
     val value = if (state.notificationsEnabled) {
-        formatReminderTime(state.weightReminderTime)
+        formatReminderTime(state.goals.setup.weighInReminderTime)
     } else {
         stringResource(R.string.settings_reminder_off_value)
     }

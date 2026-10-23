@@ -8,7 +8,6 @@ import com.emm.mybest.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.LocalTime
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -68,9 +67,5 @@ private class FakeUserPreferencesRepository(enabled: Boolean) : UserPreferencesR
 
     override val notificationsEnabled: Flow<Boolean> = flowOf(enabled)
 
-    override val weightReminderTime: Flow<LocalTime?> = flowOf(null)
-
     override suspend fun updateNotificationsEnabled(enabled: Boolean) = Unit
-
-    override suspend fun setReminderTime(time: LocalTime?) = Unit
 }

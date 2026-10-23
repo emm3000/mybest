@@ -9,7 +9,7 @@ import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
-import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
+import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +24,7 @@ class SettingsViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val exportDatabaseBackupUseCase: ExportDatabaseBackupUseCase,
     private val restoreDatabaseBackupUseCase: RestoreDatabaseBackupUseCase,
-    private val updateDefaultReminderTimeUseCase: UpdateDefaultReminderTimeUseCase,
+    private val updateWeighInReminderTimeUseCase: UpdateWeighInReminderTimeUseCase,
     private val goalsEditor: SettingsGoalsEditor,
     appVersionName: String = BuildConfig.VERSION_NAME,
     appVersionCode: Int = BuildConfig.VERSION_CODE,
@@ -39,14 +39,12 @@ class SettingsViewModel(
 
     val state: StateFlow<SettingsState> = combine(
         userPreferencesRepository.notificationsEnabled,
-        userPreferencesRepository.weightReminderTime,
         _showDefaultTimePicker,
         goalsEditor.goals,
-    ) { enabled, weightTime, showPicker, goals ->
+    ) { enabled, showPicker, goals ->
         SettingsState(
             notificationsEnabled = enabled,
             showDefaultTimePicker = showPicker,
-            weightReminderTime = weightTime,
             appVersionLabel = appVersionLabel,
             goals = goals,
         )
@@ -99,7 +97,7 @@ class SettingsViewModel(
     private fun updateDefaultReminderTime(hour: Int, minute: Int) {
         viewModelScope.launch {
             runCatching {
-                updateDefaultReminderTimeUseCase(LocalTime(hour, minute))
+                updateWeighInReminderTimeUseCase(LocalTime(hour, minute))
             }.onFailure {
                 _effect.emit(
                     SettingsEffect.ShowError(
@@ -114,7 +112,7 @@ class SettingsViewModel(
     private fun updateWeightReminder(time: LocalTime?) {
         viewModelScope.launch {
             runCatching {
-                updateDefaultReminderTimeUseCase(time)
+                updateWeighInReminderTimeUseCase(time)
             }.onFailure {
                 _effect.emit(
                     SettingsEffect.ShowError(
