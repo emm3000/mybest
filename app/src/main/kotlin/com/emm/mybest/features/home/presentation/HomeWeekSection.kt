@@ -16,13 +16,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
-import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
@@ -77,7 +77,7 @@ private fun WeekProgressRow(item: DailyCheckItem, onDefineTarget: () -> Unit) {
         if (progress == null) {
             DefineTargetAction(onDefineTarget)
         } else {
-            WeekProgressValue(type = item.type, progress = progress)
+            WeekProgressValue(item = item, progress = progress)
         }
     }
 }
@@ -99,28 +99,28 @@ private fun DefineTargetAction(onDefineTarget: () -> Unit) {
 }
 
 @Composable
-private fun WeekProgressValue(type: DailyCheckType, progress: WeekProgress) {
+private fun WeekProgressValue(item: DailyCheckItem, progress: WeekProgress) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        if (type != DailyCheckType.ALCOHOL) {
+        if (!item.isLimit) {
             WeekBar(count = progress.count)
         }
         Text(
-            text = weekProgressText(type, progress),
-            modifier = Modifier.width(WEEK_COUNT_WIDTH).padding(start = WEEK_COUNT_PADDING_START),
+            text = stringResource(weekProgressFormatRes(item), progress.count, progress.target, progress.exceededBy),
+            modifier = Modifier.weekCountWidth(item).padding(start = WEEK_COUNT_PADDING_START),
             style = MaterialTheme.typography.labelMedium,
+            color = weekToneColor(item.weekTone),
             textAlign = TextAlign.End,
         )
     }
 }
 
+private fun Modifier.weekCountWidth(item: DailyCheckItem): Modifier =
+    if (item.isLimit) this else width(WEEK_COUNT_WIDTH)
+
 @Composable
-private fun weekProgressText(type: DailyCheckType, progress: WeekProgress): String {
-    val format = if (type == DailyCheckType.ALCOHOL) {
-        R.string.home_week_alcohol_progress_format
-    } else {
-        R.string.home_week_progress_format
-    }
-    return stringResource(format, progress.count, progress.target)
+private fun weekToneColor(tone: WeekTone): Color = when (tone) {
+    WeekTone.NEUTRAL -> MaterialTheme.colorScheme.onSurface
+    WeekTone.BROKEN -> MaterialTheme.colorScheme.error
 }
 
 @Composable
