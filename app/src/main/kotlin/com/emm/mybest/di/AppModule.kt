@@ -10,6 +10,7 @@ import com.emm.mybest.data.BackupRepositoryImpl
 import com.emm.mybest.data.DailyCheckRepositoryImpl
 import com.emm.mybest.data.MIGRATION_2_3
 import com.emm.mybest.data.MIGRATION_3_4
+import com.emm.mybest.data.OutingRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
 import com.emm.mybest.data.SetupRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepositoryImpl
@@ -19,6 +20,7 @@ import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.BackupRepository
 import com.emm.mybest.domain.repository.DailyCheckRepository
+import com.emm.mybest.domain.repository.OutingRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.SetupRepository
 import com.emm.mybest.domain.repository.UserPreferencesRepository
@@ -79,6 +81,11 @@ val appModule = module {
     single { get<AppDatabase>().dailyCheckDao() }
     single<SetupRepository> { SetupRepositoryImpl(get()) }
     single<DailyCheckRepository> { DailyCheckRepositoryImpl(get()) }
+
+    single { get<AppDatabase>().outingDao() }
+    single { get<AppDatabase>().wonNightDao() }
+    single { get<AppDatabase>().noOutingAnswerDao() }
+    single<OutingRepository> { OutingRepositoryImpl(get(), get(), get()) }
 
     factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
