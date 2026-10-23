@@ -17,6 +17,23 @@ class UserPreferencesRepositoryImplTest {
         assertEquals(true, repository.notificationsEnabled.first())
     }
 
+    @Test
+    fun `onboarding is not completed when no key is stored`() = runTest {
+        val repository = UserPreferencesRepositoryImpl(createStore(backgroundScope))
+
+        assertEquals(false, repository.onboardingCompleted.first())
+    }
+
+    @Test
+    fun `onboarding completed follows the last stored value`() = runTest {
+        val repository = UserPreferencesRepositoryImpl(createStore(backgroundScope))
+
+        repository.updateOnboardingCompleted(true)
+        assertEquals(true, repository.onboardingCompleted.first())
+        repository.updateOnboardingCompleted(false)
+        assertEquals(false, repository.onboardingCompleted.first())
+    }
+
     private fun createStore(scope: CoroutineScope) = PreferenceDataStoreFactory.create(
         scope = scope,
         produceFile = {

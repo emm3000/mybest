@@ -102,6 +102,10 @@ private class NotificationsOnPreferences : UserPreferencesRepository {
     override val notificationsEnabled: Flow<Boolean> = flowOf(true)
 
     override suspend fun updateNotificationsEnabled(enabled: Boolean) = Unit
+
+    override val onboardingCompleted: Flow<Boolean> = flowOf(true)
+
+    override suspend fun updateOnboardingCompleted(completed: Boolean) = Unit
 }
 
 private class StoppedClock(private val instant: Instant) : Clock {

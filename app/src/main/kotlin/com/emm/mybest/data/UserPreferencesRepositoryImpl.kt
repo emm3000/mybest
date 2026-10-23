@@ -20,6 +20,7 @@ class UserPreferencesRepositoryImpl(
 
     private object PreferencesKeys {
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     }
 
     override val notificationsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -29,6 +30,16 @@ class UserPreferencesRepositoryImpl(
     override suspend fun updateNotificationsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = enabled
+        }
+    }
+
+    override val onboardingCompleted: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.ONBOARDING_COMPLETED] ?: false
+    }
+
+    override suspend fun updateOnboardingCompleted(completed: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ONBOARDING_COMPLETED] = completed
         }
     }
 }
