@@ -3,7 +3,6 @@ package com.emm.mybest.features.settings.presentation
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
-import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +13,6 @@ import kotlinx.datetime.LocalTime
 class SettingsRemindersEditor(
     private val observeSetupUseCase: ObserveSetupUseCase,
     private val updateSetupUseCase: UpdateSetupUseCase,
-    private val updateWeighInReminderTimeUseCase: UpdateWeighInReminderTimeUseCase,
 ) {
     private val openPicker = MutableStateFlow<ReminderField?>(null)
 
@@ -52,11 +50,7 @@ class SettingsRemindersEditor(
         if (field == ReminderField.WEIGH_IN_DAY) persist { it.copy(weighInDay = null) } else save(field, null)
 
     private suspend fun save(field: ReminderField, time: LocalTime?): SettingsEffect? =
-        if (field == ReminderField.WEIGH_IN_TIME) {
-            runCatching { updateWeighInReminderTimeUseCase(time) }.failureEffect()
-        } else {
-            persist { field.withTime(it, time) }
-        }
+        persist { field.withTime(it, time) }
 
     private suspend fun persist(change: (Setup) -> Setup): SettingsEffect? =
         runCatching { updateSetupUseCase(change(observeSetupUseCase().first())) }.failureEffect()

@@ -2,10 +2,14 @@ package com.emm.mybest.data.reminder
 
 import androidx.work.WorkManager
 import kotlinx.coroutines.flow.first
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 
 internal fun reminderTimeTag(time: LocalTime, timeZone: TimeZone): String = "reminder-time:$time@${timeZone.id}"
+
+internal fun reminderDayTimeTag(day: DayOfWeek, time: LocalTime, timeZone: TimeZone): String =
+    "reminder-time:$day $time@${timeZone.id}"
 
 internal suspend fun WorkManager.isReminderScheduledAt(workName: String, time: LocalTime, timeZone: TimeZone): Boolean =
     hasUnfinishedWorkTagged(workName, reminderTimeTag(time, timeZone))

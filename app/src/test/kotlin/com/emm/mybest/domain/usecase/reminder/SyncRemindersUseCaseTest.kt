@@ -5,11 +5,13 @@ import com.emm.mybest.domain.reminder.CheckInReminderScheduler
 import com.emm.mybest.domain.reminder.PreOutingReminderScheduler
 import com.emm.mybest.domain.reminder.ReminderScheduler
 import com.emm.mybest.domain.reminder.WeekendReminderSchedulers
+import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.testing.FakeSetupRepository
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalTime
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -34,14 +36,35 @@ private class RecordingPreOutingScheduler : RecordingScheduler(), PreOutingRemin
 
 private class RecordingCheckInScheduler : RecordingScheduler(), CheckInReminderScheduler
 
+private class RecordingWeightScheduler : WeightReminderScheduler {
+    val calls = mutableListOf<Pair<DayOfWeek, LocalTime>?>()
+
+    override suspend fun schedule(day: DayOfWeek, time: LocalTime) {
+        calls += day to time
+    }
+
+    override suspend fun cancel() {
+        calls += null
+    }
+}
+
+private val WEIGH_IN = Setup(weighInDay = DayOfWeek.FRIDAY, weighInReminderTime = MORNING)
+
 class SyncRemindersUseCaseTest {
 
     private val repository = FakeSetupRepository()
     private val preOuting = RecordingPreOutingScheduler()
     private val checkIn = RecordingCheckInScheduler()
+    private val weighIn = RecordingWeightScheduler()
 
     private fun TestScope.startSync() {
-        backgroundScope.launch { SyncRemindersUseCase(repository, WeekendReminderSchedulers(preOuting, checkIn))() }
+        backgroundScope.launch {
+            SyncRemindersUseCase(
+                repository,
+                WeekendReminderSchedulers(preOuting, checkIn),
+                weighIn,
+            )()
+        }
         runCurrent()
     }
 
@@ -107,5 +130,54 @@ class SyncRemindersUseCaseTest {
         save(Setup(preOutingReminderTime = LATE_EVENING, checkInReminderTime = MORNING))
 
         assertEquals(listOf<LocalTime?>(null, MORNING), checkIn.calls)
+    }
+
+    @Test
+    fun `schedules the weigh-in reminder on its day and time`() = runTest {
+        startSync()
+
+        save(WEIGH_IN)
+
+        assertEquals(listOf(null, DayOfWeek.FRIDAY to MORNING), weighIn.calls)
+    }
+
+    @Test
+    fun `cancels the weigh-in reminder when its day is cleared`() = runTest {
+        startSync()
+        save(WEIGH_IN)
+
+        save(WEIGH_IN.copy(weighInDay = null))
+
+        assertEquals(listOf(null, DayOfWeek.FRIDAY to MORNING, null), weighIn.calls)
+    }
+
+    @Test
+    fun `cancels the weigh-in reminder when its time is cleared`() = runTest {
+        startSync()
+        save(WEIGH_IN)
+
+        save(WEIGH_IN.copy(weighInReminderTime = null))
+
+        assertEquals(listOf(null, DayOfWeek.FRIDAY to MORNING, null), weighIn.calls)
+    }
+
+    @Test
+    fun `schedules the weigh-in reminder again when its day changes`() = runTest {
+        startSync()
+        save(WEIGH_IN)
+
+        save(WEIGH_IN.copy(weighInDay = DayOfWeek.SUNDAY))
+
+        assertEquals(listOf(null, DayOfWeek.FRIDAY to MORNING, DayOfWeek.SUNDAY to MORNING), weighIn.calls)
+    }
+
+    @Test
+    fun `turning the photo reminder on leaves the weigh-in schedule alone`() = runTest {
+        startSync()
+        save(WEIGH_IN)
+
+        save(WEIGH_IN.copy(isPhotoReminderEnabled = true))
+
+        assertEquals(listOf(null, DayOfWeek.FRIDAY to MORNING), weighIn.calls)
     }
 }

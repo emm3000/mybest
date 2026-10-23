@@ -6,14 +6,12 @@ import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Debt
 import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.Setup
-import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
-import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
 import com.emm.mybest.domain.usecase.capture.ObserveCaptureSummaryUseCase
 import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
 import com.emm.mybest.testing.FakeDebtRepository
@@ -43,7 +41,6 @@ class SettingsViewModelTest {
     private val preferencesRepository = mockk<UserPreferencesRepository>()
     private val exportUseCase = mockk<ExportDatabaseBackupUseCase>()
     private val restoreUseCase = mockk<RestoreDatabaseBackupUseCase>()
-    private val scheduler = mockk<WeightReminderScheduler>()
 
     private fun buildViewModel(
         versionName: String = "1.0",
@@ -59,7 +56,6 @@ class SettingsViewModelTest {
         remindersEditor = SettingsRemindersEditor(
             ObserveSetupUseCase(setupRepository),
             UpdateSetupUseCase(setupRepository),
-            UpdateWeighInReminderTimeUseCase(setupRepository, scheduler),
         ),
         rowSources = SettingsRowSources(
             ObserveDebtSummaryUseCase(debtRepository),
@@ -75,8 +71,6 @@ class SettingsViewModelTest {
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
-        coEvery { scheduler.schedule(any()) } returns Unit
-        coEvery { scheduler.cancel() } returns Unit
     }
 
     @Test
@@ -119,8 +113,6 @@ class SettingsViewModelTest {
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
-        coEvery { scheduler.schedule(any()) } returns Unit
-        coEvery { scheduler.cancel() } returns Unit
         val viewModel = buildViewModel()
 
         viewModel.state.test {
@@ -322,7 +314,6 @@ class SettingsViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
         assertEquals(listOf(Setup(monthlyOutingLimit = 2, preOutingReminderTime = LocalTime(20, 30))), repository.saved)
-        coVerify(exactly = 0) { scheduler.schedule(any()) }
     }
 
     @Test
@@ -338,7 +329,7 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `setting the weigh-in time saves it and schedules the weight reminder`() = runTest {
+    fun `setting the weigh-in time saves it in the setup`() = runTest {
         stubDefaults()
         val repository = FakeSetupRepository()
         val viewModel = buildViewModel(setupRepository = repository)
@@ -348,11 +339,10 @@ class SettingsViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf(Setup(weighInReminderTime = LocalTime(7, 0))), repository.saved)
-        coVerify(exactly = 1) { scheduler.schedule(LocalTime(7, 0)) }
     }
 
     @Test
-    fun `clearing the weigh-in time cancels the weight reminder`() = runTest {
+    fun `clearing the weigh-in time leaves it unset`() = runTest {
         stubDefaults()
         val repository = FakeSetupRepository(Setup(weighInReminderTime = LocalTime(7, 0)))
         val viewModel = buildViewModel(setupRepository = repository)
@@ -361,7 +351,6 @@ class SettingsViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf(Setup()), repository.saved)
-        coVerify(exactly = 1) { scheduler.cancel() }
     }
 
     @Test
