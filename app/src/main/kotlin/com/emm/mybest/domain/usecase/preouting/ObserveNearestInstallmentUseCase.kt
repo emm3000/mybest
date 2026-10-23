@@ -45,10 +45,7 @@ private fun Pair<Debt, LocalDate>.toShare(estimate: Money?): InstallmentShare =
 
 private fun nextPaymentDate(debt: Debt, today: LocalDate, isPaidThisMonth: Boolean): LocalDate {
     val month = YearMonthValue.from(today)
-    val thisMonth = paymentDateIn(month, debt.paymentDay)
+    val thisMonth = debt.paymentDateIn(month)
     if (!isPaidThisMonth && thisMonth >= today) return thisMonth
-    return paymentDateIn(month.plusMonths(1), debt.paymentDay)
+    return debt.paymentDateIn(month.plusMonths(1))
 }
-
-private fun paymentDateIn(month: YearMonthValue, paymentDay: Int): LocalDate =
-    month.atDay(minOf(paymentDay, month.lengthOfMonth()))

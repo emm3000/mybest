@@ -1,6 +1,8 @@
 package com.emm.mybest.domain.models
 
+import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.money.Money
+import kotlinx.datetime.LocalDate
 
 private const val FIRST_PAYMENT_DAY = 1
 private const val LAST_PAYMENT_DAY = 31
@@ -24,4 +26,10 @@ data class Debt(
      * This debt once one installment is paid: the balance drops by the installment and never below zero.
      */
     fun afterInstallmentPaid(): Debt = copy(balance = maxOf(balance - installment, Money.ZERO))
+
+    /**
+     * The date this debt's installment falls due in [month]; a payment day past the end of the month falls on its
+     * last day.
+     */
+    fun paymentDateIn(month: YearMonthValue): LocalDate = month.atDay(minOf(paymentDay, month.lengthOfMonth()))
 }
