@@ -46,6 +46,7 @@ class WeightReminderWorkerTest {
         context = instrumentation.targetContext
         instrumentation.uiAutomation.grantRuntimePermission(context.packageName, Manifest.permission.POST_NOTIFICATIONS)
         notificationManager().cancelAll()
+        stopKoin()
         startKoin {
             modules(
                 module {
