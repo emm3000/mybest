@@ -75,6 +75,8 @@ import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.HistoryBodySources
 import com.emm.mybest.domain.usecase.history.HistoryNightSources
 import com.emm.mybest.domain.usecase.home.ResolveHomeDestinationUseCase
+import com.emm.mybest.domain.usecase.onboarding.ObserveOnboardingCompletedUseCase
+import com.emm.mybest.domain.usecase.onboarding.SetOnboardingCompletedUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
@@ -121,6 +123,7 @@ import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeUseCases
 import com.emm.mybest.features.home.presentation.HomeViewModel
 import com.emm.mybest.features.insights.presentation.InsightsViewModel
+import com.emm.mybest.features.onboarding.presentation.OnboardingViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewerViewModel
@@ -302,4 +305,8 @@ val appModule = module {
     factory { IsPreOutingReminderDueUseCase(get()) }
     single<DebtReminderScheduler> { DebtReminderSchedulerImpl(get(), get()) }
     factory { GetInstallmentRemindersUseCase(get(), get(), get()) }
+
+    factory { ObserveOnboardingCompletedUseCase(get()) }
+    factory { SetOnboardingCompletedUseCase(get()) }
+    viewModel { OnboardingViewModel(get(), get()) }
 }

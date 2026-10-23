@@ -434,4 +434,22 @@
     <string name="debt_reminder_channel_description">Aviso tres días antes del día de pago de una cuota sin pagar</string>
     <string name="debt_reminder_title">Cuota por vencer</string>
     <string name="debt_reminder_text">Tu cuota de %1$s (%2$s) vence el %3$d</string>
+    <!-- Onboarding (#69) -->
+    <string name="onboarding_skip">Omitir</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_finish">Empezar</string>
+    <string name="onboarding_step_counter">%1$d / %2$d</string>
+    <string name="onboarding_welcome_title">Gana el fin de semana</string>
+    <string name="onboarding_welcome_line_decide">Antes de salir decides con tu plata a la vista: tu cuota, tu meta y lo que cuesta una noche.</string>
+    <string name="onboarding_welcome_line_limits">Si sales, pones topes de plata, tragos y hora; al día siguiente haces un check-in rápido.</string>
+    <string name="onboarding_welcome_line_week">Cada día marcas gym, dieta, inglés y alcohol; el domingo ves tu resumen.</string>
+    <string name="onboarding_welcome_why">Configura lo básico en dos minutos. Todo se puede cambiar después en Ajustes.</string>
+    <string name="onboarding_checks_title">Checks de la semana</string>
+    <string name="onboarding_checks_why">Con una meta por semana, Hoy te muestra cuánto llevas y cuánto te falta.</string>
+    <string name="onboarding_outings_title">Topes de salida</string>
+    <string name="onboarding_outings_why">Antes de salir, la app compara lo que cuesta una noche con tu cuota y tu meta.</string>
+    <string name="onboarding_money_title">Deudas y meta de compra</string>
+    <string name="onboarding_money_why">Así ves cuánto de tu cuota o de tu meta se va en una noche.</string>
+    <string name="onboarding_weight_title">Peso y recordatorios</string>
+    <string name="onboarding_weight_why">Solo te avisamos a la hora que elijas; si no eliges una, no hay avisos.</string>
 </resources>

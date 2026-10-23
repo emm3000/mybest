@@ -18,19 +18,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.emm.mybest.core.navigation.AppNavigation
+import com.emm.mybest.core.navigation.AppRoot
+import com.emm.mybest.features.onboarding.presentation.OnboardingGate
+import com.emm.mybest.features.onboarding.presentation.OnboardingViewModel
 import com.emm.mybest.ui.theme.AtelierTheme
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
 
     private var intentAction by mutableStateOf<String?>(null)
     private var hasAttemptedNotificationPermissionRequest = false
+    private val onboardingViewModel: OnboardingViewModel by viewModel()
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { /* no-op: app follows OS-level permission state */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        installSplashScreen().setKeepOnScreenCondition {
+            onboardingViewModel.state.value.gate == OnboardingGate.LOADING
+        }
         super.onCreate(savedInstanceState)
         window.isNavigationBarContrastEnforced = false
         requestNotificationPermissionIfNeeded()
@@ -47,7 +53,7 @@ class MainActivity : ComponentActivity() {
             }
 
             AtelierTheme {
-                AppNavigation(
+                AppRoot(
                     intentAction = intentAction,
                     onConsumeAction = { intentAction = null },
                 )
