@@ -20,7 +20,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emm.mybest.R
 import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.HSnackbarHost
-import com.emm.mybest.ui.components.ReminderTimePickerDialog
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
@@ -46,17 +45,8 @@ fun SettingsScreen(
         uri?.let { viewModel.onIntent(SettingsIntent.OnImportBackup(it.toString())) }
     }
     SettingsEffectsHandler(effects = viewModel.effect, snackbarHostState = snackbarHostState)
-    if (state.showDefaultTimePicker) {
-        ReminderTimePickerDialog(
-            initialHour = state.goals.setup.weighInReminderTime?.hour ?: 8,
-            initialMinute = state.goals.setup.weighInReminderTime?.minute ?: 0,
-            onConfirm = { hour, minute ->
-                viewModel.onIntent(
-                    SettingsIntent.OnDefaultReminderTimeChange(hour, minute),
-                )
-            },
-            onDismiss = { viewModel.onIntent(SettingsIntent.OnDefaultTimePickerDismiss) },
-        )
+    state.reminderPicker?.let { field ->
+        SettingsReminderPicker(field = field, setup = state.goals.setup, onIntent = viewModel::onIntent)
     }
     state.goals.editor?.let { editor ->
         SettingsFieldEditor(
@@ -78,7 +68,7 @@ fun SettingsScreen(
         SettingsBody(
             state = state,
             paddingValues = paddingValues,
-            onOpenPicker = { viewModel.onIntent(SettingsIntent.OnDefaultTimePickerOpen) },
+            onReminderIntent = viewModel::onIntent,
             onFieldOpen = { viewModel.onIntent(SettingsIntent.OnFieldOpen(it)) },
             onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
             onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
@@ -100,6 +90,7 @@ private fun SettingsEffectsHandler(
                 is SettingsEffect.ShowMessage -> effect.message
                 is SettingsEffect.GoalSaved -> savedMessage
                 is SettingsEffect.GoalSaveFailed -> saveFailedMessage
+                is SettingsEffect.ReminderSaveFailed -> saveFailedMessage
             }
             snackbarHostState.showSnackbar(message)
         }
@@ -124,7 +115,7 @@ private fun SettingsAppBar() {
 private fun SettingsBody(
     state: SettingsState,
     paddingValues: androidx.compose.foundation.layout.PaddingValues,
-    onOpenPicker: () -> Unit,
+    onReminderIntent: (SettingsIntent.ReminderIntent) -> Unit,
     onFieldOpen: (SettingsField) -> Unit,
     onExportClick: () -> Unit,
     onImportClick: () -> Unit,
@@ -138,39 +129,11 @@ private fun SettingsBody(
         SettingsHero()
         Hairline()
         SettingsGoalsSection(setup = state.goals.setup, onFieldOpen = onFieldOpen)
-        ReminderRow(state = state, onOpenPicker = onOpenPicker)
-        Hairline(inset = SETTINGS_GUT)
+        SettingsRemindersSection(setup = state.goals.setup, onIntent = onReminderIntent)
         BackupRow(onExportClick = onExportClick, onImportClick = onImportClick)
         Hairline()
         SettingsFooter(versionLabel = state.appVersionLabel)
     }
-}
-
-@Composable
-private fun ReminderRow(
-    state: SettingsState,
-    onOpenPicker: () -> Unit,
-) {
-    val labelActive = state.notificationsEnabled
-    val value = if (state.notificationsEnabled) {
-        formatReminderTime(state.goals.setup.weighInReminderTime)
-    } else {
-        stringResource(R.string.settings_reminder_off_value)
-    }
-    val caption = if (state.notificationsEnabled) {
-        stringResource(R.string.settings_reminder_caption_on)
-    } else {
-        stringResource(R.string.settings_reminder_caption_off)
-    }
-    SettingsRow(
-        params = SettingsRowParams(
-            label = stringResource(R.string.settings_reminder_label),
-            value = value,
-            caption = caption,
-            labelActive = labelActive,
-            onValueClick = onOpenPicker,
-        ),
-    )
 }
 
 @Composable

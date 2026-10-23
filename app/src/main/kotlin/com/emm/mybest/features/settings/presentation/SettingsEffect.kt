@@ -5,4 +5,5 @@ sealed class SettingsEffect {
     data class ShowMessage(val message: String) : SettingsEffect()
     object GoalSaved : SettingsEffect()
     object GoalSaveFailed : SettingsEffect()
+    object ReminderSaveFailed : SettingsEffect()
 }
