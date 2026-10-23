@@ -12,7 +12,10 @@ internal fun Map<DailyCheckType, WeekProgress>.toChecksSection(): SummarySection
     rows = DailyCheckType.entries.mapNotNull { type -> get(type)?.toRow(type) }.ifEmpty { listOf(CHECKS_SETUP_PROMPT) },
 )
 
-private val CHECKS_SETUP_PROMPT = SummaryRowState.SetupPrompt(SummaryText(R.string.summary_checks_setup))
+private val CHECKS_SETUP_PROMPT = SummaryRowState.SetupPrompt(
+    SummaryText(R.string.summary_checks_setup),
+    SummaryDestination.SETTINGS,
+)
 
 private fun WeekProgress.toRow(type: DailyCheckType): SummaryRowState = SummaryRowState.Line(
     label = SummaryText(type.toLabelRes()),

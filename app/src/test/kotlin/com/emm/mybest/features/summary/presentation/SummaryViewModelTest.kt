@@ -192,6 +192,9 @@ class SummaryViewModelTest {
         )
     }
 
+    private fun setupPrompt(text: SummaryText, destination: SummaryDestination) =
+        SummaryRowState.SetupPrompt(text, destination)
+
     private fun checkLine(@StringRes label: Int, value: SummaryText, color: Color) =
         SummaryRowState.Line(SummaryText(label), value, color)
 
@@ -231,7 +234,12 @@ class SummaryViewModelTest {
     fun `checks section asks to set the weekly targets when there are none`() = runTest {
         val section = sectionOf(EMPTY_SUMMARY, R.string.summary_section_checks)
 
-        assertEquals(listOf(SummaryRowState.SetupPrompt(SummaryText(R.string.summary_checks_setup))), section.rows)
+        assertEquals(
+            listOf(
+                setupPrompt(SummaryText(R.string.summary_checks_setup), SummaryDestination.SETTINGS),
+            ),
+            section.rows,
+        )
     }
 
     @Test
@@ -267,17 +275,42 @@ class SummaryViewModelTest {
     fun `weight section asks for a first weigh-in when there is none`() = runTest {
         val section = sectionOf(EMPTY_SUMMARY, R.string.summary_section_weight)
 
-        assertEquals(listOf(SummaryRowState.SetupPrompt(SummaryText(R.string.summary_weight_setup))), section.rows)
+        assertEquals(
+            listOf(
+                setupPrompt(SummaryText(R.string.summary_weight_setup), SummaryDestination.ADD_WEIGHT),
+            ),
+            section.rows,
+        )
+    }
+
+    private suspend fun TestScope.effectOfClicking(destination: SummaryDestination): SummaryEffect {
+        val viewModel = started(viewModel())
+        var effect: SummaryEffect? = null
+        viewModel.effect.test {
+            viewModel.onIntent(SummaryIntent.OnSetupPromptClick(destination))
+            effect = awaitItem()
+        }
+        return checkNotNull(effect)
     }
 
     @Test
-    fun `clicking a setup prompt opens the settings`() = runTest {
-        val viewModel = started(viewModel())
+    fun `clicking the checks prompt opens the settings`() = runTest {
+        assertEquals(SummaryEffect.OpenSettings, effectOfClicking(SummaryDestination.SETTINGS))
+    }
 
-        viewModel.effect.test {
-            viewModel.onIntent(SummaryIntent.OnSetupPromptClick)
-            assertEquals(SummaryEffect.OpenSettings, awaitItem())
-        }
+    @Test
+    fun `clicking the weight prompt opens add weight`() = runTest {
+        assertEquals(SummaryEffect.OpenAddWeight, effectOfClicking(SummaryDestination.ADD_WEIGHT))
+    }
+
+    @Test
+    fun `clicking the debts prompt opens the debts`() = runTest {
+        assertEquals(SummaryEffect.OpenDebts, effectOfClicking(SummaryDestination.DEBTS))
+    }
+
+    @Test
+    fun `clicking the goal prompt opens the purchase goal`() = runTest {
+        assertEquals(SummaryEffect.OpenPurchaseGoal, effectOfClicking(SummaryDestination.PURCHASE_GOAL))
     }
 
     @Test
@@ -321,8 +354,8 @@ class SummaryViewModelTest {
 
         assertEquals(
             listOf(
-                SummaryRowState.SetupPrompt(SummaryText(R.string.summary_money_debts_setup)),
-                SummaryRowState.SetupPrompt(SummaryText(R.string.summary_money_goal_setup)),
+                setupPrompt(SummaryText(R.string.summary_money_debts_setup), SummaryDestination.DEBTS),
+                setupPrompt(SummaryText(R.string.summary_money_goal_setup), SummaryDestination.PURCHASE_GOAL),
                 line(R.string.summary_money_not_spent, SummaryText.literal("S/ 0.00")),
             ),
             section.rows,

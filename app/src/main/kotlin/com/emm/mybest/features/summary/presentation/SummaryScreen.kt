@@ -15,16 +15,19 @@ import com.emm.mybest.ui.components.AtelierAppBar
 @Composable
 fun SummaryScreen(
     viewModel: SummaryViewModel,
-    onOpenSettings: () -> Unit,
+    callbacks: SummaryCallbacks,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val currentOnOpenSettings by rememberUpdatedState(onOpenSettings)
+    val currentCallbacks by rememberUpdatedState(callbacks)
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                SummaryEffect.OpenSettings -> currentOnOpenSettings()
+                SummaryEffect.OpenSettings -> currentCallbacks.onOpenSettings()
+                SummaryEffect.OpenAddWeight -> currentCallbacks.onOpenAddWeight()
+                SummaryEffect.OpenDebts -> currentCallbacks.onOpenDebts()
+                SummaryEffect.OpenPurchaseGoal -> currentCallbacks.onOpenPurchaseGoal()
             }
         }
     }

@@ -25,13 +25,13 @@ private val ARROW_SIZE = 18.dp
 @Composable
 internal fun SummaryRow(
     row: SummaryRowState,
-    onPromptClick: () -> Unit,
+    onPromptClick: (SummaryDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         when (row) {
             is SummaryRowState.Line -> SummaryLine(row = row)
-            is SummaryRowState.SetupPrompt -> SummaryPrompt(row = row, onClick = onPromptClick)
+            is SummaryRowState.SetupPrompt -> SummaryPrompt(row = row, onClick = { onPromptClick(row.destination) })
         }
         Hairline()
     }

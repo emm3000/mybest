@@ -404,7 +404,7 @@
     <string name="summary_check_alcohol">Alcohol</string>
     <string name="summary_checks_progress">%1$d de %2$d</string>
     <string name="summary_checks_maximum">%1$d · máx. %2$d</string>
-    <string name="summary_checks_setup">Define cuántos días a la semana quieres cumplir cada check</string>
+    <string name="summary_checks_setup">Toca para fijar tus metas semanales en Ajustes</string>
     <string name="summary_section_weight">PESO</string>
     <string name="summary_weight_latest">Último peso</string>
     <string name="summary_weight_change">Cambio</string>
@@ -412,15 +412,15 @@
     <string name="summary_weight_change_down">−%1$.1f kg</string>
     <string name="summary_weight_change_up">+%1$.1f kg</string>
     <string name="summary_weight_remaining">Para tu meta</string>
-    <string name="summary_weight_setup">Registra tu peso para ver la tendencia</string>
+    <string name="summary_weight_setup">Toca para registrar tu peso y ver la tendencia</string>
     <string name="summary_section_money">DINERO</string>
     <string name="summary_money_debt_balance">Deuda total</string>
     <string name="summary_money_debt_balance_today">Deuda total hoy</string>
     <string name="summary_money_installments_paid">Cuotas pagadas este mes</string>
-    <string name="summary_money_debts_setup">Registra tus deudas para ver cuánto te queda</string>
+    <string name="summary_money_debts_setup">Toca para agregar tus deudas y ver cuánto te queda</string>
     <string name="summary_money_goal_label">Meta: %1$s</string>
     <string name="summary_money_goal_value">%1$s · %2$d%%</string>
-    <string name="summary_money_goal_setup">Define una meta de compra para ver tu avance</string>
+    <string name="summary_money_goal_setup">Toca para crear tu meta de compra y ver tu avance</string>
     <string name="summary_money_not_spent">No gastado (estimado)</string>
     <string name="summary_title">Resumen de la semana</string>
     <string name="summary_previous_week">Semana anterior</string>
