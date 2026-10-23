@@ -18,12 +18,16 @@ import com.emm.mybest.data.PurchaseGoalRepositoryImpl
 import com.emm.mybest.data.SetupRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepositoryImpl
 import com.emm.mybest.data.WeightRepositoryImpl
+import com.emm.mybest.data.capture.InstalledAppsRepositoryImpl
+import com.emm.mybest.data.capture.NotificationAccessCheckerImpl
 import com.emm.mybest.data.reminder.WeightReminderSchedulerImpl
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.BackupRepository
 import com.emm.mybest.domain.repository.DailyCheckRepository
 import com.emm.mybest.domain.repository.DebtRepository
+import com.emm.mybest.domain.repository.InstalledAppsRepository
+import com.emm.mybest.domain.repository.NotificationAccessChecker
 import com.emm.mybest.domain.repository.NotificationCaptureRepository
 import com.emm.mybest.domain.repository.OutingRepository
 import com.emm.mybest.domain.repository.PhotoRepository
@@ -37,6 +41,7 @@ import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
+import com.emm.mybest.domain.usecase.capture.CaptureNotificationUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveDailyChecksUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
@@ -107,6 +112,9 @@ val appModule = module {
 
     single { get<AppDatabase>().notificationCaptureDao() }
     single<NotificationCaptureRepository> { NotificationCaptureRepositoryImpl(get()) }
+    single<InstalledAppsRepository> { InstalledAppsRepositoryImpl(androidContext().packageManager, get()) }
+    single<NotificationAccessChecker> { NotificationAccessCheckerImpl(androidContext()) }
+    factory { CaptureNotificationUseCase(get()) }
 
     factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
