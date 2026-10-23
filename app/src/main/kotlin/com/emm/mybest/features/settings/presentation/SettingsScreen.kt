@@ -73,6 +73,7 @@ fun SettingsScreen(
                 onFieldOpen = { viewModel.onIntent(SettingsIntent.OnFieldOpen(it)) },
                 onDebtsClick = callbacks.onDebtsClick,
                 onPurchaseGoalClick = callbacks.onPurchaseGoalClick,
+                onCaptureClick = callbacks.onCaptureClick,
                 onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
                 onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
             ),
@@ -132,6 +133,7 @@ private fun SettingsBody(
         SettingsGoalsSection(setup = state.goals.setup, onFieldOpen = actions.onFieldOpen)
         SettingsDebtsRow(debts = state.debts, onClick = actions.onDebtsClick)
         SettingsPurchaseGoalRow(purchaseGoal = state.purchaseGoal, onClick = actions.onPurchaseGoalClick)
+        SettingsCaptureRow(capture = state.capture, onClick = actions.onCaptureClick)
         SettingsRemindersSection(setup = state.goals.setup, onIntent = actions.onReminderIntent)
         BackupRow(onExportClick = actions.onExportClick, onImportClick = actions.onImportClick)
         Hairline()

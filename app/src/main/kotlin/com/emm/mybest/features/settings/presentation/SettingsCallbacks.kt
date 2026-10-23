@@ -5,5 +5,6 @@ import androidx.compose.runtime.Composable
 data class SettingsCallbacks(
     val onDebtsClick: () -> Unit,
     val onPurchaseGoalClick: () -> Unit,
+    val onCaptureClick: () -> Unit,
     val bottomBar: @Composable () -> Unit = {},
 )

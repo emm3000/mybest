@@ -37,4 +37,7 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object PurchaseGoal : Screen
+
+    @Serializable
+    data object NotificationCapture : Screen
 }

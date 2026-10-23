@@ -14,6 +14,8 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.emm.mybest.features.capture.presentation.NotificationCaptureScreen
+import com.emm.mybest.features.capture.presentation.NotificationCaptureViewModel
 import com.emm.mybest.features.debts.presentation.DebtsScreen
 import com.emm.mybest.features.debts.presentation.DebtsViewModel
 import com.emm.mybest.features.goal.presentation.PurchaseGoalScreen
@@ -166,6 +168,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             callbacks = SettingsCallbacks(
                 onDebtsClick = { navigator.navigate(Screen.Debts) },
                 onPurchaseGoalClick = { navigator.navigate(Screen.PurchaseGoal) },
+                onCaptureClick = { navigator.navigate(Screen.NotificationCapture) },
                 bottomBar = rememberBottomBar(Screen.Settings, navigator),
             ),
             modifier = Modifier,
@@ -182,6 +185,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
     }
     debtsEntry(navigator)
     purchaseGoalEntry(navigator)
+    notificationCaptureEntry(navigator)
 }
 
 private fun EntryProviderScope<NavKey>.debtsEntry(navigator: Navigator) {
@@ -195,6 +199,13 @@ private fun EntryProviderScope<NavKey>.purchaseGoalEntry(navigator: Navigator) {
     entry<Screen.PurchaseGoal> {
         val viewModel: PurchaseGoalViewModel = koinViewModel()
         PurchaseGoalScreen(viewModel = viewModel, onBack = { navigator.goBack() }, modifier = Modifier)
+    }
+}
+
+private fun EntryProviderScope<NavKey>.notificationCaptureEntry(navigator: Navigator) {
+    entry<Screen.NotificationCapture> {
+        val viewModel: NotificationCaptureViewModel = koinViewModel()
+        NotificationCaptureScreen(viewModel = viewModel, onBack = { navigator.goBack() }, modifier = Modifier)
     }
 }
 
