@@ -49,6 +49,7 @@
     <string name="home_shortcut_check_in">Check-in pendiente</string>
     <string name="home_shortcut_weekly_summary">Resumen semanal</string>
     <string name="home_show_daily_checks">Ver mis checks de hoy</string>
+    <string name="home_next_installment_format">PRÓXIMA CUOTA · %1$s</string>
 
     <!-- Photos screen (C15) -->
     <string name="photo_type_trunk">Tronco</string>

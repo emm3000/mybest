@@ -42,8 +42,6 @@ import com.emm.mybest.ui.theme.AtelierInkSecondary
 import com.emm.mybest.ui.theme.AtelierTheme
 import org.koin.androidx.compose.koinViewModel
 
-private enum class HomeContentType { Header, Headline, Hairline, QuickActions, Checks, Week, Shortcuts }
-
 private val ROW_PADDING_HORIZONTAL = 28.dp
 private val ROW_PADDING_VERTICAL = 14.dp
 private val QUICK_ACTION_HEIGHT_MIN = 80.dp
@@ -56,6 +54,7 @@ data class HomeCallbacks(
     val onSettingsClick: () -> Unit,
     val onHistoryClick: () -> Unit,
     val onShortcutClick: (HomeShortcut) -> Unit,
+    val onInstallmentClick: () -> Unit,
 )
 
 data class QuickActionCellContent(
@@ -143,21 +142,10 @@ private fun HomeLazyContent(
         item(contentType = HomeContentType.Hairline) { Hairline() }
         item(contentType = HomeContentType.QuickActions) { HomeQuickActionsRow(state, callbacks) }
         item(contentType = HomeContentType.Hairline) { Hairline() }
-        item(contentType = HomeContentType.Checks) {
-            HomeChecksSection(
-                model = HomeChecksModel(state.checks, state.keptChecks, state.totalChecks),
-                onToggle = { onIntent(HomeIntent.ToggleDailyCheck(it)) },
-            )
-        }
-        item(contentType = HomeContentType.Week) {
-            HomeWeekSection(
-                checks = state.checks,
-                onDefineTarget = { onIntent(HomeIntent.DefineWeeklyTarget) },
-            )
-        }
-        item(contentType = HomeContentType.Shortcuts) {
-            HomeShortcutsSection(shortcuts = state.shortcuts, onShortcutClick = callbacks.onShortcutClick)
-        }
+        checksItem(state, onIntent)
+        weekItem(state, onIntent)
+        installmentItem(state, callbacks)
+        shortcutsItem(state, callbacks)
     }
 }
 
@@ -247,6 +235,7 @@ private fun HomeScreenPreview() {
                 isLoading = false,
                 checks = previewDailyChecks(),
                 shortcuts = HomeShortcut.entries,
+                nextInstallment = HomeInstallment("15 NOV", "Tarjeta de crédito", "S/ 420.00"),
             ),
             callbacks = HomeCallbacks(
                 onWeightClick = {},
@@ -254,6 +243,7 @@ private fun HomeScreenPreview() {
                 onSettingsClick = {},
                 onHistoryClick = {},
                 onShortcutClick = {},
+                onInstallmentClick = {},
             ),
             onIntent = {},
         )
