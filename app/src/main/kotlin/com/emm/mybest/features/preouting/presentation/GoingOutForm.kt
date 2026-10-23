@@ -57,8 +57,12 @@ fun GoingOutForm(
 }
 
 @Composable
-private fun LimitsSection(state: PreOutingState, onIntent: (PreOutingIntent) -> Unit) {
-    Column {
+private fun LimitsSection(
+    state: PreOutingState,
+    onIntent: (PreOutingIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
         LimitRow(
             labels = LimitLabels(
                 label = stringResource(R.string.pre_outing_limit_money),
@@ -96,10 +100,14 @@ private fun LimitsSection(state: PreOutingState, onIntent: (PreOutingIntent) -> 
 }
 
 @Composable
-private fun ChecklistSection(state: PreOutingState, onIntent: (PreOutingIntent) -> Unit) {
+private fun ChecklistSection(
+    state: PreOutingState,
+    onIntent: (PreOutingIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val accountText = state.moneyLimitLabel?.let { stringResource(R.string.pre_outing_checklist_account, it) }
         ?: stringResource(R.string.pre_outing_checklist_account_unset)
-    Column {
+    Column(modifier = modifier) {
         MicroLabel(text = stringResource(R.string.pre_outing_checklist_label))
         ChecklistRow(
             item = ChecklistItem(stringResource(R.string.pre_outing_checklist_cards), state.form.areCardsOff),
