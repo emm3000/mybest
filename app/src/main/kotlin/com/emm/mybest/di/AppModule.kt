@@ -42,6 +42,8 @@ import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
 import com.emm.mybest.domain.usecase.capture.CaptureNotificationUseCase
+import com.emm.mybest.domain.usecase.capture.ObserveCaptureOverviewUseCase
+import com.emm.mybest.domain.usecase.capture.ObserveCaptureSummaryUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveDailyChecksUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
@@ -142,6 +144,8 @@ val appModule = module {
     single<InstalledAppsRepository> { InstalledAppsRepositoryImpl(androidContext().packageManager, get()) }
     single<NotificationAccessChecker> { NotificationAccessCheckerImpl(androidContext()) }
     factory { CaptureNotificationUseCase(get()) }
+    factory { ObserveCaptureOverviewUseCase(get(), get()) }
+    factory { ObserveCaptureSummaryUseCase(get()) }
 
     factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
