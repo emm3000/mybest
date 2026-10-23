@@ -163,8 +163,8 @@
     <string name="history_error_label">ERROR</string>
 
     <!-- Weight reminder notification -->
-    <string name="weight_reminder_title">Hora de registrar tu peso</string>
-    <string name="weight_reminder_text">Toca para registrarlo</string>
+    <string name="weight_reminder_title">Hoy te toca pesarte</string>
+    <string name="weight_reminder_text">Toca para registrar tu pesaje</string>
 
     <!-- Add weight screen -->
     <string name="add_weight_field_label">¿Cuánto pesas hoy?</string>
@@ -361,8 +361,8 @@
     <string name="capture_delete_confirm">Borrar</string>
     <string name="capture_cancel">Cancelar</string>
     <string name="capture_action_failed">No se pudo completar la acción</string>
-    <string name="weight_reminder_channel_name">Recordatorio de peso</string>
-    <string name="weight_reminder_channel_description">Recordatorio diario para registrar el peso</string>
+    <string name="weight_reminder_channel_name">Recordatorio de pesaje</string>
+    <string name="weight_reminder_channel_description">Recordatorio semanal en tu día de pesaje</string>
     <string name="pre_outing_reminder_channel_name">Antes de salir</string>
     <string name="pre_outing_reminder_channel_description">Aviso del viernes y sábado para mirar los números antes de decidir</string>
     <string name="pre_outing_reminder_title">¿Sales hoy?</string>

@@ -30,16 +30,16 @@
 - Contador de fotos.
 - Una recomendación derivada (`ADJUST_WEIGHT_PLAN`, `ADD_PROGRESS_PHOTO`, `KEEP_ROUTINE`).
 
-## 7. Recordatorio matinal de peso
-- Configurable desde Settings como "Hora de pesaje" (`Setup.weighInReminderTime`; sin default forzado — hasta que el usuario elija una hora, no se agenda nada).
-- Notificación local diaria a la hora elegida con CTA → AddWeight.
-- Cancelable borrando la hora (llama a `WeightReminderScheduler.cancel()`).
+## 7. Recordatorio semanal de pesaje
+- Configurable desde Settings con "Día de pesaje" y "Hora de pesaje" (`Setup.weighInDay`, `Setup.weighInReminderTime`; sin default forzado — hasta que el usuario elija ambos, no se agenda nada).
+- Notificación local "Hoy te toca pesarte" cada 7 días, el día y la hora elegidos, con CTA → AddWeight.
+- `SyncRemindersUseCase` agenda o cancela el trabajo al cambiar el setup y al abrir la app; borrar el día o la hora lo cancela.
 
 ## 8. Historial y Timeline
 - Calendario con días que tienen registros (peso, fotos).
 - Timeline de fotos de progreso por tipo.
 
 ## 9. Settings
-- Recordatorios: antes de salir, check-in de la mañana, día y hora de pesaje, foto de progreso cada 4 semanas y cuotas por vencer. Solo la hora de pesaje agenda trabajo hoy.
+- Recordatorios: antes de salir, check-in de la mañana, día y hora de pesaje, foto de progreso cada 4 semanas y cuotas por vencer. Las cuotas por vencer aún no agendan trabajo.
 - Acceso al plan de dieta y al plan de ejercicio.
 - Backup export/import (SAF).

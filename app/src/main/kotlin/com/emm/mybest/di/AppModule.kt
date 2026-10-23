@@ -49,7 +49,6 @@ import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
-import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
 import com.emm.mybest.domain.usecase.capture.CaptureNotificationUseCase
 import com.emm.mybest.domain.usecase.capture.ObserveCaptureOverviewUseCase
 import com.emm.mybest.domain.usecase.capture.ObserveCaptureSummaryUseCase
@@ -158,7 +157,6 @@ val appModule = module {
     single<PhotoRepository> { PhotoRepositoryImpl(androidContext(), get(), get()) }
     single<BackupRepository> { BackupRepositoryImpl(androidContext(), get(), get()) }
     single { WorkManager.getInstance(androidContext()) }
-    single<WeightReminderScheduler> { WeightReminderSchedulerImpl(get()) }
 
     single { get<AppDatabase>().userSetupDao() }
     single { get<AppDatabase>().dailyCheckDao() }
@@ -188,7 +186,6 @@ val appModule = module {
     factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
     factory { RestoreDatabaseBackupUseCase(get()) }
-    factory { UpdateWeighInReminderTimeUseCase(get(), get()) }
 
     factory { ObserveDailyChecksUseCase(get()) }
     factory { ObserveWeekProgressUseCase(get(), get()) }
@@ -199,7 +196,7 @@ val appModule = module {
     factory { ObserveSetupUseCase(get()) }
     factory { UpdateSetupUseCase(get()) }
     factory { SettingsGoalsEditor(get(), get()) }
-    factory { SettingsRemindersEditor(get(), get(), get()) }
+    factory { SettingsRemindersEditor(get(), get()) }
 
     // Weight use cases
     factory { SaveWeightUseCase(get()) }
@@ -286,7 +283,8 @@ val appModule = module {
     single<PreOutingReminderScheduler> { PreOutingReminderSchedulerImpl(get(), get()) }
     single<CheckInReminderScheduler> { CheckInReminderSchedulerImpl(get(), get()) }
     factory { WeekendReminderSchedulers(get(), get()) }
-    factory { SyncRemindersUseCase(get(), get()) }
+    single<WeightReminderScheduler> { WeightReminderSchedulerImpl(get(), get()) }
+    factory { SyncRemindersUseCase(get(), get(), get()) }
     factory { IsCheckInReminderDueUseCase(get(), get(), get()) }
     factory { IsPreOutingReminderDueUseCase(get()) }
 }

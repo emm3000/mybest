@@ -3,50 +3,36 @@ package com.emm.mybest.data.reminder
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.emm.mybest.domain.reminder.ReminderDelays
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
-import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import java.util.concurrent.TimeUnit
-import kotlin.time.Clock
 
 internal const val WEIGHT_REMINDER_WORK_NAME = "weight_reminder"
-private const val HOURS_IN_DAY = 24L
-private const val MS_PER_DAY = 24L * 60 * 60 * 1000
+private const val PERIOD_DAYS = 7L
 
 class WeightReminderSchedulerImpl(
     private val workManager: WorkManager,
+    private val reminderDelays: ReminderDelays,
 ) : WeightReminderScheduler {
 
-    override suspend fun schedule(time: LocalTime) {
-        val initialDelay = calculateInitialDelayMs(time)
-        val request = PeriodicWorkRequestBuilder<WeightReminderWorker>(
-            HOURS_IN_DAY,
-            TimeUnit.HOURS,
-        )
-            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+    override suspend fun schedule(day: DayOfWeek, time: LocalTime) {
+        val tag = reminderDayTimeTag(day, time, reminderDelays.timeZone)
+        if (workManager.hasUnfinishedWorkTagged(WEIGHT_REMINDER_WORK_NAME, tag)) return
+        val initialDelay = reminderDelays.untilNext(setOf(day), time)
+        val request = PeriodicWorkRequestBuilder<WeightReminderWorker>(PERIOD_DAYS, TimeUnit.DAYS)
+            .setInitialDelay(initialDelay.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+            .addTag(tag)
             .build()
-
         workManager.enqueueUniquePeriodicWork(
             WEIGHT_REMINDER_WORK_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             request,
         )
     }
 
     override suspend fun cancel() {
         workManager.cancelUniqueWork(WEIGHT_REMINDER_WORK_NAME)
-    }
-
-    private fun calculateInitialDelayMs(targetTime: LocalTime): Long {
-        val tz = TimeZone.currentSystemDefault()
-        val now = Clock.System.now()
-        val today = now.toLocalDateTime(tz).date
-        val targetToday = LocalDateTime(today, targetTime)
-        val targetTodayInstant = targetToday.toInstant(tz)
-        val differenceMs = targetTodayInstant.toEpochMilliseconds() - now.toEpochMilliseconds()
-        return if (differenceMs > 0L) differenceMs else differenceMs + MS_PER_DAY
     }
 }
