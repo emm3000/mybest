@@ -19,4 +19,5 @@ data class HomeState(
     val photoCount: Int = 0,
     val lastPhotoType: PhotoType? = null,
     val lastPhotoDaysAgo: Int? = null,
+    val checks: List<DailyCheckItem> = emptyList(),
 )

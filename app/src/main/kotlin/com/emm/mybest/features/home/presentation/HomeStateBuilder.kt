@@ -1,5 +1,6 @@
 package com.emm.mybest.features.home.presentation
 
+import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
@@ -18,3 +19,12 @@ internal fun computeLastPhotoDaysAgo(photos: List<ProgressPhoto>, today: LocalDa
     val lastDate = photos.maxByOrNull { it.date }?.date ?: return null
     return (today.toEpochDays() - lastDate.toEpochDays()).coerceAtLeast(0).toInt()
 }
+
+internal fun computeDailyCheckItems(inputs: HomeInputs): List<DailyCheckItem> =
+    DailyCheckType.entries.map { type ->
+        DailyCheckItem(
+            type = type,
+            isDone = type in inputs.doneToday,
+            progress = inputs.weekProgress[type],
+        )
+    }

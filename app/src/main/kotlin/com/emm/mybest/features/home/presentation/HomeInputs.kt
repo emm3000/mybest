@@ -1,0 +1,15 @@
+package com.emm.mybest.features.home.presentation
+
+import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.models.ProgressPhoto
+import com.emm.mybest.domain.models.WeightEntry
+import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
+import kotlinx.datetime.LocalDate
+
+internal data class HomeInputs(
+    val today: LocalDate,
+    val weights: List<WeightEntry>,
+    val photos: List<ProgressPhoto>,
+    val doneToday: Set<DailyCheckType>,
+    val weekProgress: Map<DailyCheckType, WeekProgress>,
+)

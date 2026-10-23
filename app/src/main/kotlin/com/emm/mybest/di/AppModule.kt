@@ -31,6 +31,9 @@ import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
+import com.emm.mybest.domain.usecase.dailycheck.ObserveDailyChecksUseCase
+import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
+import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
@@ -95,7 +98,10 @@ val appModule = module {
     factory { RestoreDatabaseBackupUseCase(get()) }
     factory { UpdateDefaultReminderTimeUseCase(get(), get()) }
 
-    factory { HomeUseCases(get(), get()) }
+    factory { ObserveDailyChecksUseCase(get()) }
+    factory { ObserveWeekProgressUseCase(get(), get()) }
+    factory { ToggleDailyCheckUseCase(get()) }
+    factory { HomeUseCases(get(), get(), get(), get(), get()) }
 
     // Settings use cases
     factory { ObserveSetupUseCase(get()) }
@@ -120,7 +126,7 @@ val appModule = module {
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
-    viewModel { HomeViewModel(get()) }
+    viewModel { HomeViewModel(get(), get()) }
     viewModel { AddWeightViewModel(get(), get()) }
     viewModel { PhotosViewModel(get(), get(), get(), get()) }
     viewModel { HistoryViewModel(get(), get(), get(), get()) }
