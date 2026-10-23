@@ -44,7 +44,7 @@ class ObserveRelapsesUseCase(
 
     private fun reasonsOf(outing: Outing, isOverMonthlyLimit: Boolean): Set<RelapseReason> = buildSet {
         if (outing.kind == OutingKind.UNPLANNED) add(RelapseReason.UNPLANNED)
-        if (outing.limitResults().any { it.exceededBy > 0 }) add(RelapseReason.BROKE_LIMIT)
+        if (outing.hasBrokenLimit) add(RelapseReason.BROKE_LIMIT)
         if (isOverMonthlyLimit) add(RelapseReason.OVER_MONTHLY_LIMIT)
     }
 }

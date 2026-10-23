@@ -16,6 +16,11 @@ data class Outing(
     val isPendingCheckIn: Boolean get() = checkIn == null
 
     /**
+     * Whether any limit was exceeded; an unplanned outing or one still pending its check-in has broken none.
+     */
+    val hasBrokenLimit: Boolean get() = limitResults().any { it.exceededBy > 0 }
+
+    /**
      * How far each limit was exceeded, or an empty list for an unplanned outing or one still pending its check-in.
      */
     fun limitResults(): List<LimitResult> {
