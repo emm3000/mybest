@@ -11,7 +11,7 @@ You write GitHub issues for `emm3000/mybest`. The prompt names the parent issue 
 ## Read first
 
 1. `gh issue view <parent> --comments` (when given) and two existing tickets of the same kind for the format in use.
-2. `docs/agents/issue-tracker.md` for the label vocabulary.
+2. `docs/agents/triage-labels.md` for the label vocabulary.
 3. `docs/ARCHITECTURE.md`, `docs/FEATURES.md` and the files under `.claude/rules/`.
 4. The current implementation of the area: feature package, ViewModel, use cases, tests. Verify every path you cite exists on `origin/main`.
 

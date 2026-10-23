@@ -68,5 +68,19 @@ Tickets are GitHub issues labeled `ready-for-agent` in `emm3000/mybest`; one pee
 - `/wave <issues>` boots peers (max 3) and dispatches (`.claude/skills/wave/SKILL.md`).
 - `/checks` runs `:app:detekt :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin` and reports per task.
 - `/agents-review` reviews the pending diff against `.claude/rules/`.
-- Issue tracker and labels: `docs/agents/issue-tracker.md`. Dispatch history: `docs/agents/dispatch-log.md`.
+- Issue tracker: `docs/agents/issue-tracker.md`; labels: `docs/agents/triage-labels.md`. Dispatch history: `docs/agents/dispatch-log.md`.
 - Subagents: `pr-reviewer` (read-only MERGE / FIX FIRST) and `ticket-writer` in `.claude/agents/`.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues for `emm3000/mybest`, driven with the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical labels, each string equal to its role: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root, created lazily by `/domain-modeling`. See `docs/agents/domain.md`.
