@@ -25,6 +25,7 @@ fun PreOutingScreen(
         viewModel.effect.collect { effect ->
             when (effect) {
                 PreOutingEffect.OpenSettings -> currentOnOpenSettings()
+                PreOutingEffect.DayAlreadyDecided -> Unit
             }
         }
     }

@@ -1,7 +1,13 @@
 package com.emm.mybest.features.preouting.presentation
 
+import com.emm.mybest.core.datetime.MONTH_ABBR_ES
+import com.emm.mybest.core.datetime.formatHhMm
+import com.emm.mybest.core.datetime.shortEs
 import com.emm.mybest.core.money.formatPen
+import com.emm.mybest.domain.models.NightDecision
 import com.emm.mybest.domain.models.PreOutingSnapshot
+import com.emm.mybest.domain.models.Tonight
+import kotlinx.datetime.LocalDate
 
 internal fun PreOutingSnapshot.toState(goalName: String?): PreOutingState = PreOutingState(
     isLoaded = true,
@@ -25,4 +31,27 @@ private fun PreOutingSnapshot.missingInputs(): Set<PreOutingPrompt> = buildSet {
     if (nearestInstallment == null) add(PreOutingPrompt.DEBTS)
     if (purchaseGoalLeft == null) add(PreOutingPrompt.PURCHASE_GOAL)
     if (monthlyOutingLimit == null) add(PreOutingPrompt.OUTING_LIMIT)
+}
+
+internal fun PreOutingState.withDecision(tonight: Tonight, form: PreOutingForm): PreOutingState = copy(
+    tonightLabel = tonight.appDay.toTonightLabel(),
+    canStayIn = tonight.canStayIn,
+    decision = tonight.decision.toState(),
+    form = form,
+    moneyLimitLabel = form.moneyLimit?.formatPen(),
+    returnTimeLabel = form.returnTime?.formatHhMm(),
+    canConfirmOuting = form.canConfirm,
+)
+
+private fun LocalDate.toTonightLabel(): String =
+    "${dayOfWeek.shortEs()} · $day ${MONTH_ABBR_ES.getValue(month.ordinal + 1)}"
+
+private fun NightDecision.toState(): PreOutingDecisionState = when (this) {
+    NightDecision.Undecided -> PreOutingDecisionState.Undecided
+    is NightDecision.WentOut -> PreOutingDecisionState.WentOut(
+        moneyLabel = outing.limits?.money?.formatPen(),
+        drinksLabel = outing.limits?.drinks?.toString(),
+        returnTimeLabel = outing.limits?.returnTime?.formatHhMm(),
+    )
+    is NightDecision.StayedIn -> PreOutingDecisionState.StayedIn(wonNight.estimatedCost?.formatPen())
 }

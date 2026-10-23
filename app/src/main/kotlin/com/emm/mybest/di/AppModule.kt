@@ -56,7 +56,11 @@ import com.emm.mybest.domain.usecase.preouting.ObserveNotSpentThisMonthUseCase
 import com.emm.mybest.domain.usecase.preouting.ObserveOutingMonthUseCase
 import com.emm.mybest.domain.usecase.preouting.ObservePreOutingSnapshotUseCase
 import com.emm.mybest.domain.usecase.preouting.ObservePurchaseGoalLeftUseCase
+import com.emm.mybest.domain.usecase.preouting.ObserveTonightUseCase
+import com.emm.mybest.domain.usecase.preouting.PlanOutingUseCase
+import com.emm.mybest.domain.usecase.preouting.PreOutingDecisionUseCases
 import com.emm.mybest.domain.usecase.preouting.PreOutingUseCases
+import com.emm.mybest.domain.usecase.preouting.RecordWonNightUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.usecase.weight.GetNearestWeightOnDateUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
@@ -162,7 +166,11 @@ val appModule = module {
     factory { ObservePurchaseGoalLeftUseCase(get()) }
     factory { PreOutingUseCases(get(), get(), get(), get(), get()) }
     factory { ObservePreOutingSnapshotUseCase(get()) }
-    viewModel { PreOutingViewModel(get(), get()) }
+    factory { PlanOutingUseCase(get(), get()) }
+    factory { RecordWonNightUseCase(get(), get(), get()) }
+    factory { ObserveTonightUseCase(get(), get()) }
+    factory { PreOutingDecisionUseCases(get(), get(), get()) }
+    viewModel { PreOutingViewModel(get(), get(), get()) }
 
     single { MediaManager(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }

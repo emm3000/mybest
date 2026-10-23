@@ -15,4 +15,11 @@ data class PreOutingState(
     val isNextOutingOverLimit: Boolean = false,
     val notSpentLabel: String = "",
     val prompts: Set<PreOutingPrompt> = emptySet(),
+    val tonightLabel: String = "",
+    val canStayIn: Boolean = false,
+    val decision: PreOutingDecisionState = PreOutingDecisionState.Undecided,
+    val form: PreOutingForm = PreOutingForm(),
+    val moneyLimitLabel: String? = null,
+    val returnTimeLabel: String? = null,
+    val canConfirmOuting: Boolean = false,
 )
