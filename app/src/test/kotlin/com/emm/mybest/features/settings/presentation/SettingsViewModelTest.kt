@@ -14,8 +14,10 @@ import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
+import com.emm.mybest.domain.usecase.capture.ObserveCaptureSummaryUseCase
 import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
 import com.emm.mybest.testing.FakeDebtRepository
+import com.emm.mybest.testing.FakeNotificationCaptureRepository
 import com.emm.mybest.testing.FakePurchaseGoalRepository
 import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.MainDispatcherRule
@@ -59,7 +61,11 @@ class SettingsViewModelTest {
             UpdateSetupUseCase(setupRepository),
             UpdateWeighInReminderTimeUseCase(setupRepository, scheduler),
         ),
-        rowSources = SettingsRowSources(ObserveDebtSummaryUseCase(debtRepository), purchaseGoalRepository),
+        rowSources = SettingsRowSources(
+            ObserveDebtSummaryUseCase(debtRepository),
+            purchaseGoalRepository,
+            ObserveCaptureSummaryUseCase(FakeNotificationCaptureRepository()),
+        ),
         appVersionName = versionName,
         appVersionCode = versionCode,
     )

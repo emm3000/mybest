@@ -45,6 +45,7 @@ class SettingsViewModel(
             goals = goals,
             debts = rows.debts,
             purchaseGoal = rows.purchaseGoal,
+            capture = rows.capture,
         )
     }.stateIn(
         scope = viewModelScope,
