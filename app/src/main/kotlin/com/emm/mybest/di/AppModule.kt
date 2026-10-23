@@ -1,7 +1,9 @@
 package com.emm.mybest.di
 
+import android.util.Log
 import androidx.room.Room
 import androidx.work.WorkManager
+import com.emm.mybest.core.coroutines.APP_SCOPE_NAME
 import com.emm.mybest.core.coroutines.CoroutineDispatchers
 import com.emm.mybest.core.coroutines.DefaultCoroutineDispatchers
 import com.emm.mybest.core.datetime.AppDayClock
@@ -20,8 +22,14 @@ import com.emm.mybest.data.UserPreferencesRepositoryImpl
 import com.emm.mybest.data.WeightRepositoryImpl
 import com.emm.mybest.data.capture.InstalledAppsRepositoryImpl
 import com.emm.mybest.data.capture.NotificationAccessCheckerImpl
+import com.emm.mybest.data.reminder.CheckInReminderSchedulerImpl
+import com.emm.mybest.data.reminder.PreOutingReminderSchedulerImpl
+import com.emm.mybest.data.reminder.ReminderNotifier
 import com.emm.mybest.data.reminder.WeightReminderSchedulerImpl
 import com.emm.mybest.domain.media.MediaManager
+import com.emm.mybest.domain.reminder.CheckInReminderScheduler
+import com.emm.mybest.domain.reminder.PreOutingReminderScheduler
+import com.emm.mybest.domain.reminder.ReminderDelays
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.BackupRepository
 import com.emm.mybest.domain.repository.DailyCheckRepository
@@ -78,6 +86,9 @@ import com.emm.mybest.domain.usecase.preouting.PreOutingUseCases
 import com.emm.mybest.domain.usecase.preouting.RecordWonNightUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveReturnTimesUseCase
+import com.emm.mybest.domain.usecase.reminder.IsCheckInReminderDueUseCase
+import com.emm.mybest.domain.usecase.reminder.IsPreOutingReminderDueUseCase
+import com.emm.mybest.domain.usecase.reminder.SyncRemindersUseCase
 import com.emm.mybest.domain.usecase.summary.ObserveWeekDebtUseCase
 import com.emm.mybest.domain.usecase.summary.ObserveWeekMoneyUseCase
 import com.emm.mybest.domain.usecase.summary.ObserveWeekOutingsUseCase
@@ -110,11 +121,17 @@ import com.emm.mybest.features.settings.presentation.SettingsRemindersEditor
 import com.emm.mybest.features.settings.presentation.SettingsRowSources
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.datetime.TimeZone
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import kotlin.time.Clock
+
+private const val TAG = "AppModule"
 
 val appModule = module {
     single {
@@ -254,4 +271,16 @@ val appModule = module {
     factory { ObserveWeekMoneyUseCase(get(), get(), get()) }
     factory { WeeklySummarySections(get(), get(), get(), get(), get()) }
     factory { ObserveWeeklySummaryUseCase(get()) }
+
+    single<CoroutineScope>(named(APP_SCOPE_NAME)) {
+        val handler = CoroutineExceptionHandler { _, error -> Log.e(TAG, "Unhandled error in the app scope", error) }
+        CoroutineScope(SupervisorJob() + get<CoroutineDispatchers>().default + handler)
+    }
+    single { ReminderDelays(Clock.System, TimeZone.currentSystemDefault()) }
+    single { ReminderNotifier(androidContext()) }
+    single<PreOutingReminderScheduler> { PreOutingReminderSchedulerImpl(get(), get()) }
+    single<CheckInReminderScheduler> { CheckInReminderSchedulerImpl(get(), get()) }
+    factory { SyncRemindersUseCase(get(), get(), get()) }
+    factory { IsCheckInReminderDueUseCase(get(), get(), get()) }
+    factory { IsPreOutingReminderDueUseCase(get()) }
 }
