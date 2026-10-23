@@ -6,7 +6,6 @@ import com.emm.mybest.domain.models.DailySlot
 import com.emm.mybest.domain.models.MealType
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalTime
 
 internal fun LocalDate.formatShortMonthDay(): String {
     val abbr = MONTH_ABBR_ES[month.ordinal + 1] ?: month.name.take(3)
@@ -40,12 +39,6 @@ internal fun DailySlot.labelEs(): String = when (this) {
     DailySlot.SNACK -> "SNACK"
     DailySlot.DINNER -> "CENA"
     DailySlot.EXERCISE -> "EJERCICIO"
-}
-
-internal fun LocalTime.formatHHmm(): String {
-    val hh = hour.toString().padStart(2, '0')
-    val mm = minute.toString().padStart(2, '0')
-    return "$hh:$mm"
 }
 
 internal fun formatHomeWeight(value: Float): String =

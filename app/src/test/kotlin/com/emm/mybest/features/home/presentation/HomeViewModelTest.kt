@@ -1,41 +1,21 @@
 package com.emm.mybest.features.home.presentation
 
-import com.emm.mybest.domain.models.DailyCompliance
-import com.emm.mybest.domain.models.DailySlot
-import com.emm.mybest.domain.models.DailySlotTimes
-import com.emm.mybest.domain.models.ExercisePlanEntry
-import com.emm.mybest.domain.models.MealPlanEntry
-import com.emm.mybest.domain.models.MealType
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
-import com.emm.mybest.domain.models.WeeklyExercisePlan
-import com.emm.mybest.domain.models.WeeklyMealPlan
 import com.emm.mybest.domain.models.WeightEntry
-import com.emm.mybest.domain.usecase.compliance.GetCompletionStreakUseCase
-import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
-import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
-import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
-import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
-import com.emm.mybest.domain.usecase.diet.UpsertMealUseCase
-import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
-import com.emm.mybest.domain.usecase.preferences.ObserveDailySlotTimesUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
 import com.emm.mybest.testing.MainDispatcherRule
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
@@ -52,48 +32,17 @@ class HomeViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val observeCompliance: ObserveDailyComplianceUseCase = mockk()
-    private val toggleMeal: ToggleMealComplianceUseCase = mockk(relaxed = true)
-    private val toggleExercise: ToggleExerciseComplianceUseCase = mockk(relaxed = true)
-    private val upsertMeal: UpsertMealUseCase = mockk(relaxed = true)
-    private val getMealPlan: GetWeeklyMealPlanUseCase = mockk()
-    private val getExercisePlan: GetWeeklyExercisePlanUseCase = mockk()
-    private val getCompletionStreak: GetCompletionStreakUseCase = mockk()
-    private val observeDailySlotTimes: ObserveDailySlotTimesUseCase = mockk()
     private val observeWeightProgress: ObserveWeightProgressUseCase = mockk()
     private val observePhotos: ObservePhotosUseCase = mockk()
     private val useCases: HomeUseCases = HomeUseCases(
-        observeDailyCompliance = observeCompliance,
-        getCompletionStreak = getCompletionStreak,
-        observeDailySlotTimes = observeDailySlotTimes,
-        getMealPlan = getMealPlan,
-        getExercisePlan = getExercisePlan,
-        toggleMeal = toggleMeal,
-        toggleExercise = toggleExercise,
-        upsertMeal = upsertMeal,
         observeWeightProgress = observeWeightProgress,
         observePhotos = observePhotos,
     )
 
-    private fun emptyCompliance() = DailyCompliance(
-        date = FIXED_DATE,
-        mealsDone = MealType.entries.associateWith { false },
-        exerciseDone = false,
-    )
-
     private fun buildViewModel(
-        mealPlan: WeeklyMealPlan = WeeklyMealPlan(emptyList()),
-        exercisePlan: WeeklyExercisePlan = WeeklyExercisePlan(emptyList()),
-        compliance: DailyCompliance = emptyCompliance(),
-        streak: Int = 0,
         weights: List<WeightEntry> = emptyList(),
         photos: List<ProgressPhoto> = emptyList(),
     ): HomeViewModel {
-        every { getMealPlan() } returns flowOf(mealPlan)
-        every { getExercisePlan() } returns flowOf(exercisePlan)
-        every { observeCompliance(any()) } returns flowOf(compliance)
-        every { getCompletionStreak(any()) } returns flowOf(streak)
-        every { observeDailySlotTimes() } returns flowOf(DailySlotTimes(emptyMap()))
         every { observeWeightProgress() } returns flowOf(weights)
         every { observePhotos() } returns flowOf(photos)
         return HomeViewModel(
@@ -103,104 +52,14 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `empty plan and no compliance yields 5 plan rows all done-false and zero ratio`() = runTest {
+    fun `loaded state carries today and its ISO week number`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
         val state = viewModel.state.value
         assertFalse(state.isLoading)
-        assertEquals(5, state.planRows.size)
-        state.planRows.forEach { row ->
-            assertFalse(row.done)
-            assertEquals("", row.description)
-        }
-        assertEquals(0f, state.completionRatio, 0.001f)
-        assertEquals(0, state.completedCount)
-    }
-
-    @Test
-    fun `plan with descriptions and compliance 2 meals plus exercise gives correct state`() = runTest {
-        val dow = DayOfWeek.SUNDAY
-        val mealPlan = WeeklyMealPlan(
-            listOf(
-                MealPlanEntry(dow, MealType.BREAKFAST, "Avena con frutas"),
-                MealPlanEntry(dow, MealType.LUNCH, "Arroz con pollo"),
-                MealPlanEntry(dow, MealType.DINNER, "Sopa de verduras"),
-                MealPlanEntry(dow, MealType.SNACK, "Manzana"),
-            ),
-        )
-        val exercisePlan = WeeklyExercisePlan(
-            listOf(ExercisePlanEntry(dow, detail = "Cardio 30 min")),
-        )
-        val compliance = DailyCompliance(
-            date = FIXED_DATE,
-            mealsDone = mapOf(
-                MealType.BREAKFAST to true,
-                MealType.LUNCH to true,
-                MealType.DINNER to false,
-                MealType.SNACK to false,
-            ),
-            exerciseDone = true,
-        )
-        val viewModel = buildViewModel(mealPlan, exercisePlan, compliance)
-        advanceUntilIdle()
-
-        val state = viewModel.state.value
-        val breakfastRow = state.planRows.first { it.slot == DailySlot.BREAKFAST }
-        val lunchRow = state.planRows.first { it.slot == DailySlot.LUNCH }
-        val dinnerRow = state.planRows.first { it.slot == DailySlot.DINNER }
-        val exerciseRow = state.planRows.first { it.slot == DailySlot.EXERCISE }
-        assertEquals("Avena con frutas", breakfastRow.description)
-        assertEquals(true, breakfastRow.done)
-        assertEquals(true, lunchRow.done)
-        assertEquals(false, dinnerRow.done)
-        assertEquals("Cardio 30 min", exerciseRow.description)
-        assertEquals(true, exerciseRow.done)
-        assertEquals(3, state.completedCount)
-        assertEquals(3f / 5f, state.completionRatio, 0.001f)
-    }
-
-    @Test
-    fun `ToggleSlot BREAKFAST true calls toggleMeal with correct args`() = runTest {
-        coEvery { toggleMeal(any(), any(), any()) } returns Unit
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
-
-        viewModel.onIntent(HomeIntent.ToggleSlot(DailySlot.BREAKFAST, true))
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { toggleMeal(FIXED_DATE, MealType.BREAKFAST, true) }
-    }
-
-    @Test
-    fun `ToggleSlot LUNCH false calls toggleMeal with correct args`() = runTest {
-        coEvery { toggleMeal(any(), any(), any()) } returns Unit
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
-
-        viewModel.onIntent(HomeIntent.ToggleSlot(DailySlot.LUNCH, false))
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { toggleMeal(FIXED_DATE, MealType.LUNCH, false) }
-    }
-
-    @Test
-    fun `ToggleSlot EXERCISE true calls toggleExercise with correct args`() = runTest {
-        coEvery { toggleExercise(any(), any()) } returns Unit
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
-
-        viewModel.onIntent(HomeIntent.ToggleSlot(DailySlot.EXERCISE, true))
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { toggleExercise(FIXED_DATE, true) }
-    }
-
-    @Test
-    fun `streak from use case propagates to state streakDays`() = runTest {
-        val viewModel = buildViewModel(streak = 7)
-        advanceUntilIdle()
-        assertEquals(7, viewModel.state.value.streakDays)
+        assertEquals(FIXED_DATE, state.today)
+        assertEquals(20, state.weekNumber)
     }
 
     @Test
@@ -245,99 +104,5 @@ class HomeViewModelTest {
         val state = viewModel.state.value
         assertEquals(PhotoType.TRUNK, state.lastPhotoType)
         assertEquals(4, state.lastPhotoDaysAgo)
-    }
-
-    @Test
-    fun `startEditMeal opens sheet with current description from planRow`() = runTest {
-        val dow = DayOfWeek.SUNDAY
-        val mealPlan = WeeklyMealPlan(
-            listOf(MealPlanEntry(dow, MealType.LUNCH, "Arroz con pollo")),
-        )
-        val viewModel = buildViewModel(mealPlan = mealPlan)
-        advanceUntilIdle()
-
-        viewModel.onIntent(HomeIntent.StartEditMeal(DailySlot.LUNCH))
-
-        val draft = viewModel.state.value.editingMeal
-        assertNotNull(draft)
-        assertEquals(DailySlot.LUNCH, draft?.slot)
-        assertEquals(MealType.LUNCH, draft?.type)
-        assertEquals("Arroz con pollo", draft?.description)
-    }
-
-    @Test
-    fun `startEditMeal for EXERCISE slot is no-op editingMeal stays null`() = runTest {
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
-
-        viewModel.onIntent(HomeIntent.StartEditMeal(DailySlot.EXERCISE))
-
-        assertNull(viewModel.state.value.editingMeal)
-    }
-
-    @Test
-    fun `updateMealDraft truncates input over 160 chars to exactly 160`() = runTest {
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
-
-        viewModel.onIntent(HomeIntent.StartEditMeal(DailySlot.BREAKFAST))
-        val over160 = "A".repeat(200)
-        viewModel.onIntent(HomeIntent.UpdateMealDraft(over160))
-
-        val description = viewModel.state.value.editingMeal?.description
-        assertEquals(160, description?.length)
-    }
-
-    @Test
-    fun `updateMealDraft under 160 chars is stored as-is`() = runTest {
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
-
-        viewModel.onIntent(HomeIntent.StartEditMeal(DailySlot.BREAKFAST))
-        val short = "Avena con frutas"
-        viewModel.onIntent(HomeIntent.UpdateMealDraft(short))
-
-        assertEquals(short, viewModel.state.value.editingMeal?.description)
-    }
-
-    @Test
-    fun `saveMealDraft calls upsertMeal with trimmed description and clears editingMeal`() = runTest {
-        coEvery { upsertMeal(any()) } returns Unit
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
-
-        viewModel.onIntent(HomeIntent.StartEditMeal(DailySlot.BREAKFAST))
-        viewModel.onIntent(HomeIntent.UpdateMealDraft("  Avena  "))
-        viewModel.onIntent(HomeIntent.SaveMealDraft)
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) {
-            upsertMeal(match { it.description == "Avena" && it.mealType == MealType.BREAKFAST })
-        }
-        assertNull(viewModel.state.value.editingMeal)
-    }
-
-    @Test
-    fun `saveMealDraft with empty editingMeal does nothing`() = runTest {
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
-
-        viewModel.onIntent(HomeIntent.SaveMealDraft)
-        advanceUntilIdle()
-
-        coVerify(exactly = 0) { upsertMeal(any()) }
-        assertNull(viewModel.state.value.editingMeal)
-    }
-
-    @Test
-    fun `cancelEditMeal clears editingMeal`() = runTest {
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
-
-        viewModel.onIntent(HomeIntent.StartEditMeal(DailySlot.BREAKFAST))
-        assertNotNull(viewModel.state.value.editingMeal)
-
-        viewModel.onIntent(HomeIntent.CancelEditMeal)
-        assertNull(viewModel.state.value.editingMeal)
     }
 }

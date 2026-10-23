@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.sp
  * | Token M3          | Family          | Style    | Use                                        |
  * |-------------------|-----------------|----------|--------------------------------------------|
  * | displayLarge      | Instrument Serif| Italic   | Hero number (−4.2 kg, 30/5 ratio)          |
- * | displayMedium     | Instrument Serif| Italic   | Secondary metric (streak counter)          |
+ * | displayMedium     | Instrument Serif| Italic   | Secondary metric                           |
  * | displaySmall      | Instrument Serif| Italic   | Auxiliary metric                           |
  * | headlineLarge     | Instrument Serif| Regular  | Section hero headline                      |
  * | headlineMedium    | Instrument Serif| Regular  | Sub-title ("Mantén la rutina.")            |
