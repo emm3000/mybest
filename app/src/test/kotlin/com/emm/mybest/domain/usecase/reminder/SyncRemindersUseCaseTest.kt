@@ -4,6 +4,7 @@ import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.reminder.CheckInReminderScheduler
 import com.emm.mybest.domain.reminder.PreOutingReminderScheduler
 import com.emm.mybest.domain.reminder.ReminderScheduler
+import com.emm.mybest.domain.reminder.ReminderSchedulers
 import com.emm.mybest.domain.reminder.WeekendReminderSchedulers
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.testing.FakeSetupRepository
@@ -61,8 +62,7 @@ class SyncRemindersUseCaseTest {
         backgroundScope.launch {
             SyncRemindersUseCase(
                 repository,
-                WeekendReminderSchedulers(preOuting, checkIn),
-                weighIn,
+                ReminderSchedulers(WeekendReminderSchedulers(preOuting, checkIn), weighIn),
             )()
         }
         runCurrent()
