@@ -48,6 +48,20 @@ class ObserveRelapsesUseCaseTest {
     }
 
     @Test
+    fun `a planned outing that returned at 05-00 broke only the return time limit`() = runTest {
+        val outing = planned(1, FRIDAY, KEPT.copy(returnTime = LocalTime(5, 0)))
+
+        assertEquals(listOf(Relapse(outing, setOf(RelapseReason.BROKE_LIMIT))), relapses(listOf(outing)))
+    }
+
+    @Test
+    fun `a planned outing that returned at 06-00 broke only the return time limit`() = runTest {
+        val outing = planned(1, FRIDAY, KEPT.copy(returnTime = LocalTime(6, 0)))
+
+        assertEquals(listOf(Relapse(outing, setOf(RelapseReason.BROKE_LIMIT))), relapses(listOf(outing)))
+    }
+
+    @Test
     fun `a planned outing pending its check-in did not break a limit`() = runTest {
         assertTrue(relapses(listOf(planned(1, FRIDAY, checkIn = null))).isEmpty())
     }
