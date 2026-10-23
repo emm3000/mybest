@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalTime
 
 /**
- * Keeps the weekend and weigh-in reminders in line with the setup.
+ * Keeps the weekend, weigh-in and debt reminders in line with the setup.
  */
 class SyncRemindersUseCase(
     private val setupRepository: SetupRepository,
@@ -26,6 +26,7 @@ class SyncRemindersUseCase(
         launch { sync(Setup::preOutingReminderTime, schedulers.weekend.preOuting) }
         launch { sync(Setup::checkInReminderTime, schedulers.weekend.checkIn) }
         launch { syncWeighIn() }
+        launch { sync(Setup::debtReminderTime, schedulers.debt) }
     }
 
     private suspend fun sync(field: (Setup) -> LocalTime?, scheduler: ReminderScheduler) {

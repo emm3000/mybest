@@ -23,11 +23,13 @@ import com.emm.mybest.data.WeightRepositoryImpl
 import com.emm.mybest.data.capture.InstalledAppsRepositoryImpl
 import com.emm.mybest.data.capture.NotificationAccessCheckerImpl
 import com.emm.mybest.data.reminder.CheckInReminderSchedulerImpl
+import com.emm.mybest.data.reminder.DebtReminderSchedulerImpl
 import com.emm.mybest.data.reminder.PreOutingReminderSchedulerImpl
 import com.emm.mybest.data.reminder.ReminderNotifier
 import com.emm.mybest.data.reminder.WeightReminderSchedulerImpl
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.reminder.CheckInReminderScheduler
+import com.emm.mybest.domain.reminder.DebtReminderScheduler
 import com.emm.mybest.domain.reminder.PreOutingReminderScheduler
 import com.emm.mybest.domain.reminder.ReminderDelays
 import com.emm.mybest.domain.reminder.ReminderSchedulers
@@ -88,6 +90,7 @@ import com.emm.mybest.domain.usecase.preouting.PreOutingUseCases
 import com.emm.mybest.domain.usecase.preouting.RecordWonNightUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveReturnTimesUseCase
+import com.emm.mybest.domain.usecase.reminder.GetInstallmentRemindersUseCase
 import com.emm.mybest.domain.usecase.reminder.IsCheckInReminderDueUseCase
 import com.emm.mybest.domain.usecase.reminder.IsPhotoReminderDueUseCase
 import com.emm.mybest.domain.usecase.reminder.IsPreOutingReminderDueUseCase
@@ -286,9 +289,11 @@ val appModule = module {
     single<CheckInReminderScheduler> { CheckInReminderSchedulerImpl(get(), get()) }
     factory { WeekendReminderSchedulers(get(), get()) }
     single<WeightReminderScheduler> { WeightReminderSchedulerImpl(get(), get()) }
-    factory { ReminderSchedulers(get(), get()) }
+    factory { ReminderSchedulers(get(), get(), get()) }
     factory { SyncRemindersUseCase(get(), get()) }
     factory { IsPhotoReminderDueUseCase(get(), get(), get()) }
     factory { IsCheckInReminderDueUseCase(get(), get(), get()) }
     factory { IsPreOutingReminderDueUseCase(get()) }
+    single<DebtReminderScheduler> { DebtReminderSchedulerImpl(get(), get()) }
+    factory { GetInstallmentRemindersUseCase(get(), get(), get()) }
 }

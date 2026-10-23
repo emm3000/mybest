@@ -35,12 +35,13 @@
 - Notificación local "Hoy te toca pesarte" cada 7 días, el día y la hora elegidos, con CTA → AddWeight.
 - `SyncRemindersUseCase` agenda o cancela el trabajo al cambiar el setup y al abrir la app; borrar el día o la hora lo cancela.
 - Foto de progreso (`Setup.isPhotoReminderEnabled`, apagada por defecto): ese mismo trabajo publica también "Toca tu foto de progreso" (CTA → Fotos) cuando la última foto tiene 28 días o más, o no hay ninguna.
+- Cuotas por vencer (`Setup.debtReminderTime`, sin default): un trabajo diario a esa hora publica una notificación por deuda con saldo pendiente cuya fecha de pago cae exactamente 3 días (`DEBT_REMINDER_LEAD_DAYS`) después del día de la app y cuya cuota de ese mes sigue sin pagar: "Tu cuota de <deuda> (S/ X) vence el <día>", con CTA → Deudas; X es la cuota, o el saldo restante si es menor. Un día de pago que no existe en el mes cae en su último día. Respeta el switch de notificaciones; borrar la hora cancela el trabajo.
 
 ## 8. Historial y Timeline
 - Calendario con días que tienen registros (peso, fotos).
 - Timeline de fotos de progreso por tipo.
 
 ## 9. Settings
-- Recordatorios: antes de salir, check-in de la mañana, día y hora de pesaje, foto de progreso cada 4 semanas y cuotas por vencer. Las cuotas por vencer aún no agendan trabajo.
+- Recordatorios: antes de salir, check-in de la mañana, día y hora de pesaje, foto de progreso cada 4 semanas y cuotas por vencer.
 - Acceso al plan de dieta y al plan de ejercicio.
 - Backup export/import (SAF).

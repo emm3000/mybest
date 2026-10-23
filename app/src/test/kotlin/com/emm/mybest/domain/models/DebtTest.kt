@@ -30,6 +30,16 @@ class DebtTest {
     }
 
     @Test
+    fun `the next installment is the installment while the balance covers it`() {
+        assertEquals(Money(20_000), debt(balance = Money(50_000)).nextInstallment)
+    }
+
+    @Test
+    fun `the next installment is the balance left when it is below the installment`() {
+        assertEquals(Money(15_000), debt(balance = Money(15_000)).nextInstallment)
+    }
+
+    @Test
     fun `a payment day outside 1 to 31 is rejected`() {
         val failures = listOf(0, 32).map { day -> runCatching { debt(Money.ZERO).copy(paymentDay = day) } }
 

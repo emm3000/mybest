@@ -2,6 +2,7 @@ package com.emm.mybest.domain.usecase.reminder
 
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.reminder.CheckInReminderScheduler
+import com.emm.mybest.domain.reminder.DebtReminderScheduler
 import com.emm.mybest.domain.reminder.PreOutingReminderScheduler
 import com.emm.mybest.domain.reminder.ReminderScheduler
 import com.emm.mybest.domain.reminder.ReminderSchedulers
@@ -37,6 +38,8 @@ private class RecordingPreOutingScheduler : RecordingScheduler(), PreOutingRemin
 
 private class RecordingCheckInScheduler : RecordingScheduler(), CheckInReminderScheduler
 
+private class RecordingDebtScheduler : RecordingScheduler(), DebtReminderScheduler
+
 private class RecordingWeightScheduler : WeightReminderScheduler {
     val calls = mutableListOf<Pair<DayOfWeek, LocalTime>?>()
 
@@ -57,12 +60,13 @@ class SyncRemindersUseCaseTest {
     private val preOuting = RecordingPreOutingScheduler()
     private val checkIn = RecordingCheckInScheduler()
     private val weighIn = RecordingWeightScheduler()
+    private val debt = RecordingDebtScheduler()
 
     private fun TestScope.startSync() {
         backgroundScope.launch {
             SyncRemindersUseCase(
                 repository,
-                ReminderSchedulers(WeekendReminderSchedulers(preOuting, checkIn), weighIn),
+                ReminderSchedulers(WeekendReminderSchedulers(preOuting, checkIn), weighIn, debt),
             )()
         }
         runCurrent()
@@ -179,5 +183,24 @@ class SyncRemindersUseCaseTest {
         save(WEIGH_IN.copy(isPhotoReminderEnabled = true))
 
         assertEquals(listOf(null, DayOfWeek.FRIDAY to MORNING), weighIn.calls)
+    }
+
+    @Test
+    fun `schedules the debt reminder when its time is set`() = runTest {
+        startSync()
+
+        save(Setup(debtReminderTime = MORNING))
+
+        assertEquals(listOf<LocalTime?>(null, MORNING), debt.calls)
+    }
+
+    @Test
+    fun `cancels the debt reminder when its time is cleared`() = runTest {
+        startSync()
+        save(Setup(debtReminderTime = MORNING))
+
+        save(Setup(debtReminderTime = null))
+
+        assertEquals(listOf<LocalTime?>(null, MORNING, null), debt.calls)
     }
 }
