@@ -1,13 +1,8 @@
 package com.emm.mybest.data.reminder
 
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.emm.mybest.MainActivity
 import com.emm.mybest.R
 import com.emm.mybest.core.navigation.ACTION_ADD_WEIGHT
 import com.emm.mybest.core.notification.WEIGHT_REMINDER_CHANNEL_ID
@@ -18,42 +13,28 @@ import org.koin.core.component.inject
 
 private const val WEIGHT_REMINDER_NOTIFICATION_ID = 1001
 
+private val WEIGH_IN_NOTIFICATION = ReminderNotification(
+    channelId = WEIGHT_REMINDER_CHANNEL_ID,
+    notificationId = WEIGHT_REMINDER_NOTIFICATION_ID,
+    content = ReminderContent(
+        action = ACTION_ADD_WEIGHT,
+        titleRes = R.string.weight_reminder_title,
+        textRes = R.string.weight_reminder_text,
+    ),
+)
+
 class WeightReminderWorker(
-    private val context: Context,
+    context: Context,
     workerParams: WorkerParameters,
 ) : CoroutineWorker(context, workerParams), KoinComponent {
 
     private val userPreferencesRepository: UserPreferencesRepository by inject()
+    private val reminderNotifier: ReminderNotifier by inject()
 
     override suspend fun doWork(): Result {
-        val notificationsEnabled = userPreferencesRepository.notificationsEnabled.first()
-        if (!notificationsEnabled) return Result.success()
-
-        showNotification()
-        return Result.success()
-    }
-
-    private fun showNotification() {
-        val intent = Intent(context, MainActivity::class.java).apply {
-            action = ACTION_ADD_WEIGHT
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        if (userPreferencesRepository.notificationsEnabled.first()) {
+            reminderNotifier.show(WEIGH_IN_NOTIFICATION)
         }
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            WEIGHT_REMINDER_NOTIFICATION_ID,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-
-        val notification = NotificationCompat.Builder(context, WEIGHT_REMINDER_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_progress_monochrome)
-            .setContentTitle(context.getString(R.string.weight_reminder_title))
-            .setContentText(context.getString(R.string.weight_reminder_text))
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
-
-        NotificationManagerCompat.from(context).notify(WEIGHT_REMINDER_NOTIFICATION_ID, notification)
+        return Result.success()
     }
 }
