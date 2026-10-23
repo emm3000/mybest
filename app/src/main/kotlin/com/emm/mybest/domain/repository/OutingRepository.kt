@@ -44,6 +44,14 @@ interface OutingRepository {
     suspend fun recordUnplanned(appDay: LocalDate): Long
 
     /**
+     * Records an unplanned outing on [appDay], pending its check-in, and removes the won night on [appDay] in one
+     * step, so either both happen or neither does. Returns the outing id.
+     *
+     * @throws IllegalStateException when [appDay] already has an outing; the won night is then kept.
+     */
+    suspend fun recordUnplannedReplacingWonNight(appDay: LocalDate): Long
+
+    /**
      * Saves [checkIn] on the outing with [outingId], replacing any earlier one.
      *
      * @throws IllegalStateException when no outing has [outingId].

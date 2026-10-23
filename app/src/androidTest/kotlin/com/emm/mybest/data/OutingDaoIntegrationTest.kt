@@ -5,6 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.data.entities.OutingDao
 import com.emm.mybest.data.entities.OutingEntity
+import com.emm.mybest.data.entities.WonNightEntity
 import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.OutingKind
 import kotlinx.coroutines.flow.first
@@ -48,6 +49,32 @@ class OutingDaoIntegrationTest {
         assertTrue(firstId > 0)
         assertEquals(-1L, secondId)
         assertEquals(listOf(OutingEntity(id = firstId, appDay = friday, kind = OutingKind.PLANNED)), outings)
+    }
+
+    @Test
+    fun insert_replacing_won_night_removes_the_won_night_on_that_app_day() = runBlocking {
+        database.wonNightDao().upsert(WonNightEntity(appDay = friday, estimatedCostCents = 38_000))
+        database.wonNightDao().upsert(WonNightEntity(appDay = saturday, estimatedCostCents = null))
+
+        val id = dao.insertReplacingWonNight(OutingEntity(appDay = friday, kind = OutingKind.UNPLANNED))
+
+        assertTrue(id > 0)
+        assertEquals(listOf(friday), dao.observeAll().first().map { it.appDay })
+        assertEquals(listOf(saturday), database.wonNightDao().observeRange(friday, saturday).first().map { it.appDay })
+    }
+
+    @Test
+    fun insert_replacing_won_night_keeps_the_won_night_when_the_app_day_already_has_an_outing() = runBlocking {
+        dao.insert(OutingEntity(appDay = friday, kind = OutingKind.PLANNED))
+        database.wonNightDao().upsert(WonNightEntity(appDay = friday, estimatedCostCents = 38_000))
+
+        val failure = runCatching {
+            dao.insertReplacingWonNight(OutingEntity(appDay = friday, kind = OutingKind.UNPLANNED))
+        }.exceptionOrNull()
+
+        assertTrue(failure is IllegalStateException)
+        assertEquals(listOf(friday), database.wonNightDao().observeRange(friday, friday).first().map { it.appDay })
+        assertEquals(listOf(OutingKind.PLANNED), dao.observeAll().first().map { it.kind })
     }
 
     @Test
