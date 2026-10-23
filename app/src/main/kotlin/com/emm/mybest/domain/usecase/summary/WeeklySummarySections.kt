@@ -11,4 +11,5 @@ data class WeeklySummarySections(
     val recovery: ObserveWeekRecoveryUseCase,
     val weekProgress: ObserveWeekProgressUseCase,
     val weighInTrend: ObserveWeighInTrendUseCase,
+    val money: ObserveWeekMoneyUseCase,
 )

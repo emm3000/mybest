@@ -1,27 +1,37 @@
 package com.emm.mybest.domain.usecase.summary
 
 import com.emm.mybest.core.datetime.AppDayClock
+import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.CheckIn
 import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.models.Debt
+import com.emm.mybest.domain.models.DebtPayment
+import com.emm.mybest.domain.models.GoalContribution
 import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.LimitsKept
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.OutingKind
+import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.ReturnTime
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.models.WeeklySummary
 import com.emm.mybest.domain.models.WeighInTrend
 import com.emm.mybest.domain.models.WeightEntry
+import com.emm.mybest.domain.models.WonNight
 import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.domain.usecase.dailycheck.ObserveWeekProgressUseCase
 import com.emm.mybest.domain.usecase.dailycheck.WeekProgress
+import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
+import com.emm.mybest.domain.usecase.goal.ObserveGoalProgressUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveReturnTimesUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeighInTrendUseCase
 import com.emm.mybest.testing.FakeDailyCheckRepository
+import com.emm.mybest.testing.FakeDebtRepository
 import com.emm.mybest.testing.FakeOutingRepository
+import com.emm.mybest.testing.FakePurchaseGoalRepository
 import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.FixedClock
 import io.mockk.every
@@ -47,6 +57,8 @@ private val FRIDAY = LocalDate(2026, 10, 23)
 private val SATURDAY = LocalDate(2026, 10, 24)
 private val SUNDAY = LocalDate(2026, 10, 25)
 private val NEXT_MONDAY = LocalDate(2026, 10, 26)
+private val OCTOBER = YearMonthValue(2026, 10)
+private val SEPTEMBER = YearMonthValue(2026, 9)
 private val LIMITS = Limits(money = Money(100_00), drinks = 4, returnTime = LocalTime(2, 0))
 
 private data class Records(
@@ -54,6 +66,11 @@ private data class Records(
     val checks: List<DailyCheck> = emptyList(),
     val setup: Setup = Setup(),
     val weights: List<Float> = emptyList(),
+    val wonNights: List<WonNight> = emptyList(),
+    val debts: List<Debt> = emptyList(),
+    val payments: List<DebtPayment> = emptyList(),
+    val goal: PurchaseGoal? = null,
+    val contributions: List<GoalContribution> = emptyList(),
 )
 
 class ObserveWeeklySummaryUseCaseTest {
@@ -70,7 +87,7 @@ class ObserveWeeklySummaryUseCaseTest {
         CheckIn(totalSpent = Money(spent), drinks = drinks, returnTime = returnTime, mood = 3)
 
     private fun useCaseOf(records: Records): ObserveWeeklySummaryUseCase {
-        val outingRepository = FakeOutingRepository(records.outings)
+        val outingRepository = FakeOutingRepository(records.outings, records.wonNights)
         val setupRepository = FakeSetupRepository(records.setup)
         val checkRepository = FakeDailyCheckRepository(records.checks)
         val relapses = ObserveRelapsesUseCase(outingRepository, setupRepository)
@@ -83,7 +100,18 @@ class ObserveWeeklySummaryUseCaseTest {
                 ),
                 weekProgress = ObserveWeekProgressUseCase(checkRepository, setupRepository),
                 weighInTrend = ObserveWeighInTrendUseCase(weightRepositoryOf(records.weights), setupRepository),
+                money = moneyOf(records, outingRepository),
             ),
+        )
+    }
+
+    private fun moneyOf(records: Records, outingRepository: FakeOutingRepository): ObserveWeekMoneyUseCase {
+        val debtRepository = FakeDebtRepository(records.debts, records.payments)
+        val goalRepository = FakePurchaseGoalRepository(records.goal, records.contributions)
+        return ObserveWeekMoneyUseCase(
+            outingRepository,
+            ObserveWeekDebtUseCase(ObserveDebtSummaryUseCase(debtRepository), debtRepository),
+            ObserveGoalProgressUseCase(goalRepository),
         )
     }
 
@@ -226,5 +254,63 @@ class ObserveWeeklySummaryUseCaseTest {
 
         val expected = WeighInTrend(latestKg = 80.5f, changeSincePreviousKg = -1.5f, remainingToTargetKg = 2.5f)
         assertEquals(expected, summaryOf(records).weighInTrend)
+    }
+
+    private fun debt(id: Long, balance: Long) =
+        Debt(id, "Debt $id", balance = Money(balance), installment = Money(100_00), paymentDay = 5)
+
+    @Test
+    fun `lists the won nights of the week with their estimated total`() = runTest {
+        val wonNights = listOf(
+            WonNight(LocalDate(2026, 10, 16), Money(300_00)),
+            WonNight(FRIDAY, Money(380_00)),
+            WonNight(SATURDAY, estimatedCost = null),
+        )
+
+        val money = summaryOf(Records(wonNights = wonNights)).money
+
+        assertEquals(wonNights.drop(1), money.wonNights)
+        assertEquals(Money(380_00), money.notSpentEstimated)
+    }
+
+    @Test
+    fun `sums the total debt balance`() = runTest {
+        val records = Records(debts = listOf(debt(1, 500_00), debt(2, 300_00)))
+
+        assertEquals(Money(800_00), summaryOf(records).money.debt.totalBalance)
+    }
+
+    @Test
+    fun `counts the installments paid this month against the number of debts`() = runTest {
+        val records = Records(
+            debts = listOf(debt(1, 500_00), debt(2, 300_00)),
+            payments = listOf(
+                DebtPayment(1, OCTOBER, Money(100_00)),
+                DebtPayment(1, SEPTEMBER, Money(100_00)),
+                DebtPayment(2, SEPTEMBER, Money(100_00)),
+            ),
+        )
+
+        val debt = summaryOf(records).money.debt
+
+        assertEquals(1, debt.installmentsPaidThisMonth)
+        assertEquals(2, debt.debtCount)
+    }
+
+    @Test
+    fun `gives the goal contributed against its price`() = runTest {
+        val contributions =
+            listOf(GoalContribution(1, MONDAY, Money(200_00)), GoalContribution(2, FRIDAY, Money(300_00)))
+        val records = Records(goal = PurchaseGoal("Laptop", Money(3000_00)), contributions = contributions)
+
+        val goal = summaryOf(records).money.goal
+
+        assertEquals(Money(500_00), goal?.contributed)
+        assertEquals(Money(3000_00), goal?.goal?.price)
+    }
+
+    @Test
+    fun `has no goal progress without a purchase goal`() = runTest {
+        assertNull(summaryOf(Records()).money.goal)
     }
 }

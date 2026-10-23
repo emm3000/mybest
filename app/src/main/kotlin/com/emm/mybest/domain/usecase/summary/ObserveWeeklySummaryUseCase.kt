@@ -18,6 +18,7 @@ class ObserveWeeklySummaryUseCase(
         sections.recovery(appDay),
         sections.weekProgress(appDay),
         sections.weighInTrend(),
+        sections.money(appDay),
         ::WeeklySummary,
     )
 }
