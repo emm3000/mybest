@@ -5,6 +5,7 @@ import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.WonNight
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.datetime.LocalDate
 
 /**
@@ -73,4 +74,10 @@ interface OutingRepository {
      * Records that the user did not go out on the night of [appDay]; recording it again changes nothing.
      */
     suspend fun recordNoOuting(appDay: LocalDate)
+
+    /**
+     * Whether [appDay] already holds an outing or a won night.
+     */
+    suspend fun hasDecisionOn(appDay: LocalDate): Boolean =
+        observeRange(appDay, appDay).first().isNotEmpty() || observeWonNights(appDay, appDay).first().isNotEmpty()
 }
