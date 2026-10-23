@@ -371,4 +371,13 @@
     <string name="check_in_reminder_channel_description">Aviso de la mañana para completar el check-in de tu salida</string>
     <string name="check_in_reminder_title">¿Cómo te fue anoche?</string>
     <string name="check_in_reminder_text">Completa tu check-in.</string>
+    <string name="summary_literal">%1$s</string>
+    <string name="summary_section_outings">SALIDAS</string>
+    <string name="summary_section_limits">LÍMITES</string>
+    <string name="summary_outings_count">Salidas</string>
+    <string name="summary_outings_spent">Gasto</string>
+    <string name="summary_outings_pending">Check-ins pendientes</string>
+    <string name="summary_limits_label">Topes</string>
+    <string name="summary_limits_kept">Cumpliste %1$d de %2$d</string>
+    <string name="summary_limits_none">Sin check-ins todavía</string>
 </resources>
