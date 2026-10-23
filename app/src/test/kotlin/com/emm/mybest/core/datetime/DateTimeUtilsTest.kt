@@ -9,6 +9,12 @@ import org.junit.Test
 class DateTimeUtilsTest {
 
     @Test
+    fun `YearMonthValue days spans the first to the last day of the month`() {
+        assertEquals(LocalDate(2026, 2, 1)..LocalDate(2026, 2, 28), YearMonthValue(2026, 2).days())
+        assertEquals(LocalDate(2028, 2, 1)..LocalDate(2028, 2, 29), YearMonthValue(2028, 2).days())
+    }
+
+    @Test
     fun `YearMonthValue validates month range`() {
         assertThrows(IllegalArgumentException::class.java) {
             YearMonthValue(year = 2026, month = 0)

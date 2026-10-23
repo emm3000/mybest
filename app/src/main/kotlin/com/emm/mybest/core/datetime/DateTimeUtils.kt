@@ -37,6 +37,8 @@ data class YearMonthValue(
         return (next - start).toInt()
     }
 
+    fun days(): ClosedRange<LocalDate> = atDay(FIRST_MONTH)..atDay(lengthOfMonth())
+
     companion object {
         fun from(date: LocalDate): YearMonthValue = YearMonthValue(date.year, date.month.ordinal + 1)
     }
