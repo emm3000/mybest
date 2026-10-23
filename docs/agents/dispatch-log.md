@@ -38,3 +38,5 @@ Last 20 PRs, oldest first. Model:effort is what actually ran, which may differ f
 | #44 | #15 | 3 | sonnet:medium | FIX FIRST | judgment |
 | #45 | #16 | 3 | sonnet:medium | FIX FIRST | judgment |
 | #48 | #18 | 3 | sonnet:medium | FIX FIRST | judgment |
+| #49 | #46 | 3 | sonnet:high | MERGE | - |
+| #50 | #17 | 3 | sonnet:high | FIX FIRST | checklist |
