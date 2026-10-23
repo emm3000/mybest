@@ -103,4 +103,19 @@ class OutingTest {
     fun `an outing with a check-in is not pending`() {
         assertEquals(false, plannedOuting(KEPT_CHECK_IN).isPendingCheckIn)
     }
+
+    @Test
+    fun `an outing that exceeded a limit has broken a limit`() {
+        assertEquals(true, plannedOuting(KEPT_CHECK_IN.copy(drinks = 5)).hasBrokenLimit)
+    }
+
+    @Test
+    fun `an outing within every limit has not broken a limit`() {
+        assertEquals(false, plannedOuting(KEPT_CHECK_IN).hasBrokenLimit)
+    }
+
+    @Test
+    fun `an outing pending its check-in has not broken a limit`() {
+        assertEquals(false, plannedOuting(checkIn = null).hasBrokenLimit)
+    }
 }
