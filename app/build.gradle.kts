@@ -68,7 +68,7 @@ android {
         applicationId = "com.emm.mybest"
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
+        versionCode = providers.gradleProperty("versionCode").map(String::toInt).getOrElse(1)
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
