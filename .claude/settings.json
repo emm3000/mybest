@@ -58,7 +58,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -e '.tool_input.command | ascii_downcase | (test(\"git\\\\b.*\\\\bcommit\") and test(\"co-authored-by\")) | not' > /dev/null || { echo 'Blocked: Co-Authored-By trailers are forbidden in this repo (CLAUDE.md)' >&2; exit 2; }"
+            "command": "jq -e '.tool_input.command | ascii_downcase | (test(\"^\\\\s*(cd [^&;]+(&&|;)\\\\s*)?git\\\\s+(-c\\\\s+\\\\S+\\\\s+)*commit\\\\b\") and test(\"co-authored-by\")) | not' > /dev/null || { echo 'Blocked: AI attribution trailers are forbidden in this repo (CLAUDE.md)' >&2; exit 2; }"
           }
         ]
       }
