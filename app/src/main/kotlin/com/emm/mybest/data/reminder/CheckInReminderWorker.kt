@@ -18,7 +18,7 @@ private val CHECK_IN_NOTIFICATION = ReminderNotification(
     content = ReminderContent(
         action = ACTION_CHECK_IN,
         titleRes = R.string.check_in_reminder_title,
-        textRes = R.string.check_in_reminder_text,
+        text = reminderText(R.string.check_in_reminder_text),
     ),
 )
 

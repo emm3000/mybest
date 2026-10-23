@@ -18,7 +18,7 @@ private val PRE_OUTING_NOTIFICATION = ReminderNotification(
     content = ReminderContent(
         action = ACTION_PRE_OUTING,
         titleRes = R.string.pre_outing_reminder_title,
-        textRes = R.string.pre_outing_reminder_text,
+        text = reminderText(R.string.pre_outing_reminder_text),
     ),
 )
 

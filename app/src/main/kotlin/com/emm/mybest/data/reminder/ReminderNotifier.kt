@@ -15,7 +15,7 @@ class ReminderNotifier(private val context: Context) {
         val built = NotificationCompat.Builder(context, notification.channelId)
             .setSmallIcon(R.drawable.ic_progress_monochrome)
             .setContentTitle(context.getString(content.titleRes))
-            .setContentText(context.getString(content.textRes))
+            .setContentText(content.text.resolve(context))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(openAppIntent(notification))
             .setAutoCancel(true)
