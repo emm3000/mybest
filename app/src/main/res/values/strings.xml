@@ -418,4 +418,8 @@
     <string name="summary_title">Resumen de la semana</string>
     <string name="summary_previous_week">Semana anterior</string>
     <string name="summary_next_week">Semana siguiente</string>
+    <string name="photo_reminder_channel_name">Foto de progreso</string>
+    <string name="photo_reminder_channel_description">Aviso en tu día de pesaje cuando toca una foto de progreso</string>
+    <string name="photo_reminder_title">Toca tu foto de progreso</string>
+    <string name="photo_reminder_text">Tómala hoy junto a tu pesaje.</string>
 </resources>
