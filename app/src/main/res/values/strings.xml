@@ -205,4 +205,36 @@
     <string name="pre_outing_won_night_added">+ %1$s a No gastado este mes (estimado)</string>
     <string name="pre_outing_day_already_decided">Esta noche ya tiene una decisión</string>
     <string name="pre_outing_won_night_added_unknown">Sumada a No gastado este mes (estimado)</string>
+
+    <string name="debts_title">Deudas</string>
+    <string name="debts_empty">Agrega tu primera deuda</string>
+    <string name="debts_add">Agregar deuda</string>
+    <string name="debts_row_details">%1$s · día %2$d · saldo %3$s</string>
+    <string name="debts_paid_this_month">PAGADO ESTE MES</string>
+    <string name="debts_mark_paid">MARCAR CUOTA PAGADA</string>
+    <string name="debts_paid">PAGADO</string>
+    <string name="debts_edit">EDITAR</string>
+    <string name="debts_delete">ELIMINAR</string>
+    <string name="debts_delete_confirm">Eliminar</string>
+    <string name="debts_form_title_add">NUEVA DEUDA</string>
+    <string name="debts_form_title_edit">EDITAR DEUDA</string>
+    <string name="debts_field_name">Nombre</string>
+    <string name="debts_field_balance">Saldo (S/)</string>
+    <string name="debts_field_installment">Cuota (S/)</string>
+    <string name="debts_field_payment_day">Día de pago (1–31)</string>
+    <string name="debts_form_save">Guardar</string>
+    <string name="debts_form_cancel">Cancelar</string>
+    <string name="debts_error_blank_name">Escribe un nombre</string>
+    <string name="debts_error_missing_balance">Escribe el saldo</string>
+    <string name="debts_error_negative_balance">El saldo no puede ser negativo</string>
+    <string name="debts_error_installment">La cuota debe ser mayor que cero</string>
+    <string name="debts_error_payment_day">El día de pago va de 1 a 31</string>
+    <string name="debts_delete_title">¿Eliminar deuda?</string>
+    <string name="debts_delete_message">Se borrará %1$s con sus pagos registrados.</string>
+    <string name="debts_action_failed">No se pudo completar la acción</string>
+    <string name="settings_debts_label">DEUDAS</string>
+    <plurals name="settings_debts_value">
+        <item quantity="one">%1$d deuda · %2$s</item>
+        <item quantity="other">%1$d deudas · %2$s</item>
+    </plurals>
 </resources>

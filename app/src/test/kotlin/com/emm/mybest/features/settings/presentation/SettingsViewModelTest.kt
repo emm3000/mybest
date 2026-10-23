@@ -3,6 +3,7 @@ package com.emm.mybest.features.settings.presentation
 import app.cash.turbine.test
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.models.Debt
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.RestoreResult
@@ -12,12 +13,15 @@ import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateWeighInReminderTimeUseCase
+import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
+import com.emm.mybest.testing.FakeDebtRepository
 import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -41,6 +45,7 @@ class SettingsViewModelTest {
         versionName: String = "1.0",
         versionCode: Int = 1,
         setupRepository: FakeSetupRepository = FakeSetupRepository(),
+        debtRepository: FakeDebtRepository = FakeDebtRepository(),
     ): SettingsViewModel = SettingsViewModel(
         userPreferencesRepository = preferencesRepository,
         exportDatabaseBackupUseCase = exportUseCase,
@@ -51,6 +56,7 @@ class SettingsViewModelTest {
             UpdateSetupUseCase(setupRepository),
             UpdateWeighInReminderTimeUseCase(setupRepository, scheduler),
         ),
+        observeDebtSummary = ObserveDebtSummaryUseCase(debtRepository),
         appVersionName = versionName,
         appVersionCode = versionCode,
     )
@@ -74,6 +80,17 @@ class SettingsViewModelTest {
             assertEquals("v1.0 · 1", item.appVersionLabel)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `state exposes the debt summary`() = runTest {
+        stubDefaults()
+        val debts = listOf(Debt(1, "Tarjeta", Money(320_000), Money(42_000), paymentDay = 15))
+        val viewModel = buildViewModel(debtRepository = FakeDebtRepository(debts))
+
+        val debtsState = viewModel.state.first { it.debts.count > 0 }.debts
+
+        assertEquals(SettingsDebtsState(count = 1, totalLabel = "S/ 3,200.00"), debtsState)
     }
 
     @Test

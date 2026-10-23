@@ -32,8 +32,8 @@ private val SETTINGS_GUT = 28.dp
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    callbacks: SettingsCallbacks,
     modifier: Modifier = Modifier,
-    bottomBar: @Composable () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -63,15 +63,18 @@ fun SettingsScreen(
         modifier = modifier,
         topBar = { SettingsAppBar() },
         snackbarHost = { HSnackbarHost(snackbarHostState) },
-        bottomBar = bottomBar,
+        bottomBar = callbacks.bottomBar,
     ) { paddingValues ->
         SettingsBody(
             state = state,
             paddingValues = paddingValues,
-            onReminderIntent = viewModel::onIntent,
-            onFieldOpen = { viewModel.onIntent(SettingsIntent.OnFieldOpen(it)) },
-            onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
-            onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
+            actions = SettingsBodyActions(
+                onReminderIntent = viewModel::onIntent,
+                onFieldOpen = { viewModel.onIntent(SettingsIntent.OnFieldOpen(it)) },
+                onDebtsClick = callbacks.onDebtsClick,
+                onExportClick = { backupExportLauncher.launch("mybest-backup.db") },
+                onImportClick = { backupImportLauncher.launch(arrayOf("*/*")) },
+            ),
         )
     }
 }
@@ -115,10 +118,7 @@ private fun SettingsAppBar() {
 private fun SettingsBody(
     state: SettingsState,
     paddingValues: androidx.compose.foundation.layout.PaddingValues,
-    onReminderIntent: (SettingsIntent.ReminderIntent) -> Unit,
-    onFieldOpen: (SettingsField) -> Unit,
-    onExportClick: () -> Unit,
-    onImportClick: () -> Unit,
+    actions: SettingsBodyActions,
 ) {
     Column(
         modifier = Modifier
@@ -128,9 +128,10 @@ private fun SettingsBody(
     ) {
         SettingsHero()
         Hairline()
-        SettingsGoalsSection(setup = state.goals.setup, onFieldOpen = onFieldOpen)
-        SettingsRemindersSection(setup = state.goals.setup, onIntent = onReminderIntent)
-        BackupRow(onExportClick = onExportClick, onImportClick = onImportClick)
+        SettingsGoalsSection(setup = state.goals.setup, onFieldOpen = actions.onFieldOpen)
+        SettingsDebtsRow(debts = state.debts, onClick = actions.onDebtsClick)
+        SettingsRemindersSection(setup = state.goals.setup, onIntent = actions.onReminderIntent)
+        BackupRow(onExportClick = actions.onExportClick, onImportClick = actions.onImportClick)
         Hairline()
         SettingsFooter(versionLabel = state.appVersionLabel)
     }
