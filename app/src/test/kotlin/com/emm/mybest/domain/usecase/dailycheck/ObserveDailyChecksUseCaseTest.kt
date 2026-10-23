@@ -15,7 +15,7 @@ private val THURSDAY = LocalDate(2026, 10, 22)
 class ObserveDailyChecksUseCaseTest {
 
     @Test
-    fun `emits the types done on the app day`() = runTest {
+    fun `emits the checks recorded on the app day`() = runTest {
         val repository = FakeDailyCheckRepository(
             listOf(
                 DailyCheck(FRIDAY, DailyCheckType.GYM, isDone = true),
@@ -24,8 +24,14 @@ class ObserveDailyChecksUseCaseTest {
             ),
         )
 
-        val done = ObserveDailyChecksUseCase(repository)(FRIDAY).first()
+        val recorded = ObserveDailyChecksUseCase(repository)(FRIDAY).first()
 
-        assertEquals(setOf(DailyCheckType.GYM), done)
+        assertEquals(
+            listOf(
+                DailyCheck(FRIDAY, DailyCheckType.GYM, isDone = true),
+                DailyCheck(FRIDAY, DailyCheckType.DIET, isDone = false),
+            ),
+            recorded,
+        )
     }
 }

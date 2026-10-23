@@ -25,6 +25,7 @@ import com.emm.mybest.testing.VirtualTimeClock
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -76,14 +77,13 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `loaded state carries today and its ISO week number`() = runTest {
+    fun `loaded state carries today`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
         val state = viewModel.state.value
         assertFalse(state.isLoading)
         assertEquals(FIXED_DATE, state.today)
-        assertEquals(20, state.weekNumber)
     }
 
     @Test
@@ -263,5 +263,48 @@ class HomeViewModelTest {
             listOf(HomeShortcut.PRE_OUTING, HomeShortcut.WEEKLY_SUMMARY),
             viewModel.state.value.shortcuts,
         )
+    }
+
+    private fun TestScope.keptChecks(vararg checks: DailyCheck): Int {
+        val viewModel = buildViewModel(dailyChecks = FakeDailyCheckRepository(checks.toList()))
+        advanceUntilIdle()
+        return viewModel.state.value.keptChecks
+    }
+
+    @Test
+    fun `a day with nothing answered has no kept check`() = runTest {
+        assertEquals(0, keptChecks())
+    }
+
+    @Test
+    fun `the four daily checks are the total`() = runTest {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertEquals(4, viewModel.state.value.totalChecks)
+    }
+
+    @Test
+    fun `a done target counts as kept`() = runTest {
+        assertEquals(1, keptChecks(DailyCheck(FIXED_DATE, DailyCheckType.GYM, true)))
+    }
+
+    @Test
+    fun `alcohol recorded as not drank counts as kept`() = runTest {
+        assertEquals(1, keptChecks(DailyCheck(FIXED_DATE, DailyCheckType.ALCOHOL, false)))
+    }
+
+    @Test
+    fun `alcohol recorded as drank does not count as kept`() = runTest {
+        val gym = DailyCheck(FIXED_DATE, DailyCheckType.GYM, true)
+
+        assertEquals(1, keptChecks(gym, DailyCheck(FIXED_DATE, DailyCheckType.ALCOHOL, true)))
+    }
+
+    @Test
+    fun `alcohol left unanswered adds nothing to the kept checks`() = runTest {
+        val gym = DailyCheck(FIXED_DATE, DailyCheckType.GYM, true)
+
+        assertEquals(2, keptChecks(gym, DailyCheck(FIXED_DATE, DailyCheckType.DIET, true)))
     }
 }

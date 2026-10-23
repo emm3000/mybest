@@ -38,16 +38,16 @@ private val SEGMENT_PADDING_VERTICAL = 10.dp
 
 @Composable
 internal fun HomeChecksSection(
-    checks: List<DailyCheckItem>,
+    model: HomeChecksModel,
     onToggle: (DailyCheckType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = SECTION_PADDING_HORIZONTAL)) {
         MicroLabel(
-            text = stringResource(R.string.home_checks_title).uppercase(),
+            text = stringResource(R.string.home_checks_title_format, model.keptChecks, model.totalChecks),
             modifier = Modifier.padding(vertical = SECTION_PADDING_VERTICAL),
         )
-        checks.forEach { item ->
+        model.items.forEach { item ->
             Hairline()
             DailyCheckRow(item = item, onToggle = { onToggle(item.type) })
         }
@@ -106,7 +106,7 @@ private fun Segment(text: String, isSelected: Boolean, onSelect: () -> Unit) {
 private fun HomeChecksSectionPreview() {
     AtelierTheme {
         HomeChecksSection(
-            checks = previewDailyChecks(),
+            model = HomeChecksModel(previewDailyChecks(), PREVIEW_KEPT_CHECKS, PREVIEW_TOTAL_CHECKS),
             onToggle = {},
         )
     }

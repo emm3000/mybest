@@ -12,9 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,15 +38,17 @@ import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
+import com.emm.mybest.ui.theme.AtelierInkSecondary
 import com.emm.mybest.ui.theme.AtelierTheme
 import org.koin.androidx.compose.koinViewModel
 
-private enum class HomeContentType { Header, Hairline, QuickActions, Checks, Week, Shortcuts }
+private enum class HomeContentType { Header, Headline, Hairline, QuickActions, Checks, Week, Shortcuts }
 
 private val ROW_PADDING_HORIZONTAL = 28.dp
 private val ROW_PADDING_VERTICAL = 14.dp
 private val QUICK_ACTION_HEIGHT_MIN = 80.dp
 private val QUICK_ACTION_CELL_SPACER = 4.dp
+private val SETTINGS_ICON_SIZE = 18.dp
 
 data class HomeCallbacks(
     val onWeightClick: () -> Unit,
@@ -130,13 +138,14 @@ private fun HomeLazyContent(
             .fillMaxSize()
             .padding(paddingValues),
     ) {
-        item(contentType = HomeContentType.Header) { HomeHeaderRow(state) }
+        item(contentType = HomeContentType.Header) { HomeHeaderRow(state, callbacks.onSettingsClick) }
+        item(contentType = HomeContentType.Headline) { HomeHeadline() }
         item(contentType = HomeContentType.Hairline) { Hairline() }
         item(contentType = HomeContentType.QuickActions) { HomeQuickActionsRow(state, callbacks) }
         item(contentType = HomeContentType.Hairline) { Hairline() }
         item(contentType = HomeContentType.Checks) {
             HomeChecksSection(
-                checks = state.checks,
+                model = HomeChecksModel(state.checks, state.keptChecks, state.totalChecks),
                 onToggle = { onIntent(HomeIntent.ToggleDailyCheck(it)) },
             )
         }
@@ -153,7 +162,7 @@ private fun HomeLazyContent(
 }
 
 @Composable
-private fun HomeHeaderRow(state: HomeState) {
+private fun HomeHeaderRow(state: HomeState, onSettingsClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -165,11 +174,24 @@ private fun HomeHeaderRow(state: HomeState) {
             text = formatHomeHeaderDate(state.today, state.dayOfWeek),
             style = MicroLabelStyle(tone = MicroLabelTone.Default),
         )
-        MicroLabel(
-            text = stringResource(R.string.home_week_format, state.weekNumber).uppercase(),
-            style = MicroLabelStyle(tone = MicroLabelTone.Dim),
-        )
+        IconButton(onClick = onSettingsClick) {
+            Icon(
+                imageVector = Icons.Outlined.Settings,
+                contentDescription = stringResource(R.string.nav_settings),
+                modifier = Modifier.size(SETTINGS_ICON_SIZE),
+                tint = AtelierInkSecondary,
+            )
+        }
     }
+}
+
+@Composable
+private fun HomeHeadline() {
+    Text(
+        text = stringResource(R.string.home_headline),
+        modifier = Modifier.padding(horizontal = ROW_PADDING_HORIZONTAL, vertical = ROW_PADDING_VERTICAL),
+        style = MaterialTheme.typography.headlineLarge,
+    )
 }
 
 @Composable
@@ -223,7 +245,6 @@ private fun HomeScreenPreview() {
         HomeScreenContent(
             state = HomeState(
                 isLoading = false,
-                weekNumber = 20,
                 checks = previewDailyChecks(),
                 shortcuts = HomeShortcut.entries,
             ),
