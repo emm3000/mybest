@@ -1,5 +1,6 @@
 package com.emm.mybest.features.home.presentation
 
+import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeekProgress
@@ -10,7 +11,7 @@ internal data class HomeInputs(
     val today: LocalDate,
     val weights: List<WeightEntry>,
     val photos: List<ProgressPhoto>,
-    val doneToday: Set<DailyCheckType>,
+    val recordedChecks: List<DailyCheck>,
     val weekProgress: Map<DailyCheckType, WeekProgress>,
     val routing: HomeRouting,
 )

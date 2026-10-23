@@ -1,5 +1,6 @@
 package com.emm.mybest.features.home.presentation
 
+import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
@@ -24,10 +25,12 @@ internal fun computeDailyCheckItems(inputs: HomeInputs): List<DailyCheckItem> =
     DailyCheckType.entries.map { type ->
         DailyCheckItem(
             type = type,
-            isDone = type in inputs.doneToday,
+            isDone = inputs.recordedChecks.any { it.type == type && it.isDone },
             progress = inputs.weekProgress[type],
         )
     }
 
 internal fun computeShortcuts(hasPendingCheckIn: Boolean): List<HomeShortcut> =
     HomeShortcut.entries.filter { hasPendingCheckIn || it != HomeShortcut.CHECK_IN }
+
+internal fun computeKeptChecks(recordedChecks: List<DailyCheck>): Int = recordedChecks.count { it.isKept() }

@@ -19,23 +19,25 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toJavaLocalDate
-import java.time.temporal.WeekFields
 
-private fun buildHomeState(inputs: HomeInputs, destination: HomeDestination): HomeState = HomeState(
-    isLoading = false,
-    today = inputs.today,
-    dayOfWeek = inputs.today.dayOfWeek,
-    weekNumber = inputs.today.toJavaLocalDate().get(WeekFields.ISO.weekOfWeekBasedYear()),
-    lastWeightKg = computeLastWeight(inputs.weights),
-    previousWeightKg = computePreviousWeight(inputs.weights),
-    photoCount = inputs.photos.size,
-    lastPhotoType = computeLastPhotoType(inputs.photos),
-    lastPhotoDaysAgo = computeLastPhotoDaysAgo(inputs.photos, inputs.today),
-    checks = computeDailyCheckItems(inputs),
-    destination = destination,
-    shortcuts = computeShortcuts(inputs.routing.hasPendingCheckIn),
-)
+private fun buildHomeState(inputs: HomeInputs, destination: HomeDestination): HomeState {
+    val checks = computeDailyCheckItems(inputs)
+    return HomeState(
+        isLoading = false,
+        today = inputs.today,
+        dayOfWeek = inputs.today.dayOfWeek,
+        lastWeightKg = computeLastWeight(inputs.weights),
+        previousWeightKg = computePreviousWeight(inputs.weights),
+        photoCount = inputs.photos.size,
+        lastPhotoType = computeLastPhotoType(inputs.photos),
+        lastPhotoDaysAgo = computeLastPhotoDaysAgo(inputs.photos, inputs.today),
+        checks = checks,
+        keptChecks = computeKeptChecks(inputs.recordedChecks),
+        totalChecks = DailyCheckType.entries.size,
+        destination = destination,
+        shortcuts = computeShortcuts(inputs.routing.hasPendingCheckIn),
+    )
+}
 
 class HomeViewModel(
     private val useCases: HomeUseCases,
@@ -95,8 +97,8 @@ class HomeViewModel(
         useCases.observeDailyChecks(today),
         useCases.observeWeekProgress(today),
         observeRouting(),
-    ) { weights, photos, doneToday, weekProgress, routing ->
-        HomeInputs(today, weights, photos, doneToday, weekProgress, routing)
+    ) { weights, photos, recordedChecks, weekProgress, routing ->
+        HomeInputs(today, weights, photos, recordedChecks, weekProgress, routing)
     }
 
     private fun observeRouting(): Flow<HomeRouting> = combine(

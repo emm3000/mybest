@@ -1,9 +1,8 @@
 package com.emm.mybest.domain.usecase.dailycheck
 
-import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.repository.DailyCheckRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 
 class ObserveDailyChecksUseCase(
@@ -11,10 +10,7 @@ class ObserveDailyChecksUseCase(
 ) {
 
     /**
-     * Emits the daily check types marked done on [appDay].
+     * Emits the daily checks recorded on [appDay], done or not; a check without a mark is absent.
      */
-    operator fun invoke(appDay: LocalDate): Flow<Set<DailyCheckType>> =
-        repository.observeRange(appDay, appDay).map { checks ->
-            checks.filter { it.isDone }.map { it.type }.toSet()
-        }
+    operator fun invoke(appDay: LocalDate): Flow<List<DailyCheck>> = repository.observeRange(appDay, appDay)
 }
