@@ -88,8 +88,8 @@ import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewerViewModel
 import com.emm.mybest.features.preouting.presentation.PreOutingViewModel
 import com.emm.mybest.features.settings.presentation.SettingsGoalsEditor
-import com.emm.mybest.features.settings.presentation.SettingsMoneySources
 import com.emm.mybest.features.settings.presentation.SettingsRemindersEditor
+import com.emm.mybest.features.settings.presentation.SettingsRowSources
 import com.emm.mybest.features.settings.presentation.SettingsViewModel
 import com.emm.mybest.features.weight.presentation.AddWeightViewModel
 import kotlinx.datetime.TimeZone
@@ -212,7 +212,7 @@ val appModule = module {
     factory { ObserveGoalProgressUseCase(get()) }
     factory { SavePurchaseGoalUseCase(get()) }
     factory { AddGoalContributionUseCase(get(), get()) }
-    factory { SettingsMoneySources(get(), get()) }
+    factory { SettingsRowSources(get(), get()) }
     factory { PurchaseGoalUseCases(get(), get(), get(), get(), get()) }
     viewModel { PurchaseGoalViewModel(get()) }
 

@@ -59,7 +59,7 @@ class SettingsViewModelTest {
             UpdateSetupUseCase(setupRepository),
             UpdateWeighInReminderTimeUseCase(setupRepository, scheduler),
         ),
-        moneySources = SettingsMoneySources(ObserveDebtSummaryUseCase(debtRepository), purchaseGoalRepository),
+        rowSources = SettingsRowSources(ObserveDebtSummaryUseCase(debtRepository), purchaseGoalRepository),
         appVersionName = versionName,
         appVersionCode = versionCode,
     )
