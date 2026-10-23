@@ -98,4 +98,20 @@ class MoneyTest {
     fun percentOfIsNullWhenWholeIsZero() {
         assertNull(Money(4600).percentOf(Money.ZERO))
     }
+
+    @Test
+    fun averageOfReturnsMeanOfAmounts() {
+        assertEquals(Money(200), averageOf(listOf(Money(100), Money(300))))
+    }
+
+    @Test
+    fun averageOfRoundsHalfUpToTheCent() {
+        assertEquals(Money(2), averageOf(listOf(Money(1), Money(2))))
+        assertEquals(Money(33), averageOf(listOf(Money(33), Money(33), Money(34))))
+    }
+
+    @Test
+    fun averageOfIsNullForEmptyList() {
+        assertNull(averageOf(emptyList()))
+    }
 }
