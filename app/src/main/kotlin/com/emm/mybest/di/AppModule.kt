@@ -7,25 +7,15 @@ import com.emm.mybest.core.coroutines.DefaultCoroutineDispatchers
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.BackupRepositoryImpl
-import com.emm.mybest.data.ComplianceRepositoryImpl
-import com.emm.mybest.data.ExercisePlanRepositoryImpl
 import com.emm.mybest.data.MIGRATION_2_3
 import com.emm.mybest.data.MIGRATION_3_4
-import com.emm.mybest.data.MealPlanRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepositoryImpl
 import com.emm.mybest.data.WeightRepositoryImpl
-import com.emm.mybest.data.entities.ExerciseComplianceDao
-import com.emm.mybest.data.entities.ExercisePlanDao
-import com.emm.mybest.data.entities.MealComplianceDao
-import com.emm.mybest.data.entities.MealPlanDao
 import com.emm.mybest.data.reminder.WeightReminderSchedulerImpl
 import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.BackupRepository
-import com.emm.mybest.domain.repository.ComplianceRepository
-import com.emm.mybest.domain.repository.ExercisePlanRepository
-import com.emm.mybest.domain.repository.MealPlanRepository
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.repository.WeightRepository
@@ -33,19 +23,11 @@ import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateDefaultReminderTimeUseCase
-import com.emm.mybest.domain.usecase.compliance.ObserveDailyComplianceUseCase
-import com.emm.mybest.domain.usecase.compliance.ToggleExerciseComplianceUseCase
-import com.emm.mybest.domain.usecase.compliance.ToggleMealComplianceUseCase
-import com.emm.mybest.domain.usecase.diet.GetWeeklyMealPlanUseCase
-import com.emm.mybest.domain.usecase.diet.UpsertMealUseCase
-import com.emm.mybest.domain.usecase.exercise.GetWeeklyExercisePlanUseCase
-import com.emm.mybest.domain.usecase.exercise.UpsertExerciseRoutineUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
 import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
-import com.emm.mybest.domain.usecase.preferences.ObserveDailySlotTimesUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.usecase.weight.GetNearestWeightOnDateUseCase
 import com.emm.mybest.domain.usecase.weight.ObserveWeightProgressUseCase
@@ -78,10 +60,6 @@ val appModule = module {
 
     single { get<AppDatabase>().dailyWeightDao() }
     single { get<AppDatabase>().progressPhotoDao() }
-    single<MealPlanDao> { get<AppDatabase>().mealPlanDao() }
-    single<ExercisePlanDao> { get<AppDatabase>().exercisePlanDao() }
-    single<MealComplianceDao> { get<AppDatabase>().mealComplianceDao() }
-    single<ExerciseComplianceDao> { get<AppDatabase>().exerciseComplianceDao() }
 
     single<CoroutineDispatchers> { DefaultCoroutineDispatchers() }
 
@@ -90,10 +68,6 @@ val appModule = module {
     single<WeightRepository> { WeightRepositoryImpl(get(), get()) }
     single<PhotoRepository> { PhotoRepositoryImpl(androidContext(), get(), get()) }
     single<BackupRepository> { BackupRepositoryImpl(androidContext(), get(), get()) }
-
-    single<MealPlanRepository> { MealPlanRepositoryImpl(get()) }
-    single<ExercisePlanRepository> { ExercisePlanRepositoryImpl(get()) }
-    single<ComplianceRepository> { ComplianceRepositoryImpl(get(), get()) }
     single { WorkManager.getInstance(androidContext()) }
     single<WeightReminderScheduler> { WeightReminderSchedulerImpl(get()) }
 
@@ -102,19 +76,6 @@ val appModule = module {
     factory { RestoreDatabaseBackupUseCase(get()) }
     factory { UpdateDefaultReminderTimeUseCase(get(), get()) }
 
-    // Diet use cases
-    factory { GetWeeklyMealPlanUseCase(get()) }
-    factory { UpsertMealUseCase(get()) }
-
-    // Exercise use cases
-    factory { GetWeeklyExercisePlanUseCase(get()) }
-    factory { UpsertExerciseRoutineUseCase(get()) }
-
-    // Compliance use cases
-    factory { ObserveDailyComplianceUseCase(get()) }
-    factory { ToggleMealComplianceUseCase(get()) }
-    factory { ToggleExerciseComplianceUseCase(get()) }
-    factory { ObserveDailySlotTimesUseCase(get()) }
     factory { HomeUseCases(get(), get()) }
 
     // Weight use cases
