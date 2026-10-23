@@ -82,4 +82,20 @@ class MoneyTest {
         assertNull(Money.parseOrNull("-5"))
         assertNull(Money.parseOrNull("12.345"))
     }
+
+    @Test
+    fun percentOfReturnsRoundedShareOfWhole() {
+        assertEquals(23, Money(4600).percentOf(Money(20000)))
+    }
+
+    @Test
+    fun percentOfRoundsHalfUp() {
+        assertEquals(1, Money(1).percentOf(Money(200)))
+        assertEquals(0, Money(1).percentOf(Money(201)))
+    }
+
+    @Test
+    fun percentOfIsNullWhenWholeIsZero() {
+        assertNull(Money(4600).percentOf(Money.ZERO))
+    }
 }
