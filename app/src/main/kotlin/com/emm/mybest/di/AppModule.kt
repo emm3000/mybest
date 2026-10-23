@@ -8,10 +8,12 @@ import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.BackupRepositoryImpl
 import com.emm.mybest.data.DailyCheckRepositoryImpl
+import com.emm.mybest.data.DebtRepositoryImpl
 import com.emm.mybest.data.MIGRATION_2_3
 import com.emm.mybest.data.MIGRATION_3_4
 import com.emm.mybest.data.OutingRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
+import com.emm.mybest.data.PurchaseGoalRepositoryImpl
 import com.emm.mybest.data.SetupRepositoryImpl
 import com.emm.mybest.data.UserPreferencesRepositoryImpl
 import com.emm.mybest.data.WeightRepositoryImpl
@@ -20,8 +22,10 @@ import com.emm.mybest.domain.media.MediaManager
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
 import com.emm.mybest.domain.repository.BackupRepository
 import com.emm.mybest.domain.repository.DailyCheckRepository
+import com.emm.mybest.domain.repository.DebtRepository
 import com.emm.mybest.domain.repository.OutingRepository
 import com.emm.mybest.domain.repository.PhotoRepository
+import com.emm.mybest.domain.repository.PurchaseGoalRepository
 import com.emm.mybest.domain.repository.SetupRepository
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.repository.WeightRepository
@@ -92,6 +96,11 @@ val appModule = module {
     single { get<AppDatabase>().wonNightDao() }
     single { get<AppDatabase>().noOutingAnswerDao() }
     single<OutingRepository> { OutingRepositoryImpl(get(), get(), get()) }
+
+    single { get<AppDatabase>().debtDao() }
+    single { get<AppDatabase>().purchaseGoalDao() }
+    single<DebtRepository> { DebtRepositoryImpl(get()) }
+    single<PurchaseGoalRepository> { PurchaseGoalRepositoryImpl(get()) }
 
     factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }

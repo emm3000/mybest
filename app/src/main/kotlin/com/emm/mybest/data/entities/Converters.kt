@@ -1,10 +1,15 @@
 package com.emm.mybest.data.entities
 
 import androidx.room.TypeConverter
+import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.OutingKind
 import com.emm.mybest.domain.models.PhotoType
 import kotlinx.datetime.LocalDate
+
+private const val YEAR_DIGITS = 4
+private const val MONTH_DIGITS = 2
+private const val MONTH_SEPARATOR = '-'
 
 class Converters {
 
@@ -37,4 +42,15 @@ class Converters {
     fun toOutingKind(value: String): OutingKind =
         OutingKind.entries.firstOrNull { it.name == value }
             ?: throw IllegalArgumentException("Unknown OutingKind value: $value")
+
+    @TypeConverter
+    fun fromYearMonth(month: YearMonthValue): String =
+        "${month.year.toString().padStart(YEAR_DIGITS, '0')}$MONTH_SEPARATOR" +
+            month.month.toString().padStart(MONTH_DIGITS, '0')
+
+    @TypeConverter
+    fun toYearMonth(value: String): YearMonthValue {
+        val (year, month) = value.split(MONTH_SEPARATOR)
+        return YearMonthValue(year.toInt(), month.toInt())
+    }
 }
