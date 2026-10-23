@@ -409,6 +409,7 @@
     <string name="summary_weight_setup">Registra tu peso para ver la tendencia</string>
     <string name="summary_section_money">DINERO</string>
     <string name="summary_money_debt_balance">Deuda total</string>
+    <string name="summary_money_debt_balance_today">Deuda total hoy</string>
     <string name="summary_money_installments_paid">Cuotas pagadas este mes</string>
     <string name="summary_money_debts_setup">Registra tus deudas para ver cuánto te queda</string>
     <string name="summary_money_goal_label">Meta: %1$s</string>

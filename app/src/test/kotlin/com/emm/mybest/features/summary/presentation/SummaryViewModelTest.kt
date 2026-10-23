@@ -303,6 +303,19 @@ class SummaryViewModelTest {
     }
 
     @Test
+    fun `a past week labels the debt balance as today's`() = runTest {
+        val money = WeekMoney(emptyList(), Money.ZERO, WeekDebt(Money(3_200_00), 1, 2), goal = null)
+        val viewModel = started(viewModel(EMPTY_SUMMARY.copy(money = money)))
+
+        viewModel.onIntent(SummaryIntent.OnPreviousWeekClick)
+        advanceUntilIdle()
+
+        val section = viewModel.state.value.sections.first { it.titleRes == R.string.summary_section_money }
+        val expected = line(R.string.summary_money_debt_balance_today, SummaryText.literal("S/ 3,200.00"))
+        assertEquals(expected, section.rows.first())
+    }
+
+    @Test
     fun `money section asks to set the debts and the goal when missing`() = runTest {
         val section = sectionOf(EMPTY_SUMMARY, R.string.summary_section_money)
 
