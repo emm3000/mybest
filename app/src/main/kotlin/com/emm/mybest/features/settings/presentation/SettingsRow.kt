@@ -125,7 +125,7 @@ private fun ExtraLabel(
 ) {
     val extraModifier = if (onExtraClick != null) Modifier.clickable(onClick = onExtraClick) else Modifier
     Text(
-        text = "+ $extra",
+        text = extra,
         modifier = extraModifier,
         style = TextStyle(
             fontFamily = AtelierMonoFamily,
