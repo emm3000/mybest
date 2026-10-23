@@ -75,8 +75,11 @@ class WeightReminderWorkerTest {
 
         val result = worker.doWork()
 
+        val active = notificationManager().awaitActiveNotifications { active ->
+            active.any { it.id == PHOTO_REMINDER_NOTIFICATION_ID }
+        }
         assertEquals(ListenableWorker.Result.success(), result)
-        assertTrue(notificationManager().activeNotifications.any { it.id == PHOTO_REMINDER_NOTIFICATION_ID })
+        assertTrue(active.any { it.id == PHOTO_REMINDER_NOTIFICATION_ID })
     }
 
     @Test
