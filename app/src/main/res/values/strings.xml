@@ -105,7 +105,6 @@
     </plurals>
     <string name="settings_goal_save">Guardar</string>
     <string name="settings_goal_clear">Borrar</string>
-    <string name="settings_goal_cancel">Cancelar</string>
     <string name="settings_goal_error_invalid_number">Escribe un número válido.</string>
     <string name="settings_goal_error_out_of_range">Elige entre 0 y 7 días.</string>
     <string name="settings_goal_error_not_positive">El peso debe ser mayor que cero.</string>
