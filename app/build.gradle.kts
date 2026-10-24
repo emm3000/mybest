@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kover)
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.ksp)
     id("jacoco")
     alias(libs.plugins.detekt)
     alias(libs.plugins.kotlin.serialization)
@@ -52,7 +52,7 @@ kover {
 }
 
 jacoco {
-    toolVersion = "0.8.12"
+    toolVersion = libs.versions.jacoco.get()
 }
 
 val releaseSigningProperties = rootProject.loadReleaseSigningProperties()
