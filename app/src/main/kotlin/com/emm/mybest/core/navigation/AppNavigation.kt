@@ -106,7 +106,6 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
                 onOpenViewer = { photoId -> navigator.navigate(Screen.PhotoViewer(photoId)) },
                 onCompare = { beforeId, afterId -> navigator.navigate(Screen.ComparePhotos(beforeId, afterId)) },
             ),
-            bottomBar = {},
             modifier = Modifier,
         )
     }
