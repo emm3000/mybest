@@ -5,12 +5,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      release_build:
-        description: Build and distribute release APK (slower)
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -23,8 +17,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    env:
-      RELEASE_BUILD: ${{ github.event_name == 'workflow_dispatch' && inputs.release_build && 'true' || 'false' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -66,22 +58,13 @@ jobs:
 
       - name: Build APK
         if: github.ref == 'refs/heads/main'
-        run: |
-          if [ "$RELEASE_BUILD" = "true" ]; then
-            ./gradlew :app:assembleRelease
-          else
-            ./gradlew :app:assembleQa
-          fi
+        run: ./gradlew :app:assembleRelease -PversionCode=${{ github.run_number }}
 
       - name: Resolve APK path
         if: github.ref == 'refs/heads/main'
         id: apk
         run: |
-          if [ "$RELEASE_BUILD" = "true" ]; then
-            APK_DIR="app/build/outputs/apk/release"
-          else
-            APK_DIR="app/build/outputs/apk/qa"
-          fi
+          APK_DIR="app/build/outputs/apk/release"
           APK_PATH=$(find "$APK_DIR" -maxdepth 1 -name '*.apk' -print -quit)
           if [ -z "$APK_PATH" ]; then
             echo "No APK found in $APK_DIR" >&2
