@@ -8,6 +8,7 @@ data class SettingsState(
     val appVersionLabel: String = "",
     val goals: SettingsGoals = SettingsGoals(),
     val goalRows: List<SettingsGoalRow> = Setup().toGoalRows(),
+    val reminders: SettingsReminders = Setup().toReminders(),
     val debts: SettingsDebtsState = SettingsDebtsState(),
     val purchaseGoal: SettingsPurchaseGoalState = SettingsPurchaseGoalState(),
     val capture: SettingsCaptureState = SettingsCaptureState(),
