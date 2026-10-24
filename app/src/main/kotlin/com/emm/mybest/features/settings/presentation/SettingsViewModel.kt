@@ -121,11 +121,7 @@ class SettingsViewModel(
             dependencies.restoreDatabaseBackupUseCase(sourceUri)
                 .onSuccess { result ->
                     when (result) {
-                        RestoreResult.RequiresRestart -> _effect.emit(
-                            SettingsEffect.ShowMessage(
-                                "Backup restaurado. Reinicia la app para aplicar.",
-                            ),
-                        )
+                        RestoreResult.RequiresRestart -> _effect.emit(SettingsEffect.BackupRestored)
                         RestoreResult.OtherSchemaVersion -> _effect.emit(SettingsEffect.BackupFromOtherVersion)
                     }
                 }.onFailure {
