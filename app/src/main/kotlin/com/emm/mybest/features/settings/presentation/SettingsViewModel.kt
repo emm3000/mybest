@@ -45,6 +45,7 @@ class SettingsViewModel(
             appVersionLabel = appVersionLabel,
             goals = goals,
             goalRows = goals.setup.toGoalRows(),
+            reminders = goals.setup.toReminders(),
             debts = rows.debts,
             purchaseGoal = rows.purchaseGoal,
             capture = rows.capture,

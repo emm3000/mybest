@@ -65,6 +65,6 @@ private fun SettingsSetupBody(
         SettingsPurchaseGoalRow(purchaseGoal = state.purchaseGoal, onClick = actions.onPurchaseGoalClick)
     }
     if (section.hasReminders) {
-        SettingsRemindersSection(setup = state.goals.setup, onIntent = actions.onReminderIntent)
+        SettingsRemindersSection(reminders = state.reminders, onIntent = actions.onReminderIntent)
     }
 }

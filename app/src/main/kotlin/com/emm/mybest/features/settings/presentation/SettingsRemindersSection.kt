@@ -11,8 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
-import com.emm.mybest.core.datetime.formatHhMm
-import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.ui.components.HSwitch
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
@@ -25,7 +23,7 @@ private val SWITCH_ROW_VERTICAL_PADDING = 22.dp
 
 @Composable
 internal fun SettingsRemindersSection(
-    setup: Setup,
+    reminders: SettingsReminders,
     onIntent: (SettingsIntent.ReminderIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -35,46 +33,31 @@ internal fun SettingsRemindersSection(
             style = MicroLabelStyle(tone = MicroLabelTone.Dim),
             modifier = Modifier.padding(start = SECTION_GUT, top = SECTION_TOP),
         )
-        ReminderRow(field = ReminderField.PRE_OUTING_TIME, setup = setup, onIntent = onIntent)
-        ReminderRow(field = ReminderField.CHECK_IN_TIME, setup = setup, onIntent = onIntent)
-        ReminderRow(field = ReminderField.WEIGH_IN_DAY, setup = setup, onIntent = onIntent)
-        ReminderRow(field = ReminderField.WEIGH_IN_TIME, setup = setup, onIntent = onIntent)
+        reminders.rows.forEach { row -> ReminderRow(row = row, onIntent = onIntent) }
         PhotoReminderRow(
-            isEnabled = setup.isPhotoReminderEnabled,
+            isEnabled = reminders.isPhotoReminderEnabled,
             onToggle = { onIntent(SettingsIntent.OnPhotoReminderToggle(it)) },
         )
         Hairline(inset = SECTION_GUT)
-        ReminderRow(field = ReminderField.DEBT_TIME, setup = setup, onIntent = onIntent)
+        ReminderRow(row = reminders.debtRow, onIntent = onIntent)
     }
 }
 
 @Composable
 private fun ReminderRow(
-    field: ReminderField,
-    setup: Setup,
+    row: SettingsReminderRow,
     onIntent: (SettingsIntent.ReminderIntent) -> Unit,
 ) {
     SettingsRow(
         params = SettingsRowParams(
-            label = stringResource(field.labelRes),
-            value = reminderValueText(field, setup),
-            extra = if (field.isSetIn(setup)) stringResource(R.string.settings_goal_clear) else null,
-            onValueClick = { onIntent(SettingsIntent.OnReminderOpen(field)) },
-            onExtraClick = { onIntent(SettingsIntent.OnReminderClear(field)) },
+            label = stringResource(row.labelRes),
+            value = row.value.resolve(),
+            extra = if (row.isSet) stringResource(R.string.settings_goal_clear) else null,
+            onValueClick = { onIntent(SettingsIntent.OnReminderOpen(row.field)) },
+            onExtraClick = { onIntent(SettingsIntent.OnReminderClear(row.field)) },
         ),
     )
     Hairline(inset = SECTION_GUT)
-}
-
-@Composable
-private fun reminderValueText(field: ReminderField, setup: Setup): String {
-    val day = setup.weighInDay.takeIf { field == ReminderField.WEIGH_IN_DAY }
-    val time = field.timeIn(setup)
-    return when {
-        day != null -> stringResource(day.weekdayRes)
-        time != null -> time.formatHhMm()
-        else -> stringResource(R.string.settings_goal_unset)
-    }
 }
 
 @Composable
