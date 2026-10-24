@@ -106,7 +106,7 @@ class PurchaseGoalViewModelTest {
 
         val state = send(viewModel(repository), *defineGoal("Zapatillas", "450"))
 
-        val goal = state.goal!!
+        val goal = checkNotNull(state.goal)
         assertEquals("Zapatillas", goal.name)
         assertEquals("S/ 450.00", goal.priceLabel)
         assertEquals("S/ 0.00", goal.contributedLabel)
@@ -151,7 +151,7 @@ class PurchaseGoalViewModelTest {
 
         val state = send(viewModel(repository), *contribute("180"))
 
-        val goal = state.goal!!
+        val goal = checkNotNull(state.goal)
         assertEquals("S/ 180.00", goal.contributedLabel)
         assertEquals("S/ 270.00", goal.leftLabel)
         assertEquals(40, goal.percent)
@@ -171,8 +171,8 @@ class PurchaseGoalViewModelTest {
 
         val state = send(viewModel(FakePurchaseGoalRepository(GOAL, contributions)))
 
-        assertEquals(listOf(2L, 3L, 1L), state.goal!!.contributions.map { it.id })
-        assertEquals("Viernes 23 octubre", state.goal!!.contributions.first().dayLabel)
+        assertEquals(listOf(2L, 3L, 1L), checkNotNull(state.goal).contributions.map { it.id })
+        assertEquals("Viernes 23 octubre", checkNotNull(state.goal).contributions.first().dayLabel)
     }
 
     @Test
@@ -182,10 +182,9 @@ class PurchaseGoalViewModelTest {
         val state = send(viewModel(repository), *contribute("0"))
 
         assertEquals(ContributionValidationError.NonPositiveAmount, state.contributionForm?.error)
-        assertEquals(
-            Money.ZERO,
-            state.goal!!.let { repository.observeContributions().first().fold(Money.ZERO) { t, c -> t + c.amount } },
-        )
+        checkNotNull(state.goal)
+        val contributed = repository.observeContributions().first().fold(Money.ZERO) { total, c -> total + c.amount }
+        assertEquals(Money.ZERO, contributed)
     }
 
     @Test
@@ -209,8 +208,8 @@ class PurchaseGoalViewModelTest {
             PurchaseGoalIntent.OnContributionDelete(2),
         )
 
-        assertEquals("S/ 100.00", state.goal!!.contributedLabel)
-        assertEquals(listOf(1L), state.goal!!.contributions.map { it.id })
+        assertEquals("S/ 100.00", checkNotNull(state.goal).contributedLabel)
+        assertEquals(listOf(1L), checkNotNull(state.goal).contributions.map { it.id })
     }
 
     @Test
@@ -220,8 +219,8 @@ class PurchaseGoalViewModelTest {
         val state = send(viewModel(FakePurchaseGoalRepository(GOAL), wonNights))
 
         assertEquals("S/ 380.00", state.notSpentLabel)
-        assertEquals("S/ 0.00", state.goal!!.contributedLabel)
-        assertEquals(0, state.goal!!.percent)
+        assertEquals("S/ 0.00", checkNotNull(state.goal).contributedLabel)
+        assertEquals(0, checkNotNull(state.goal).percent)
     }
 
     @Test
