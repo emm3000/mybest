@@ -6,9 +6,6 @@ import com.emm.mybest.BuildConfig
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.repository.RestoreResult
-import com.emm.mybest.domain.repository.UserPreferencesRepository
-import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
-import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,12 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
-    private val userPreferencesRepository: UserPreferencesRepository,
-    private val exportDatabaseBackupUseCase: ExportDatabaseBackupUseCase,
-    private val restoreDatabaseBackupUseCase: RestoreDatabaseBackupUseCase,
-    private val goalsEditor: SettingsGoalsEditor,
-    private val remindersEditor: SettingsRemindersEditor,
-    rowSources: SettingsRowSources,
+    private val dependencies: SettingsDependencies,
     appVersionName: String = BuildConfig.VERSION_NAME,
     appVersionCode: Int = BuildConfig.VERSION_CODE,
 ) : ViewModel() {
@@ -34,9 +26,9 @@ class SettingsViewModel(
     val effect = _effect.asSharedFlow()
 
     val state: StateFlow<SettingsState> = combine(
-        goalsEditor.goals,
-        remindersEditor.picker,
-        rowSources.observe(),
+        dependencies.goalsEditor.goals,
+        dependencies.remindersEditor.picker,
+        dependencies.rowSources.observe(),
     ) { goals, picker, rows ->
         SettingsState(
             reminderPicker = picker,
@@ -72,17 +64,17 @@ class SettingsViewModel(
     }
 
     private fun handleFieldIntent(intent: SettingsIntent.FieldIntent) {
-        viewModelScope.launch { goalsEditor.handle(intent)?.let { _effect.emit(it) } }
+        viewModelScope.launch { dependencies.goalsEditor.handle(intent)?.let { _effect.emit(it) } }
     }
 
     private fun handleReminderIntent(intent: SettingsIntent.ReminderIntent) {
-        viewModelScope.launch { remindersEditor.handle(intent)?.let { _effect.emit(it) } }
+        viewModelScope.launch { dependencies.remindersEditor.handle(intent)?.let { _effect.emit(it) } }
     }
 
     private fun replayOnboarding() {
         viewModelScope.launch {
             runCatching {
-                userPreferencesRepository.updateOnboardingCompleted(false)
+                dependencies.userPreferencesRepository.updateOnboardingCompleted(false)
             }.onFailure {
                 if (it is CancellationException) throw it
                 _effect.emit(
@@ -97,7 +89,7 @@ class SettingsViewModel(
     private fun updateNotificationsPreference(enabled: Boolean) {
         viewModelScope.launch {
             runCatching {
-                userPreferencesRepository.updateNotificationsEnabled(enabled)
+                dependencies.userPreferencesRepository.updateNotificationsEnabled(enabled)
             }.onFailure {
                 if (it is CancellationException) throw it
                 _effect.emit(
@@ -111,7 +103,7 @@ class SettingsViewModel(
 
     private fun exportBackup(targetUri: String) {
         viewModelScope.launch {
-            exportDatabaseBackupUseCase(targetUri)
+            dependencies.exportDatabaseBackupUseCase(targetUri)
                 .onSuccess {
                     _effect.emit(SettingsEffect.ShowMessage("Backup exportado correctamente"))
                 }.onFailure {
@@ -126,7 +118,7 @@ class SettingsViewModel(
 
     private fun importBackup(sourceUri: String) {
         viewModelScope.launch {
-            restoreDatabaseBackupUseCase(sourceUri)
+            dependencies.restoreDatabaseBackupUseCase(sourceUri)
                 .onSuccess { result ->
                     when (result) {
                         RestoreResult.RequiresRestart -> _effect.emit(
