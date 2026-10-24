@@ -100,7 +100,7 @@ private fun SettingsBody(
         SettingsDebtsRow(debts = state.debts, onClick = actions.onDebtsClick)
         SettingsPurchaseGoalRow(purchaseGoal = state.purchaseGoal, onClick = actions.onPurchaseGoalClick)
         SettingsCaptureRow(capture = state.capture, onClick = actions.onCaptureClick)
-        SettingsRemindersSection(setup = state.goals.setup, onIntent = actions.onReminderIntent)
+        SettingsRemindersSection(reminders = state.reminders, onIntent = actions.onReminderIntent)
         BackupRow(onExportClick = actions.onExportClick, onImportClick = actions.onImportClick)
         OnboardingReplayRow(onClick = actions.onReplayOnboardingClick)
         Hairline()
