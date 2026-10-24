@@ -95,7 +95,7 @@ private fun SettingsBody(
         SettingsHero()
         Hairline()
         SettingsGoalsSection(
-            params = SettingsGoalsSectionParams(setup = state.goals.setup, onFieldOpen = actions.onFieldOpen),
+            params = SettingsGoalsSectionParams(rows = state.goalRows, onFieldOpen = actions.onFieldOpen),
         )
         SettingsDebtsRow(debts = state.debts, onClick = actions.onDebtsClick)
         SettingsPurchaseGoalRow(purchaseGoal = state.purchaseGoal, onClick = actions.onPurchaseGoalClick)
