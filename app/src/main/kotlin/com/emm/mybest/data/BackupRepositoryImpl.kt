@@ -46,6 +46,7 @@ class BackupRepositoryImpl(
                 restoreFrom(backupCopy)
             } finally {
                 backupCopy.delete()
+                deleteSqliteSideFiles(backupCopy)
             }
         }
     }
@@ -60,10 +61,16 @@ class BackupRepositoryImpl(
     private fun restoreFrom(backupCopy: File): RestoreResult = when (readHeaderCheck(backupCopy)) {
         BackupHeaderCheck.NOT_SQLITE -> error("Invalid SQLite backup file")
         BackupHeaderCheck.OTHER_VERSION -> RestoreResult.OtherSchemaVersion
-        BackupHeaderCheck.SAME_VERSION -> {
-            replaceDatabaseWith(backupCopy)
-            RestoreResult.RequiresRestart
+        BackupHeaderCheck.SAME_VERSION -> restoreMatchingIdentity(backupCopy)
+    }
+
+    private fun restoreMatchingIdentity(backupCopy: File): RestoreResult {
+        val backupHash = readBackupIdentityHash(backupCopy)
+        if (backupHash == null || backupHash != readLiveIdentityHash(database)) {
+            return RestoreResult.OtherSchemaVersion
         }
+        replaceDatabaseWith(backupCopy)
+        return RestoreResult.RequiresRestart
     }
 
     private fun readHeaderCheck(file: File): BackupHeaderCheck = FileInputStream(file).use { input ->
@@ -78,6 +85,10 @@ class BackupRepositoryImpl(
         backupCopy.copyTo(databaseFile, overwrite = true)
         File("${databaseFile.path}-wal").delete()
         File("${databaseFile.path}-shm").delete()
+    }
+
+    private fun deleteSqliteSideFiles(file: File) {
+        SQLITE_SIDE_FILE_SUFFIXES.forEach { suffix -> File("${file.path}$suffix").delete() }
     }
 }
 
@@ -96,6 +107,7 @@ private fun hasSqlitePrefix(headerBytes: ByteArray): Boolean =
 private fun readUserVersion(headerBytes: ByteArray): Int =
     ByteBuffer.wrap(headerBytes, SQLITE_USER_VERSION_OFFSET, Int.SIZE_BYTES).int
 
+private val SQLITE_SIDE_FILE_SUFFIXES = listOf("-wal", "-shm", "-journal")
 private const val SQLITE_HEADER_LENGTH = 100
 private const val SQLITE_HEADER_PREFIX = "SQLite format 3"
 private const val SQLITE_USER_VERSION_OFFSET = 60
