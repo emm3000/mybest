@@ -16,7 +16,7 @@ import com.emm.mybest.ui.components.AtelierAppBar
 fun SummaryScreen(
     viewModel: SummaryViewModel,
     callbacks: SummaryCallbacks,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     bottomBar: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
