@@ -16,10 +16,10 @@ internal fun computePreviousWeight(weights: List<WeightEntry>): Float? =
     if (weights.size >= 2) weights[weights.size - 2].weight else null
 
 internal fun computeLastPhotoType(photos: List<ProgressPhoto>): PhotoType? =
-    photos.maxByOrNull { it.date }?.type
+    latestPhoto(photos)?.type
 
 internal fun computeLastPhotoDaysAgo(photos: List<ProgressPhoto>, today: LocalDate): Int? {
-    val lastDate = photos.maxByOrNull { it.date }?.date ?: return null
+    val lastDate = latestPhoto(photos)?.date ?: return null
     return (today.toEpochDays() - lastDate.toEpochDays()).coerceAtLeast(0).toInt()
 }
 
@@ -40,6 +40,9 @@ internal fun computeKeptChecks(recordedChecks: List<DailyCheck>): Int = recorded
 internal fun computeNextInstallment(share: InstallmentShare?): HomeInstallment? = share?.let {
     HomeInstallment(it.paymentDate.formatShortMonthDay(), it.debtName, it.installment.formatPen())
 }
+
+private fun latestPhoto(photos: List<ProgressPhoto>): ProgressPhoto? =
+    photos.maxWithOrNull(compareBy({ it.date }, { it.createdAt }))
 
 private fun answerFor(recordedChecks: List<DailyCheck>, type: DailyCheckType): HomeCheckAnswer {
     val recorded = recordedChecks.firstOrNull { it.type == type } ?: return HomeCheckAnswer.UNANSWERED

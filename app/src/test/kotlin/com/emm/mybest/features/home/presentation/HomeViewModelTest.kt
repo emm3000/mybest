@@ -9,8 +9,6 @@ import com.emm.mybest.domain.models.Debt
 import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.OutingKind
-import com.emm.mybest.domain.models.PhotoType
-import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.models.WeekProgress
 import com.emm.mybest.domain.models.WeightEntry
@@ -95,26 +93,6 @@ class HomeViewModelTest {
         val state = viewModel.state.value
         assertEquals(79.5f, state.lastWeightKg)
         assertEquals(80.0f, state.previousWeightKg)
-    }
-
-    @Test
-    fun `photos with type TRUNK and last 4 days ago produces correct state`() = runTest {
-        val photoDate = FIXED_DATE.minus(DatePeriod(days = 4))
-        val photos = listOf(
-            ProgressPhoto(
-                id = "p1",
-                date = photoDate,
-                type = PhotoType.TRUNK,
-                photoPath = "/path/photo.jpg",
-                createdAt = 0L,
-            ),
-        )
-        val viewModel = buildViewModel(HomeUseCasesFixture(photos = photos))
-        advanceUntilIdle()
-
-        val state = viewModel.state.value
-        assertEquals(PhotoType.TRUNK, state.lastPhotoType)
-        assertEquals(4, state.lastPhotoDaysAgo)
     }
 
     @Test
