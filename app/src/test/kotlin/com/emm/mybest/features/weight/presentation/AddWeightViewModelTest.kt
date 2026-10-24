@@ -70,6 +70,14 @@ class AddWeightViewModelTest {
     }
 
     @Test
+    fun `state exposes the weigh-in day as a lowercase label`() = runTest {
+        val viewModel = buildViewModel(setup = Setup(weighInDay = DayOfWeek.MONDAY))
+        advanceUntilIdle()
+
+        assertEquals("lunes", viewModel.state.value.weighInDayLabel)
+    }
+
+    @Test
     fun `unset setup leaves target and weigh-in day null`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()

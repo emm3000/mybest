@@ -150,6 +150,7 @@ private fun AddWeightScreenPreview() {
                 trend = WeighInTrend(latestKg = 81.2f, changeSincePreviousKg = -0.6f, remainingToTargetKg = 3.2f),
                 targetWeightKg = 78f,
                 weighInDay = DayOfWeek.MONDAY,
+                weighInDayLabel = "lunes",
                 isLoading = false,
             ),
             snackbarHostState = remember { SnackbarHostState() },
