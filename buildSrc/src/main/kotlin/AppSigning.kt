@@ -17,5 +17,9 @@ fun Project.loadReleaseSigningProperties(fileName: String = "keystore.properties
 }
 
 fun Properties.hasRequiredReleaseSigningKeys(): Boolean {
-    return releaseSigningKeys.all { key -> getProperty(key).isNullOrBlank().not() }
+    return missingReleaseSigningKeys().isEmpty()
+}
+
+fun Properties?.missingReleaseSigningKeys(): List<String> {
+    return releaseSigningKeys.filter { key -> this?.getProperty(key).isNullOrBlank() }
 }
