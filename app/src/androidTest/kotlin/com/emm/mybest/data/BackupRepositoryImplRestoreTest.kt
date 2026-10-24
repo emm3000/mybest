@@ -1,6 +1,7 @@
 package com.emm.mybest.data
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
 import com.emm.mybest.core.coroutines.CoroutineDispatchers
@@ -26,6 +27,7 @@ private object UnconfinedDispatchers : CoroutineDispatchers {
 
 private val KNOWN_DATE = LocalDate(2026, 3, 15)
 private const val SQLITE_USER_VERSION_OFFSET = 60L
+private const val WRONG_IDENTITY_HASH_SQL = "UPDATE room_master_table SET identity_hash = 'deadbeef' WHERE id = 42"
 
 private val V1_TABLES = setOf(
     "user_setup", "daily_check", "outing", "won_night", "no_outing_answer", "debt", "debt_payment",
@@ -121,6 +123,24 @@ class BackupRepositoryImplRestoreTest {
     }
 
     @Test
+    fun restore_refuses_a_backup_with_another_identity_hash_and_keeps_the_live_database_open() = runBlocking {
+        val backupFile = seedBackupFile().apply { executeSql(WRONG_IDENTITY_HASH_SQL) }
+
+        assertRestoreIsRefusedAndLiveDatabaseKept(backupFile)
+    }
+
+    @Test
+    fun restore_refuses_a_foreign_sqlite_file_at_the_same_user_version() = runBlocking {
+        val foreignFile = File(context.cacheDir, "test-foreign.db").apply { deleteWithSideFiles() }
+        SQLiteDatabase.openOrCreateDatabase(foreignFile, null).use { foreign ->
+            foreign.execSQL("CREATE TABLE t(x)")
+            foreign.version = AppDatabase.SCHEMA_VERSION
+        }
+
+        assertRestoreIsRefusedAndLiveDatabaseKept(foreignFile)
+    }
+
+    @Test
     fun export_and_restore_keep_one_row_of_every_v1_table() = runBlocking {
         deleteDatabaseFiles()
         val liveDb = openDatabase()
@@ -141,6 +161,36 @@ class BackupRepositoryImplRestoreTest {
         assertEquals(V1_TABLES, seeded.keys)
         assertTrue(seeded.values.all { it.size == 1 })
         assertEquals(seeded, restored)
+    }
+
+    private suspend fun assertRestoreIsRefusedAndLiveDatabaseKept(backupFile: File) {
+        deleteDatabaseFiles()
+        val liveDb = openDatabase()
+        liveDb.dailyWeightDao().upsert(DailyWeightEntity(id = "live1", date = KNOWN_DATE, weight = 71.0f))
+
+        val result = BackupRepositoryImpl(context, liveDb, UnconfinedDispatchers)
+            .restoreDatabase(backupFile.toURI().toString())
+        backupFile.deleteWithSideFiles()
+
+        assertEquals(RestoreResult.OtherSchemaVersion, result.getOrThrow())
+        assertTrue(liveDb.dailyWeightDao().observeAllOrdered().first().any { it.id == "live1" })
+        liveDb.close()
+        assertTrue(hasWeightAfterReopen("live1"))
+        assertFalse(hasWeightAfterReopen("seed1"))
+    }
+
+    private fun File.executeSql(sql: String) {
+        SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READWRITE).use { it.execSQL(sql) }
+        deleteSideFiles()
+    }
+
+    private fun File.deleteWithSideFiles() {
+        delete()
+        deleteSideFiles()
+    }
+
+    private fun File.deleteSideFiles() {
+        listOf("-wal", "-shm", "-journal").forEach { File("$path$it").delete() }
     }
 
     private fun snapshotOf(database: AppDatabase): Map<String, List<List<String?>>> =
@@ -167,6 +217,7 @@ class BackupRepositoryImplRestoreTest {
     }
 
     private suspend fun seedBackupFile(): File {
+        deleteDatabaseFiles()
         val seedDb = openDatabase()
         seedDb.dailyWeightDao().upsert(DailyWeightEntity(id = "seed1", date = KNOWN_DATE, weight = 68.5f))
         seedDb.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(FULL)").use { it.moveToFirst() }
