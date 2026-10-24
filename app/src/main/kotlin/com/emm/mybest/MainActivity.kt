@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.emm.mybest.core.navigation.AppRoot
+import com.emm.mybest.core.navigation.LaunchActionRule
 import com.emm.mybest.features.onboarding.presentation.OnboardingGate
 import com.emm.mybest.features.onboarding.presentation.OnboardingViewModel
 import com.emm.mybest.ui.theme.AtelierTheme
@@ -41,7 +42,7 @@ class MainActivity : ComponentActivity() {
         window.isNavigationBarContrastEnforced = false
         requestNotificationPermissionIfNeeded()
 
-        intentAction = intent.action
+        intentAction = resolveLaunchAction(savedInstanceState)
 
         setContent {
             DisposableEffect(Unit) {
@@ -61,10 +62,21 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(KEY_PENDING_ACTION, intentAction)
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         intentAction = intent.action
+    }
+
+    private fun resolveLaunchAction(savedInstanceState: Bundle?): String? {
+        val saved = savedInstanceState?.let { LaunchActionRule.Saved(it.getString(KEY_PENDING_ACTION)) }
+        val isFromHistory = intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0
+        return LaunchActionRule.resolve(saved, intent.action, isFromHistory)
     }
 
     private fun requestNotificationPermissionIfNeeded() {
@@ -81,6 +93,7 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
+        private const val KEY_PENDING_ACTION = "pending_launch_action"
         private val DefaultDarkScrim = android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)
     }
 }
