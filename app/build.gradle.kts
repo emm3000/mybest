@@ -69,7 +69,7 @@ if (isReleaseSigningRequired && !hasCompleteReleaseSigning) {
             )
         }
     }
-    tasks.matching { it.name == "preReleaseBuild" }.configureEach { dependsOn(verifyReleaseSigning) }
+    tasks.named { it == "preReleaseBuild" }.configureEach { dependsOn(verifyReleaseSigning) }
 }
 
 android {
