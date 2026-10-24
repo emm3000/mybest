@@ -13,10 +13,8 @@ import com.emm.mybest.testing.FakePurchaseGoalRepository
 import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -29,7 +27,6 @@ class SettingsReplayOnboardingFailureTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val preferencesRepository = mockk<UserPreferencesRepository> {
-        every { notificationsEnabled } returns flowOf(true)
         coEvery { updateOnboardingCompleted(any()) } throws IOException("disk full")
     }
 
