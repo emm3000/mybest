@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emm.mybest.R
-import com.emm.mybest.domain.media.MediaManager
+import com.emm.mybest.domain.media.PhotoCaptureFiles
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.features.photo.presentation.components.CompareFooter
 import com.emm.mybest.features.photo.presentation.components.CompareHero
@@ -33,7 +33,7 @@ import com.emm.mybest.ui.components.atelier.TrunkSilhouette
 @Composable
 fun PhotosScreen(
     viewModel: PhotosViewModel,
-    mediaManager: MediaManager,
+    photoCaptureFiles: PhotoCaptureFiles,
     onBack: () -> Unit,
     onOpenViewer: (String) -> Unit,
     onCompare: (String, String) -> Unit,
@@ -45,7 +45,7 @@ fun PhotosScreen(
 
     val cameraHandler = rememberPhotoCameraHandler(
         snackbarHostState = snackbarHostState,
-        mediaManager = mediaManager,
+        photoCaptureFiles = photoCaptureFiles,
         onPhotoCaptured = { uri -> viewModel.onIntent(PhotosIntent.OnPhotoCaptured(uri)) },
     )
 

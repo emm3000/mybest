@@ -24,8 +24,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.emm.mybest.R
-import com.emm.mybest.domain.media.MediaManager
+import com.emm.mybest.domain.media.PhotoCaptureFiles
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,7 +40,7 @@ internal data class PhotoCameraHandler(
 @Composable
 internal fun rememberPhotoCameraHandler(
     snackbarHostState: SnackbarHostState,
-    mediaManager: MediaManager,
+    photoCaptureFiles: PhotoCaptureFiles,
     onPhotoCaptured: (String) -> Unit,
 ): PhotoCameraHandler {
     val context = LocalContext.current
@@ -57,7 +58,7 @@ internal fun rememberPhotoCameraHandler(
         contract = ActivityResultContracts.RequestPermission(),
     ) { isGranted ->
         if (isGranted) {
-            val uri = mediaManager.generatePhotoUri()
+            val uri = photoCaptureFiles.createCaptureUri().toUri()
             tempPhotoUri = uri
             cameraLauncher.launch(uri)
         } else {
@@ -68,7 +69,7 @@ internal fun rememberPhotoCameraHandler(
     return remember(permissionLauncher, cameraLauncher) {
         val launchAction: () -> Unit = {
             checkAndLaunch(context, permissionLauncher) {
-                val uri = mediaManager.generatePhotoUri()
+                val uri = photoCaptureFiles.createCaptureUri().toUri()
                 tempPhotoUri = uri
                 cameraLauncher.launch(uri)
             }
