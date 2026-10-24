@@ -11,8 +11,6 @@ import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.BackupRepositoryImpl
 import com.emm.mybest.data.DailyCheckRepositoryImpl
 import com.emm.mybest.data.DebtRepositoryImpl
-import com.emm.mybest.data.MIGRATION_2_3
-import com.emm.mybest.data.MIGRATION_3_4
 import com.emm.mybest.data.NotificationCaptureRepositoryImpl
 import com.emm.mybest.data.OutingRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
@@ -28,6 +26,7 @@ import com.emm.mybest.data.reminder.DebtReminderSchedulerImpl
 import com.emm.mybest.data.reminder.PreOutingReminderSchedulerImpl
 import com.emm.mybest.data.reminder.ReminderNotifier
 import com.emm.mybest.data.reminder.WeightReminderSchedulerImpl
+import com.emm.mybest.data.withAppMigrations
 import com.emm.mybest.domain.media.PhotoCaptureFiles
 import com.emm.mybest.domain.reminder.CheckInReminderScheduler
 import com.emm.mybest.domain.reminder.DebtReminderScheduler
@@ -152,8 +151,7 @@ val appModule = module {
             androidContext(),
             AppDatabase::class.java,
             AppDatabase.DB_NAME,
-        ).addMigrations(MIGRATION_2_3, MIGRATION_3_4)
-            .fallbackToDestructiveMigration(dropAllTables = true)
+        ).withAppMigrations()
             .build()
     }
 

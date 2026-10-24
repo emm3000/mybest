@@ -1,6 +1,5 @@
 package com.emm.mybest.data
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -47,9 +46,6 @@ import com.emm.mybest.data.entities.WonNightEntity
     ],
     version = AppDatabase.SCHEMA_VERSION,
     exportSchema = true,
-    autoMigrations = [
-        AutoMigration(from = 1, to = 2),
-    ],
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -67,5 +63,6 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         const val DB_NAME = "my_best_db"
         const val SCHEMA_VERSION = 10
+        const val V1_SCHEMA_VERSION = 10
     }
 }

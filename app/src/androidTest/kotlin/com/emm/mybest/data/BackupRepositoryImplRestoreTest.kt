@@ -225,7 +225,7 @@ class BackupRepositoryImplRestoreTest {
 
     private fun openDatabase(): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DB_NAME)
-            .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+            .withAppMigrations()
             .build()
 
     private fun deleteDatabaseFiles() {
