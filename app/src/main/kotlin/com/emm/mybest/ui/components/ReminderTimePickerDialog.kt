@@ -51,22 +51,27 @@ import com.emm.mybest.R
 import com.emm.mybest.ui.theme.AtelierTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalTime
 import kotlin.math.abs
 
 private const val TIME_PICKER_VISIBLE_ITEM_COUNT = 5
 private const val TIME_PICKER_CENTER_PADDING_ITEMS = TIME_PICKER_VISIBLE_ITEM_COUNT / 2
 private val TIME_PICKER_ITEM_HEIGHT = 44.dp
+private const val PREVIEW_MORNING_HOUR = 8
+private const val PREVIEW_MORNING_MINUTE = 30
+private const val PREVIEW_LAST_HOUR = 23
+private const val PREVIEW_LAST_MINUTE = 59
+private val PREVIEW_MORNING_TIME = LocalTime(PREVIEW_MORNING_HOUR, PREVIEW_MORNING_MINUTE)
+private val PREVIEW_LAST_TIME = LocalTime(PREVIEW_LAST_HOUR, PREVIEW_LAST_MINUTE)
 
 @Composable
 fun ReminderTimePickerDialog(
-    initialHour: Int,
-    initialMinute: Int,
+    initialTime: LocalTime,
     onConfirm: (hour: Int, minute: Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
     HTimePickerDialog(
-        initialHour = initialHour,
-        initialMinute = initialMinute,
+        initialTime = initialTime,
         onConfirm = onConfirm,
         onDismiss = onDismiss,
     )
@@ -74,13 +79,14 @@ fun ReminderTimePickerDialog(
 
 @Composable
 internal fun HTimePickerDialog(
-    initialHour: Int,
-    initialMinute: Int,
+    initialTime: LocalTime,
     onConfirm: (hour: Int, minute: Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var selectedHour by rememberSaveable(initialHour) { mutableIntStateOf(initialHour.coerceIn(0, 23)) }
-    var selectedMinute by rememberSaveable(initialMinute) { mutableIntStateOf(initialMinute.coerceIn(0, 59)) }
+    var selectedHour by rememberSaveable(initialTime.hour) { mutableIntStateOf(initialTime.hour.coerceIn(0, 23)) }
+    var selectedMinute by rememberSaveable(initialTime.minute) {
+        mutableIntStateOf(initialTime.minute.coerceIn(0, 59))
+    }
     val hours = remember { (0..23).toList() }
     val minutes = remember { (0..59).toList() }
     BasicAlertDialog(onDismissRequest = onDismiss) {
@@ -100,8 +106,7 @@ internal fun HTimePickerDialog(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     TimePickerColumn(
-                        label = stringResource(R.string.time_picker_hour_label),
-                        values = hours,
+                        column = TimePickerColumnSpec(stringResource(R.string.time_picker_hour_label), hours),
                         selectedValue = selectedHour,
                         onValueChange = { selectedHour = it },
                         modifier = Modifier.weight(1f),
@@ -113,8 +118,7 @@ internal fun HTimePickerDialog(
                         fontWeight = FontWeight.SemiBold,
                     )
                     TimePickerColumn(
-                        label = stringResource(R.string.time_picker_minute_label),
-                        values = minutes,
+                        column = TimePickerColumnSpec(stringResource(R.string.time_picker_minute_label), minutes),
                         selectedValue = selectedMinute,
                         onValueChange = { selectedMinute = it },
                         modifier = Modifier.weight(1f),
@@ -182,12 +186,12 @@ private fun TimePickerHeader(
 
 @Composable
 private fun TimePickerColumn(
-    label: String,
-    values: List<Int>,
+    column: TimePickerColumnSpec,
     selectedValue: Int,
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val (label, values) = column
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = values.indexOf(selectedValue).coerceAtLeast(0))
     val scope = rememberCoroutineScope()
     val currentOnValueChange by rememberUpdatedState(onValueChange)
@@ -237,10 +241,12 @@ private fun TimePickerColumn(
                 items(count = values.size) { index ->
                     val value = values[index]
                     TimePickerCell(
-                        value = value,
-                        isSelected = value == selectedValue,
-                        distanceFromSelection = abs(value - selectedValue),
-                        cellContentDescription = "$label $value",
+                        cell = TimePickerCellModel(
+                            value = value,
+                            isSelected = value == selectedValue,
+                            distanceFromSelection = abs(value - selectedValue),
+                            contentDescription = "$label $value",
+                        ),
                         onClick = {
                             currentOnValueChange(value)
                             scope.launch {
@@ -258,17 +264,14 @@ private fun TimePickerColumn(
 
 @Composable
 private fun TimePickerCell(
-    value: Int,
-    isSelected: Boolean,
-    distanceFromSelection: Int,
-    cellContentDescription: String,
+    cell: TimePickerCellModel,
     onClick: () -> Unit,
 ) {
     val cs = MaterialTheme.colorScheme
     val textColor by animateColorAsState(
         targetValue = when {
-            isSelected -> cs.onSurface
-            distanceFromSelection == 1 -> cs.onSurface.copy(alpha = 0.72f)
+            cell.isSelected -> cs.onSurface
+            cell.distanceFromSelection == 1 -> cs.onSurface.copy(alpha = 0.72f)
             else -> cs.onSurfaceVariant.copy(alpha = 0.72f)
         },
         animationSpec = tween(durationMillis = 150),
@@ -279,8 +282,8 @@ private fun TimePickerCell(
         modifier = Modifier.fillMaxWidth().height(
             TIME_PICKER_ITEM_HEIGHT,
         ).semantics(mergeDescendants = true) {
-            contentDescription = cellContentDescription
-            selected = isSelected
+            contentDescription = cell.contentDescription
+            selected = cell.isSelected
         },
         color = Color.Transparent,
         contentColor = cs.onSurface,
@@ -289,9 +292,9 @@ private fun TimePickerCell(
     ) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Text(
-                text = formatTwoDigits(value),
+                text = formatTwoDigits(cell.value),
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    fontWeight = if (cell.isSelected) FontWeight.Bold else FontWeight.Normal,
                 ),
                 color = textColor,
             )
@@ -316,7 +319,7 @@ private fun formatTwoDigits(value: Int): String = value.toString().padStart(2, '
 private fun ReminderTimePickerDialogPreview() {
     AtelierTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            HTimePickerDialog(initialHour = 8, initialMinute = 30, onConfirm = { _, _ -> }, onDismiss = {})
+            HTimePickerDialog(initialTime = PREVIEW_MORNING_TIME, onConfirm = { _, _ -> }, onDismiss = {})
         }
     }
 }
@@ -326,7 +329,7 @@ private fun ReminderTimePickerDialogPreview() {
 private fun ReminderTimePickerDialogEdgeCasePreview() {
     AtelierTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            HTimePickerDialog(initialHour = 23, initialMinute = 59, onConfirm = { _, _ -> }, onDismiss = {})
+            HTimePickerDialog(initialTime = PREVIEW_LAST_TIME, onConfirm = { _, _ -> }, onDismiss = {})
         }
     }
 }

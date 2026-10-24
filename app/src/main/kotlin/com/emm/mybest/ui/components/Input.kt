@@ -111,10 +111,12 @@ fun HInput(
                 cursorBrush = SolidColor(cs.onSurface),
                 decorationBox = { innerTextField ->
                     HInputDecoration(
-                        value = value,
-                        placeholder = placeholder,
-                        leadingIcon = leadingIcon,
-                        trailingIcon = trailingIcon,
+                        content = InputDecorationContent(
+                            value = value,
+                            placeholder = placeholder,
+                            leadingIcon = leadingIcon,
+                            trailingIcon = trailingIcon,
+                        ),
                         singleLine = singleLine,
                         innerTextField = innerTextField,
                     )
@@ -153,36 +155,29 @@ private fun inputTextColor(enabled: Boolean): androidx.compose.ui.graphics.Color
 
 @Composable
 private fun HInputDecoration(
-    value: String,
-    placeholder: String?,
-    leadingIcon: (@Composable () -> Unit)?,
-    trailingIcon: (@Composable () -> Unit)?,
+    content: InputDecorationContent,
     singleLine: Boolean,
     innerTextField: @Composable () -> Unit,
 ) {
     val boxAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart
     val trailingAlignment = if (singleLine) Alignment.CenterEnd else Alignment.TopEnd
-    val placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+    val layout = InputSlotLayout(
+        alignment = boxAlignment,
+        hasLeadingIcon = content.leadingIcon != null,
+        hasTrailingIcon = content.trailingIcon != null,
+    )
 
     Box(
         modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
         contentAlignment = boxAlignment,
     ) {
-        LeadingIconSlot(icon = leadingIcon, alignment = boxAlignment)
+        LeadingIconSlot(icon = content.leadingIcon, alignment = boxAlignment)
         PlaceholderText(
-            value = value,
-            placeholder = placeholder,
-            hasLeadingIcon = leadingIcon != null,
-            alignment = boxAlignment,
-            placeholderColor = placeholderColor,
+            placeholder = content.placeholder.takeIf { content.value.isEmpty() },
+            layout = layout,
         )
-        InputTextFieldSlot(
-            hasLeadingIcon = leadingIcon != null,
-            hasTrailingIcon = trailingIcon != null,
-            alignment = boxAlignment,
-            innerTextField = innerTextField,
-        )
-        TrailingIconSlot(icon = trailingIcon, alignment = trailingAlignment)
+        InputTextFieldSlot(layout = layout, innerTextField = innerTextField)
+        TrailingIconSlot(icon = content.trailingIcon, alignment = trailingAlignment)
     }
 }
 
@@ -197,37 +192,29 @@ private fun BoxScope.LeadingIconSlot(icon: (@Composable () -> Unit)?, alignment:
 }
 
 @Composable
-private fun BoxScope.PlaceholderText(
-    value: String,
-    placeholder: String?,
-    hasLeadingIcon: Boolean,
-    alignment: Alignment,
-    placeholderColor: androidx.compose.ui.graphics.Color,
-) {
-    if (!value.isEmpty() || placeholder == null) return
+private fun BoxScope.PlaceholderText(placeholder: String?, layout: InputSlotLayout) {
+    if (placeholder == null) return
     Text(
         text = placeholder,
         style = MaterialTheme.typography.bodyMedium,
-        color = placeholderColor,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
         modifier = Modifier
-            .align(alignment)
-            .then(if (hasLeadingIcon) Modifier.padding(start = 28.dp) else Modifier),
+            .align(layout.alignment)
+            .then(if (layout.hasLeadingIcon) Modifier.padding(start = 28.dp) else Modifier),
     )
 }
 
 @Composable
 private fun BoxScope.InputTextFieldSlot(
-    hasLeadingIcon: Boolean,
-    hasTrailingIcon: Boolean,
-    alignment: Alignment,
+    layout: InputSlotLayout,
     innerTextField: @Composable () -> Unit,
 ) {
     Box(
         modifier = Modifier
-            .align(alignment)
+            .align(layout.alignment)
             .padding(
-                start = if (hasLeadingIcon) 28.dp else 0.dp,
-                end = if (hasTrailingIcon) 40.dp else 0.dp,
+                start = if (layout.hasLeadingIcon) 28.dp else 0.dp,
+                end = if (layout.hasTrailingIcon) 40.dp else 0.dp,
             )
             .fillMaxWidth(),
     ) { innerTextField() }
