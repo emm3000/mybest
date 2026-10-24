@@ -14,9 +14,13 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.InputStream
 import java.io.RandomAccessFile
 
 private object UnconfinedDispatchers : CoroutineDispatchers {
@@ -27,6 +31,8 @@ private object UnconfinedDispatchers : CoroutineDispatchers {
 
 private val KNOWN_DATE = LocalDate(2026, 3, 15)
 private const val SQLITE_USER_VERSION_OFFSET = 60L
+private const val FAIL_AFTER_BYTES = 4096
+private val LIVE_DATABASE_FILES = setOf(AppDatabase.DB_NAME, "${AppDatabase.DB_NAME}-wal", "${AppDatabase.DB_NAME}-shm")
 private const val WRONG_IDENTITY_HASH_SQL = "UPDATE room_master_table SET identity_hash = 'deadbeef' WHERE id = 42"
 
 private val V1_TABLES = setOf(
@@ -141,6 +147,25 @@ class BackupRepositoryImplRestoreTest {
     }
 
     @Test
+    fun a_backup_stream_that_fails_mid_copy_leaves_the_live_database_untouched() = runBlocking {
+        val backupFile = seedBackupFile()
+        deleteDatabaseFiles()
+        val liveDb = openDatabase()
+        liveDb.dailyWeightDao().upsert(DailyWeightEntity(id = "live1", date = KNOWN_DATE, weight = 71.0f))
+        liveDb.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(FULL)").use { it.moveToFirst() }
+
+        FailingInputStream(FileInputStream(backupFile), FAIL_AFTER_BYTES).use { source ->
+            assertThrows(IOException::class.java) { replaceFileAtomically(source, dbPath) { liveDb.close() } }
+        }
+        backupFile.delete()
+
+        assertTrue(LIVE_DATABASE_FILES.containsAll(dbPath.parentFile?.list().orEmpty().toSet()))
+        assertTrue(liveDb.dailyWeightDao().observeAllOrdered().first().any { it.id == "live1" })
+        liveDb.close()
+        assertTrue(hasWeightAfterReopen("live1"))
+    }
+
+    @Test
     fun export_and_restore_keep_one_row_of_every_v1_table() = runBlocking {
         deleteDatabaseFiles()
         val liveDb = openDatabase()
@@ -245,4 +270,16 @@ class BackupRepositoryImplRestoreTest {
         File("${dbPath.path}-wal").delete()
         File("${dbPath.path}-shm").delete()
     }
+}
+
+private class FailingInputStream(private val source: InputStream, private val failAfter: Int) : InputStream() {
+    private var bytesRead = 0
+
+    override fun read(): Int {
+        if (bytesRead >= failAfter) throw IOException("Simulated failure after $failAfter bytes")
+        bytesRead++
+        return source.read()
+    }
+
+    override fun close() = source.close()
 }
