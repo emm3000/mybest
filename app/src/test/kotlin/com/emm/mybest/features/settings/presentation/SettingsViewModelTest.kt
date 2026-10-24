@@ -22,10 +22,8 @@ import com.emm.mybest.testing.FakeUserPreferencesRepository
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DayOfWeek
@@ -69,7 +67,6 @@ class SettingsViewModelTest {
     )
 
     private fun stubDefaults() {
-        every { preferencesRepository.notificationsEnabled } returns flowOf(true)
         coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
         coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
         coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
@@ -107,21 +104,6 @@ class SettingsViewModelTest {
         val goalState = viewModel.state.first { it.purchaseGoal.name != null }.purchaseGoal
 
         assertEquals(SettingsPurchaseGoalState(name = "Zapatillas", priceLabel = "S/ 450.00"), goalState)
-    }
-
-    @Test
-    fun `state maps notifications preference`() = runTest {
-        every { preferencesRepository.notificationsEnabled } returns flowOf(false)
-        coEvery { preferencesRepository.updateNotificationsEnabled(any()) } returns Unit
-        coEvery { exportUseCase.invoke(any()) } returns Result.success(Unit)
-        coEvery { restoreUseCase.invoke(any()) } returns Result.success(RestoreResult.RequiresRestart)
-        val viewModel = buildViewModel()
-
-        viewModel.state.test {
-            awaitItem()
-            assertEquals(false, awaitItem().notificationsEnabled)
-            cancelAndIgnoreRemainingEvents()
-        }
     }
 
     @Test

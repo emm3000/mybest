@@ -34,13 +34,11 @@ class SettingsViewModel(
     val effect = _effect.asSharedFlow()
 
     val state: StateFlow<SettingsState> = combine(
-        userPreferencesRepository.notificationsEnabled,
         goalsEditor.goals,
         remindersEditor.picker,
         rowSources.observe(),
-    ) { enabled, goals, picker, rows ->
+    ) { goals, picker, rows ->
         SettingsState(
-            notificationsEnabled = enabled,
             reminderPicker = picker,
             appVersionLabel = appVersionLabel,
             goals = goals,
