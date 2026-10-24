@@ -1,22 +1,22 @@
-package com.emm.mybest.domain.media
+package com.emm.mybest.data.media
 
 import android.content.Context
-import android.net.Uri
 import androidx.core.content.FileProvider
+import com.emm.mybest.domain.media.PhotoCaptureFiles
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class MediaManager(private val context: Context) {
+class PhotoCaptureFilesImpl(private val context: Context) : PhotoCaptureFiles {
 
-    fun generatePhotoUri(): Uri {
+    override fun createCaptureUri(): String {
         val photoFile = createPhotoFile()
         return FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
             photoFile,
-        )
+        ).toString()
     }
 
     private fun createPhotoFile(): File {

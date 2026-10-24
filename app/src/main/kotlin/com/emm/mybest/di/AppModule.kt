@@ -22,12 +22,13 @@ import com.emm.mybest.data.UserPreferencesRepositoryImpl
 import com.emm.mybest.data.WeightRepositoryImpl
 import com.emm.mybest.data.capture.InstalledAppsRepositoryImpl
 import com.emm.mybest.data.capture.NotificationAccessCheckerImpl
+import com.emm.mybest.data.media.PhotoCaptureFilesImpl
 import com.emm.mybest.data.reminder.CheckInReminderSchedulerImpl
 import com.emm.mybest.data.reminder.DebtReminderSchedulerImpl
 import com.emm.mybest.data.reminder.PreOutingReminderSchedulerImpl
 import com.emm.mybest.data.reminder.ReminderNotifier
 import com.emm.mybest.data.reminder.WeightReminderSchedulerImpl
-import com.emm.mybest.domain.media.MediaManager
+import com.emm.mybest.domain.media.PhotoCaptureFiles
 import com.emm.mybest.domain.reminder.CheckInReminderScheduler
 import com.emm.mybest.domain.reminder.DebtReminderScheduler
 import com.emm.mybest.domain.reminder.PreOutingReminderScheduler
@@ -239,7 +240,7 @@ val appModule = module {
     factory { PreOutingDecisionUseCases(get(), get(), get()) }
     viewModel { PreOutingViewModel(get(), get(), get()) }
 
-    single { MediaManager(androidContext()) }
+    single<PhotoCaptureFiles> { PhotoCaptureFilesImpl(androidContext()) }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
     viewModel { HomeViewModel(get(), get()) }

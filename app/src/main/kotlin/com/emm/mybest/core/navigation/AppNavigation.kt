@@ -99,7 +99,7 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         val viewModel: PhotosViewModel = koinViewModel()
         PhotosScreen(
             viewModel = viewModel,
-            mediaManager = koinInject(),
+            photoCaptureFiles = koinInject(),
             onBack = { navigator.goBack() },
             onOpenViewer = { photoId -> navigator.navigate(Screen.PhotoViewer(photoId)) },
             onCompare = { beforeId, afterId -> navigator.navigate(Screen.ComparePhotos(beforeId, afterId)) },
