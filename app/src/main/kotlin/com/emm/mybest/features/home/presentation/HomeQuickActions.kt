@@ -57,9 +57,9 @@ internal fun weightCellContent(state: HomeState): QuickActionCellContent {
         stringResource(R.string.home_previous_weight_format, formatHomeWeight(prev))
     }
     return QuickActionCellContent(
-        label = stringResource(R.string.home_register_weight).uppercase(),
+        label = stringResource(R.string.home_register_weight),
         number = if (kg != null) formatHomeWeight(kg) else stringResource(R.string.home_quick_action_placeholder),
-        unit = if (kg != null) stringResource(R.string.home_weight_unit_kg).uppercase() else null,
+        unit = if (kg != null) stringResource(R.string.home_weight_unit_kg) else null,
         caption = caption,
         isPlaceholder = kg == null,
     )
@@ -80,7 +80,7 @@ internal fun photoCellContent(state: HomeState): QuickActionCellContent {
         null
     }
     return QuickActionCellContent(
-        label = stringResource(R.string.home_photo).uppercase(),
+        label = stringResource(R.string.home_photo),
         number = state.photoCount.toString(),
         caption = caption,
         isPlaceholder = state.photoCount == 0,
