@@ -33,6 +33,7 @@ private val KNOWN_DATE = LocalDate(2026, 3, 15)
 private const val SQLITE_USER_VERSION_OFFSET = 60L
 private const val FAIL_AFTER_BYTES = 4096
 private val LIVE_DATABASE_FILES = setOf(AppDatabase.DB_NAME, "${AppDatabase.DB_NAME}-wal", "${AppDatabase.DB_NAME}-shm")
+private const val READ_SCHEMA_SQL = "SELECT COUNT(*) FROM sqlite_master"
 private const val WRONG_IDENTITY_HASH_SQL = "UPDATE room_master_table SET identity_hash = 'deadbeef' WHERE id = 42"
 
 class BackupRepositoryImplRestoreTest {
@@ -145,6 +146,27 @@ class BackupRepositoryImplRestoreTest {
     }
 
     @Test
+    fun a_restore_whose_move_fails_keeps_rows_another_connection_left_in_the_wal() = runBlocking {
+        val backupFile = seedBackupFile()
+        deleteDatabaseFiles()
+        val liveDb = openDatabase()
+        liveDb.dailyWeightDao().upsert(DailyWeightEntity(id = "live1", date = KNOWN_DATE, weight = 71.0f))
+        val reader = SQLiteDatabase.openDatabase(dbPath.path, null, SQLiteDatabase.OPEN_READONLY)
+        reader.rawQuery(READ_SCHEMA_SQL, null).use { it.moveToFirst() }
+
+        val result = BackupRepositoryImpl(context, liveDb, UnconfinedDispatchers, moveFile = ::failMove)
+            .restoreDatabase(backupFile.toURI().toString())
+        val walBytesAfterRestore = File("${dbPath.path}-wal").length()
+        reader.close()
+        backupFile.delete()
+
+        assertTrue(result.isFailure)
+        assertTrue(hasWeightAfterReopen("live1"))
+        assertFalse(hasWeightAfterReopen("seed1"))
+        assertTrue(walBytesAfterRestore > 0)
+    }
+
+    @Test
     fun export_and_restore_keep_one_row_of_every_v1_table() = runBlocking {
         deleteDatabaseFiles()
         val liveDb = openDatabase()
@@ -233,6 +255,10 @@ class BackupRepositoryImplRestoreTest {
         File("${dbPath.path}-wal").delete()
         File("${dbPath.path}-shm").delete()
     }
+}
+
+private fun failMove(staged: File, target: File) {
+    throw IOException("Simulated failure moving ${staged.name} to ${target.name}")
 }
 
 private class FailingInputStream(private val source: InputStream, private val failAfter: Int) : InputStream() {
