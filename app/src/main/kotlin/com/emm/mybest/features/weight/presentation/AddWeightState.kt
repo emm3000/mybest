@@ -10,5 +10,6 @@ data class AddWeightState(
     val trend: WeighInTrend = WeighInTrend(),
     val targetWeightKg: Float? = null,
     val weighInDay: DayOfWeek? = null,
+    val weighInDayLabel: String? = null,
     val isLoading: Boolean = false,
 )

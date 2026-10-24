@@ -31,7 +31,7 @@ class AddWeightViewModel(
         }
         viewModelScope.launch {
             setupRepository.observe().collect { setup ->
-                _state.update { it.copy(targetWeightKg = setup.targetWeightKg, weighInDay = setup.weighInDay) }
+                _state.update { it.withSetup(setup) }
             }
         }
     }
