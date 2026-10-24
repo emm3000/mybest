@@ -65,8 +65,7 @@ fun AddWeightScreen(
     AddWeightContent(
         state = state,
         snackbarHostState = snackbarHostState,
-        onBackClick = currentOnBackClick,
-        onIntent = viewModel::onIntent,
+        callbacks = AddWeightCallbacks(onBackClick = currentOnBackClick, onIntent = viewModel::onIntent),
         modifier = modifier,
     )
 }
@@ -75,16 +74,20 @@ fun AddWeightScreen(
 private fun AddWeightContent(
     state: AddWeightState,
     snackbarHostState: SnackbarHostState,
-    onBackClick: () -> Unit,
-    onIntent: (AddWeightIntent) -> Unit,
+    callbacks: AddWeightCallbacks,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
         snackbarHost = { HSnackbarHost(snackbarHostState) },
-        topBar = { AtelierAppBar(title = stringResource(R.string.add_weight_app_bar_title), onBack = onBackClick) },
+        topBar = {
+            AtelierAppBar(
+                title = stringResource(R.string.add_weight_app_bar_title),
+                onBack = callbacks.onBackClick,
+            )
+        },
     ) { padding ->
-        AddWeightBody(state = state, padding = padding, onIntent = onIntent)
+        AddWeightBody(state = state, padding = padding, onIntent = callbacks.onIntent)
     }
 }
 
@@ -154,8 +157,7 @@ private fun AddWeightScreenPreview() {
                 isLoading = false,
             ),
             snackbarHostState = remember { SnackbarHostState() },
-            onBackClick = {},
-            onIntent = {},
+            callbacks = AddWeightCallbacks(onBackClick = {}, onIntent = {}),
         )
     }
 }

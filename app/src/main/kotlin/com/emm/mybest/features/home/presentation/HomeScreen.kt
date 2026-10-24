@@ -3,7 +3,6 @@ package com.emm.mybest.features.home.presentation
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -120,7 +119,7 @@ internal fun HomeScreenContent(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = bottomBar,
     ) { paddingValues ->
-        HomeLazyContent(state, callbacks, onIntent, paddingValues)
+        HomeLazyContent(state, callbacks, onIntent, Modifier.padding(paddingValues))
     }
 }
 
@@ -129,13 +128,9 @@ private fun HomeLazyContent(
     state: HomeState,
     callbacks: HomeCallbacks,
     onIntent: (HomeIntent) -> Unit,
-    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
-    ) {
+    LazyColumn(modifier = modifier.fillMaxSize()) {
         item(contentType = HomeContentType.Header) { HomeHeaderRow(state, callbacks.onSettingsClick) }
         item(contentType = HomeContentType.Headline) { HomeHeadline() }
         item(contentType = HomeContentType.Hairline) { Hairline() }
