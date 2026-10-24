@@ -20,8 +20,7 @@ private val SECTION_TOP = 24.dp
 
 @Composable
 internal fun SettingsGoalsSection(
-    setup: Setup,
-    onFieldOpen: (SettingsField) -> Unit,
+    params: SettingsGoalsSectionParams,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -30,12 +29,12 @@ internal fun SettingsGoalsSection(
             style = MicroLabelStyle(tone = MicroLabelTone.Dim),
             modifier = Modifier.padding(start = SECTION_GUT, top = SECTION_TOP),
         )
-        SettingsField.entries.forEach { field ->
+        params.fields.forEach { field ->
             SettingsRow(
                 params = SettingsRowParams(
                     label = stringResource(field.labelRes),
-                    value = goalValueText(field, setup),
-                    onValueClick = { onFieldOpen(field) },
+                    value = goalValueText(field, params.setup),
+                    onValueClick = { params.onFieldOpen(field) },
                 ),
             )
             Hairline(inset = SECTION_GUT)
