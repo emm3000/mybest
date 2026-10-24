@@ -3,6 +3,7 @@ package com.emm.mybest.domain.usecase.capture
 import com.emm.mybest.domain.models.CaptureAppOption
 import com.emm.mybest.domain.models.CaptureSummary
 import com.emm.mybest.domain.models.InstalledApp
+import com.emm.mybest.domain.models.PostedNotification
 import com.emm.mybest.domain.repository.InstalledAppsRepository
 import com.emm.mybest.testing.FakeInstalledAppsRepository
 import com.emm.mybest.testing.FakeNotificationCaptureRepository
@@ -52,7 +53,7 @@ class ObserveCaptureOverviewUseCaseTest {
     @Test
     fun `labels each captured notification with its app`() = runTest {
         val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
-        repository.saveCaptured(YAPE, "Yape", "Te yapearon S/ 25.00", POSTED_AT)
+        repository.saveCaptured(PostedNotification(YAPE, "Yape", "Te yapearon S/ 25.00", POSTED_AT))
 
         val entries = useCase(repository)().first().entries
 
@@ -66,7 +67,7 @@ class ObserveCaptureOverviewUseCaseTest {
     @Test
     fun `falls back to the package name when the app is no longer installed`() = runTest {
         val repository = FakeNotificationCaptureRepository()
-        repository.saveCaptured(REMOVED, "Hola", null, POSTED_AT)
+        repository.saveCaptured(PostedNotification(REMOVED, "Hola", null, POSTED_AT))
 
         val entries = useCase(repository)().first().entries
 
@@ -76,8 +77,8 @@ class ObserveCaptureOverviewUseCaseTest {
     @Test
     fun `keeps the newest captured notification first`() = runTest {
         val repository = FakeNotificationCaptureRepository()
-        repository.saveCaptured(YAPE, "first", null, POSTED_AT)
-        repository.saveCaptured(PLIN, "second", null, POSTED_AT + 1.minutes)
+        repository.saveCaptured(PostedNotification(YAPE, "first", null, POSTED_AT))
+        repository.saveCaptured(PostedNotification(PLIN, "second", null, POSTED_AT + 1.minutes))
 
         val entries = useCase(repository)().first().entries
 
@@ -96,7 +97,7 @@ class ObserveCaptureOverviewUseCaseTest {
     @Test
     fun `shows no apps and labels notifications by package when the installed apps cannot be listed`() = runTest {
         val repository = FakeNotificationCaptureRepository()
-        repository.saveCaptured(YAPE, "Yape", null, POSTED_AT)
+        repository.saveCaptured(PostedNotification(YAPE, "Yape", null, POSTED_AT))
         val failingApps = object : InstalledAppsRepository {
             override suspend fun list(): List<InstalledApp> = error("boom")
         }

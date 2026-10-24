@@ -3,6 +3,7 @@ package com.emm.mybest.data
 import com.emm.mybest.data.entities.CaptureAppEntity
 import com.emm.mybest.data.entities.CapturedNotificationEntity
 import com.emm.mybest.data.entities.NotificationCaptureDao
+import com.emm.mybest.domain.models.PostedNotification
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -46,7 +47,9 @@ class NotificationCaptureRepositoryImplTest {
     fun `saveCaptured stores title and text exactly as given`() = runTest {
         coEvery { dao.insertCaptured(any()) } returns 1
 
-        repository.saveCaptured(YAPE, " Yape ", "Te yapearon S/ 25.00\n", Instant.fromEpochMilliseconds(1_000))
+        repository.saveCaptured(
+            PostedNotification(YAPE, " Yape ", "Te yapearon S/ 25.00\n", Instant.fromEpochMilliseconds(1_000)),
+        )
 
         coVerify {
             dao.insertCaptured(

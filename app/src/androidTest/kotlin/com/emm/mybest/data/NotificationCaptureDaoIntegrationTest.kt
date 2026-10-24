@@ -2,6 +2,7 @@ package com.emm.mybest.data
 
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
+import com.emm.mybest.domain.models.PostedNotification
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -45,8 +46,8 @@ class NotificationCaptureDaoIntegrationTest {
 
     @Test
     fun captured_notifications_come_back_newest_first_and_unmodified() = runBlocking {
-        repository.saveCaptured(YAPE, "Yape", "Te yapearon S/ 25.00", Instant.fromEpochMilliseconds(1_000))
-        repository.saveCaptured(PLIN, null, " Recibiste S/ 10.00 \n", Instant.fromEpochMilliseconds(2_000))
+        repository.saveCaptured(PostedNotification(YAPE, "Yape", "Te yapearon S/ 25.00", Instant.fromEpochMilliseconds(1_000)))
+        repository.saveCaptured(PostedNotification(PLIN, null, " Recibiste S/ 10.00 \n", Instant.fromEpochMilliseconds(2_000)))
 
         val captured = repository.observeCaptured().first()
 
@@ -57,7 +58,7 @@ class NotificationCaptureDaoIntegrationTest {
     @Test
     fun deleting_all_captured_keeps_the_selected_apps() = runBlocking {
         repository.setAppSelected(YAPE, isSelected = true)
-        repository.saveCaptured(YAPE, "Yape", "Te yapearon S/ 25.00", Instant.fromEpochMilliseconds(1_000))
+        repository.saveCaptured(PostedNotification(YAPE, "Yape", "Te yapearon S/ 25.00", Instant.fromEpochMilliseconds(1_000)))
 
         repository.deleteAllCaptured()
 

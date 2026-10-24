@@ -1,8 +1,8 @@
 package com.emm.mybest.domain.repository
 
 import com.emm.mybest.domain.models.CapturedNotification
+import com.emm.mybest.domain.models.PostedNotification
 import kotlinx.coroutines.flow.Flow
-import kotlin.time.Instant
 
 /**
  * Stores the apps the user picked for capture and the raw notifications captured from them.
@@ -29,9 +29,9 @@ interface NotificationCaptureRepository {
     fun observeCaptured(): Flow<List<CapturedNotification>>
 
     /**
-     * Stores a notification from [packageName] with [title] and [text] exactly as given.
+     * Stores [notification] with its title and text exactly as given.
      */
-    suspend fun saveCaptured(packageName: String, title: String?, text: String?, postedAt: Instant)
+    suspend fun saveCaptured(notification: PostedNotification)
 
     /**
      * Removes every captured notification.

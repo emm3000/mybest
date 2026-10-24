@@ -1,10 +1,10 @@
 package com.emm.mybest.testing
 
 import com.emm.mybest.domain.models.CapturedNotification
+import com.emm.mybest.domain.models.PostedNotification
 import com.emm.mybest.domain.repository.NotificationCaptureRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlin.time.Instant
 
 class FakeNotificationCaptureRepository(
     selectedApps: Set<String> = emptySet(),
@@ -25,9 +25,15 @@ class FakeNotificationCaptureRepository(
 
     override fun observeCaptured(): Flow<List<CapturedNotification>> = captured
 
-    override suspend fun saveCaptured(packageName: String, title: String?, text: String?, postedAt: Instant) {
-        val notification = CapturedNotification(captured.value.size + 1L, packageName, title, text, postedAt)
-        captured.value = listOf(notification) + captured.value
+    override suspend fun saveCaptured(notification: PostedNotification) {
+        val stored = CapturedNotification(
+            id = captured.value.size + 1L,
+            packageName = notification.packageName,
+            title = notification.title,
+            text = notification.text,
+            postedAt = notification.postedAt,
+        )
+        captured.value = listOf(stored) + captured.value
     }
 
     override suspend fun deleteAllCaptured() {
