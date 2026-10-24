@@ -57,6 +57,20 @@ jacoco {
 
 val releaseSigningProperties = rootProject.loadReleaseSigningProperties()
 val hasCompleteReleaseSigning = releaseSigningProperties?.hasRequiredReleaseSigningKeys() == true
+val isReleaseSigningRequired = providers.gradleProperty("requireReleaseSigning").map(String::toBoolean).getOrElse(false)
+
+if (isReleaseSigningRequired && !hasCompleteReleaseSigning) {
+    val missingKeys = releaseSigningProperties.missingReleaseSigningKeys().joinToString()
+    val verifyReleaseSigning = tasks.register("verifyReleaseSigning") {
+        doLast {
+            throw GradleException(
+                "Release signing is required (-PrequireReleaseSigning=true) but keystore.properties " +
+                    "at the repo root is missing, unreadable or incomplete. Missing keys: $missingKeys.",
+            )
+        }
+    }
+    tasks.matching { it.name == "preReleaseBuild" }.configureEach { dependsOn(verifyReleaseSigning) }
+}
 
 android {
     namespace = "com.emm.mybest"
