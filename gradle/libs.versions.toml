@@ -27,6 +27,8 @@ vico = "3.1.0"
 detekt = "1.23.8"
 compose-rules = "0.5.8"
 kover = "0.9.8"
+ksp = "2.3.6"
+jacoco = "0.8.12"
 
 
 [libraries]
@@ -81,3 +83,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
