@@ -70,6 +70,14 @@ class SetupValidatorTest {
     }
 
     @Test
+    fun `infinite target weight is rejected`() {
+        assertEquals(
+            listOf(SetupValidationError.NonPositiveTargetWeight),
+            SetupValidator.validate(Setup(targetWeightKg = Float.POSITIVE_INFINITY)),
+        )
+    }
+
+    @Test
     fun `positive target weight is valid`() {
         assertEquals(emptyList<SetupValidationError>(), SetupValidator.validate(Setup(targetWeightKg = 72.5f)))
     }
