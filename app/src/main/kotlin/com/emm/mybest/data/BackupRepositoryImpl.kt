@@ -34,7 +34,7 @@ class BackupRepositoryImpl(
     }
 
     private fun forceWalCheckpoint() {
-        database.openHelper.writableDatabase.execSQL("PRAGMA wal_checkpoint(FULL)")
+        database.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(FULL)").use { it.moveToFirst() }
     }
 
     override suspend fun restoreDatabase(sourceUri: String): Result<RestoreResult> = runCatching {
