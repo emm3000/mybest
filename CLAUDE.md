@@ -19,6 +19,8 @@ Detekt autocorrect is enabled in `app/build.gradle.kts`, so a Detekt run may mod
 
 `keystore.properties` at the repo root is optional. Release and QA signing is wired through `buildSrc/src/main/kotlin/AppSigning.kt` (`loadReleaseSigningProperties()` / `hasRequiredReleaseSigningKeys()`). When the file is missing or incomplete, both `qa` and `release` fall back to the debug signing config — no manual edits needed for local builds.
 
+Passing `-PrequireReleaseSigning=true` turns the fallback off for `release`: any `release` build fails with an error naming `keystore.properties` and the missing keys. The `Build APK` step in `.github/workflows/uploadApk.yml` passes it, so CI never ships a debug-signed APK when the signing secrets are missing or incomplete. Local builds without the property keep the debug fallback.
+
 ## Coverage exclusions
 
 JaCoCo and Kover share an exclusion set defined in `buildSrc/src/main/kotlin/JacocoConfig.kt` (`appJacocoExcludes`) plus the Kover `excludes` block in `app/build.gradle.kts`. UI previews, DI, navigation glue, and generated classes (`BuildConfig`, `R`, `R$*`, `*Preview*`, `*.di.*`, `*.core.navigation.*`) are excluded by design — do not treat these as regressions.
