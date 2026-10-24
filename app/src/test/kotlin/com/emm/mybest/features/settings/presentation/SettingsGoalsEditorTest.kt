@@ -1,9 +1,12 @@
 package com.emm.mybest.features.settings.presentation
 
+import com.emm.mybest.domain.models.DailyCheckType
+import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
 import com.emm.mybest.domain.validation.SetupValidationError
 import com.emm.mybest.testing.FakeSetupRepository
+import com.emm.mybest.testing.SlowSetupRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.delay
@@ -38,5 +41,25 @@ class SettingsGoalsEditorTest {
         advanceUntilIdle()
 
         assertEquals("72", editor.goals.first().editor?.input)
+    }
+
+    @Test
+    fun `saving a second goal during a slow save keeps both goals`() = runTest {
+        val repository = SlowSetupRepository(SLOW_SAVE_MS)
+        val editor = SettingsGoalsEditor(ObserveSetupUseCase(repository), UpdateSetupUseCase(repository))
+
+        editor.handle(SettingsIntent.OnFieldOpen(SettingsField.MONTHLY_OUTING_LIMIT))
+        editor.handle(SettingsIntent.OnFieldInputChange("3"))
+        launch { editor.handle(SettingsIntent.OnFieldSave) }
+        runCurrent()
+        editor.handle(SettingsIntent.OnFieldOpen(SettingsField.WEEKLY_GYM))
+        editor.handle(SettingsIntent.OnFieldInputChange("4"))
+        launch { editor.handle(SettingsIntent.OnFieldSave) }
+        advanceUntilIdle()
+
+        assertEquals(
+            Setup(monthlyOutingLimit = 3, weeklyTargets = mapOf(DailyCheckType.GYM to 4)),
+            repository.observe().first(),
+        )
     }
 }
