@@ -11,6 +11,6 @@ enum class MicroLabelTone {
     /** Sage — "cumplido / done" state. Used only in the completion context. */
     Done,
 
-    /** Warm — single-recommendation hint on Insights. */
+    /** Warm — soft accent hint. */
     Warm,
 }

@@ -51,7 +51,7 @@ internal fun popTransition(): ContentTransform =
         animationSpec = tween(durationMillis = PUSH_POP_DURATION_MS, easing = pushEasing),
     )
 
-/** Tab switch (Home ↔ History ↔ Insights ↔ Timeline): pure crossfade, no motion. */
+/** Tab switch (Home ↔ Summary ↔ History ↔ Settings): pure crossfade, no motion. */
 internal fun tabSwitchTransition(): ContentTransform =
     fadeIn(
         animationSpec = tween(durationMillis = TAB_SWITCH_DURATION_MS),
