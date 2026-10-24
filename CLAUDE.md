@@ -54,7 +54,7 @@ Path-scoped rules live in `.claude/rules/` and load when matching files are touc
 |---|---|
 | `.claude/rules/architecture.md` | Layers, `ForbiddenImport`, MVI contract, Koin wiring |
 | `.claude/rules/kotlin-style.md` | Comments, function size, one type per file, forbidden constructs |
-| `.claude/rules/room.md` | Schema files, versioning, destructive migrations |
+| `.claude/rules/room.md` | Schema files, versioning, explicit migrations |
 | `.claude/rules/testing.md` | The three-task gate, clock-independent flows, coverage exclusions |
 | `.claude/rules/ui.md` | Container/presentational, Atelier Dark theme, previews |
 
