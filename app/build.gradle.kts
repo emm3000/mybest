@@ -74,6 +74,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    sourceSets {
+        getByName("androidTest") {
+            assets.directories.add("$projectDir/schemas")
+        }
+    }
+
     signingConfigs {
         if (hasCompleteReleaseSigning) {
             create("config") {
