@@ -37,7 +37,6 @@ fun PhotosScreen(
     photoCaptureFiles: PhotoCaptureFiles,
     callbacks: PhotosCallbacks,
     modifier: Modifier = Modifier,
-    bottomBar: @Composable () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -73,7 +72,6 @@ fun PhotosScreen(
                 },
             )
         },
-        bottomBar = bottomBar,
     ) { paddingValues ->
         PhotosContent(
             state = state,
