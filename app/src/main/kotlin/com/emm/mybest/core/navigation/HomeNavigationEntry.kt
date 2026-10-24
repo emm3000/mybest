@@ -52,7 +52,12 @@ private fun HomeRoutedContent(destination: HomeDestination, onClose: () -> Unit,
     when (destination) {
         HomeDestination.PRE_OUTING -> PreOutingScreen(koinViewModel(), preOutingCallbacks(navigator), onClose, Modifier)
         HomeDestination.CHECK_IN -> CheckInScreen(koinViewModel(), onClose, Modifier)
-        HomeDestination.WEEKLY_SUMMARY -> SummaryScreen(koinViewModel(), summaryCallbacks(navigator), onClose, Modifier)
+        HomeDestination.WEEKLY_SUMMARY -> SummaryScreen(
+            koinViewModel(),
+            summaryCallbacks(navigator),
+            onClose,
+            modifier = Modifier,
+        )
         HomeDestination.DAILY_CHECKS -> Unit
     }
 }

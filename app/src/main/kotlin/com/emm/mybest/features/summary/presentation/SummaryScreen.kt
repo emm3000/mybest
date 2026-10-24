@@ -17,6 +17,7 @@ fun SummaryScreen(
     viewModel: SummaryViewModel,
     callbacks: SummaryCallbacks,
     onBack: () -> Unit,
+    bottomBar: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -34,6 +35,7 @@ fun SummaryScreen(
     Scaffold(
         modifier = modifier,
         topBar = { AtelierAppBar(title = stringResource(R.string.summary_title), onBack = onBack) },
+        bottomBar = bottomBar,
     ) { paddingValues ->
         SummaryContent(state = state, onIntent = viewModel::onIntent, modifier = Modifier.padding(paddingValues))
     }
