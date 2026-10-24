@@ -44,7 +44,7 @@ Feature areas: `home`, `habit`, `photo`, `weight`, `history`, `timeline`, `insig
 - Keep dependency versions in `gradle/libs.versions.toml`; do not hardcode versions in Gradle files.
 - Room schema output is committed under `app/schemas/` — update it whenever DB structure changes (KSP arg `room.schemaLocation` is wired in `app/build.gradle.kts`).
 - Opt-ins habilitados a nivel de proyecto en `kotlin.compilerOptions` (`app/build.gradle.kts`): `ExperimentalMaterial3Api`, `ExperimentalFoundationApi`, `ExperimentalCoroutinesApi`. No añadas `@OptIn` para estos marcadores en código.
-- minSdk 30, compile/target SDK 36, JVM target 17.
+- minSdk 30, compileSdk 37, targetSdk 36, JVM target 17.
 
 ## Rules
 
