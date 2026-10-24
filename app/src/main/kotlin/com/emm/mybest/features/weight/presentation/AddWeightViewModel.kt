@@ -64,7 +64,7 @@ class AddWeightViewModel(
 
         val weightValue = WeightInputValidator.parse(currentState.weight)
         if (weightValue == null) {
-            _state.update { it.copy(weightError = INVALID_WEIGHT_MESSAGE) }
+            _state.update { it.copy(weightError = AddWeightFieldError.INVALID_FORMAT) }
             return
         }
 
@@ -84,21 +84,16 @@ class AddWeightViewModel(
         }
     }
 
-    private fun weightErrorFor(input: String): String? {
+    private fun weightErrorFor(input: String): AddWeightFieldError? {
         if (input.isBlank()) return null
         val isFormatValid = WeightInputValidator.isValidWeightInput(input) &&
             !input.endsWith('.') && !input.endsWith(',')
-        if (!isFormatValid) return INVALID_WEIGHT_MESSAGE
+        if (!isFormatValid) return AddWeightFieldError.INVALID_FORMAT
         val parsed = WeightInputValidator.parse(input)
         return when {
-            parsed == null -> INVALID_WEIGHT_MESSAGE
-            !WeightInputValidator.isWeightInRange(parsed) -> OUT_OF_RANGE_MESSAGE
+            parsed == null -> AddWeightFieldError.INVALID_FORMAT
+            !WeightInputValidator.isWeightInRange(parsed) -> AddWeightFieldError.OUT_OF_RANGE
             else -> null
         }
-    }
-
-    companion object {
-        private const val INVALID_WEIGHT_MESSAGE = "Ingresa un peso valido. Ejemplo: 72.4 o 72,4"
-        private const val OUT_OF_RANGE_MESSAGE = "Peso fuera de rango. Acepta 20–500 kg."
     }
 }

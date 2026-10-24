@@ -183,6 +183,8 @@
     <string name="add_weight_kg_placeholder">Ej: 72.4</string>
     <string name="add_weight_note_label">Nota (opcional)</string>
     <string name="add_weight_note_placeholder">Ej: Después del entrenamiento</string>
+    <string name="add_weight_error_invalid_format">Ingresa un peso valido. Ejemplo: 72.4 o 72,4</string>
+    <string name="add_weight_error_out_of_range">Peso fuera de rango. Acepta 20–500 kg.</string>
     <string name="add_weight_save_button">Guardar Registro</string>
     <string name="add_weight_last_record_format">Último pesaje: %1$.1f kg</string>
     <string name="add_weight_app_bar_title">Pesaje</string>
