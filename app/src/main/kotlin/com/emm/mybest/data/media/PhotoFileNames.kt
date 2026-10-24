@@ -31,4 +31,9 @@ class PhotoFileNames(
         val timestamp = CAPTURE_TIMESTAMP_FORMAT.format(clock.now().toLocalDateTime(timeZone))
         return "JPEG_${timestamp}_"
     }
+
+    /**
+     * Returns the name of a new stored photo copy, such as `IMG_1792811045678.jpg`.
+     */
+    fun persistedName(): String = "IMG_${clock.now().toEpochMilliseconds()}.jpg"
 }

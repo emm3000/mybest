@@ -1,11 +1,10 @@
-package com.emm.mybest.features.photo.presentation
+package com.emm.mybest.data.media
 
+import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
-import android.util.Log
-import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
 import java.io.File
 
@@ -14,31 +13,13 @@ private const val ROTATE_90 = 90f
 private const val ROTATE_180 = 180f
 private const val ROTATE_270 = 270f
 
-internal fun copyUriToInternalStorageSafe(context: android.content.Context, uri: Uri): Uri? {
-    return runCatching {
-        val file = createPhotoFile(context = context)
-        val persisted = persistBitmapFromUri(context = context, sourceUri = uri, targetFile = file)
-        if (!persisted) return null
-        val authority = "${context.packageName}.fileprovider"
-        FileProvider.getUriForFile(context, authority, file)
-    }.onFailure { error ->
-        Log.e("AddPhotoScreen", "Error copying photo from URI", error)
-    }.getOrNull()
-}
-
-private fun createPhotoFile(context: android.content.Context): File {
-    val directory = File(context.filesDir, "photos")
-    if (!directory.exists()) directory.mkdirs()
-    return File(directory, "IMG_${System.currentTimeMillis()}.jpg")
-}
-
-private fun persistBitmapFromUri(
-    context: android.content.Context,
+internal fun writeUprightJpeg(
+    contentResolver: ContentResolver,
     sourceUri: Uri,
     targetFile: File,
 ): Boolean {
-    val bitmap = decodeBitmapFromUri(context = context, sourceUri = sourceUri) ?: return false
-    val orientation = readExifOrientation(context = context, sourceUri = sourceUri)
+    val bitmap = decodeBitmapFromUri(contentResolver = contentResolver, sourceUri = sourceUri) ?: return false
+    val orientation = readExifOrientation(contentResolver = contentResolver, sourceUri = sourceUri)
     val rotatedBitmap = rotateBitmapIfNeeded(bitmap = bitmap, orientation = orientation)
 
     targetFile.outputStream().use { output ->
@@ -50,16 +31,16 @@ private fun persistBitmapFromUri(
 }
 
 private fun decodeBitmapFromUri(
-    context: android.content.Context,
+    contentResolver: ContentResolver,
     sourceUri: Uri,
-): Bitmap? = context.contentResolver.openInputStream(sourceUri)?.use { input ->
+): Bitmap? = contentResolver.openInputStream(sourceUri)?.use { input ->
     BitmapFactory.decodeStream(input, null, BitmapFactory.Options().apply { inJustDecodeBounds = false })
 }
 
 private fun readExifOrientation(
-    context: android.content.Context,
+    contentResolver: ContentResolver,
     sourceUri: Uri,
-): Int = context.contentResolver.openInputStream(sourceUri)?.use { orientationInput ->
+): Int = contentResolver.openInputStream(sourceUri)?.use { orientationInput ->
     ExifInterface(orientationInput).getAttributeInt(
         ExifInterface.TAG_ORIENTATION,
         ExifInterface.ORIENTATION_UNDEFINED,

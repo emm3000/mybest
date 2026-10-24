@@ -17,4 +17,9 @@ class PhotoFileNamesTest {
     fun `capture prefix uses the local date and time of the clock`() {
         assertEquals("JPEG_20261023_220405_", fileNames.capturePrefix())
     }
+
+    @Test
+    fun `persisted name uses the epoch milliseconds of the clock`() {
+        assertEquals("IMG_1792811045678.jpg", fileNames.persistedName())
+    }
 }

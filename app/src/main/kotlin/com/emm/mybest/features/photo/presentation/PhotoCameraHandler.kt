@@ -28,9 +28,7 @@ import androidx.core.net.toUri
 import com.emm.mybest.R
 import com.emm.mybest.domain.media.PhotoCaptureFiles
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @Stable
 internal data class PhotoCameraHandler(
@@ -51,7 +49,7 @@ internal fun rememberPhotoCameraHandler(
         contract = ActivityResultContracts.TakePicture(),
     ) { success ->
         val uri = tempPhotoUri ?: return@rememberLauncherForActivityResult
-        if (success) persistAndNotify(context, scope, PhotoCaptureRequest(uri, onPhotoCaptured))
+        if (success) persistAndNotify(photoCaptureFiles, scope, PhotoCaptureRequest(uri, onPhotoCaptured))
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -95,15 +93,12 @@ private fun checkAndLaunch(
 }
 
 private fun persistAndNotify(
-    context: Context,
+    photoCaptureFiles: PhotoCaptureFiles,
     scope: CoroutineScope,
     request: PhotoCaptureRequest,
 ) {
-    scope.launch(Dispatchers.IO) {
-        val persisted = copyUriToInternalStorageSafe(context, request.uri)
-        withContext(Dispatchers.Main) {
-            persisted?.let { request.onPhotoCaptured(it.toString()) }
-        }
+    scope.launch {
+        photoCaptureFiles.persistCapture(request.uri.toString())?.let(request.onPhotoCaptured)
     }
 }
 

@@ -237,7 +237,7 @@ val appModule = module {
     viewModel { PreOutingViewModel(get(), get(), get()) }
 
     single<PhotoCaptureFiles> {
-        PhotoCaptureFilesImpl(androidContext(), PhotoFileNames(Clock.System, TimeZone.currentSystemDefault()))
+        PhotoCaptureFilesImpl(androidContext(), PhotoFileNames(Clock.System, TimeZone.currentSystemDefault()), get())
     }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
