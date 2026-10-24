@@ -48,7 +48,6 @@ import com.emm.mybest.domain.repository.SetupRepository
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
-import com.emm.mybest.domain.usecase.GetInsightsUseCase
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
@@ -122,7 +121,6 @@ import com.emm.mybest.features.goal.presentation.PurchaseGoalViewModel
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeUseCases
 import com.emm.mybest.features.home.presentation.HomeViewModel
-import com.emm.mybest.features.insights.presentation.InsightsViewModel
 import com.emm.mybest.features.onboarding.presentation.OnboardingViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.photo.presentation.PhotosViewModel
@@ -194,7 +192,6 @@ val appModule = module {
     factory { NotificationCaptureUseCases(get(), get(), get()) }
     viewModel { NotificationCaptureViewModel(get(), get()) }
 
-    factory { GetInsightsUseCase(get(), get()) }
     factory { ExportDatabaseBackupUseCase(get()) }
     factory { RestoreDatabaseBackupUseCase(get()) }
 
@@ -249,7 +246,6 @@ val appModule = module {
     viewModel { AddWeightViewModel(get(), get(), get()) }
     viewModel { PhotosViewModel(get(), get(), get(), get()) }
     viewModel { HistoryViewModel(get(), get(), get(), get()) }
-    viewModel { InsightsViewModel(get()) }
     viewModel { (beforeId: String, afterId: String) ->
         ComparePhotosViewModel(beforeId, afterId, get())
     }

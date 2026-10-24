@@ -18,9 +18,6 @@ sealed interface Screen : NavKey {
     data object History : Screen
 
     @Serializable
-    data object Insights : Screen
-
-    @Serializable
     data class ComparePhotos(val beforeId: String, val afterId: String) : Screen
 
     @Serializable

@@ -15,8 +15,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.emm.mybest.features.history.presentation.HistoryScreen
 import com.emm.mybest.features.history.presentation.HistoryViewModel
-import com.emm.mybest.features.insights.presentation.InsightsScreen
-import com.emm.mybest.features.insights.presentation.InsightsViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosScreen
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.photo.presentation.PhotosScreen
@@ -115,16 +113,6 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
             viewModel = viewModel,
             onSeePhotosClick = { navigator.navigate(Screen.Photos) },
             bottomBar = rememberBottomBar(Screen.History, navigator),
-            modifier = Modifier,
-        )
-    }
-    entry<Screen.Insights> {
-        val viewModel: InsightsViewModel = koinViewModel()
-        InsightsScreen(
-            viewModel = viewModel,
-            onHistoryClick = { navigator.navigate(Screen.History) },
-            onAddWeightClick = { navigator.navigate(Screen.AddWeight) },
-            bottomBar = rememberBottomBar(Screen.Insights, navigator),
             modifier = Modifier,
         )
     }
