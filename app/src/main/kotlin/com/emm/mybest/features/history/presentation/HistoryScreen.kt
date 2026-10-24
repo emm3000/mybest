@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emm.mybest.R
-import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.atelier.MicroLabel
@@ -44,10 +43,12 @@ fun HistoryScreen(
         ) {
             DayDetailContent(
                 detail = detail,
-                onClose = { viewModel.onIntent(HistoryIntent.OnDateDismiss) },
-                onDeleteWeight = { viewModel.onIntent(HistoryIntent.OnDeleteWeight(detail.date)) },
-                onDeletePhoto = { viewModel.onIntent(HistoryIntent.OnDeletePhoto(it)) },
-                onSeePhotosClick = onSeePhotosClick,
+                callbacks = DayDetailCallbacks(
+                    onClose = { viewModel.onIntent(HistoryIntent.OnDateDismiss) },
+                    onDeleteWeight = { viewModel.onIntent(HistoryIntent.OnDeleteWeight(detail.date)) },
+                    onDeletePhoto = { viewModel.onIntent(HistoryIntent.OnDeletePhoto(it)) },
+                    onSeePhotosClick = onSeePhotosClick,
+                ),
             )
         }
     }
@@ -63,8 +64,10 @@ fun HistoryScreen(
         HistoryPagerContent(
             state = state,
             today = today,
-            onMonthChange = { viewModel.onIntent(HistoryIntent.OnMonthChange(it)) },
-            onDateClick = { viewModel.onIntent(HistoryIntent.OnDateSelected(it)) },
+            callbacks = HistoryPagerCallbacks(
+                onMonthChange = { viewModel.onIntent(HistoryIntent.OnMonthChange(it)) },
+                onDateClick = { viewModel.onIntent(HistoryIntent.OnDateSelected(it)) },
+            ),
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
@@ -76,8 +79,7 @@ fun HistoryScreen(
 private fun HistoryPagerContent(
     state: HistoryState,
     today: LocalDate,
-    onMonthChange: (YearMonthValue) -> Unit,
-    onDateClick: (LocalDate) -> Unit,
+    callbacks: HistoryPagerCallbacks,
     modifier: Modifier = Modifier,
 ) {
     when {
@@ -89,8 +91,7 @@ private fun HistoryPagerContent(
         else -> HistoryPagedContent(
             state = state,
             today = today,
-            onMonthChange = onMonthChange,
-            onDateClick = onDateClick,
+            callbacks = callbacks,
             modifier = modifier,
         )
     }
@@ -100,8 +101,7 @@ private fun HistoryPagerContent(
 private fun HistoryPagedContent(
     state: HistoryState,
     today: LocalDate,
-    onMonthChange: (YearMonthValue) -> Unit,
-    onDateClick: (LocalDate) -> Unit,
+    callbacks: HistoryPagerCallbacks,
     modifier: Modifier = Modifier,
 ) {
     val referenceMonth = state.currentMonth
@@ -112,7 +112,7 @@ private fun HistoryPagedContent(
 
     LaunchedEffect(pagerState.currentPage) {
         val offset = pagerState.currentPage - PAGER_INITIAL
-        onMonthChange(referenceMonth.plusMonths(offset))
+        callbacks.onMonthChange(referenceMonth.plusMonths(offset))
     }
 
     HorizontalPager(
@@ -122,7 +122,7 @@ private fun HistoryPagedContent(
         HistoryMonthPage(
             state = state,
             today = today,
-            onDateClick = onDateClick,
+            onDateClick = callbacks.onDateClick,
         )
     }
 }

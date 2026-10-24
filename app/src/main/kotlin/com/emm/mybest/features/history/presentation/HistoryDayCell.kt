@@ -30,22 +30,18 @@ private val MARK_GAP = 3.dp
 
 @Composable
 internal fun HistoryDayCell(
-    day: Int,
-    date: LocalDate,
-    marks: DayMarksState,
-    isToday: Boolean,
-    isFuture: Boolean,
+    cell: HistoryDayCellState,
     onClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val borderColor = if (isToday) AtelierDone else Color.Transparent
-    val textColor = if (isFuture) AtelierInkMuted else AtelierInk
+    val borderColor = if (cell.isToday) AtelierDone else Color.Transparent
+    val textColor = if (cell.isFuture) AtelierInkMuted else AtelierInk
 
     Box(
         modifier = modifier
             .aspectRatio(1f)
             .border(width = 1.dp, color = borderColor)
-            .clickable { onClick(date) },
+            .clickable { onClick(cell.date) },
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -53,7 +49,7 @@ internal fun HistoryDayCell(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = day.toString(),
+                text = cell.day.toString(),
                 style = TextStyle(
                     fontFamily = AtelierSerifFamily,
                     fontSize = CELL_DAY_SIZE,
@@ -61,7 +57,7 @@ internal fun HistoryDayCell(
                     lineHeight = CELL_DAY_SIZE,
                 ),
             )
-            DayMarkRows(marks = marks)
+            DayMarkRows(marks = cell.marks)
         }
     }
 }
