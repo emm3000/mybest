@@ -55,6 +55,15 @@ class SettingsBackupRestoreTest {
     }
 
     @Test
+    fun `importing a backup that needs a restart announces it was restored`() = runTest {
+        val viewModel = buildViewModel(RestoreResult.RequiresRestart)
+
+        viewModel.onIntent(SettingsIntent.OnImportBackup("content://backup"))
+
+        assertEquals(SettingsEffect.BackupRestored, viewModel.effect.first())
+    }
+
+    @Test
     fun `importing a backup from another schema version announces it cannot be restored`() = runTest {
         val viewModel = buildViewModel(RestoreResult.OtherSchemaVersion)
 
