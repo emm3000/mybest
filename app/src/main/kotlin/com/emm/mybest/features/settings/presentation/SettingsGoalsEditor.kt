@@ -9,12 +9,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class SettingsGoalsEditor(
     private val observeSetupUseCase: ObserveSetupUseCase,
     private val updateSetupUseCase: UpdateSetupUseCase,
 ) {
     private val editor = MutableStateFlow<SettingsEditorState?>(null)
+    private val saveLock = Mutex()
 
     val goals: Flow<SettingsGoals> = combine(observeSetupUseCase(), editor, ::SettingsGoals)
 
@@ -46,14 +49,15 @@ class SettingsGoalsEditor(
 
     private suspend fun save(): SettingsEffect? {
         val current = editor.value ?: return null
-        val candidate = current.field.withInput(observeSetupUseCase().first(), current.input)
-            ?: return showError(SettingsFieldError.INVALID_NUMBER)
-        return persist(candidate)
+        return saveLock.withLock {
+            val candidate = current.field.withInput(observeSetupUseCase().first(), current.input)
+            if (candidate == null) showError(SettingsFieldError.INVALID_NUMBER) else persist(candidate)
+        }
     }
 
     private suspend fun clear(): SettingsEffect? {
         val current = editor.value ?: return null
-        return persist(current.field.cleared(observeSetupUseCase().first()))
+        return saveLock.withLock { persist(current.field.cleared(observeSetupUseCase().first())) }
     }
 
     private suspend fun persist(candidate: Setup): SettingsEffect? =

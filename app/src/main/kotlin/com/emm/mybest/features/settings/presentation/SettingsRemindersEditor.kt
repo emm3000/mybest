@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalTime
 
@@ -15,6 +17,7 @@ class SettingsRemindersEditor(
     private val updateSetupUseCase: UpdateSetupUseCase,
 ) {
     private val openPicker = MutableStateFlow<ReminderField?>(null)
+    private val saveLock = Mutex()
 
     val picker: StateFlow<ReminderField?> = openPicker.asStateFlow()
 
@@ -52,8 +55,9 @@ class SettingsRemindersEditor(
     private suspend fun save(field: ReminderField, time: LocalTime?): SettingsEffect? =
         persist { field.withTime(it, time) }
 
-    private suspend fun persist(change: (Setup) -> Setup): SettingsEffect? =
+    private suspend fun persist(change: (Setup) -> Setup): SettingsEffect? = saveLock.withLock {
         runCatching { updateSetupUseCase(change(observeSetupUseCase().first())) }.failureEffect()
+    }
 
     private fun Result<*>.failureEffect(): SettingsEffect? = exceptionOrNull()?.let { SettingsEffect.ReminderSaveFailed }
 }
