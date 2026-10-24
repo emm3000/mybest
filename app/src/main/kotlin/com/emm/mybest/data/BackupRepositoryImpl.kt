@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.nio.ByteBuffer
 
 class BackupRepositoryImpl(
     private val context: Context,
@@ -39,47 +40,63 @@ class BackupRepositoryImpl(
 
     override suspend fun restoreDatabase(sourceUri: String): Result<RestoreResult> = runCatching {
         withContext(dispatchers.io) {
-            val uri = Uri.parse(sourceUri)
-            val tempFile = File.createTempFile("mybest-restore-", ".db", context.cacheDir)
-
-            context.contentResolver.openInputStream(uri).use { input ->
-                checkNotNull(input) { "Unable to open input stream for restore" }
-                FileOutputStream(tempFile).use { output ->
-                    input.copyTo(output)
-                }
+            val backupCopy = File.createTempFile("mybest-restore-", ".db", context.cacheDir)
+            try {
+                copySource(sourceUri, backupCopy)
+                restoreFrom(backupCopy)
+            } finally {
+                backupCopy.delete()
             }
+        }
+    }
 
-            validateBackupFile(tempFile)
+    private fun copySource(sourceUri: String, target: File) {
+        context.contentResolver.openInputStream(Uri.parse(sourceUri)).use { input ->
+            checkNotNull(input) { "Unable to open input stream for restore" }
+            FileOutputStream(target).use { output -> input.copyTo(output) }
+        }
+    }
 
-            val databaseFile = context.getDatabasePath(AppDatabase.DB_NAME)
-            database.close()
-            databaseFile.parentFile?.mkdirs()
-            tempFile.copyTo(databaseFile, overwrite = true)
-
-            File("${databaseFile.path}-wal").delete()
-            File("${databaseFile.path}-shm").delete()
-
-            tempFile.delete()
-
+    private fun restoreFrom(backupCopy: File): RestoreResult = when (readHeaderCheck(backupCopy)) {
+        BackupHeaderCheck.NOT_SQLITE -> error("Invalid SQLite backup file")
+        BackupHeaderCheck.OTHER_VERSION -> RestoreResult.OtherSchemaVersion
+        BackupHeaderCheck.SAME_VERSION -> {
+            replaceDatabaseWith(backupCopy)
             RestoreResult.RequiresRestart
         }
     }
 
-    private fun validateBackupFile(file: File) {
-        check(file.length() > 0) { "Backup file is empty" }
-        FileInputStream(file).use { input ->
-            val header = ByteArray(SQLITE_HEADER_LENGTH)
-            val read = input.read(header)
-            check(isValidSqliteHeader(header, read)) { "Invalid SQLite backup file" }
-        }
+    private fun readHeaderCheck(file: File): BackupHeaderCheck = FileInputStream(file).use { input ->
+        val header = ByteArray(SQLITE_HEADER_LENGTH)
+        checkBackupHeader(header, input.read(header), AppDatabase.SCHEMA_VERSION)
+    }
+
+    private fun replaceDatabaseWith(backupCopy: File) {
+        val databaseFile = context.getDatabasePath(AppDatabase.DB_NAME)
+        database.close()
+        databaseFile.parentFile?.mkdirs()
+        backupCopy.copyTo(databaseFile, overwrite = true)
+        File("${databaseFile.path}-wal").delete()
+        File("${databaseFile.path}-shm").delete()
     }
 }
 
-internal fun isValidSqliteHeader(headerBytes: ByteArray, bytesRead: Int): Boolean {
-    if (bytesRead != SQLITE_HEADER_LENGTH) return false
-    val headerText = headerBytes.toString(Charsets.UTF_8)
-    return headerText.startsWith(SQLITE_HEADER_PREFIX)
-}
+internal enum class BackupHeaderCheck { SAME_VERSION, OTHER_VERSION, NOT_SQLITE }
 
-private const val SQLITE_HEADER_LENGTH = 16
+internal fun checkBackupHeader(headerBytes: ByteArray, bytesRead: Int, expectedVersion: Int): BackupHeaderCheck =
+    when {
+        bytesRead < SQLITE_USER_VERSION_END || !hasSqlitePrefix(headerBytes) -> BackupHeaderCheck.NOT_SQLITE
+        readUserVersion(headerBytes) != expectedVersion -> BackupHeaderCheck.OTHER_VERSION
+        else -> BackupHeaderCheck.SAME_VERSION
+    }
+
+private fun hasSqlitePrefix(headerBytes: ByteArray): Boolean =
+    headerBytes.decodeToString(0, SQLITE_HEADER_PREFIX.length) == SQLITE_HEADER_PREFIX
+
+private fun readUserVersion(headerBytes: ByteArray): Int =
+    ByteBuffer.wrap(headerBytes, SQLITE_USER_VERSION_OFFSET, Int.SIZE_BYTES).int
+
+private const val SQLITE_HEADER_LENGTH = 100
 private const val SQLITE_HEADER_PREFIX = "SQLite format 3"
+private const val SQLITE_USER_VERSION_OFFSET = 60
+private const val SQLITE_USER_VERSION_END = SQLITE_USER_VERSION_OFFSET + Int.SIZE_BYTES

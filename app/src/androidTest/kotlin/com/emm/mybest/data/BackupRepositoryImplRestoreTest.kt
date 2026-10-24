@@ -12,9 +12,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
+import java.io.RandomAccessFile
 
 private object UnconfinedDispatchers : CoroutineDispatchers {
     override val main: CoroutineDispatcher = Dispatchers.Unconfined
@@ -23,6 +25,7 @@ private object UnconfinedDispatchers : CoroutineDispatchers {
 }
 
 private val KNOWN_DATE = LocalDate(2026, 3, 15)
+private const val SQLITE_USER_VERSION_OFFSET = 60L
 
 class BackupRepositoryImplRestoreTest {
 
@@ -77,6 +80,30 @@ class BackupRepositoryImplRestoreTest {
         fakeFile.delete()
 
         assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun restore_refuses_a_backup_from_another_schema_version_and_keeps_the_current_database() = runBlocking {
+        val backupFile = seedBackupFile().apply { writeUserVersion(AppDatabase.SCHEMA_VERSION - 1) }
+        deleteDatabaseFiles()
+        val liveDb = openDatabase()
+        liveDb.dailyWeightDao().upsert(DailyWeightEntity(id = "live1", date = KNOWN_DATE, weight = 71.0f))
+
+        val result = BackupRepositoryImpl(context, liveDb, UnconfinedDispatchers)
+            .restoreDatabase(backupFile.toURI().toString())
+        liveDb.close()
+        backupFile.delete()
+
+        assertEquals(RestoreResult.OtherSchemaVersion, result.getOrThrow())
+        assertTrue(hasWeightAfterReopen("live1"))
+        assertFalse(hasWeightAfterReopen("seed1"))
+    }
+
+    private fun File.writeUserVersion(version: Int) {
+        RandomAccessFile(this, "rw").use { file ->
+            file.seek(SQLITE_USER_VERSION_OFFSET)
+            file.writeInt(version)
+        }
     }
 
     private suspend fun seedBackupFile(): File {

@@ -6,4 +6,5 @@ sealed class SettingsEffect {
     object GoalSaved : SettingsEffect()
     object GoalSaveFailed : SettingsEffect()
     object ReminderSaveFailed : SettingsEffect()
+    object BackupFromOtherVersion : SettingsEffect()
 }
