@@ -205,26 +205,22 @@ val appModule = module {
     factory { HomeUseCases(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { ResolveHomeDestinationUseCase(get(), get(), get()) }
 
-    // Settings use cases
     factory { ObserveSetupUseCase(get()) }
     factory { UpdateSetupUseCase(get()) }
     factory { SettingsGoalsEditor(get(), get()) }
     factory { SettingsRemindersEditor(get(), get()) }
 
-    // Weight use cases
     factory { SaveWeightUseCase(get()) }
     factory { DeleteWeightByDateUseCase(get()) }
     factory { ObserveWeightProgressUseCase(get()) }
     factory { ObserveWeighInTrendUseCase(get(), get()) }
     factory { GetNearestWeightOnDateUseCase(get()) }
 
-    // Photo use cases
     factory { SavePhotosUseCase(get()) }
     factory { DeletePhotoUseCase(get()) }
     factory { ObservePhotosUseCase(get()) }
     factory { GetPhotosOverviewUseCase(get(), get()) }
 
-    // History use cases
     factory { GetHistoryUseCase(HistoryBodySources(get(), get()), HistoryNightSources(get(), get()), get()) }
 
     factory { GetEstimatedOutingCostUseCase(get(), get()) }
