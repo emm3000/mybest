@@ -47,27 +47,27 @@ class SettingsGoalsEditor(
     private suspend fun save(): SettingsEffect? {
         val current = editor.value ?: return null
         val candidate = current.field.withInput(observeSetupUseCase().first(), current.input)
-            ?: return showError(current, SettingsFieldError.INVALID_NUMBER)
-        return persist(current, candidate)
+            ?: return showError(SettingsFieldError.INVALID_NUMBER)
+        return persist(candidate)
     }
 
     private suspend fun clear(): SettingsEffect? {
         val current = editor.value ?: return null
-        return persist(current, current.field.cleared(observeSetupUseCase().first()))
+        return persist(current.field.cleared(observeSetupUseCase().first()))
     }
 
-    private suspend fun persist(current: SettingsEditorState, candidate: Setup): SettingsEffect? =
+    private suspend fun persist(candidate: Setup): SettingsEffect? =
         runCatching { updateSetupUseCase(candidate) }
-            .map { errors -> resultOf(current, errors) }
+            .map { errors -> resultOf(errors) }
             .getOrElse { SettingsEffect.GoalSaveFailed }
 
-    private fun resultOf(current: SettingsEditorState, errors: List<SetupValidationError>): SettingsEffect? {
+    private fun resultOf(errors: List<SetupValidationError>): SettingsEffect? {
         val error = errors.firstOrNull() ?: return SettingsEffect.GoalSaved.also { editor.update { null } }
-        return showError(current, error.toFieldError())
+        return showError(error.toFieldError())
     }
 
-    private fun showError(current: SettingsEditorState, error: SettingsFieldError): SettingsEffect? {
-        editor.update { current.copy(error = error) }
+    private fun showError(error: SettingsFieldError): SettingsEffect? {
+        editor.update { it?.copy(error = error) }
         return null
     }
 }
