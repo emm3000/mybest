@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,6 +20,7 @@ import com.emm.mybest.R
 import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.HButton
+import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.theme.AtelierTheme
 
 private val PRIMARY_GUTTER = 28.dp
@@ -26,13 +29,15 @@ private val PRIMARY_BOTTOM = 24.dp
 @Composable
 fun OnboardingContent(
     state: OnboardingState,
-    onIntent: (OnboardingIntent) -> Unit,
+    actions: OnboardingContentActions,
     modifier: Modifier = Modifier,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
         modifier = modifier,
-        topBar = { OnboardingAppBar(state = state, onSkip = { onIntent(OnboardingIntent.Skip) }) },
-        bottomBar = { OnboardingPrimaryButton(state.primaryAction) { onIntent(OnboardingIntent.Next) } },
+        topBar = { OnboardingAppBar(state = state, onSkip = { actions.onIntent(OnboardingIntent.Skip) }) },
+        snackbarHost = { HSnackbarHost(snackbarHostState) },
+        bottomBar = { OnboardingPrimaryButton(state.primaryAction) { actions.onIntent(OnboardingIntent.Next) } },
     ) { paddingValues ->
         OnboardingStepPage(
             step = state.step,
@@ -40,6 +45,7 @@ fun OnboardingContent(
                 .padding(paddingValues)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
+            body = { actions.stepBody(OnboardingStepHost(state.step, snackbarHostState)) },
         )
     }
 }
@@ -80,7 +86,10 @@ private fun OnboardingPrimaryButton(
 @Composable
 private fun OnboardingContentWelcomePreview() {
     AtelierTheme {
-        OnboardingContent(state = OnboardingState(OnboardingGate.REQUIRED, OnboardingStep.WELCOME), onIntent = {})
+        OnboardingContent(
+            state = OnboardingState(OnboardingGate.REQUIRED, OnboardingStep.WELCOME),
+            actions = OnboardingContentActions(onIntent = {}),
+        )
     }
 }
 
@@ -88,6 +97,9 @@ private fun OnboardingContentWelcomePreview() {
 @Composable
 private fun OnboardingContentLastStepPreview() {
     AtelierTheme {
-        OnboardingContent(state = OnboardingState(OnboardingGate.REQUIRED, OnboardingStep.WEIGHT), onIntent = {})
+        OnboardingContent(
+            state = OnboardingState(OnboardingGate.REQUIRED, OnboardingStep.WEIGHT),
+            actions = OnboardingContentActions(onIntent = {}),
+        )
     }
 }

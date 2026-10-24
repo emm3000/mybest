@@ -11,8 +11,13 @@ import org.koin.androidx.compose.koinViewModel
 fun OnboardingScreen(
     modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = koinViewModel(),
+    stepBody: @Composable (OnboardingStepHost) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     BackHandler(enabled = state.canGoBack) { viewModel.onIntent(OnboardingIntent.Back) }
-    OnboardingContent(state = state, onIntent = viewModel::onIntent, modifier = modifier)
+    OnboardingContent(
+        state = state,
+        actions = OnboardingContentActions(onIntent = viewModel::onIntent, stepBody = stepBody),
+        modifier = modifier,
+    )
 }
