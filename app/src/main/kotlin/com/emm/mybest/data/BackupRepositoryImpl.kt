@@ -80,11 +80,13 @@ class BackupRepositoryImpl(
 
     private fun replaceDatabaseWith(backupCopy: File) {
         val databaseFile = context.getDatabasePath(AppDatabase.DB_NAME)
-        database.close()
         databaseFile.parentFile?.mkdirs()
-        backupCopy.copyTo(databaseFile, overwrite = true)
-        File("${databaseFile.path}-wal").delete()
-        File("${databaseFile.path}-shm").delete()
+        FileInputStream(backupCopy).use { input ->
+            replaceFileAtomically(input, databaseFile) {
+                database.close()
+                deleteSqliteSideFiles(databaseFile)
+            }
+        }
     }
 
     private fun deleteSqliteSideFiles(file: File) {
