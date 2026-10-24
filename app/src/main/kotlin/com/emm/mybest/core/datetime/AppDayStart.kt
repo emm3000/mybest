@@ -4,7 +4,11 @@ import kotlinx.datetime.LocalTime
 
 private const val APP_DAY_START_HOUR = 5
 private const val SECONDS_PER_MINUTE = 60
-private const val MINUTES_PER_DAY = 24 * 60
+
+/**
+ * Minutes in one calendar day.
+ */
+const val MINUTES_PER_DAY = 24 * 60
 
 /**
  * The local time at which every app day begins and the previous one ends (ADR 0003).

@@ -1,12 +1,11 @@
 package com.emm.mybest.domain.models
 
 import com.emm.mybest.core.datetime.APP_DAY_START
+import com.emm.mybest.core.datetime.MINUTES_PER_DAY
 import com.emm.mybest.core.datetime.MORNING_AFTER_CUTOFF
 import com.emm.mybest.core.datetime.minutesIntoAppDay
 import com.emm.mybest.core.money.Money
 import kotlinx.datetime.LocalTime
-
-private const val MINUTES_PER_DAY = 24 * 60
 
 /**
  * The three caps set before a planned outing: [money], [drinks] and [returnTime].
