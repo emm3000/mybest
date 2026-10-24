@@ -117,7 +117,6 @@ private fun BackupRow(
         params = SettingsRowParams(
             label = stringResource(R.string.settings_backup_label),
             value = stringResource(R.string.settings_backup_export_value),
-            caption = stringResource(R.string.settings_backup_caption_empty),
             extra = stringResource(R.string.settings_backup_import_extra),
             onValueClick = onExportClick,
             onExtraClick = onImportClick,
