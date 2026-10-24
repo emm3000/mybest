@@ -19,7 +19,6 @@ private const val TAB_SWITCH_DURATION_MS = 200
 private const val SLIDE_FRACTION = 0.10f
 
 private val pushEasing: Easing = Easing { fraction ->
-    // Cubic ease-out: decelerates into place.
     val t = fraction - 1f
     t * t * t + 1f
 }
