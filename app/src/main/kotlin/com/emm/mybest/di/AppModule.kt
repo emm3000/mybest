@@ -21,6 +21,7 @@ import com.emm.mybest.data.WeightRepositoryImpl
 import com.emm.mybest.data.capture.InstalledAppsRepositoryImpl
 import com.emm.mybest.data.capture.NotificationAccessCheckerImpl
 import com.emm.mybest.data.media.PhotoCaptureFilesImpl
+import com.emm.mybest.data.media.PhotoFileNames
 import com.emm.mybest.data.reminder.CheckInReminderSchedulerImpl
 import com.emm.mybest.data.reminder.DebtReminderSchedulerImpl
 import com.emm.mybest.data.reminder.PreOutingReminderSchedulerImpl
@@ -235,7 +236,9 @@ val appModule = module {
     factory { PreOutingDecisionUseCases(get(), get(), get()) }
     viewModel { PreOutingViewModel(get(), get(), get()) }
 
-    single<PhotoCaptureFiles> { PhotoCaptureFilesImpl(androidContext()) }
+    single<PhotoCaptureFiles> {
+        PhotoCaptureFilesImpl(androidContext(), PhotoFileNames(Clock.System, TimeZone.currentSystemDefault()))
+    }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
     viewModel { HomeViewModel(get(), get()) }
