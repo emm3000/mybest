@@ -36,7 +36,6 @@ internal fun HistoryMonthPage(
         Hairline()
         HistoryRecentEntries(
             entries = state.recentEntries,
-            today = today,
             onRowClick = onDateClick,
         )
     }

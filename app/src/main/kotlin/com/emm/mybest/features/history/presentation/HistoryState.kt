@@ -2,7 +2,6 @@ package com.emm.mybest.features.history.presentation
 
 import androidx.compose.runtime.Stable
 import com.emm.mybest.core.datetime.YearMonthValue
-import com.emm.mybest.domain.usecase.history.HistoryRecentEntry
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -21,7 +20,7 @@ data class HistoryState(
     val monthWonNightCount: Int = 0,
     val dayMarks: ImmutableMap<LocalDate, DayMarksState> = persistentMapOf(),
     val dayDetail: DayDetailState? = null,
-    val recentEntries: ImmutableList<HistoryRecentEntry> = persistentListOf(),
+    val recentEntries: ImmutableList<HistoryRecentRowState> = persistentListOf(),
     val selectedDate: LocalDate? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
