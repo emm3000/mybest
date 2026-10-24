@@ -10,7 +10,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -24,8 +23,6 @@ import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
 
 private val SETTINGS_GUT = 28.dp
 
@@ -45,20 +42,7 @@ fun SettingsScreen(
         uri?.let { viewModel.onIntent(SettingsIntent.OnImportBackup(it.toString())) }
     }
     SettingsEffectsHandler(effects = viewModel.effect, snackbarHostState = snackbarHostState)
-    state.reminderPicker?.let { field ->
-        SettingsReminderPicker(field = field, setup = state.goals.setup, onIntent = viewModel::onIntent)
-    }
-    state.goals.editor?.let { editor ->
-        SettingsFieldEditor(
-            editor = editor,
-            actions = SettingsFieldEditorActions(
-                onInputChange = { viewModel.onIntent(SettingsIntent.OnFieldInputChange(it)) },
-                onSave = { viewModel.onIntent(SettingsIntent.OnFieldSave) },
-                onClear = { viewModel.onIntent(SettingsIntent.OnFieldClear) },
-                onDismiss = { viewModel.onIntent(SettingsIntent.OnFieldDismiss) },
-            ),
-        )
-    }
+    SettingsEditors(state = state, onIntent = viewModel::onIntent)
     Scaffold(
         modifier = modifier,
         topBar = { SettingsAppBar() },
@@ -79,27 +63,6 @@ fun SettingsScreen(
                 onReplayOnboardingClick = { viewModel.onIntent(SettingsIntent.OnReplayOnboarding) },
             ),
         )
-    }
-}
-
-@Composable
-private fun SettingsEffectsHandler(
-    effects: Flow<SettingsEffect>,
-    snackbarHostState: SnackbarHostState,
-) {
-    val savedMessage = stringResource(R.string.settings_goal_saved)
-    val saveFailedMessage = stringResource(R.string.settings_goal_save_failed)
-    LaunchedEffect(Unit) {
-        effects.collectLatest { effect ->
-            val message = when (effect) {
-                is SettingsEffect.ShowError -> effect.message
-                is SettingsEffect.ShowMessage -> effect.message
-                is SettingsEffect.GoalSaved -> savedMessage
-                is SettingsEffect.GoalSaveFailed -> saveFailedMessage
-                is SettingsEffect.ReminderSaveFailed -> saveFailedMessage
-            }
-            snackbarHostState.showSnackbar(message)
-        }
     }
 }
 
@@ -131,7 +94,9 @@ private fun SettingsBody(
     ) {
         SettingsHero()
         Hairline()
-        SettingsGoalsSection(setup = state.goals.setup, onFieldOpen = actions.onFieldOpen)
+        SettingsGoalsSection(
+            params = SettingsGoalsSectionParams(setup = state.goals.setup, onFieldOpen = actions.onFieldOpen),
+        )
         SettingsDebtsRow(debts = state.debts, onClick = actions.onDebtsClick)
         SettingsPurchaseGoalRow(purchaseGoal = state.purchaseGoal, onClick = actions.onPurchaseGoalClick)
         SettingsCaptureRow(capture = state.capture, onClick = actions.onCaptureClick)
