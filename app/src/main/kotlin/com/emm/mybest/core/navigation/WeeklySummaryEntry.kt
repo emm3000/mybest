@@ -13,7 +13,6 @@ internal fun EntryProviderScope<NavKey>.weeklySummaryEntry(navigator: Navigator)
         SummaryScreen(
             viewModel = viewModel,
             callbacks = summaryCallbacks(navigator),
-            onBack = { navigator.goBack() },
             bottomBar = rememberBottomBar(Screen.WeeklySummary, navigator),
             modifier = Modifier,
         )
