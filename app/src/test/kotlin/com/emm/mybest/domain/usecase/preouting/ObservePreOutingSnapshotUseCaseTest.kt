@@ -67,8 +67,15 @@ class ObservePreOutingSnapshotUseCaseTest {
         suspend fun snapshot(): PreOutingSnapshot = useCase().first()
     }
 
-    private fun debt(id: Long, name: String, installment: Long, day: Int) =
-        Debt(id, name, balance = Money(5_000_00), installment = Money(installment), paymentDay = day)
+    private data class Due(val amount: Long, val day: Int)
+
+    private fun debt(id: Long, name: String, due: Due) = Debt(
+        id,
+        name,
+        balance = Money(5_000_00),
+        installment = Money(due.amount),
+        paymentDay = due.day,
+    )
 
     private fun checkedIn(id: Long, day: LocalDate, spent: Long) = Outing(
         id,
@@ -82,7 +89,11 @@ class ObservePreOutingSnapshotUseCaseTest {
 
     @Test
     fun `picks the earliest payment date on or after today`() = runTest {
-        val debts = listOf(debt(1, "Banco", 400_00, 28), debt(2, "Tarjeta", 500_00, 23), debt(3, "Auto", 300_00, 25))
+        val debts = listOf(
+            debt(1, "Banco", Due(400_00, 28)),
+            debt(2, "Tarjeta", Due(500_00, 23)),
+            debt(3, "Auto", Due(300_00, 25)),
+        )
 
         val share = Rig(debts = debts).snapshot().nearestInstallment
 
@@ -92,7 +103,7 @@ class ObservePreOutingSnapshotUseCaseTest {
 
     @Test
     fun `a debt paid this month falls due next month`() = runTest {
-        val debts = listOf(debt(1, "Banco", 400_00, 28), debt(2, "Tarjeta", 500_00, 30))
+        val debts = listOf(debt(1, "Banco", Due(400_00, 28)), debt(2, "Tarjeta", Due(500_00, 30)))
         val paid = listOf(DebtPayment(1, YearMonthValue(2026, 10), Money(400_00)))
 
         val share = Rig(debts = debts, payments = paid).snapshot().nearestInstallment
@@ -104,35 +115,38 @@ class ObservePreOutingSnapshotUseCaseTest {
     fun `the only debt paid this month uses next month's date`() = runTest {
         val paid = listOf(DebtPayment(1, YearMonthValue(2026, 10), Money(400_00)))
 
-        val share = Rig(debts = listOf(debt(1, "Banco", 400_00, 28)), payments = paid).snapshot().nearestInstallment
+        val rig = Rig(debts = listOf(debt(1, "Banco", Due(400_00, 28))), payments = paid)
+
+        val share = rig.snapshot().nearestInstallment
 
         assertEquals(LocalDate(2026, 11, 28), share?.paymentDate)
     }
 
     @Test
     fun `an unpaid debt whose date passed falls due next month`() = runTest {
-        val share = Rig(debts = listOf(debt(1, "Banco", 400_00, 10))).snapshot().nearestInstallment
+        val share = Rig(debts = listOf(debt(1, "Banco", Due(400_00, 10)))).snapshot().nearestInstallment
 
         assertEquals(LocalDate(2026, 11, 10), share?.paymentDate)
     }
 
     @Test
     fun `payment day 31 in a 30-day month falls on the 30th`() = runTest {
-        val rig = Rig(today = LocalDate(2026, 11, 3), debts = listOf(debt(1, "Banco", 400_00, 31)))
+        val rig = Rig(today = LocalDate(2026, 11, 3), debts = listOf(debt(1, "Banco", Due(400_00, 31))))
 
         assertEquals(LocalDate(2026, 11, 30), rig.snapshot().nearestInstallment?.paymentDate)
     }
 
     @Test
     fun `night percent is the estimate over the installment`() = runTest {
-        val rig = Rig(setup = Setup(typicalOutingCost = TYPICAL_COST), debts = listOf(debt(1, "Banco", 1_652_00, 28)))
+        val debts = listOf(debt(1, "Banco", Due(1_652_00, 28)))
+        val rig = Rig(setup = Setup(typicalOutingCost = TYPICAL_COST), debts = debts)
 
         assertEquals(23, rig.snapshot().nearestInstallment?.nightPercent)
     }
 
     @Test
     fun `night percent is null without an estimate`() = runTest {
-        val share = Rig(debts = listOf(debt(1, "Banco", 400_00, 28))).snapshot().nearestInstallment
+        val share = Rig(debts = listOf(debt(1, "Banco", Due(400_00, 28)))).snapshot().nearestInstallment
 
         assertEquals(InstallmentShare("Banco", LocalDate(2026, 10, 28), Money(400_00), nightPercent = null), share)
     }
@@ -217,7 +231,7 @@ class ObservePreOutingSnapshotUseCaseTest {
     fun `recording a won night changes only the not spent counter`() = runTest {
         val rig = Rig(
             setup = Setup(typicalOutingCost = TYPICAL_COST, monthlyOutingLimit = 3),
-            debts = listOf(debt(1, "Banco", 1_000_00, 28)),
+            debts = listOf(debt(1, "Banco", Due(1_000_00, 28))),
             goal = PurchaseGoal("Zapatillas", Money(370_00)),
         )
         val before = rig.snapshot()
