@@ -17,6 +17,7 @@ import com.emm.mybest.features.history.presentation.HistoryScreen
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.photo.presentation.ComparePhotosScreen
 import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
+import com.emm.mybest.features.photo.presentation.PhotosCallbacks
 import com.emm.mybest.features.photo.presentation.PhotosScreen
 import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewer
@@ -100,9 +101,11 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
         PhotosScreen(
             viewModel = viewModel,
             photoCaptureFiles = koinInject(),
-            onBack = { navigator.goBack() },
-            onOpenViewer = { photoId -> navigator.navigate(Screen.PhotoViewer(photoId)) },
-            onCompare = { beforeId, afterId -> navigator.navigate(Screen.ComparePhotos(beforeId, afterId)) },
+            callbacks = PhotosCallbacks(
+                onBack = { navigator.goBack() },
+                onOpenViewer = { photoId -> navigator.navigate(Screen.PhotoViewer(photoId)) },
+                onCompare = { beforeId, afterId -> navigator.navigate(Screen.ComparePhotos(beforeId, afterId)) },
+            ),
             bottomBar = {},
             modifier = Modifier,
         )

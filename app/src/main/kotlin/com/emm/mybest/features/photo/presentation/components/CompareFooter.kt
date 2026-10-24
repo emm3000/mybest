@@ -11,33 +11,21 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
-import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
-import kotlinx.datetime.LocalDate
 
 private val FOOTER_HORIZONTAL_PADDING = 28.dp
 private val FOOTER_BOTTOM_PADDING = 16.dp
 
 @Composable
 internal fun CompareFooter(
-    beforePhoto: ProgressPhoto?,
-    afterPhoto: ProgressPhoto?,
-    beforeWeightKg: Float?,
-    afterWeightKg: Float?,
-    today: LocalDate,
+    selection: CompareSelection,
     onCompareClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val summaryText = summaryText(
-        beforePhoto = beforePhoto,
-        afterPhoto = afterPhoto,
-        beforeWeightKg = beforeWeightKg,
-        afterWeightKg = afterWeightKg,
-        today = today,
-    )
-    val showCompareCta = beforePhoto != null && afterPhoto != null
+    val summaryText = summaryText(selection)
+    val showCompareCta = selection.beforePhoto != null && selection.afterPhoto != null
 
     Row(
         modifier = modifier
@@ -60,18 +48,16 @@ internal fun CompareFooter(
 }
 
 @Composable
-private fun summaryText(
-    beforePhoto: ProgressPhoto?,
-    afterPhoto: ProgressPhoto?,
-    beforeWeightKg: Float?,
-    afterWeightKg: Float?,
-    today: LocalDate,
-): String {
+private fun summaryText(selection: CompareSelection): String {
+    val beforePhoto = selection.beforePhoto
     if (beforePhoto == null) return stringResource(R.string.photos_compare_summary_empty)
-    val referenceDate = afterPhoto?.date ?: today
+    val referenceDate = selection.afterPhoto?.date ?: selection.today
     val days = (referenceDate.toEpochDays() - beforePhoto.date.toEpochDays()).toInt()
     val daysLabel = pluralStringResource(R.plurals.photos_compare_days_part, days, days)
-    val deltaText = deltaText(beforeWeightKg = beforeWeightKg, afterWeightKg = afterWeightKg)
+    val deltaText = deltaText(
+        beforeWeightKg = selection.beforeWeightKg,
+        afterWeightKg = selection.afterWeightKg,
+    )
     return stringResource(R.string.photos_compare_summary_format, daysLabel, deltaText)
 }
 
