@@ -31,23 +31,25 @@ class SettingsBackupRestoreTest {
     private fun buildViewModel(restoreResult: RestoreResult): SettingsViewModel {
         val setupRepository = FakeSetupRepository()
         return SettingsViewModel(
-            userPreferencesRepository = preferencesRepository,
-            exportDatabaseBackupUseCase = mockk<ExportDatabaseBackupUseCase>(),
-            restoreDatabaseBackupUseCase = mockk<RestoreDatabaseBackupUseCase> {
-                coEvery { this@mockk.invoke(any()) } returns Result.success(restoreResult)
-            },
-            goalsEditor = SettingsGoalsEditor(
-                ObserveSetupUseCase(setupRepository),
-                UpdateSetupUseCase(setupRepository),
-            ),
-            remindersEditor = SettingsRemindersEditor(
-                ObserveSetupUseCase(setupRepository),
-                UpdateSetupUseCase(setupRepository),
-            ),
-            rowSources = SettingsRowSources(
-                ObserveDebtSummaryUseCase(FakeDebtRepository()),
-                FakePurchaseGoalRepository(),
-                ObserveCaptureSummaryUseCase(FakeNotificationCaptureRepository()),
+            dependencies = SettingsDependencies(
+                userPreferencesRepository = preferencesRepository,
+                exportDatabaseBackupUseCase = mockk<ExportDatabaseBackupUseCase>(),
+                restoreDatabaseBackupUseCase = mockk<RestoreDatabaseBackupUseCase> {
+                    coEvery { this@mockk.invoke(any()) } returns Result.success(restoreResult)
+                },
+                goalsEditor = SettingsGoalsEditor(
+                    ObserveSetupUseCase(setupRepository),
+                    UpdateSetupUseCase(setupRepository),
+                ),
+                remindersEditor = SettingsRemindersEditor(
+                    ObserveSetupUseCase(setupRepository),
+                    UpdateSetupUseCase(setupRepository),
+                ),
+                rowSources = SettingsRowSources(
+                    ObserveDebtSummaryUseCase(FakeDebtRepository()),
+                    FakePurchaseGoalRepository(),
+                    ObserveCaptureSummaryUseCase(FakeNotificationCaptureRepository()),
+                ),
             ),
         )
     }

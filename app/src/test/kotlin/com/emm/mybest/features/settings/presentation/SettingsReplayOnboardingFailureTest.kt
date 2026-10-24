@@ -31,18 +31,23 @@ class SettingsReplayOnboardingFailureTest {
     }
 
     private fun buildViewModel(setupRepository: FakeSetupRepository = FakeSetupRepository()) = SettingsViewModel(
-        userPreferencesRepository = preferencesRepository,
-        exportDatabaseBackupUseCase = mockk<ExportDatabaseBackupUseCase>(),
-        restoreDatabaseBackupUseCase = mockk<RestoreDatabaseBackupUseCase>(),
-        goalsEditor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), UpdateSetupUseCase(setupRepository)),
-        remindersEditor = SettingsRemindersEditor(
-            ObserveSetupUseCase(setupRepository),
-            UpdateSetupUseCase(setupRepository),
-        ),
-        rowSources = SettingsRowSources(
-            ObserveDebtSummaryUseCase(FakeDebtRepository()),
-            FakePurchaseGoalRepository(),
-            ObserveCaptureSummaryUseCase(FakeNotificationCaptureRepository()),
+        dependencies = SettingsDependencies(
+            userPreferencesRepository = preferencesRepository,
+            exportDatabaseBackupUseCase = mockk<ExportDatabaseBackupUseCase>(),
+            restoreDatabaseBackupUseCase = mockk<RestoreDatabaseBackupUseCase>(),
+            goalsEditor = SettingsGoalsEditor(
+                ObserveSetupUseCase(setupRepository),
+                UpdateSetupUseCase(setupRepository),
+            ),
+            remindersEditor = SettingsRemindersEditor(
+                ObserveSetupUseCase(setupRepository),
+                UpdateSetupUseCase(setupRepository),
+            ),
+            rowSources = SettingsRowSources(
+                ObserveDebtSummaryUseCase(FakeDebtRepository()),
+                FakePurchaseGoalRepository(),
+                ObserveCaptureSummaryUseCase(FakeNotificationCaptureRepository()),
+            ),
         ),
     )
 

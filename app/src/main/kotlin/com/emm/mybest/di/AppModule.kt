@@ -126,6 +126,7 @@ import com.emm.mybest.features.photo.presentation.ComparePhotosViewModel
 import com.emm.mybest.features.photo.presentation.PhotosViewModel
 import com.emm.mybest.features.photo.presentation.viewer.PhotoViewerViewModel
 import com.emm.mybest.features.preouting.presentation.PreOutingViewModel
+import com.emm.mybest.features.settings.presentation.SettingsDependencies
 import com.emm.mybest.features.settings.presentation.SettingsGoalsEditor
 import com.emm.mybest.features.settings.presentation.SettingsRemindersEditor
 import com.emm.mybest.features.settings.presentation.SettingsRowSources
@@ -250,7 +251,8 @@ val appModule = module {
         ComparePhotosViewModel(beforeId, afterId, get())
     }
     viewModel { (initialPhotoId: String) -> PhotoViewerViewModel(initialPhotoId, get()) }
-    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { SettingsDependencies(get(), get(), get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(get()) }
 
     factory { ObserveDebtListUseCase(get(), get()) }
     factory { ObserveDebtSummaryUseCase(get()) }
