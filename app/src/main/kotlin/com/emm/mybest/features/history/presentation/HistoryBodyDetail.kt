@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.emm.mybest.R
-import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.IconButtonVariant
 import com.emm.mybest.ui.components.atelier.Hairline
@@ -71,7 +70,7 @@ internal fun DetailPhotoRow(row: PhotoRowState, onDelete: () -> Unit, modifier: 
             text = stringResource(R.string.history_detail_photo_label),
             modifier = Modifier.padding(top = PHOTO_LABEL_TOP_PADDING),
         )
-        PhotoColumn(photo = row.photo, modifier = Modifier.weight(1f))
+        PhotoColumn(row = row, modifier = Modifier.weight(1f))
         BodyRowDelete(
             canDelete = row.canDelete,
             description = stringResource(R.string.history_delete_photo),
@@ -81,13 +80,13 @@ internal fun DetailPhotoRow(row: PhotoRowState, onDelete: () -> Unit, modifier: 
 }
 
 @Composable
-private fun PhotoColumn(photo: ProgressPhoto, modifier: Modifier = Modifier) {
-    val typeLabel = photoTypeLabel(photo.type)
+private fun PhotoColumn(row: PhotoRowState, modifier: Modifier = Modifier) {
+    val typeLabel = photoTypeLabel(row.photo.type)
     Column(modifier = modifier) {
         Text(text = typeLabel, style = BODY_TEXT_STYLE)
         AsyncImage(
-            model = photo.photoPath,
-            contentDescription = stringResource(R.string.history_photo_description, typeLabel.lowercase()),
+            model = row.photo.photoPath,
+            contentDescription = stringResource(row.descriptionRes),
             modifier = Modifier
                 .padding(top = PHOTO_TOP_PADDING)
                 .size(THUMBNAIL_SIZE),

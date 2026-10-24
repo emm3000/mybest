@@ -40,7 +40,7 @@ internal fun toDayDetailState(date: LocalDate, summary: DaySummary?, today: Loca
         wonNight = summary.wonNight?.toDetail(),
         checks = summary.toCheckDetails(),
         weight = summary.weight?.let { WeightRowState(it.toLabel(), canDelete) },
-        photos = summary.photos.map { PhotoRowState(it, canDelete) }.toImmutableList(),
+        photos = summary.photos.map { PhotoRowState(it, canDelete, it.type.toDescriptionRes()) }.toImmutableList(),
         isEmpty = false,
     )
 }

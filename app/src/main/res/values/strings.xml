@@ -157,7 +157,10 @@
     <string name="history_detail_check_unrecorded">—</string>
     <string name="history_delete_weight">Eliminar peso</string>
     <string name="history_delete_photo">Eliminar foto</string>
-    <string name="history_photo_description">Foto de %1$s</string>
+    <string name="history_photo_trunk_description">Foto de tronco</string>
+    <string name="history_photo_face_description">Foto de cara</string>
+    <string name="history_recent_weight">Peso %1$.1f</string>
+    <string name="history_recent_photos">Foto %1$s</string>
     <string name="history_today_chip">HOY</string>
     <string name="history_empty_day">Sin actividad</string>
     <string name="history_view_photos">VER FOTOS ↗</string>

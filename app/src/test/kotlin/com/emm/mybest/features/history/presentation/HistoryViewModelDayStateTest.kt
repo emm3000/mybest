@@ -1,5 +1,6 @@
 package com.emm.mybest.features.history.presentation
 
+import com.emm.mybest.R
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.money.Money
@@ -286,6 +287,20 @@ class HistoryViewModelDayStateTest {
 
         assertEquals(listOf(PhotoRowState(old, canDelete = false)), selected(result, yesterday).photos)
         assertEquals(listOf(PhotoRowState(recent, canDelete = true)), selected(result, today).photos)
+    }
+
+    @Test
+    fun `each photo row describes its photo type`() = runTest {
+        val trunk = ProgressPhoto("p1", today, PhotoType.TRUNK, "/tmp/trunk.jpg", 1L)
+        val face = ProgressPhoto("p2", today, PhotoType.FACE, "/tmp/face.jpg", 2L)
+        val result = emptyResult(DaySummary(date = today, photos = listOf(trunk, face)))
+
+        val descriptions = selected(result, today).photos.map { it.descriptionRes }
+
+        assertEquals(
+            listOf(R.string.history_photo_trunk_description, R.string.history_photo_face_description),
+            descriptions,
+        )
     }
 
     @Test

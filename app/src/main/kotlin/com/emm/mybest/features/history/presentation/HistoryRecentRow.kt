@@ -37,8 +37,7 @@ internal fun HistoryRecentRow(
     modifier: Modifier = Modifier,
 ) {
     val dateLabel = formatRecentDate(entry.date)
-    val photoLabels = entry.photoTypes.map { photoTypeLabel(it) }
-    val description = buildDescription(entry, photoLabels)
+    val description = buildDescription(entry)
     val isToday = entry.date == today
 
     Row(
@@ -73,11 +72,11 @@ internal fun HistoryRecentRow(
     }
 }
 
-private fun buildDescription(entry: HistoryRecentEntry, photoLabels: List<String>): String {
-    val parts = mutableListOf<String>()
-    entry.weight?.let { parts.add("Peso ${"%.1f".format(it)}") }
-    if (photoLabels.isNotEmpty()) {
-        parts.add("Foto ${photoLabels.joinToString(" · ")}")
-    }
-    return parts.joinToString(" · ")
+@Composable
+private fun buildDescription(entry: HistoryRecentEntry): String {
+    val weightPart = entry.weight?.let { stringResource(R.string.history_recent_weight, it) }
+    val photoLabels = entry.photoTypes.map { photoTypeLabel(it) }
+    val photoPart = photoLabels.takeIf { it.isNotEmpty() }
+        ?.let { stringResource(R.string.history_recent_photos, it.joinToString(" · ")) }
+    return listOfNotNull(weightPart, photoPart).joinToString(" · ")
 }
