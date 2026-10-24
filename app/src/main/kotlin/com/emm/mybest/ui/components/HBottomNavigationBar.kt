@@ -49,7 +49,7 @@ private data class AtelierNavItem(
 
 private val NAV_ITEMS = listOf(
     AtelierNavItem(Screen.Home, Icons.AutoMirrored.Outlined.MenuBook, R.string.nav_home),
-    AtelierNavItem(Screen.Insights, Icons.AutoMirrored.Outlined.TrendingUp, R.string.nav_insights),
+    AtelierNavItem(Screen.WeeklySummary, Icons.AutoMirrored.Outlined.TrendingUp, R.string.nav_summary),
     AtelierNavItem(Screen.History, Icons.Outlined.History, R.string.nav_history),
     AtelierNavItem(Screen.Settings, Icons.Outlined.Settings, R.string.nav_settings),
 )

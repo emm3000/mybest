@@ -36,7 +36,7 @@ import org.koin.core.parameter.parametersOf
 
 private val TOP_LEVEL_SCREENS = setOf(
     Screen.Home,
-    Screen.Insights,
+    Screen.WeeklySummary,
     Screen.History,
     Screen.Settings,
 )
