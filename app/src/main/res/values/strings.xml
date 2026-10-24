@@ -452,6 +452,7 @@
     <string name="onboarding_money_why">Así ves cuánto de tu cuota o de tu meta se va en una noche.</string>
     <string name="onboarding_weight_title">Peso y recordatorios</string>
     <string name="onboarding_weight_why">Solo te avisamos a la hora que elijas; si no eliges una, no hay avisos.</string>
+    <string name="onboarding_outings_note">Los topes de plata, tragos y hora los pones cada noche, antes de salir.</string>
     <string name="settings_onboarding_label">INTRODUCCIÓN</string>
     <string name="settings_onboarding_value">Volver a ver la introducción</string>
 </resources>

@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emm.mybest.features.onboarding.presentation.OnboardingGate
-import com.emm.mybest.features.onboarding.presentation.OnboardingScreen
 import com.emm.mybest.features.onboarding.presentation.OnboardingViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -23,7 +22,7 @@ fun AppRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     when (state.gate) {
         OnboardingGate.LOADING -> Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
-        OnboardingGate.REQUIRED -> OnboardingScreen(modifier = modifier, viewModel = viewModel)
+        OnboardingGate.REQUIRED -> OnboardingFlow(viewModel = viewModel, modifier = modifier)
         OnboardingGate.DONE -> AppNavigation(
             modifier = modifier,
             intentAction = intentAction,

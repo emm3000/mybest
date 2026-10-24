@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.theme.AtelierInk
 import com.emm.mybest.ui.theme.AtelierInkSecondary
+import com.emm.mybest.ui.theme.AtelierInkTertiary
 import com.emm.mybest.ui.theme.AtelierTheme
 
 private val PAGE_GUTTER = 28.dp
@@ -38,7 +39,18 @@ fun OnboardingStepPage(
             modifier = Modifier.padding(horizontal = PAGE_GUTTER, vertical = SECTION_GAP),
         )
         body()
+        step.noteRes?.let { OnboardingNote(noteRes = it) }
     }
+}
+
+@Composable
+private fun OnboardingNote(@StringRes noteRes: Int) {
+    Text(
+        text = stringResource(noteRes),
+        style = MaterialTheme.typography.bodyMedium,
+        color = AtelierInkTertiary,
+        modifier = Modifier.padding(horizontal = PAGE_GUTTER, vertical = SECTION_GAP),
+    )
 }
 
 @Composable

@@ -23,6 +23,13 @@ internal val OnboardingStep.whyRes: Int
         OnboardingStep.WEIGHT -> R.string.onboarding_weight_why
     }
 
+@get:StringRes
+internal val OnboardingStep.noteRes: Int?
+    get() = when (this) {
+        OnboardingStep.OUTINGS -> R.string.onboarding_outings_note
+        else -> null
+    }
+
 internal val OnboardingStep.lineResIds: List<Int>
     get() = when (this) {
         OnboardingStep.WELCOME -> WELCOME_LINES
