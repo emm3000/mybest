@@ -61,7 +61,7 @@ val hasCompleteReleaseSigning = releaseSigningProperties?.hasRequiredReleaseSign
 android {
     namespace = "com.emm.mybest"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
