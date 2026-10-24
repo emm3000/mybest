@@ -17,7 +17,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DayOfWeek
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -148,7 +147,7 @@ class AddWeightViewModelTest {
 
         viewModel.onIntent(AddWeightIntent.OnWeightChange("abc"))
 
-        assertNotNull(viewModel.state.value.weightError)
+        assertEquals(AddWeightFieldError.INVALID_FORMAT, viewModel.state.value.weightError)
     }
 
     @Test
@@ -157,7 +156,7 @@ class AddWeightViewModelTest {
 
         viewModel.onIntent(AddWeightIntent.OnWeightChange("72."))
 
-        assertNotNull(viewModel.state.value.weightError)
+        assertEquals(AddWeightFieldError.INVALID_FORMAT, viewModel.state.value.weightError)
     }
 
     @Test
@@ -166,7 +165,7 @@ class AddWeightViewModelTest {
 
         viewModel.onIntent(AddWeightIntent.OnWeightChange("72,"))
 
-        assertNotNull(viewModel.state.value.weightError)
+        assertEquals(AddWeightFieldError.INVALID_FORMAT, viewModel.state.value.weightError)
     }
 
     @Test
@@ -188,7 +187,7 @@ class AddWeightViewModelTest {
         viewModel.onIntent(AddWeightIntent.OnSaveClick)
         advanceUntilIdle()
 
-        assertNotNull(viewModel.state.value.weightError)
+        assertEquals(AddWeightFieldError.INVALID_FORMAT, viewModel.state.value.weightError)
         coVerify(exactly = 0) { saveWeightUseCase(any(), any()) }
     }
 
@@ -275,11 +274,11 @@ class AddWeightViewModelTest {
     }
 
     @Test
-    fun `out-of-range weight sets error`() = runTest {
+    fun `out-of-range weight sets the out-of-range error`() = runTest {
         val viewModel = buildViewModel()
 
-        viewModel.onIntent(AddWeightIntent.OnWeightChange("232323"))
+        viewModel.onIntent(AddWeightIntent.OnWeightChange("600"))
 
-        assertNotNull(viewModel.state.value.weightError)
+        assertEquals(AddWeightFieldError.OUT_OF_RANGE, viewModel.state.value.weightError)
     }
 }

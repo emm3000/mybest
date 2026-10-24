@@ -116,7 +116,7 @@ private fun AddWeightBody(
             onValueChange = { onIntent(AddWeightIntent.OnWeightChange(it)) },
             label = stringResource(R.string.add_weight_kg_label),
             placeholder = stringResource(R.string.add_weight_kg_placeholder),
-            errorMessage = state.weightError,
+            errorMessage = state.weightError?.let { stringResource(it.messageRes()) },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             leadingIcon = { Icon(Icons.Rounded.Scale, contentDescription = null) },
