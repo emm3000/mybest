@@ -9,19 +9,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.emm.mybest.features.capture.presentation.NotificationCaptureScreen
-import com.emm.mybest.features.capture.presentation.NotificationCaptureViewModel
-import com.emm.mybest.features.checkin.presentation.CheckInScreen
-import com.emm.mybest.features.checkin.presentation.CheckInViewModel
-import com.emm.mybest.features.debts.presentation.DebtsScreen
-import com.emm.mybest.features.debts.presentation.DebtsViewModel
-import com.emm.mybest.features.goal.presentation.PurchaseGoalScreen
-import com.emm.mybest.features.goal.presentation.PurchaseGoalViewModel
 import com.emm.mybest.features.history.presentation.HistoryScreen
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.insights.presentation.InsightsScreen
@@ -171,34 +162,6 @@ private fun appEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavKey>
     notificationCaptureEntry(navigator)
     checkInEntry(navigator)
     weeklySummaryEntry(navigator)
-}
-
-private fun EntryProviderScope<NavKey>.debtsEntry(navigator: Navigator) {
-    entry<Screen.Debts> {
-        val viewModel: DebtsViewModel = koinViewModel()
-        DebtsScreen(viewModel = viewModel, onBack = { navigator.goBack() }, modifier = Modifier)
-    }
-}
-
-private fun EntryProviderScope<NavKey>.purchaseGoalEntry(navigator: Navigator) {
-    entry<Screen.PurchaseGoal> {
-        val viewModel: PurchaseGoalViewModel = koinViewModel()
-        PurchaseGoalScreen(viewModel = viewModel, onBack = { navigator.goBack() }, modifier = Modifier)
-    }
-}
-
-private fun EntryProviderScope<NavKey>.notificationCaptureEntry(navigator: Navigator) {
-    entry<Screen.NotificationCapture> {
-        val viewModel: NotificationCaptureViewModel = koinViewModel()
-        NotificationCaptureScreen(viewModel = viewModel, onBack = { navigator.goBack() }, modifier = Modifier)
-    }
-}
-
-private fun EntryProviderScope<NavKey>.checkInEntry(navigator: Navigator) {
-    entry<Screen.CheckIn> {
-        val viewModel: CheckInViewModel = koinViewModel()
-        CheckInScreen(viewModel = viewModel, onClose = { navigator.goBack() }, modifier = Modifier)
-    }
 }
 
 @Composable
