@@ -44,6 +44,7 @@ class SettingsViewModel(
             reminderPicker = picker,
             appVersionLabel = appVersionLabel,
             goals = goals,
+            goalRows = goals.setup.toGoalRows(),
             debts = rows.debts,
             purchaseGoal = rows.purchaseGoal,
             capture = rows.capture,
