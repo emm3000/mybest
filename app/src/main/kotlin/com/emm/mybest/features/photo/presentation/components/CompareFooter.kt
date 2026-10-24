@@ -75,9 +75,8 @@ private fun summaryText(
     return stringResource(R.string.photos_compare_summary_format, daysLabel, deltaText)
 }
 
+@Composable
 private fun deltaText(beforeWeightKg: Float?, afterWeightKg: Float?): String {
     if (beforeWeightKg == null || afterWeightKg == null) return "—"
-    val delta = afterWeightKg - beforeWeightKg
-    val sign = if (delta >= 0f) "+" else ""
-    return "$sign%.1f".format(delta)
+    return stringResource(R.string.photos_compare_delta_format, afterWeightKg - beforeWeightKg)
 }

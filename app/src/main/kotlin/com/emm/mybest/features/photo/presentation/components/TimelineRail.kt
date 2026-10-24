@@ -51,17 +51,15 @@ internal fun TimelineRail(
             ) { index, photo ->
                 PhotoTile(
                     photoPath = photo.photoPath,
-                    dateLabel = formatTileDate(photo),
+                    dateLabel = stringResource(
+                        R.string.photos_tile_date_format,
+                        photo.date.day,
+                        photo.date.month.ordinal + 1,
+                    ),
                     isNewest = index == photos.lastIndex,
                     onClick = { onTileClick(photo.id) },
                 )
             }
         }
     }
-}
-
-private fun formatTileDate(photo: ProgressPhoto): String {
-    val day = "%02d".format(photo.date.day)
-    val month = "%02d".format(photo.date.month.ordinal + 1)
-    return "$day/$month"
 }
