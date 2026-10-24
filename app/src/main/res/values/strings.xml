@@ -55,6 +55,8 @@
     <!-- Photos screen (C15) -->
     <string name="photo_type_trunk">Tronco</string>
     <string name="photo_type_face">Cara</string>
+    <string name="photos_compare_delta_format">%1$+.1f</string>
+    <string name="photos_tile_date_format">%1$02d/%2$02d</string>
     <string name="photos_app_bar_title">FOTOS DE PROGRESO</string>
     <string name="photos_tab_trunk">Tronco</string>
     <string name="photos_tab_face">Cara</string>
