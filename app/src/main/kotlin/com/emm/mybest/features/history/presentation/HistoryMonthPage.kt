@@ -24,9 +24,11 @@ internal fun HistoryMonthPage(
         HistoryMonthHero(state = state)
         Hairline()
         HistoryCalendarGrid(
-            month = state.selectedMonth,
-            dayMarks = state.dayMarks,
-            today = today,
+            calendar = HistoryCalendarState(
+                month = state.selectedMonth,
+                dayMarks = state.dayMarks,
+                today = today,
+            ),
             onDateClick = onDateClick,
         )
         Hairline()

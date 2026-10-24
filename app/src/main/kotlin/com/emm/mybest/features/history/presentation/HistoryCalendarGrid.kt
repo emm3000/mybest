@@ -33,13 +33,11 @@ internal data class CalendarCell(
 
 @Composable
 internal fun HistoryCalendarGrid(
-    month: YearMonthValue,
-    dayMarks: Map<LocalDate, DayMarksState>,
-    today: LocalDate,
+    calendar: HistoryCalendarState,
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val cells = remember(month) { buildCalendarCells(month) }
+    val cells = remember(calendar.month) { buildCalendarCells(calendar.month) }
     val rows = remember(cells) { cells.chunked(CALENDAR_COLUMNS) }
 
     WeekHeaderRow()
@@ -47,8 +45,7 @@ internal fun HistoryCalendarGrid(
     rows.forEach { rowCells ->
         CalendarRow(
             cells = rowCells,
-            dayMarks = dayMarks,
-            today = today,
+            calendar = calendar,
             onDateClick = onDateClick,
             modifier = modifier
                 .padding(horizontal = HISTORY_GUT)
@@ -62,8 +59,7 @@ internal fun HistoryCalendarGrid(
 @Composable
 private fun CalendarRow(
     cells: List<CalendarCell>,
-    dayMarks: Map<LocalDate, DayMarksState>,
-    today: LocalDate,
+    calendar: HistoryCalendarState,
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -76,11 +72,13 @@ private fun CalendarRow(
                 Box(modifier = Modifier.weight(1f).aspectRatio(1f))
             } else {
                 HistoryDayCell(
-                    day = cell.day,
-                    date = cell.date,
-                    marks = dayMarks.getOrDefault(cell.date, DayMarksState.NONE),
-                    isToday = cell.date == today,
-                    isFuture = cell.date > today,
+                    cell = HistoryDayCellState(
+                        day = cell.day,
+                        date = cell.date,
+                        marks = calendar.dayMarks.getOrDefault(cell.date, DayMarksState.NONE),
+                        isToday = cell.date == calendar.today,
+                        isFuture = cell.date > calendar.today,
+                    ),
                     onClick = onDateClick,
                     modifier = Modifier.weight(1f),
                 )

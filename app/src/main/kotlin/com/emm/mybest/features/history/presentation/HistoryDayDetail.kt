@@ -41,10 +41,7 @@ private val DETAIL_SERIF_SIZE = 38.sp
 @Composable
 internal fun DayDetailContent(
     detail: DayDetailState,
-    onClose: () -> Unit,
-    onDeleteWeight: () -> Unit,
-    onDeletePhoto: (String) -> Unit,
-    onSeePhotosClick: () -> Unit,
+    callbacks: DayDetailCallbacks,
     modifier: Modifier = Modifier,
 ) {
     var photoToDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
@@ -58,7 +55,7 @@ internal fun DayDetailContent(
             isDangerous = true,
             onDismiss = { photoToDelete = null },
             onConfirm = {
-                photoToDelete?.let { onDeletePhoto(it.id) }
+                photoToDelete?.let { callbacks.onDeletePhoto(it.id) }
                 photoToDelete = null
             },
         )
@@ -70,7 +67,7 @@ internal fun DayDetailContent(
             .padding(horizontal = HISTORY_GUT)
             .padding(top = 20.dp, bottom = 32.dp),
     ) {
-        DetailHeader(date = detail.date, onClose = onClose)
+        DetailHeader(date = detail.date, onClose = callbacks.onClose)
         Hairline(modifier = Modifier.padding(top = 12.dp))
 
         if (detail.isEmpty) {
@@ -78,14 +75,14 @@ internal fun DayDetailContent(
         } else {
             DetailSections(
                 detail = detail,
-                onDeleteWeight = onDeleteWeight,
+                onDeleteWeight = callbacks.onDeleteWeight,
                 onDeletePhoto = { photoToDelete = it },
             )
         }
 
         if (detail.photos.isNotEmpty()) {
             Surface(
-                onClick = onSeePhotosClick,
+                onClick = callbacks.onSeePhotosClick,
                 color = Color.Transparent,
                 modifier = Modifier.padding(top = 20.dp),
             ) {
