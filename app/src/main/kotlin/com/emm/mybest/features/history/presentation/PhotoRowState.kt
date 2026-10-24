@@ -6,5 +6,5 @@ import com.emm.mybest.domain.models.ProgressPhoto
 data class PhotoRowState(
     val photo: ProgressPhoto,
     val canDelete: Boolean,
-    @StringRes val descriptionRes: Int = photo.type.toDescriptionRes(),
+    @StringRes val descriptionRes: Int,
 )
