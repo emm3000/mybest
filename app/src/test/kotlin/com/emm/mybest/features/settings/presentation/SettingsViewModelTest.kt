@@ -49,18 +49,23 @@ class SettingsViewModelTest {
         purchaseGoalRepository: FakePurchaseGoalRepository = FakePurchaseGoalRepository(),
         userPreferencesRepository: UserPreferencesRepository = preferencesRepository,
     ): SettingsViewModel = SettingsViewModel(
-        userPreferencesRepository = userPreferencesRepository,
-        exportDatabaseBackupUseCase = exportUseCase,
-        restoreDatabaseBackupUseCase = restoreUseCase,
-        goalsEditor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), UpdateSetupUseCase(setupRepository)),
-        remindersEditor = SettingsRemindersEditor(
-            ObserveSetupUseCase(setupRepository),
-            UpdateSetupUseCase(setupRepository),
-        ),
-        rowSources = SettingsRowSources(
-            ObserveDebtSummaryUseCase(debtRepository),
-            purchaseGoalRepository,
-            ObserveCaptureSummaryUseCase(FakeNotificationCaptureRepository()),
+        dependencies = SettingsDependencies(
+            userPreferencesRepository = userPreferencesRepository,
+            exportDatabaseBackupUseCase = exportUseCase,
+            restoreDatabaseBackupUseCase = restoreUseCase,
+            goalsEditor = SettingsGoalsEditor(
+                ObserveSetupUseCase(setupRepository),
+                UpdateSetupUseCase(setupRepository),
+            ),
+            remindersEditor = SettingsRemindersEditor(
+                ObserveSetupUseCase(setupRepository),
+                UpdateSetupUseCase(setupRepository),
+            ),
+            rowSources = SettingsRowSources(
+                ObserveDebtSummaryUseCase(debtRepository),
+                purchaseGoalRepository,
+                ObserveCaptureSummaryUseCase(FakeNotificationCaptureRepository()),
+            ),
         ),
         appVersionName = versionName,
         appVersionCode = versionCode,
