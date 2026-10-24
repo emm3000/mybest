@@ -285,8 +285,10 @@ class HistoryViewModelDayStateTest {
             DaySummary(date = today, photos = listOf(recent)),
         )
 
-        assertEquals(listOf(PhotoRowState(old, canDelete = false)), selected(result, yesterday).photos)
-        assertEquals(listOf(PhotoRowState(recent, canDelete = true)), selected(result, today).photos)
+        val faceDescription = R.string.history_photo_face_description
+
+        assertEquals(listOf(PhotoRowState(old, false, faceDescription)), selected(result, yesterday).photos)
+        assertEquals(listOf(PhotoRowState(recent, true, faceDescription)), selected(result, today).photos)
     }
 
     @Test
