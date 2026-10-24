@@ -15,11 +15,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emm.mybest.R
-import com.emm.mybest.domain.usecase.history.HistoryRecentEntry
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
-import com.emm.mybest.ui.components.atelier.photoTypeLabel
 import com.emm.mybest.ui.theme.AtelierInk
 import com.emm.mybest.ui.theme.AtelierSansFamily
 import kotlinx.datetime.LocalDate
@@ -31,29 +29,24 @@ private val ROW_VERTICAL_PADDING = 12.dp
 
 @Composable
 internal fun HistoryRecentRow(
-    entry: HistoryRecentEntry,
-    today: LocalDate,
+    row: HistoryRecentRowState,
     onClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val dateLabel = formatRecentDate(entry.date)
-    val description = buildDescription(entry)
-    val isToday = entry.date == today
-
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = ROW_MIN_HEIGHT)
-            .clickable { onClick(entry.date) }
+            .clickable { onClick(row.date) }
             .padding(vertical = ROW_VERTICAL_PADDING, horizontal = HISTORY_GUT),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         MicroLabel(
-            text = dateLabel,
+            text = row.dateLabel,
             modifier = Modifier.width(DATE_LABEL_WIDTH),
         )
         Text(
-            text = description,
+            text = row.description.resolve(),
             style = TextStyle(
                 fontFamily = AtelierSansFamily,
                 fontSize = ROW_DESCRIPTION_SIZE,
@@ -63,20 +56,11 @@ internal fun HistoryRecentRow(
                 .weight(1f)
                 .padding(start = 14.dp),
         )
-        if (isToday) {
+        if (row.isToday) {
             MicroLabel(
                 text = stringResource(R.string.history_today_chip),
                 style = MicroLabelStyle(tone = MicroLabelTone.Done),
             )
         }
     }
-}
-
-@Composable
-private fun buildDescription(entry: HistoryRecentEntry): String {
-    val weightPart = entry.weight?.let { stringResource(R.string.history_recent_weight, it) }
-    val photoLabels = entry.photoTypes.map { photoTypeLabel(it) }
-    val photoPart = photoLabels.takeIf { it.isNotEmpty() }
-        ?.let { stringResource(R.string.history_recent_photos, it.joinToString(" · ")) }
-    return listOfNotNull(weightPart, photoPart).joinToString(" · ")
 }

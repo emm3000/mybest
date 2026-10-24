@@ -163,6 +163,7 @@
     <string name="history_photo_face_description">Foto de cara</string>
     <string name="history_recent_weight">Peso %1$.1f</string>
     <string name="history_recent_photos">Foto %1$s</string>
+    <string name="history_recent_separator">" · "</string>
     <string name="history_today_chip">HOY</string>
     <string name="history_empty_day">Sin actividad</string>
     <string name="history_view_photos">VER FOTOS ↗</string>

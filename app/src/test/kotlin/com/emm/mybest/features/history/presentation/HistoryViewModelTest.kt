@@ -178,7 +178,7 @@ class HistoryViewModelTest {
             awaitItem()
             val loaded = awaitItem()
             assertEquals(1, loaded.recentEntries.size)
-            assertEquals(entry, loaded.recentEntries[0])
+            assertEquals(entry.toRowState(loaded.today), loaded.recentEntries[0])
             cancelAndIgnoreRemainingEvents()
         }
     }
