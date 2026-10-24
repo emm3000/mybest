@@ -51,27 +51,32 @@ class SettingsGoalsEditor(
         val current = editor.value ?: return null
         return saveLock.withLock {
             val candidate = current.field.withInput(observeSetupUseCase().first(), current.input)
-            if (candidate == null) showError(SettingsFieldError.INVALID_NUMBER) else persist(candidate)
+            when (candidate) {
+                null -> showError(current.field, SettingsFieldError.INVALID_NUMBER)
+                else -> persist(current.field, candidate)
+            }
         }
     }
 
     private suspend fun clear(): SettingsEffect? {
         val current = editor.value ?: return null
-        return saveLock.withLock { persist(current.field.cleared(observeSetupUseCase().first())) }
+        return saveLock.withLock { persist(current.field, current.field.cleared(observeSetupUseCase().first())) }
     }
 
-    private suspend fun persist(candidate: Setup): SettingsEffect? =
+    private suspend fun persist(field: SettingsField, candidate: Setup): SettingsEffect? =
         runCatching { updateSetupUseCase(candidate) }
-            .map { errors -> resultOf(errors) }
+            .map { errors -> resultOf(field, errors) }
             .getOrElse { SettingsEffect.GoalSaveFailed }
 
-    private fun resultOf(errors: List<SetupValidationError>): SettingsEffect? {
-        val error = errors.firstOrNull() ?: return SettingsEffect.GoalSaved.also { editor.update { null } }
-        return showError(error.toFieldError())
+    private fun resultOf(field: SettingsField, errors: List<SetupValidationError>): SettingsEffect? {
+        val error = errors.firstOrNull() ?: return SettingsEffect.GoalSaved.also {
+            editor.update { open -> open?.takeUnless { it.field == field } }
+        }
+        return showError(field, error.toFieldError())
     }
 
-    private fun showError(error: SettingsFieldError): SettingsEffect? {
-        editor.update { it?.copy(error = error) }
+    private fun showError(field: SettingsField, error: SettingsFieldError): SettingsEffect? {
+        editor.update { open -> open?.takeIf { it.field == field }?.copy(error = error) ?: open }
         return null
     }
 }
