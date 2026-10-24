@@ -51,7 +51,7 @@ internal fun rememberPhotoCameraHandler(
         contract = ActivityResultContracts.TakePicture(),
     ) { success ->
         val uri = tempPhotoUri ?: return@rememberLauncherForActivityResult
-        if (success) persistAndNotify(context, scope, uri, onPhotoCaptured)
+        if (success) persistAndNotify(context, scope, PhotoCaptureRequest(uri, onPhotoCaptured))
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -97,13 +97,12 @@ private fun checkAndLaunch(
 private fun persistAndNotify(
     context: Context,
     scope: CoroutineScope,
-    uri: Uri,
-    onPhotoCaptured: (String) -> Unit,
+    request: PhotoCaptureRequest,
 ) {
     scope.launch(Dispatchers.IO) {
-        val persisted = copyUriToInternalStorageSafe(context, uri)
+        val persisted = copyUriToInternalStorageSafe(context, request.uri)
         withContext(Dispatchers.Main) {
-            persisted?.let { onPhotoCaptured(it.toString()) }
+            persisted?.let { request.onPhotoCaptured(it.toString()) }
         }
     }
 }

@@ -50,13 +50,15 @@ internal fun TimelineRail(
                 contentType = { _, _ -> "photo_tile" },
             ) { index, photo ->
                 PhotoTile(
-                    photoPath = photo.photoPath,
-                    dateLabel = stringResource(
-                        R.string.photos_tile_date_format,
-                        photo.date.day,
-                        photo.date.month.ordinal + 1,
+                    model = PhotoTileModel(
+                        photoPath = photo.photoPath,
+                        dateLabel = stringResource(
+                            R.string.photos_tile_date_format,
+                            photo.date.day,
+                            photo.date.month.ordinal + 1,
+                        ),
+                        isNewest = index == photos.lastIndex,
                     ),
-                    isNewest = index == photos.lastIndex,
                     onClick = { onTileClick(photo.id) },
                 )
             }

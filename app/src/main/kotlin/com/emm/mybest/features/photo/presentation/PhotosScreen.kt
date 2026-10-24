@@ -21,6 +21,7 @@ import com.emm.mybest.domain.media.PhotoCaptureFiles
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.features.photo.presentation.components.CompareFooter
 import com.emm.mybest.features.photo.presentation.components.CompareHero
+import com.emm.mybest.features.photo.presentation.components.CompareSelection
 import com.emm.mybest.features.photo.presentation.components.PhotoTypeTabs
 import com.emm.mybest.features.photo.presentation.components.TimelineRail
 import com.emm.mybest.ui.components.AtelierAppBar
@@ -34,11 +35,9 @@ import com.emm.mybest.ui.components.atelier.TrunkSilhouette
 fun PhotosScreen(
     viewModel: PhotosViewModel,
     photoCaptureFiles: PhotoCaptureFiles,
-    onBack: () -> Unit,
-    onOpenViewer: (String) -> Unit,
-    onCompare: (String, String) -> Unit,
-    bottomBar: @Composable () -> Unit,
+    callbacks: PhotosCallbacks,
     modifier: Modifier = Modifier,
+    bottomBar: @Composable () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -53,7 +52,7 @@ fun PhotosScreen(
         viewModel.effect.collect { effect ->
             when (effect) {
                 is PhotosEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
-                is PhotosEffect.NavigateToCompare -> onCompare(effect.beforeId, effect.afterId)
+                is PhotosEffect.NavigateToCompare -> callbacks.onCompare(effect.beforeId, effect.afterId)
             }
         }
     }
@@ -64,7 +63,7 @@ fun PhotosScreen(
         topBar = {
             AtelierAppBar(
                 title = stringResource(R.string.photos_app_bar_title),
-                onBack = onBack,
+                onBack = callbacks.onBack,
                 actions = {
                     HIconButton(
                         icon = Icons.Default.Add,
@@ -78,9 +77,11 @@ fun PhotosScreen(
     ) { paddingValues ->
         PhotosContent(
             state = state,
-            onSelectType = { viewModel.onIntent(PhotosIntent.SelectType(it)) },
-            onOpenViewer = onOpenViewer,
-            onCompare = { viewModel.onIntent(PhotosIntent.OpenCompare) },
+            actions = PhotosContentActions(
+                onSelectType = { viewModel.onIntent(PhotosIntent.SelectType(it)) },
+                onOpenViewer = callbacks.onOpenViewer,
+                onCompare = { viewModel.onIntent(PhotosIntent.OpenCompare) },
+            ),
             modifier = Modifier.padding(paddingValues),
         )
     }
@@ -89,9 +90,7 @@ fun PhotosScreen(
 @Composable
 private fun PhotosContent(
     state: PhotosState,
-    onSelectType: (PhotoType) -> Unit,
-    onOpenViewer: (String) -> Unit,
-    onCompare: () -> Unit,
+    actions: PhotosContentActions,
     modifier: Modifier = Modifier,
 ) {
     val silhouette = if (state.selectedType == PhotoType.TRUNK) TrunkSilhouette else FaceSilhouette
@@ -103,7 +102,7 @@ private fun PhotosContent(
     ) {
         PhotoTypeTabs(
             selectedType = state.selectedType,
-            onSelectType = onSelectType,
+            onSelectType = actions.onSelectType,
         )
         Hairline()
         CompareHero(
@@ -112,17 +111,19 @@ private fun PhotosContent(
             silhouette = silhouette,
         )
         CompareFooter(
-            beforePhoto = state.overview.before,
-            afterPhoto = state.overview.after,
-            beforeWeightKg = state.overview.beforeWeightKg,
-            afterWeightKg = state.overview.afterWeightKg,
-            today = state.today,
-            onCompareClick = onCompare,
+            selection = CompareSelection(
+                beforePhoto = state.overview.before,
+                afterPhoto = state.overview.after,
+                beforeWeightKg = state.overview.beforeWeightKg,
+                afterWeightKg = state.overview.afterWeightKg,
+                today = state.today,
+            ),
+            onCompareClick = actions.onCompare,
         )
         Hairline()
         TimelineRail(
             photos = state.overview.timeline,
-            onTileClick = onOpenViewer,
+            onTileClick = actions.onOpenViewer,
         )
     }
 }

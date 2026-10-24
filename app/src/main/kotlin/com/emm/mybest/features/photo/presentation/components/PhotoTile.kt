@@ -32,13 +32,11 @@ private const val GRADIENT_ALPHA_END = 0.02f
 
 @Composable
 internal fun PhotoTile(
-    photoPath: String?,
-    dateLabel: String,
-    isNewest: Boolean,
+    model: PhotoTileModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val outlineModifier = if (isNewest) {
+    val outlineModifier = if (model.isNewest) {
         Modifier.border(width = NEWEST_TILE_OUTLINE_WIDTH, color = AtelierDone)
     } else {
         Modifier
@@ -59,16 +57,16 @@ internal fun PhotoTile(
             )
             .clickable { onClick() },
     ) {
-        if (photoPath != null) {
+        if (model.photoPath != null) {
             AsyncImage(
-                model = photoPath,
+                model = model.photoPath,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
             )
         }
         MicroLabel(
-            text = dateLabel,
+            text = model.dateLabel,
             style = MicroLabelStyle(tone = MicroLabelTone.Dim, size = TILE_DATE_FONT_SIZE.sp),
             modifier = Modifier
                 .align(Alignment.BottomStart)
