@@ -3,7 +3,6 @@ package com.emm.mybest.features.settings.presentation
 import com.emm.mybest.domain.models.Setup
 
 data class SettingsState(
-    val notificationsEnabled: Boolean = true,
     val reminderPicker: ReminderField? = null,
     val appVersionLabel: String = "",
     val goals: SettingsGoals = SettingsGoals(),
