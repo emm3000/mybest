@@ -134,6 +134,7 @@ class SettingsViewModel(
                                 "Backup restaurado. Reinicia la app para aplicar.",
                             ),
                         )
+                        RestoreResult.OtherSchemaVersion -> _effect.emit(SettingsEffect.BackupFromOtherVersion)
                     }
                 }.onFailure {
                     _effect.emit(

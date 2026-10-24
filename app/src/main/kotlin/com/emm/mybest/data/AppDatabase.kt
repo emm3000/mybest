@@ -45,7 +45,7 @@ import com.emm.mybest.data.entities.WonNightEntity
         CaptureAppEntity::class,
         CapturedNotificationEntity::class,
     ],
-    version = 10,
+    version = AppDatabase.SCHEMA_VERSION,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -66,5 +66,6 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         const val DB_NAME = "my_best_db"
+        const val SCHEMA_VERSION = 10
     }
 }

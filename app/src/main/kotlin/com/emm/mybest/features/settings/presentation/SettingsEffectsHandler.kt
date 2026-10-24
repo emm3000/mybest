@@ -15,6 +15,7 @@ internal fun SettingsEffectsHandler(
 ) {
     val savedMessage = stringResource(R.string.settings_goal_saved)
     val saveFailedMessage = stringResource(R.string.settings_goal_save_failed)
+    val otherVersionMessage = stringResource(R.string.settings_backup_other_version)
     LaunchedEffect(Unit) {
         effects.collectLatest { effect ->
             val message = when (effect) {
@@ -23,6 +24,7 @@ internal fun SettingsEffectsHandler(
                 is SettingsEffect.GoalSaved -> savedMessage
                 is SettingsEffect.GoalSaveFailed -> saveFailedMessage
                 is SettingsEffect.ReminderSaveFailed -> saveFailedMessage
+                is SettingsEffect.BackupFromOtherVersion -> otherVersionMessage
             }
             snackbarHostState.showSnackbar(message)
         }
