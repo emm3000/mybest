@@ -1,5 +1,6 @@
 package com.emm.mybest.features.settings.presentation
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -38,8 +39,10 @@ private fun DismissEditorsOnLeave(
     section: SettingsSetupSection,
     onIntent: (SettingsIntent) -> Unit,
 ) {
+    val activity = LocalActivity.current
     DisposableEffect(section) {
         onDispose {
+            if (activity?.isChangingConfigurations == true) return@onDispose
             onIntent(SettingsIntent.OnFieldDismiss)
             onIntent(SettingsIntent.OnReminderDismiss)
         }
