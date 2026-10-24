@@ -48,12 +48,19 @@ class SettingsGoalRowsTest {
     }
 
     @Test
-    fun `a section keeps only its own rows in its own order`() {
-        val rows = Setup().toGoalRows()
+    fun `every section with fields keeps exactly its own rows in its own order`() {
+        val sectionRows = Setup().toGoalRows().toSectionRows()
 
+        SettingsSetupSection.entries.filter { it.fields.isNotEmpty() }.forEach { section ->
+            assertEquals(section.fields, sectionRows.getValue(section).map { it.field })
+        }
+    }
+
+    @Test
+    fun `a section without fields has no rows`() {
         assertEquals(
-            SettingsSetupSection.OUTINGS.fields,
-            SettingsSetupSection.OUTINGS.goalRowsIn(rows).map { it.field },
+            emptyList<SettingsGoalRow>(),
+            Setup().toGoalRows().toSectionRows().getValue(SettingsSetupSection.MONEY),
         )
     }
 }

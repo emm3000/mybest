@@ -55,7 +55,7 @@ private fun SettingsSetupBody(
     if (section.fields.isNotEmpty()) {
         SettingsGoalsSection(
             params = SettingsGoalsSectionParams(
-                rows = section.goalRowsIn(state.goalRows),
+                rows = state.sectionRows.getValue(section),
                 onFieldOpen = actions.onFieldOpen,
             ),
         )

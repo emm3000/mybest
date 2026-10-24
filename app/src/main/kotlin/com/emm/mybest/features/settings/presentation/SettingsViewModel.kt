@@ -30,11 +30,13 @@ class SettingsViewModel(
         dependencies.remindersEditor.picker,
         dependencies.rowSources.observe(),
     ) { goals, picker, rows ->
+        val goalRows = goals.setup.toGoalRows()
         SettingsState(
             reminderPicker = picker,
             appVersionLabel = appVersionLabel,
             goals = goals,
-            goalRows = goals.setup.toGoalRows(),
+            goalRows = goalRows,
+            sectionRows = goalRows.toSectionRows(),
             reminders = goals.setup.toReminders(),
             debts = rows.debts,
             purchaseGoal = rows.purchaseGoal,
