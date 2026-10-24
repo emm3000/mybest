@@ -30,20 +30,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.theme.AtelierTheme
 
+private const val RESTING_BORDER_ALPHA = 0.40f
+private const val FOCUSED_BORDER_ALPHA = 0.45f
+private val RESTING_BORDER_WIDTH = 1.dp
+private val FOCUSED_BORDER_WIDTH = 2.dp
+
 /**
- * Input de texto inspirado en shadcn/ui — look & feel exacto.
+ * Text input in the shadcn/ui style: external label above the field, no fill, no floating label.
  *
- * Características:
- * - Label externo sobre el campo (como shadcn `<Label />` + `<Input />`)
- * - Borde `outlineVariant` en reposo → `outline` (ring) al focus (animado)
- * - Fondo transparente (sin fill)
- * - Sin trailing icon / label flotante de Material 3
- * - Error: borde rojo, helper text rojo abajo
- * - Supporting text en `muted-foreground` cuando no hay error
- * - Altura mínima fija de 40 dp (shadcn h-10)
+ * The field boundary is always drawn so it keeps at least 3:1 contrast (WCAG 2.2 SC 1.4.11):
+ * - Rest: 1dp `outline` at alpha 0.40
+ * - Focused: 2dp `outline` at alpha 0.45
+ * - Error, rest or focused: `error` at full alpha, 1dp at rest and 2dp when focused
+ *
+ * The color change is animated. The error message replaces the supporting text and turns the
+ * label and helper red. The field is at least 40dp tall.
  */
 @Composable
 fun HInput(
@@ -70,7 +75,7 @@ fun HInput(
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val cs = MaterialTheme.colorScheme
-    val ringColor = inputRingColor(isError = isError, isFocused = isFocused)
+    val border = inputBorder(isError = isError, isFocused = isFocused)
     val textColor = inputTextColor(enabled = enabled)
 
     Column(modifier = modifier) {
@@ -81,8 +86,8 @@ fun HInput(
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.small)
                 .border(
-                    width = 2.dp,
-                    color = ringColor,
+                    width = border.width,
+                    color = border.color,
                     shape = MaterialTheme.shapes.small,
                 )
                 .padding(2.dp),
@@ -122,19 +127,22 @@ fun HInput(
     }
 }
 
+private data class InputBorder(val width: Dp, val color: Color)
+
 @Composable
-private fun inputRingColor(isError: Boolean, isFocused: Boolean): androidx.compose.ui.graphics.Color {
+private fun inputBorder(isError: Boolean, isFocused: Boolean): InputBorder {
     val cs = MaterialTheme.colorScheme
     val targetColor = when {
-        isFocused && isError -> cs.error.copy(alpha = 0.25f)
-        isFocused -> cs.outline.copy(alpha = 0.45f)
-        else -> Color.Transparent
+        isError -> cs.error
+        isFocused -> cs.outline.copy(alpha = FOCUSED_BORDER_ALPHA)
+        else -> cs.outline.copy(alpha = RESTING_BORDER_ALPHA)
     }
-    return animateColorAsState(
+    val color = animateColorAsState(
         targetValue = targetColor,
         animationSpec = tween(durationMillis = 120),
         label = "input_ring",
     ).value
+    return InputBorder(width = if (isFocused) FOCUSED_BORDER_WIDTH else RESTING_BORDER_WIDTH, color = color)
 }
 
 @Composable
