@@ -5,10 +5,10 @@ import com.emm.mybest.data.entities.CapturedNotificationEntity
 import com.emm.mybest.data.entities.NotificationCaptureDao
 import com.emm.mybest.data.mappers.toDomain
 import com.emm.mybest.domain.models.CapturedNotification
+import com.emm.mybest.domain.models.PostedNotification
 import com.emm.mybest.domain.repository.NotificationCaptureRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlin.time.Instant
 
 class NotificationCaptureRepositoryImpl(
     private val notificationCaptureDao: NotificationCaptureDao,
@@ -32,13 +32,13 @@ class NotificationCaptureRepositoryImpl(
     override fun observeCaptured(): Flow<List<CapturedNotification>> =
         notificationCaptureDao.observeCaptured().map { list -> list.map { it.toDomain() } }
 
-    override suspend fun saveCaptured(packageName: String, title: String?, text: String?, postedAt: Instant) {
+    override suspend fun saveCaptured(notification: PostedNotification) {
         notificationCaptureDao.insertCaptured(
             CapturedNotificationEntity(
-                packageName = packageName,
-                title = title,
-                text = text,
-                postedAtEpochMs = postedAt.toEpochMilliseconds(),
+                packageName = notification.packageName,
+                title = notification.title,
+                text = notification.text,
+                postedAtEpochMs = notification.postedAt.toEpochMilliseconds(),
             ),
         )
     }

@@ -14,6 +14,6 @@ class CaptureNotificationUseCase(
     suspend operator fun invoke(notification: PostedNotification) {
         if (notification.title.isNullOrBlank() && notification.text.isNullOrBlank()) return
         if (notification.packageName !in repository.observeSelectedApps().first()) return
-        repository.saveCaptured(notification.packageName, notification.title, notification.text, notification.postedAt)
+        repository.saveCaptured(notification)
     }
 }
