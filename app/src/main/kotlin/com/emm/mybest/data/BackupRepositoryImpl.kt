@@ -15,6 +15,7 @@ class BackupRepositoryImpl(
     private val context: Context,
     private val database: AppDatabase,
     private val dispatchers: CoroutineDispatchers,
+    private val moveFile: (File, File) -> Unit = ::moveAtomically,
 ) : BackupRepository {
 
     override suspend fun exportDatabase(targetUri: String): Result<Unit> = runCatching {
@@ -82,15 +83,12 @@ class BackupRepositoryImpl(
         val databaseFile = context.getDatabasePath(AppDatabase.DB_NAME)
         databaseFile.parentFile?.mkdirs()
         FileInputStream(backupCopy).use { input ->
-            replaceFileAtomically(input, databaseFile) {
-                database.close()
-                deleteSqliteSideFiles(databaseFile)
-            }
+            replaceFileAtomically(input, databaseFile, moveFile) { database.close() }
         }
     }
 
     private fun deleteSqliteSideFiles(file: File) {
-        SQLITE_SIDE_FILE_SUFFIXES.forEach { suffix -> File("${file.path}$suffix").delete() }
+        sqliteSideFilesOf(file).forEach(File::delete)
     }
 }
 
@@ -109,7 +107,6 @@ private fun hasSqlitePrefix(headerBytes: ByteArray): Boolean =
 private fun readUserVersion(headerBytes: ByteArray): Int =
     ByteBuffer.wrap(headerBytes, SQLITE_USER_VERSION_OFFSET, Int.SIZE_BYTES).int
 
-private val SQLITE_SIDE_FILE_SUFFIXES = listOf("-wal", "-shm", "-journal")
 private const val SQLITE_HEADER_LENGTH = 100
 private const val SQLITE_HEADER_PREFIX = "SQLite format 3"
 private const val SQLITE_USER_VERSION_OFFSET = 60

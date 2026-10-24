@@ -6,21 +6,55 @@ import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
-internal fun replaceFileAtomically(source: InputStream, target: File, beforeReplace: () -> Unit) {
+internal fun replaceFileAtomically(
+    source: InputStream,
+    target: File,
+    move: (File, File) -> Unit = ::moveAtomically,
+    beforeReplace: () -> Unit,
+) {
     val staged = File(target.parentFile, "${target.name}$STAGED_FILE_SUFFIX")
     try {
         writeSynced(source, staged)
         beforeReplace()
-        Files.move(
-            staged.toPath(),
-            target.toPath(),
-            StandardCopyOption.ATOMIC_MOVE,
-            StandardCopyOption.REPLACE_EXISTING,
-        )
+        replaceKeepingSideFilesOnFailure(staged, target, move)
     } finally {
         staged.delete()
     }
 }
+
+internal fun moveAtomically(source: File, target: File) {
+    Files.move(
+        source.toPath(),
+        target.toPath(),
+        StandardCopyOption.ATOMIC_MOVE,
+        StandardCopyOption.REPLACE_EXISTING,
+    )
+}
+
+internal fun sqliteSideFilesOf(file: File): List<File> =
+    SQLITE_SIDE_FILE_SUFFIXES.map { suffix -> File("${file.path}$suffix") }
+
+private fun replaceKeepingSideFilesOnFailure(staged: File, target: File, move: (File, File) -> Unit) {
+    val setAside = mutableListOf<File>()
+    runCatching {
+        sqliteSideFilesOf(target).filter(File::exists).forEach { sideFile ->
+            moveAtomically(sideFile, asideFileOf(sideFile))
+            setAside += sideFile
+        }
+        move(staged, target)
+    }.onFailure { failure -> putBack(setAside, failure) }.getOrThrow()
+    setAside.forEach { sideFile -> asideFileOf(sideFile).delete() }
+}
+
+private fun putBack(setAside: List<File>, failure: Throwable) {
+    setAside.forEach { sideFile ->
+        runCatching { moveAtomically(asideFileOf(sideFile), sideFile) }
+            .exceptionOrNull()
+            ?.let(failure::addSuppressed)
+    }
+}
+
+private fun asideFileOf(sideFile: File): File = File("${sideFile.path}$SET_ASIDE_FILE_SUFFIX")
 
 private fun writeSynced(source: InputStream, staged: File) {
     FileOutputStream(staged).use { output ->
@@ -29,4 +63,6 @@ private fun writeSynced(source: InputStream, staged: File) {
     }
 }
 
+private val SQLITE_SIDE_FILE_SUFFIXES = listOf("-wal", "-shm", "-journal")
 private const val STAGED_FILE_SUFFIX = ".restore"
+private const val SET_ASIDE_FILE_SUFFIX = ".aside"
