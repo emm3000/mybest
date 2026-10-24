@@ -188,9 +188,9 @@ Divisor horizontal. `HorizontalDivider` de `1dp` en `cs.outlineVariant` por defe
 
 ### HInput (`Input.kt`)
 Campo de texto basado en `BasicTextField`.
-- Borde en reposo: `outlineVariant` (`#1F1F1F`).
-- Borde con foco: `outline` (`#2A2A2A`) animado con `tween`.
-- Borde con error: `cs.error`.
+- Borde en reposo: `1dp`, `outline` al 40% alfa (contraste 3:1 sobre el fondo, WCAG 1.4.11).
+- Borde con foco: `2dp`, `outline` al 45% alfa; el color se anima con `tween`.
+- Borde con error: `cs.error` a alfa completo, `1dp` en reposo y `2dp` con foco.
 - Estilo de texto: `bodyMedium`; placeholder: `onSurfaceVariant` al 60% alfa.
 
 ### HProgressRing (`ProgressRing.kt`)
