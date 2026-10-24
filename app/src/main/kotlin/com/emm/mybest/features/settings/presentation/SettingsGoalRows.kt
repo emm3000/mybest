@@ -7,8 +7,10 @@ import com.emm.mybest.domain.models.Setup
 internal fun Setup.toGoalRows(): List<SettingsGoalRow> =
     SettingsField.entries.map { SettingsGoalRow(it, it.labelRes, it.valueIn(this)) }
 
-internal fun SettingsSetupSection.goalRowsIn(rows: List<SettingsGoalRow>): List<SettingsGoalRow> =
-    fields.mapNotNull { field -> rows.find { it.field == field } }
+internal fun List<SettingsGoalRow>.toSectionRows(): Map<SettingsSetupSection, List<SettingsGoalRow>> {
+    val rowsByField = associateBy { it.field }
+    return SettingsSetupSection.entries.associateWith { section -> section.fields.mapNotNull(rowsByField::get) }
+}
 
 private fun SettingsField.valueIn(setup: Setup): SettingsRowValue {
     val input = inputFor(setup)
