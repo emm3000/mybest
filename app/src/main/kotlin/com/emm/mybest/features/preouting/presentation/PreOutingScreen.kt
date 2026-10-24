@@ -77,8 +77,7 @@ private fun PreOutingBody(
     }
     if (state.form.isTimePickerOpen) {
         ReminderTimePickerDialog(
-            initialHour = state.form.pickerTime.hour,
-            initialMinute = state.form.pickerTime.minute,
+            initialTime = state.form.pickerTime,
             onConfirm = { hour, minute -> onIntent(PreOutingIntent.OnReturnTimeSelected(hour, minute)) },
             onDismiss = { onIntent(PreOutingIntent.OnReturnTimeDismiss) },
         )

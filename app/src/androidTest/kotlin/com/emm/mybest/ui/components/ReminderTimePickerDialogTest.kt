@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.emm.mybest.ui.theme.AtelierTheme
+import kotlinx.datetime.LocalTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -21,8 +22,7 @@ class ReminderTimePickerDialogTest {
         composeTestRule.setContent {
             AtelierTheme {
                 ReminderTimePickerDialog(
-                    initialHour = 8,
-                    initialMinute = 30,
+                    initialTime = LocalTime(8, 30),
                     onConfirm = { _, _ -> },
                     onDismiss = {},
                 )
@@ -42,8 +42,7 @@ class ReminderTimePickerDialogTest {
         composeTestRule.setContent {
             AtelierTheme {
                 ReminderTimePickerDialog(
-                    initialHour = 8,
-                    initialMinute = 30,
+                    initialTime = LocalTime(8, 30),
                     onConfirm = { hour, minute ->
                         confirmedHour = hour
                         confirmedMinute = minute
@@ -77,8 +76,7 @@ class ReminderTimePickerDialogTest {
         composeTestRule.setContent {
             AtelierTheme {
                 ReminderTimePickerDialog(
-                    initialHour = 7,
-                    initialMinute = 15,
+                    initialTime = LocalTime(7, 15),
                     onConfirm = { _, _ -> },
                     onDismiss = { dismissed = true },
                 )

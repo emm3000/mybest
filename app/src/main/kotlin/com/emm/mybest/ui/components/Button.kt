@@ -55,10 +55,12 @@ fun HButton(
     content: @Composable RowScope.() -> Unit,
 ) {
     HButtonContainer(
-        variant = variant,
+        style = ButtonStyle(
+            variant = variant,
+            isEnabled = enabled && !isLoading,
+            contentPadding = contentPadding,
+        ),
         onClick = onClick,
-        enabled = enabled && !isLoading,
-        contentPadding = contentPadding,
         modifier = modifier.defaultMinSize(minHeight = 40.dp),
     ) {
         ButtonContent(leadingIcon = leadingIcon, isLoading = isLoading, content = content)
@@ -67,24 +69,22 @@ fun HButton(
 
 @Composable
 private fun HButtonContainer(
-    variant: ButtonVariant,
+    style: ButtonStyle,
     onClick: () -> Unit,
-    enabled: Boolean,
-    contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val (containerColor, contentColor, borderColor) = buttonTokens(variant)
-    val finalContentPadding = if (variant == ButtonVariant.Link) {
+    val (containerColor, contentColor, borderColor) = buttonTokens(style.variant)
+    val finalContentPadding = if (style.variant == ButtonVariant.Link) {
         PaddingValues(horizontal = 12.dp, vertical = 8.dp)
     } else {
-        contentPadding
+        style.contentPadding
     }
 
     Surface(
         onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.alpha(if (enabled) 1f else BUTTON_DISABLED_ALPHA),
+        enabled = style.isEnabled,
+        modifier = modifier.alpha(if (style.isEnabled) 1f else BUTTON_DISABLED_ALPHA),
         color = containerColor,
         contentColor = contentColor,
         shape = MaterialTheme.shapes.small,
