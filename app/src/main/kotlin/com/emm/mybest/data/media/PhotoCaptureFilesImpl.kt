@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.core.content.FileProvider
 import com.emm.mybest.domain.media.PhotoCaptureFiles
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
-class PhotoCaptureFilesImpl(private val context: Context) : PhotoCaptureFiles {
+class PhotoCaptureFilesImpl(
+    private val context: Context,
+    private val fileNames: PhotoFileNames,
+) : PhotoCaptureFiles {
 
     override fun createCaptureUri(): String {
         val photoFile = createPhotoFile()
@@ -20,12 +20,11 @@ class PhotoCaptureFilesImpl(private val context: Context) : PhotoCaptureFiles {
     }
 
     private fun createPhotoFile(): File {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val storageDir = File(context.filesDir, "photos").apply {
             if (!exists()) mkdirs()
         }
         return File.createTempFile(
-            "JPEG_${timeStamp}_",
+            fileNames.capturePrefix(),
             ".jpg",
             storageDir,
         )
