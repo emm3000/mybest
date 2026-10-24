@@ -76,7 +76,6 @@ fun HInput(
     Column(modifier = modifier) {
         InputLabelSection(label = label, isError = isError)
 
-        // ── Field box ─────────────────────────────────────────────────────────
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -118,7 +117,6 @@ fun HInput(
             )
         }
 
-        // ── Helper / error text ───────────────────────────────────────────────
         val helperText = errorMessage ?: supportingText
         InputHelperSection(helperText = helperText, isError = isError)
     }
@@ -232,8 +230,6 @@ private fun BoxScope.TrailingIconSlot(icon: (@Composable () -> Unit)?, alignment
     if (icon == null) return
     Box(Modifier.align(alignment)) { icon() }
 }
-
-// ─── Previews ────────────────────────────────────────────────────────────────
 
 @PreviewLightDark
 @Composable
