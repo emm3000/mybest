@@ -39,7 +39,7 @@ class SummaryViewModel(
         when (intent) {
             SummaryIntent.OnPreviousWeekClick -> weeksBack.update { it + 1 }
             SummaryIntent.OnNextWeekClick -> weeksBack.update { (it - 1).coerceAtLeast(0) }
-            is SummaryIntent.OnSetupPromptClick -> _effect.tryEmit(intent.destination.toEffect())
+            is SummaryIntent.OnRowClick -> _effect.tryEmit(intent.destination.toEffect())
         }
     }
 }

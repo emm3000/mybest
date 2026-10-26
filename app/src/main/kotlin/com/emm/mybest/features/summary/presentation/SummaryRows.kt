@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.components.atelier.Hairline
 
@@ -25,13 +26,13 @@ private val ARROW_SIZE = 18.dp
 @Composable
 internal fun SummaryRow(
     row: SummaryRowState,
-    onPromptClick: (SummaryDestination) -> Unit,
+    onRowClick: (SummaryDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         when (row) {
-            is SummaryRowState.Line -> SummaryLine(row = row)
-            is SummaryRowState.SetupPrompt -> SummaryPrompt(row = row, onClick = { onPromptClick(row.destination) })
+            is SummaryRowState.Line -> SummaryLine(row = row, onClick = onRowClick)
+            is SummaryRowState.SetupPrompt -> SummaryPrompt(row = row, onClick = { onRowClick(row.destination) })
         }
         Hairline()
     }
@@ -40,11 +41,13 @@ internal fun SummaryRow(
 @Composable
 private fun SummaryLine(
     row: SummaryRowState.Line,
+    onClick: (SummaryDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .then(row.destination.toClickModifier(onClick))
             .padding(vertical = ROW_PADDING),
         horizontalArrangement = Arrangement.spacedBy(ROW_GAP),
         verticalAlignment = Alignment.Bottom,
@@ -58,6 +61,9 @@ private fun SummaryLine(
         Text(text = row.value.resolve(), style = MaterialTheme.typography.titleMedium, color = row.valueColor)
     }
 }
+
+private fun SummaryDestination?.toClickModifier(onClick: (SummaryDestination) -> Unit): Modifier =
+    if (this == null) Modifier else Modifier.clickable(role = Role.Button, onClick = { onClick(this) })
 
 @Composable
 private fun SummaryPrompt(

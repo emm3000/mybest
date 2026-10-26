@@ -33,7 +33,7 @@ fun SummaryContent(
     ) {
         item { SummaryHeader(state = state, onIntent = onIntent) }
         items(items = state.sections, key = { it.titleRes }) { section ->
-            SummarySection(section = section, onPromptClick = { onIntent(SummaryIntent.OnSetupPromptClick(it)) })
+            SummarySection(section = section, onRowClick = { onIntent(SummaryIntent.OnRowClick(it)) })
         }
     }
 }
@@ -53,13 +53,13 @@ private fun SummaryHeader(
 @Composable
 private fun SummarySection(
     section: SummarySectionState,
-    onPromptClick: (SummaryDestination) -> Unit,
+    onRowClick: (SummaryDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         MicroLabel(text = stringResource(section.titleRes), modifier = Modifier.padding(bottom = TITLE_PADDING))
         Hairline()
-        section.rows.forEach { SummaryRow(row = it, onPromptClick = onPromptClick) }
+        section.rows.forEach { SummaryRow(row = it, onRowClick = onRowClick) }
     }
 }
 

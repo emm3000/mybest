@@ -43,6 +43,7 @@ private fun GoalProgress?.toRows(): List<SummaryRowState> {
             label = SummaryText(R.string.summary_money_goal_label, listOf(goal.name)),
             value = SummaryText(R.string.summary_money_goal_value, listOf(contributed.formatPen(), percent)),
             valueColor = AtelierInk,
+            destination = SummaryDestination.PURCHASE_GOAL,
         ),
     )
 }
