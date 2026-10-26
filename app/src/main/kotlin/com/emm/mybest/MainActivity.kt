@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.emm.mybest.core.navigation.AppRoot
 import com.emm.mybest.core.navigation.LaunchActionRule
+import com.emm.mybest.core.permission.NotificationPermissionRule
 import com.emm.mybest.features.onboarding.presentation.OnboardingGate
 import com.emm.mybest.features.onboarding.presentation.OnboardingViewModel
 import com.emm.mybest.ui.theme.AtelierTheme
@@ -28,11 +29,11 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : ComponentActivity() {
 
     private var intentAction by mutableStateOf<String?>(null)
-    private var hasAttemptedNotificationPermissionRequest = false
+    private var wasNotificationPermissionRequested = false
     private val onboardingViewModel: OnboardingViewModel by viewModel()
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
-    ) { /* no-op: app follows OS-level permission state */ }
+    ) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().setKeepOnScreenCondition {
@@ -40,6 +41,8 @@ class MainActivity : ComponentActivity() {
         }
         super.onCreate(savedInstanceState)
         window.isNavigationBarContrastEnforced = false
+        wasNotificationPermissionRequested =
+            savedInstanceState?.getBoolean(KEY_NOTIFICATION_PERMISSION_REQUESTED) ?: false
         requestNotificationPermissionIfNeeded()
 
         intentAction = resolveLaunchAction(savedInstanceState)
@@ -65,6 +68,7 @@ class MainActivity : ComponentActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(KEY_PENDING_ACTION, intentAction)
+        outState.putBoolean(KEY_NOTIFICATION_PERMISSION_REQUESTED, wasNotificationPermissionRequested)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -80,20 +84,24 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun requestNotificationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-
         val isGranted = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.POST_NOTIFICATIONS,
         ) == PackageManager.PERMISSION_GRANTED
-        if (isGranted || hasAttemptedNotificationPermissionRequest) return
+        val shouldRequest = NotificationPermissionRule.shouldRequest(
+            isSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+            isGranted = isGranted,
+            wasRequested = wasNotificationPermissionRequested,
+        )
+        if (!shouldRequest) return
 
-        hasAttemptedNotificationPermissionRequest = true
+        wasNotificationPermissionRequested = true
         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     companion object {
         private const val KEY_PENDING_ACTION = "pending_launch_action"
+        private const val KEY_NOTIFICATION_PERMISSION_REQUESTED = "notification_permission_requested"
         private val DefaultDarkScrim = android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)
     }
 }
