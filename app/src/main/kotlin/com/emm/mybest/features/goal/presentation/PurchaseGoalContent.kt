@@ -1,8 +1,10 @@
 package com.emm.mybest.features.goal.presentation
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -19,6 +21,7 @@ import com.emm.mybest.ui.theme.AtelierTheme
 private val CONTENT_GUTTER = 24.dp
 private val SECTION_GAP = 28.dp
 private val ACTION_VERTICAL = 10.dp
+private val ACTION_GAP = 24.dp
 
 @Composable
 fun PurchaseGoalContent(
@@ -35,27 +38,52 @@ fun PurchaseGoalContent(
     ) {
         if (state.isLoaded) {
             val goal = state.goal
-            if (goal == null) {
+            if (goal == null || state.goalForm.isEditing) {
                 DefineGoalSection(form = state.goalForm, onIntent = onIntent)
             } else {
                 GoalProgressSection(goal = goal, onIntent = onIntent)
             }
             NotSpentSection(amountLabel = state.notSpentLabel)
-            state.goal?.let { ContributionsAndClear(goal = it, onIntent = onIntent) }
+            state.goal?.let {
+                ContributionsAndActions(goal = it, isEditing = state.goalForm.isEditing, onIntent = onIntent)
+            }
         }
     }
 }
 
 @Composable
-private fun ContributionsAndClear(
+private fun ContributionsAndActions(
     goal: GoalSummaryState,
+    isEditing: Boolean,
     onIntent: (PurchaseGoalIntent) -> Unit,
 ) {
     ContributionList(contributions = goal.contributions, onIntent = onIntent)
+    Row(horizontalArrangement = Arrangement.spacedBy(ACTION_GAP)) {
+        if (!isEditing) {
+            GoalAction(
+                textRes = R.string.purchase_goal_edit,
+                intent = PurchaseGoalIntent.OnEditClick,
+                onIntent = onIntent,
+            )
+        }
+        GoalAction(
+            textRes = R.string.purchase_goal_clear,
+            intent = PurchaseGoalIntent.OnClearClick,
+            onIntent = onIntent,
+        )
+    }
+}
+
+@Composable
+private fun GoalAction(
+    @StringRes textRes: Int,
+    intent: PurchaseGoalIntent,
+    onIntent: (PurchaseGoalIntent) -> Unit,
+) {
     MicroLabel(
-        text = stringResource(R.string.purchase_goal_clear),
+        text = stringResource(textRes),
         modifier = Modifier
-            .clickable { onIntent(PurchaseGoalIntent.OnClearClick) }
+            .clickable { onIntent(intent) }
             .padding(vertical = ACTION_VERTICAL),
     )
 }
@@ -72,6 +100,7 @@ private val PREVIEW_GOAL = GoalSummaryState(
         ContributionItemState(2, "Viernes 23 octubre", "S/ 80.00"),
         ContributionItemState(1, "Viernes 9 octubre", "S/ 100.00"),
     ),
+    priceInput = "450",
 )
 
 @Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)

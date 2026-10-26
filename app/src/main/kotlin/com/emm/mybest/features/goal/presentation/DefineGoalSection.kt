@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
 import com.emm.mybest.domain.validation.PurchaseGoalValidationError
+import com.emm.mybest.ui.components.ButtonVariant
 import com.emm.mybest.ui.components.HButton
 import com.emm.mybest.ui.components.HInput
 import com.emm.mybest.ui.theme.AtelierTheme
@@ -26,15 +27,26 @@ internal fun DefineGoalSection(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(SECTION_GAP)) {
-        Text(text = stringResource(R.string.purchase_goal_define_title), style = MaterialTheme.typography.titleMedium)
+        Text(text = stringResource(form.titleRes()), style = MaterialTheme.typography.titleMedium)
         GoalFormField.entries.forEach { field -> GoalFormInput(form = form, field = field, onIntent = onIntent) }
         HButton(
             text = stringResource(R.string.purchase_goal_save),
             onClick = { onIntent(PurchaseGoalIntent.OnGoalSave) },
             modifier = Modifier.fillMaxWidth(),
         )
+        if (form.isEditing) {
+            HButton(
+                text = stringResource(R.string.purchase_goal_cancel),
+                onClick = { onIntent(PurchaseGoalIntent.OnEditCancel) },
+                modifier = Modifier.fillMaxWidth(),
+                variant = ButtonVariant.Outline,
+            )
+        }
     }
 }
+
+private fun GoalFormState.titleRes(): Int =
+    if (isEditing) R.string.purchase_goal_edit_title else R.string.purchase_goal_define_title
 
 @Composable
 private fun GoalFormInput(

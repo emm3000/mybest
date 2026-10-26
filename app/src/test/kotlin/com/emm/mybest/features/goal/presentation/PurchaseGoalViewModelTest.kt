@@ -1,33 +1,21 @@
 package com.emm.mybest.features.goal.presentation
 
 import app.cash.turbine.test
-import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.GoalContribution
 import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.WonNight
 import com.emm.mybest.domain.repository.PurchaseGoalRepository
-import com.emm.mybest.domain.usecase.goal.AddGoalContributionUseCase
-import com.emm.mybest.domain.usecase.goal.ObserveGoalProgressUseCase
-import com.emm.mybest.domain.usecase.goal.SavePurchaseGoalUseCase
-import com.emm.mybest.domain.usecase.preouting.ObserveNotSpentThisMonthUseCase
 import com.emm.mybest.domain.validation.ContributionValidationError
 import com.emm.mybest.domain.validation.PurchaseGoalValidationError
-import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FakePurchaseGoalRepository
-import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -35,7 +23,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
-private val LIMA = TimeZone.of("America/Lima")
 private val GOAL = PurchaseGoal("Zapatillas", Money(450_00))
 private val OCTOBER_9 = LocalDate(2026, 10, 9)
 private val OCTOBER_16 = LocalDate(2026, 10, 16)
@@ -46,23 +33,8 @@ class PurchaseGoalViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val clock = AppDayClock(FixedClock(LocalDateTime(2026, 10, 23, 12, 0).toInstant(LIMA)), LIMA)
-
-    private fun viewModel(
-        repository: PurchaseGoalRepository,
-        wonNights: List<WonNight> = emptyList(),
-    ) = PurchaseGoalViewModel(
-        PurchaseGoalUseCases(
-            observeGoalProgress = ObserveGoalProgressUseCase(repository),
-            observeNotSpent = ObserveNotSpentThisMonthUseCase(
-                FakeOutingRepository(initialWonNights = wonNights),
-                clock,
-            ),
-            saveGoal = SavePurchaseGoalUseCase(repository),
-            addContribution = AddGoalContributionUseCase(repository, clock),
-            purchaseGoalRepository = repository,
-        ),
-    )
+    private fun viewModel(repository: PurchaseGoalRepository, wonNights: List<WonNight> = emptyList()) =
+        purchaseGoalViewModel(repository, wonNights)
 
     private fun failingRepository(delegate: FakePurchaseGoalRepository): PurchaseGoalRepository =
         object : PurchaseGoalRepository by delegate {
@@ -94,14 +66,6 @@ class PurchaseGoalViewModelTest {
             check(attempts.size > 1) { "boom" }
             delegate.addContribution(appDay, amount)
         }
-    }
-
-    private fun TestScope.send(viewModel: PurchaseGoalViewModel, vararg intents: PurchaseGoalIntent): PurchaseGoalState {
-        backgroundScope.launch { viewModel.state.collect {} }
-        advanceUntilIdle()
-        intents.forEach { viewModel.onIntent(it) }
-        advanceUntilIdle()
-        return viewModel.state.value
     }
 
     private fun defineGoal(name: String, price: String) = arrayOf(
