@@ -287,7 +287,7 @@ class SummaryViewModelTest {
         val viewModel = started(viewModel())
         var effect: SummaryEffect? = null
         viewModel.effect.test {
-            viewModel.onIntent(SummaryIntent.OnSetupPromptClick(destination))
+            viewModel.onIntent(SummaryIntent.OnRowClick(destination))
             effect = awaitItem()
         }
         return checkNotNull(effect)
@@ -328,11 +328,33 @@ class SummaryViewModelTest {
                     SummaryText(R.string.summary_money_goal_label, listOf("Moto")),
                     SummaryText(R.string.summary_money_goal_value, listOf("S/ 300.00", 52)),
                     AtelierInk,
+                    SummaryDestination.PURCHASE_GOAL,
                 ),
                 line(R.string.summary_money_not_spent, SummaryText.literal("S/ 380.00")),
             ),
             section.rows,
         )
+    }
+
+    @Test
+    fun `a past week keeps the destination of the goal row`() = runTest {
+        val viewModel = started(viewModel(EMPTY_SUMMARY.copy(money = goalWeekMoney())))
+
+        viewModel.onIntent(SummaryIntent.OnPreviousWeekClick)
+        advanceUntilIdle()
+
+        assertEquals(SummaryDestination.PURCHASE_GOAL, goalDestinationOf(viewModel))
+    }
+
+    @Test
+    fun `clicking the goal row opens the purchase goal once`() = runTest {
+        val viewModel = started(viewModel(EMPTY_SUMMARY.copy(money = goalWeekMoney())))
+
+        viewModel.effect.test {
+            viewModel.onIntent(SummaryIntent.OnRowClick(checkNotNull(goalDestinationOf(viewModel))))
+            assertEquals(SummaryEffect.OpenPurchaseGoal, awaitItem())
+            expectNoEvents()
+        }
     }
 
     @Test
@@ -404,4 +426,17 @@ class SummaryViewModelTest {
 
         assertEquals("19 OCT – 25 OCT", viewModel.state.value.weekLabel)
     }
+}
+
+private fun goalWeekMoney(): WeekMoney {
+    val goal = GoalProgress(PurchaseGoal("Moto", Money(570_00)), Money(300_00), Money(270_00), 52, emptyList())
+    return WeekMoney(emptyList(), Money.ZERO, WeekDebt(Money.ZERO, 0, 0), goal)
+}
+
+private fun goalDestinationOf(viewModel: SummaryViewModel): SummaryDestination? {
+    val section = viewModel.state.value.sections.first { it.titleRes == R.string.summary_section_money }
+    val goalRow = section.rows.filterIsInstance<SummaryRowState.Line>().first {
+        it.label.res == R.string.summary_money_goal_label
+    }
+    return goalRow.destination
 }
