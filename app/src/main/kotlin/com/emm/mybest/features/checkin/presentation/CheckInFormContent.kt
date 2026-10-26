@@ -77,7 +77,7 @@ private fun ColumnScope.PlannedFields(
         ),
     ) {
         LimitInput(
-            field = LimitField(state.form.drinksInput, KeyboardType.Number),
+            field = LimitField(state.form.drinksInput, KeyboardType.NumberPassword),
             onValueChange = { onIntent(CheckInIntent.OnDrinksChange(it)) },
         )
     }

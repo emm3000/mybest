@@ -83,7 +83,7 @@ private fun LimitsSection(
             ),
         ) {
             LimitInput(
-                field = LimitField(state.form.drinksInput, KeyboardType.Number),
+                field = LimitField(state.form.drinksInput, KeyboardType.NumberPassword),
                 onValueChange = { onIntent(PreOutingIntent.OnDrinksChange(it)) },
             )
         }
