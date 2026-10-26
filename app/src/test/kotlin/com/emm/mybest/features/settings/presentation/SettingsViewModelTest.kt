@@ -6,6 +6,7 @@ import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Debt
 import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.repository.AppRestarter
 import com.emm.mybest.domain.repository.RestoreResult
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
@@ -66,6 +67,7 @@ class SettingsViewModelTest {
                 purchaseGoalRepository,
                 ObserveCaptureSummaryUseCase(FakeNotificationCaptureRepository()),
             ),
+            appRestarter = mockk<AppRestarter>(relaxUnitFun = true),
         ),
         appVersionName = versionName,
         appVersionCode = versionCode,
