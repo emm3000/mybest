@@ -15,11 +15,13 @@ import com.emm.mybest.testing.FakeDebtRepository
 import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -73,6 +75,29 @@ class DebtsViewModelTest {
         override suspend fun deleteDebt(id: Long) = throw failure
 
         override fun observeDebts() = flow<List<Debt>> { throw failure }
+    }
+
+    private fun gatedRepository(
+        delegate: FakeDebtRepository,
+        gate: CompletableDeferred<Unit>,
+        attempts: MutableList<Debt>,
+    ): DebtRepository = object : DebtRepository by delegate {
+        override suspend fun saveDebt(debt: Debt): Long {
+            attempts += debt
+            gate.await()
+            return delegate.saveDebt(debt)
+        }
+    }
+
+    private fun failingOnceRepository(
+        delegate: FakeDebtRepository,
+        attempts: MutableList<Debt>,
+    ): DebtRepository = object : DebtRepository by delegate {
+        override suspend fun saveDebt(debt: Debt): Long {
+            attempts += debt
+            check(attempts.size > 1) { "boom" }
+            return delegate.saveDebt(debt)
+        }
     }
 
     private fun TestScope.stateOf(viewModel: DebtsViewModel): DebtsState {
@@ -311,6 +336,60 @@ class DebtsViewModelTest {
             viewModel.onIntent(DebtsIntent.OnEditClick(CARD.id))
             assertEquals(DebtsEffect.ActionFailed, awaitItem())
         }
+    }
+
+    @Test
+    fun `saving three times while the first save is in flight stores one debt`() = runTest {
+        val good = repository(debts = emptyList())
+        val gate = CompletableDeferred<Unit>()
+        val attempts = mutableListOf<Debt>()
+        val viewModel = viewModel(good, gatedRepository(good, gate, attempts))
+
+        send(
+            viewModel,
+            DebtsIntent.OnAddClick,
+            *fill(DebtFields("Dos", "100", "10", "20")),
+            DebtsIntent.OnFormSave,
+            DebtsIntent.OnFormSave,
+            DebtsIntent.OnFormSave,
+        )
+        runCurrent()
+        gate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(1, attempts.size)
+        assertEquals(1, good.observeDebts().first().size)
+        assertNull(viewModel.state.value.form)
+    }
+
+    @Test
+    fun `a save rejected by validation does not block the next one`() = runTest {
+        val repository = repository(debts = emptyList())
+        val viewModel = viewModel(repository)
+
+        send(viewModel, DebtsIntent.OnAddClick, *fill(DebtFields("", "100", "10", "20")), DebtsIntent.OnFormSave)
+        val state = send(viewModel, DebtsIntent.OnFormChange(DebtFormField.NAME, "Dos"), DebtsIntent.OnFormSave)
+
+        assertNull(state.form)
+        assertEquals(listOf("Dos"), repository.observeDebts().first().map { it.name })
+    }
+
+    @Test
+    fun `a failed save reports once and the next save is attempted again`() = runTest {
+        val good = repository(debts = emptyList())
+        val attempts = mutableListOf<Debt>()
+        val viewModel = viewModel(good, failingOnceRepository(good, attempts))
+        stateOf(viewModel)
+
+        viewModel.effect.test {
+            send(viewModel, DebtsIntent.OnAddClick, *fill(DebtFields("Dos", "100", "10", "20")), DebtsIntent.OnFormSave)
+            assertEquals(DebtsEffect.ActionFailed, awaitItem())
+            send(viewModel, DebtsIntent.OnFormSave)
+            expectNoEvents()
+        }
+        assertEquals(2, attempts.size)
+        assertEquals(1, good.observeDebts().first().size)
+        assertNull(viewModel.state.value.form)
     }
 
     @Test

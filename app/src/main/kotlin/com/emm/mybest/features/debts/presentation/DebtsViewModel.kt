@@ -6,6 +6,7 @@ import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.validation.DebtValidationError
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,6 +24,7 @@ class DebtsViewModel(
 
     private val form = MutableStateFlow<DebtFormState?>(null)
     private val pendingDeleteId = MutableStateFlow<Long?>(null)
+    private var saveJob: Job? = null
 
     private val _effect = effectFlow<DebtsEffect>()
     val effect: SharedFlow<DebtsEffect> = _effect.asSharedFlow()
@@ -75,7 +77,8 @@ class DebtsViewModel(
 
     private fun saveForm() {
         val current = form.value ?: return
-        viewModelScope.launch {
+        if (saveJob?.isActive == true) return
+        saveJob = viewModelScope.launch {
             attempt { useCases.saveDebt(current.id, current.toDraft()) }
                 .onSuccess { errors -> applySaveResult(current.id, errors.toSet()) }
                 .onFailure { _effect.emit(DebtsEffect.ActionFailed) }
