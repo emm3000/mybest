@@ -2,6 +2,7 @@ package com.emm.mybest.features.checkin.presentation
 
 import app.cash.turbine.test
 import com.emm.mybest.core.datetime.AppDayClock
+import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.CheckIn
 import com.emm.mybest.domain.models.LimitKind
@@ -9,6 +10,7 @@ import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.OutingKind
 import com.emm.mybest.domain.models.WonNight
+import com.emm.mybest.domain.repository.OutingRepository
 import com.emm.mybest.domain.usecase.checkin.ObserveCheckInTaskUseCase
 import com.emm.mybest.domain.usecase.checkin.RecordNoOutingUseCase
 import com.emm.mybest.domain.usecase.checkin.RecordUnplannedOutingUseCase
@@ -17,10 +19,14 @@ import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
 import com.emm.mybest.ui.components.LimitOutcomeState
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -36,17 +42,30 @@ import org.junit.Test
 
 private val LIMA = TimeZone.of("America/Lima")
 private val FRIDAY = LocalDate(2026, 10, 23)
+private val THURSDAY = LocalDate(2026, 10, 22)
 private val SATURDAY_MORNING = LocalDateTime(LocalDate(2026, 10, 24), LocalTime(9, 0))
 private val LIMITS = Limits(Money(200_00), drinks = 4, returnTime = LocalTime(2, 0))
 private val PLANNED = Outing(1, FRIDAY, OutingKind.PLANNED, LIMITS, checkIn = null)
+private val OLDER_UNPLANNED = Outing(2, THURSDAY, OutingKind.UNPLANNED, limits = null, checkIn = null)
 private val UNPLANNED = Outing(1, FRIDAY, OutingKind.UNPLANNED, limits = null, checkIn = null)
+
+private class CountingOutingRepository(private val delegate: OutingRepository) : OutingRepository by delegate {
+
+    var saveCheckInCalls = 0
+        private set
+
+    override suspend fun saveCheckIn(outingId: Long, checkIn: CheckIn) {
+        saveCheckInCalls++
+        delegate.saveCheckIn(outingId, checkIn)
+    }
+}
 
 class CheckInViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private fun viewModel(repository: FakeOutingRepository): CheckInViewModel {
+    private fun viewModel(repository: OutingRepository): CheckInViewModel {
         val clock = AppDayClock(FixedClock(SATURDAY_MORNING.toInstant(LIMA)), LIMA)
         return CheckInViewModel(
             CheckInUseCases(
@@ -69,6 +88,27 @@ class CheckInViewModelTest {
         advanceUntilIdle()
         return viewModel.state.value
     }
+
+    private fun TestScope.observe(viewModel: CheckInViewModel): Job {
+        val screen = backgroundScope.launch { viewModel.state.collect {} }
+        advanceUntilIdle()
+        return screen
+    }
+
+    private suspend fun TestScope.leave(screen: Job) {
+        screen.cancelAndJoin()
+        advanceTimeBy(SUBSCRIPTION_TIMEOUT_MS + 1)
+        runCurrent()
+    }
+
+    private fun TestScope.observeFromStart(viewModel: CheckInViewModel): List<CheckInState> {
+        val seen = mutableListOf<CheckInState>()
+        backgroundScope.launch { viewModel.state.collect(seen::add) }
+        advanceUntilIdle()
+        return seen
+    }
+
+    private val answerUnplanned = arrayOf(CheckInIntent.OnSpentChange("90"), CheckInIntent.OnMoodSelect(3))
 
     private val answerPlanned = arrayOf(
         CheckInIntent.OnSpentChange("260"),
@@ -180,6 +220,82 @@ class CheckInViewModelTest {
             viewModel.onIntent(CheckInIntent.OnDoneClick)
             assertEquals(CheckInEffect.Close, awaitItem())
         }
+    }
+
+    @Test
+    fun `a new pending outing after done opens its form, not the old result`() = runTest {
+        val repository = FakeOutingRepository(initialOutings = listOf(PLANNED))
+        val viewModel = viewModel(repository)
+        val screen = observe(viewModel)
+        act(viewModel, *answerPlanned, CheckInIntent.OnSaveClick)
+        act(viewModel, CheckInIntent.OnDoneClick)
+        leave(screen)
+
+        repository.recordUnplanned(THURSDAY)
+        val seen = observeFromStart(viewModel)
+
+        assertTrue(seen.none { it.step == CheckInStep.RESULT })
+        assertEquals(CheckInStep.FORM, seen.last().step)
+        assertEquals("JUE · 22 OCT", seen.last().dayLabel)
+    }
+
+    @Test
+    fun `done keeps the result on screen while the screen closes`() = runTest {
+        val viewModel = viewModel(FakeOutingRepository(initialOutings = listOf(PLANNED)))
+        stateOf(viewModel)
+        val result = act(viewModel, *answerPlanned, CheckInIntent.OnSaveClick)
+
+        viewModel.effect.test {
+            val closing = act(viewModel, CheckInIntent.OnDoneClick)
+            assertEquals(CheckInEffect.Close, awaitItem())
+            assertEquals(result, closing)
+        }
+    }
+
+    @Test
+    fun `done with another outing pending closes and keeps the result on screen`() = runTest {
+        val viewModel = viewModel(FakeOutingRepository(initialOutings = listOf(OLDER_UNPLANNED, PLANNED)))
+        stateOf(viewModel)
+        val result = act(viewModel, *answerUnplanned, CheckInIntent.OnSaveClick)
+
+        viewModel.effect.test {
+            val closing = act(viewModel, CheckInIntent.OnDoneClick)
+            assertEquals(CheckInEffect.Close, awaitItem())
+            assertEquals(result, closing)
+        }
+        assertEquals(CheckInStep.RESULT, result.step)
+        assertEquals("JUE · 22 OCT", result.dayLabel)
+    }
+
+    @Test
+    fun `the next pending outing opens its form once the screen was left`() = runTest {
+        val viewModel = viewModel(FakeOutingRepository(initialOutings = listOf(OLDER_UNPLANNED, PLANNED)))
+        val screen = observe(viewModel)
+        act(viewModel, *answerUnplanned, CheckInIntent.OnSaveClick)
+        act(viewModel, CheckInIntent.OnDoneClick)
+        leave(screen)
+
+        val seen = observeFromStart(viewModel)
+
+        assertTrue(seen.none { it.step == CheckInStep.RESULT })
+        assertEquals("VIE · 23 OCT", seen.last().dayLabel)
+    }
+
+    @Test
+    fun `saving twice in a row saves once and shows no error`() = runTest {
+        val repository = CountingOutingRepository(FakeOutingRepository(initialOutings = listOf(PLANNED)))
+        val viewModel = viewModel(repository)
+        stateOf(viewModel)
+        act(viewModel, *answerPlanned)
+
+        viewModel.effect.test {
+            viewModel.onIntent(CheckInIntent.OnSaveClick)
+            viewModel.onIntent(CheckInIntent.OnSaveClick)
+            advanceUntilIdle()
+            expectNoEvents()
+        }
+
+        assertEquals(1, repository.saveCheckInCalls)
     }
 
     @Test
