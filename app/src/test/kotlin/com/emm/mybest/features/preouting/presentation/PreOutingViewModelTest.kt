@@ -4,9 +4,11 @@ import app.cash.turbine.test
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.InstallmentShare
+import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.PreOutingSnapshot
 import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.repository.OutingRepository
 import com.emm.mybest.domain.usecase.preouting.GetEstimatedOutingCostUseCase
 import com.emm.mybest.domain.usecase.preouting.HasDecisionOnUseCase
 import com.emm.mybest.domain.usecase.preouting.ObservePreOutingSnapshotUseCase
@@ -21,10 +23,13 @@ import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -37,6 +42,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import kotlin.coroutines.cancellation.CancellationException
 
 private val LIMA = TimeZone.of("America/Lima")
 private val FRIDAY = LocalDate(2026, 10, 23)
@@ -68,12 +74,29 @@ private val FULL_SNAPSHOT = PreOutingSnapshot(
     notSpentThisMonth = Money(380_00),
 )
 
+private class GatedOutingRepository(
+    private val delegate: OutingRepository,
+) : OutingRepository by delegate {
+
+    var gate: CompletableDeferred<Unit>? = null
+    var failure: Throwable? = null
+    var recordPlannedCalls = 0
+
+    override suspend fun recordPlanned(appDay: LocalDate, limits: Limits): Long {
+        recordPlannedCalls++
+        failure?.let { throw it }
+        gate?.await()
+        return delegate.recordPlanned(appDay, limits)
+    }
+}
+
 class PreOutingViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
     private val outingRepository = FakeOutingRepository()
+    private val gatedOutingRepository = GatedOutingRepository(outingRepository)
 
     private fun decisionUseCases(now: LocalDateTime, setup: Setup): PreOutingDecisionUseCases {
         val clock = AppDayClock(FixedClock(now.toInstant(LIMA)), LIMA)
@@ -81,7 +104,7 @@ class PreOutingViewModelTest {
         val hasDecisionOn = HasDecisionOnUseCase(outingRepository)
         return PreOutingDecisionUseCases(
             observeTonight = ObserveTonightUseCase(outingRepository, clock),
-            planOuting = PlanOutingUseCase(outingRepository, hasDecisionOn, clock),
+            planOuting = PlanOutingUseCase(gatedOutingRepository, hasDecisionOn, clock),
             recordWonNight = RecordWonNightUseCase(outingRepository, hasDecisionOn, estimate, clock),
         )
     }
@@ -396,5 +419,43 @@ class PreOutingViewModelTest {
             viewModel.onIntent(PreOutingIntent.OnStayInClick)
             assertEquals(PreOutingEffect.DayAlreadyDecided, awaitItem())
         }
+    }
+
+    @Test
+    fun `confirming three times while the outing is being saved records one outing`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        fillForm(viewModel)
+        val gate = CompletableDeferred<Unit>()
+        gatedOutingRepository.gate = gate
+
+        viewModel.effect.test {
+            repeat(3) { viewModel.onIntent(PreOutingIntent.OnConfirmOutingClick) }
+            runCurrent()
+            gate.complete(Unit)
+            advanceUntilIdle()
+            expectNoEvents()
+        }
+
+        assertEquals(1, gatedOutingRepository.recordPlannedCalls)
+        assertEquals(1, outingRepository.observeAll().first().size)
+        assertFalse(stateNow(viewModel).form.isOpen)
+    }
+
+    @Test
+    fun `confirming again after an interrupted save attempts the save again`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        fillForm(viewModel)
+        gatedOutingRepository.failure = CancellationException("save interrupted")
+
+        viewModel.onIntent(PreOutingIntent.OnConfirmOutingClick)
+        advanceUntilIdle()
+        gatedOutingRepository.failure = null
+        viewModel.onIntent(PreOutingIntent.OnConfirmOutingClick)
+        advanceUntilIdle()
+
+        assertEquals(2, gatedOutingRepository.recordPlannedCalls)
+        assertEquals(1, outingRepository.observeAll().first().size)
     }
 }
