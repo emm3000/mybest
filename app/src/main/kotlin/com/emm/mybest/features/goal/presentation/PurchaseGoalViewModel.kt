@@ -7,6 +7,7 @@ import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.core.money.formatPen
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,6 +25,7 @@ class PurchaseGoalViewModel(
     private val goalForm = MutableStateFlow(GoalFormState())
     private val contributionForm = MutableStateFlow<ContributionFormState?>(null)
     private val isClearConfirmationVisible = MutableStateFlow(false)
+    private var contributionJob: Job? = null
 
     private val _effect = effectFlow<PurchaseGoalEffect>()
     val effect: SharedFlow<PurchaseGoalEffect> = _effect.asSharedFlow()
@@ -103,7 +105,8 @@ class PurchaseGoalViewModel(
 
     private fun saveContribution() {
         val current = contributionForm.value ?: return
-        viewModelScope.launch {
+        if (contributionJob?.isActive == true) return
+        contributionJob = viewModelScope.launch {
             attempt { useCases.addContribution(Money.parseOrNull(current.amount)) }
                 .onSuccess { error -> contributionForm.value = error?.let { current.copy(error = it) } }
                 .onFailure { _effect.emit(PurchaseGoalEffect.ActionFailed) }

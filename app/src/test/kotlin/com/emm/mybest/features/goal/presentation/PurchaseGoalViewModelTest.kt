@@ -17,10 +17,12 @@ import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FakePurchaseGoalRepository
 import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -70,6 +72,29 @@ class PurchaseGoalViewModelTest {
 
             override suspend fun clearGoal() = error("boom")
         }
+
+    private fun gatedRepository(
+        delegate: FakePurchaseGoalRepository,
+        gate: CompletableDeferred<Unit>,
+        attempts: MutableList<Money>,
+    ): PurchaseGoalRepository = object : PurchaseGoalRepository by delegate {
+        override suspend fun addContribution(appDay: LocalDate, amount: Money) {
+            attempts += amount
+            gate.await()
+            delegate.addContribution(appDay, amount)
+        }
+    }
+
+    private fun failingOnceRepository(
+        delegate: FakePurchaseGoalRepository,
+        attempts: MutableList<Money>,
+    ): PurchaseGoalRepository = object : PurchaseGoalRepository by delegate {
+        override suspend fun addContribution(appDay: LocalDate, amount: Money) {
+            attempts += amount
+            check(attempts.size > 1) { "boom" }
+            delegate.addContribution(appDay, amount)
+        }
+    }
 
     private fun TestScope.send(viewModel: PurchaseGoalViewModel, vararg intents: PurchaseGoalIntent): PurchaseGoalState {
         backgroundScope.launch { viewModel.state.collect {} }
@@ -253,5 +278,62 @@ class PurchaseGoalViewModelTest {
             send(viewModel, *contribute("50"))
             assertEquals(PurchaseGoalEffect.ActionFailed, awaitItem())
         }
+    }
+
+    @Test
+    fun `saving three times while the first save is in flight stores one contribution`() = runTest {
+        val good = FakePurchaseGoalRepository(GOAL)
+        val gate = CompletableDeferred<Unit>()
+        val attempts = mutableListOf<Money>()
+        val viewModel = viewModel(gatedRepository(good, gate, attempts))
+
+        send(
+            viewModel,
+            PurchaseGoalIntent.OnAddContributionClick,
+            PurchaseGoalIntent.OnContributionChange("20"),
+            PurchaseGoalIntent.OnContributionSave,
+            PurchaseGoalIntent.OnContributionSave,
+            PurchaseGoalIntent.OnContributionSave,
+        )
+        runCurrent()
+        gate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(listOf(Money(20_00)), attempts)
+        assertEquals(listOf(Money(20_00)), good.observeContributions().first().map { it.amount })
+        assertNull(viewModel.state.value.contributionForm)
+    }
+
+    @Test
+    fun `a contribution rejected by validation does not block the next one`() = runTest {
+        val repository = FakePurchaseGoalRepository(GOAL)
+        val viewModel = viewModel(repository)
+
+        send(viewModel, *contribute("0"))
+        val state = send(
+            viewModel,
+            PurchaseGoalIntent.OnContributionChange("20"),
+            PurchaseGoalIntent.OnContributionSave,
+        )
+
+        assertNull(state.contributionForm)
+        assertEquals(listOf(Money(20_00)), repository.observeContributions().first().map { it.amount })
+    }
+
+    @Test
+    fun `a failed contribution reports once and the next save is attempted again`() = runTest {
+        val good = FakePurchaseGoalRepository(GOAL)
+        val attempts = mutableListOf<Money>()
+        val viewModel = viewModel(failingOnceRepository(good, attempts))
+
+        viewModel.effect.test {
+            send(viewModel, *contribute("20"))
+            assertEquals(PurchaseGoalEffect.ActionFailed, awaitItem())
+            send(viewModel, PurchaseGoalIntent.OnContributionSave)
+            expectNoEvents()
+        }
+        assertEquals(2, attempts.size)
+        assertEquals(listOf(Money(20_00)), good.observeContributions().first().map { it.amount })
+        assertNull(viewModel.state.value.contributionForm)
     }
 }
