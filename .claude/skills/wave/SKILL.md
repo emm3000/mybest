@@ -28,7 +28,7 @@ Rows are ordered by blast radius. A ticket that matches several rows takes the h
 
 | Row | Work | Model:effort | Extra instruction |
 |---|---|---|---|
-| 1 | Docs, strings, renames; every criterion is a command with empty output | sonnet:low | none: the gate and the criteria fail loudly |
+| 1 | Docs, strings, renames; every criterion is a command with empty output | sonnet:low | verify clause (below) |
 | 2 | One screen, layout or restyle only | sonnet:medium | visual check |
 | 3 | ViewModel or use-case behavior | sonnet:high | load `mattpocock-skills:tdd`, red-green-refactor |
 | 4 | Shared `ui/components` or theme change | sonnet:high | visual check of every affected screen |
@@ -36,7 +36,11 @@ Rows are ordered by blast radius. A ticket that matches several rows takes the h
 
 Sonnet writes the code on rows 1-4. Row 5 is the only Opus implementation row: its failures (data-dropping migrations, missing Koin bindings, workers that never run) compile and pass CI, so no gate catches them.
 
-Other roles: every PR review opus:high (the reviewer is the only judgment check, and a review costs far less than an implementation), post-review fixes sonnet:low, ticket-writer opus:high.
+Other roles: every PR review opus:high (the reviewer is the only judgment check, and a review costs far less than an implementation), post-review fixes sonnet:low with the verify clause, ticket-writer opus:medium.
+
+Verify clause, pasted into every sonnet:low dispatch: "Before you report done, re-read your full diff, run the gate, and check each acceptance criterion against its command output. Report done only when all three hold." *Why: Anthropic's Sonnet 5.5 prompting guide says that at `low` it can skip verifying a change.*
+
+- Ticket-writer moved from opus:high to opus:medium (2026-10-26): Anthropic reports Opus 5.5 at `medium` matching Opus 5 at `high`, and ticket writing is planning, not code. Raise it back if tickets start drawing `spec` FIX FIRST verdicts.
 
 Every row is a bet until `docs/agents/dispatch-log.md` says otherwise. When a row shows two or more first-review FIX FIRST verdicts with cause `judgment`, raise it one step and note why here.
 

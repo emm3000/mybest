@@ -97,7 +97,7 @@ Required for any ticket that changes a screen or a shared component.
 - A peer gets nothing new until its PR is reviewed, fixed and merged.
 - Each PR is reviewed by a fresh `pr-reviewer` subagent launched by the orchestrator, one per PR. It is read-only, does not build or rerun the gate (CI owns that), reads the diff and the issue, and pulls screenshots with `git show origin/assets/<N>-visual-check:<file>`, checking that the SHA in each file name matches the PR head. It boots an emulator in a throwaway worktree only when screenshots are missing, stale or suspicious, and shuts it down afterward. It returns MERGE or FIX FIRST. *Why: a long-lived review session fills its context and reviews worse each time.*
 - The subagent follows `mattpocock-skills:code-review` for the Standards and Spec axes, with the merge-base with `origin/main` as the fixed point.
-- Reviewer model: opus:high for every PR, restyles included. Post-review fixes run sonnet:low.
+- Reviewer model: opus:high for every PR, restyles included. Post-review fixes run sonnet:low with the verify clause from `.claude/skills/wave/SKILL.md`.
 - On FIX FIRST the orchestrator sends the blocking items back to the same peer with one `SendMessage` (`notify_when_idle: true`). The peer folds each fix into the commit it belongs to and force-pushes with lease; it never stacks a `fix:` commit. Then a new subagent re-reviews.
 
 ## Merge

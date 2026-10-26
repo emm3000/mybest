@@ -2,7 +2,7 @@
 name: ticket-writer
 description: Writes GitHub issues for MyBest features or slices. Use when a wave needs tickets before dispatch. Returns the issue numbers grouped by wave.
 model: opus
-effort: high
+effort: medium
 tools: Read, Glob, Grep, Bash
 ---
 
