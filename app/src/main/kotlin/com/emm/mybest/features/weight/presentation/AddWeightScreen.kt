@@ -1,14 +1,18 @@
 package com.emm.mybest.features.weight.presentation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Scale
 import androidx.compose.material3.Icon
@@ -37,6 +41,8 @@ import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.theme.AtelierTheme
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.datetime.DayOfWeek
+
+private val FIELDS_BOTTOM_GAP = 24.dp
 
 @Composable
 fun AddWeightScreen(
@@ -97,12 +103,38 @@ private fun AddWeightBody(
     padding: androidx.compose.foundation.layout.PaddingValues,
     onIntent: (AddWeightIntent) -> Unit,
 ) {
-    Column(
+    BoxWithConstraints(
         modifier = Modifier
             .padding(padding)
+            .consumeWindowInsets(padding)
             .padding(24.dp)
             .fillMaxSize()
             .imePadding(),
+    ) {
+        Column(
+            modifier = Modifier.verticalScroll(rememberScrollState()).heightIn(min = maxHeight),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            AddWeightFields(state = state, onIntent = onIntent, modifier = Modifier.padding(bottom = FIELDS_BOTTOM_GAP))
+            HButton(
+                text = stringResource(R.string.add_weight_save_button),
+                onClick = { onIntent(AddWeightIntent.OnSaveClick) },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                enabled = state.weight.isNotBlank() && state.weightError == null && !state.isLoading,
+                isLoading = state.isLoading,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddWeightFields(
+    state: AddWeightState,
+    onIntent: (AddWeightIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         WeighInSummary(state = state, onOpenSettings = { onIntent(AddWeightIntent.OnOpenSettingsClick) })
@@ -130,14 +162,6 @@ private fun AddWeightBody(
             modifier = Modifier.fillMaxWidth(),
             singleLine = false,
             minLines = 3,
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        HButton(
-            text = stringResource(R.string.add_weight_save_button),
-            onClick = { onIntent(AddWeightIntent.OnSaveClick) },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            enabled = state.weight.isNotBlank() && state.weightError == null && !state.isLoading,
-            isLoading = state.isLoading,
         )
     }
 }
