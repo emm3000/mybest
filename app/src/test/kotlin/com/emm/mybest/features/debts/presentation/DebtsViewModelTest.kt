@@ -129,11 +129,20 @@ class DebtsViewModelTest {
         assertTrue(state.isLoaded)
         assertEquals(
             listOf(
-                DebtItemState(1, "Tarjeta", "S/ 3,200.00", "S/ 420.00", 15, isPaidThisMonth = false),
-                DebtItemState(2, "Moto", "S/ 2,150.00", "S/ 310.00", 5, isPaidThisMonth = true),
+                DebtItemState(1, "Tarjeta", "S/ 3,200.00", "S/ 420.00", 15, isPaidThisMonth = false, canPay = true),
+                DebtItemState(2, "Moto", "S/ 2,150.00", "S/ 310.00", 5, isPaidThisMonth = true, canPay = true),
             ),
             state.debts,
         )
+    }
+
+    @Test
+    fun `a paid-off debt offers no pay action while a debt with balance does`() = runTest {
+        val paidOff = MOTO.copy(balance = Money.ZERO)
+
+        val state = stateOf(viewModel(repository(debts = listOf(CARD, paidOff))))
+
+        assertEquals(listOf(true, false), state.debts.map { it.canPay })
     }
 
     @Test

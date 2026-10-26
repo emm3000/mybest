@@ -94,14 +94,13 @@ private fun PayAction(
     onIntent: (DebtsIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (item.isPaidThisMonth) {
-        MicroLabel(
+    when {
+        item.isPaidThisMonth -> MicroLabel(
             text = stringResource(R.string.debts_paid),
             style = MicroLabelStyle(tone = MicroLabelTone.Done),
             modifier = modifier.padding(vertical = ACTION_VERTICAL),
         )
-    } else {
-        RowAction(
+        item.canPay -> RowAction(
             text = stringResource(R.string.debts_mark_paid),
             onClick = { onIntent(DebtsIntent.OnPayClick(item.id)) },
             modifier = modifier,
