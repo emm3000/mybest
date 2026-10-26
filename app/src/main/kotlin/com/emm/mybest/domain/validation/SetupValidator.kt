@@ -11,8 +11,8 @@ object SetupValidator {
 
     fun validate(setup: Setup): List<SetupValidationError> = weeklyTargetErrors(setup) + listOfNotNull(
         SetupValidationError.NegativeMonthlyOutingLimit.takeIf { (setup.monthlyOutingLimit ?: 0) < 0 },
-        SetupValidationError.NonPositiveTargetWeight.takeIf {
-            setup.targetWeightKg?.let { !it.isFinite() || it <= 0f } == true
+        SetupValidationError.TargetWeightOutOfRange.takeIf {
+            setup.targetWeightKg?.let { !WeightInputValidator.isWeightInRange(it) } == true
         },
         SetupValidationError.NegativeTypicalOutingCost.takeIf { setup.typicalOutingCost?.isNegative == true },
     )

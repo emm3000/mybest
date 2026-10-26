@@ -30,7 +30,7 @@ class SettingsGoalsEditorTest {
         val slowUpdate = mockk<UpdateSetupUseCase>()
         coEvery { slowUpdate(any()) } coAnswers {
             delay(SLOW_SAVE_MS)
-            listOf(SetupValidationError.NonPositiveTargetWeight)
+            listOf(SetupValidationError.TargetWeightOutOfRange)
         }
         val editor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), slowUpdate)
 
@@ -42,6 +42,56 @@ class SettingsGoalsEditorTest {
         advanceUntilIdle()
 
         assertEquals("72", editor.goals.first().editor?.input)
+    }
+
+    @Test
+    fun `an out-of-range target weight is rejected and nothing is stored`() = runTest {
+        val repository = FakeSetupRepository(Setup(targetWeightKg = 70f))
+        val editor = editorOn(repository)
+
+        val effect = saveTargetWeight(editor, "9999")
+
+        assertEquals(null, effect)
+        assertEquals(
+            SettingsEditorState(SettingsField.TARGET_WEIGHT, "9999", SettingsFieldError.WEIGHT_OUT_OF_RANGE),
+            editor.goals.first().editor,
+        )
+        assertEquals(emptyList<Setup>(), repository.saved)
+    }
+
+    @Test
+    fun `scientific notation is an invalid number and nothing is stored`() = runTest {
+        val repository = FakeSetupRepository(Setup(targetWeightKg = 70f))
+        val editor = editorOn(repository)
+
+        val effect = saveTargetWeight(editor, "1e3")
+
+        assertEquals(null, effect)
+        assertEquals(SettingsFieldError.INVALID_NUMBER, editor.goals.first().editor?.error)
+        assertEquals(emptyList<Setup>(), repository.saved)
+    }
+
+    @Test
+    fun `a target weight with a decimal comma is stored`() = runTest {
+        val repository = FakeSetupRepository()
+        val editor = editorOn(repository)
+
+        val effect = saveTargetWeight(editor, "75,5")
+
+        assertEquals(SettingsEffect.GoalSaved, effect)
+        assertEquals(75.5f, repository.observe().first().targetWeightKg)
+    }
+
+    @Test
+    fun `clearing the target weight stores null`() = runTest {
+        val repository = FakeSetupRepository(Setup(targetWeightKg = 70f))
+        val editor = editorOn(repository)
+
+        editor.handle(SettingsIntent.OnFieldOpen(SettingsField.TARGET_WEIGHT))
+        val effect = editor.handle(SettingsIntent.OnFieldClear)
+
+        assertEquals(SettingsEffect.GoalSaved, effect)
+        assertEquals(null, repository.observe().first().targetWeightKg)
     }
 
     @Test
@@ -102,11 +152,20 @@ class SettingsGoalsEditorTest {
         assertEquals(SettingsEditorState(SettingsField.WEEKLY_GYM, "4"), editor.goals.first().editor)
     }
 
+    private fun editorOn(repository: FakeSetupRepository) =
+        SettingsGoalsEditor(ObserveSetupUseCase(repository), UpdateSetupUseCase(repository))
+
+    private suspend fun saveTargetWeight(editor: SettingsGoalsEditor, input: String): SettingsEffect? {
+        editor.handle(SettingsIntent.OnFieldOpen(SettingsField.TARGET_WEIGHT))
+        editor.handle(SettingsIntent.OnFieldInputChange(input))
+        return editor.handle(SettingsIntent.OnFieldSave)
+    }
+
     private fun rejectingSlowUpdate(): UpdateSetupUseCase {
         val slowUpdate = mockk<UpdateSetupUseCase>()
         coEvery { slowUpdate(any()) } coAnswers {
             delay(SLOW_SAVE_MS)
-            listOf(SetupValidationError.NonPositiveTargetWeight)
+            listOf(SetupValidationError.TargetWeightOutOfRange)
         }
         return slowUpdate
     }

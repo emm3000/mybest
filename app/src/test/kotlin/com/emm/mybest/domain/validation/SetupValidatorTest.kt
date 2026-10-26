@@ -54,32 +54,20 @@ class SetupValidatorTest {
     }
 
     @Test
-    fun `zero target weight is rejected`() {
-        assertEquals(
-            listOf(SetupValidationError.NonPositiveTargetWeight),
-            SetupValidator.validate(Setup(targetWeightKg = 0f)),
-        )
+    fun `target weights inside the weigh-in range are valid`() {
+        listOf(20f, 72.5f, 500f).forEach { weight ->
+            assertEquals(emptyList<SetupValidationError>(), SetupValidator.validate(Setup(targetWeightKg = weight)))
+        }
     }
 
     @Test
-    fun `NaN target weight is rejected`() {
-        assertEquals(
-            listOf(SetupValidationError.NonPositiveTargetWeight),
-            SetupValidator.validate(Setup(targetWeightKg = Float.NaN)),
-        )
-    }
-
-    @Test
-    fun `infinite target weight is rejected`() {
-        assertEquals(
-            listOf(SetupValidationError.NonPositiveTargetWeight),
-            SetupValidator.validate(Setup(targetWeightKg = Float.POSITIVE_INFINITY)),
-        )
-    }
-
-    @Test
-    fun `positive target weight is valid`() {
-        assertEquals(emptyList<SetupValidationError>(), SetupValidator.validate(Setup(targetWeightKg = 72.5f)))
+    fun `target weights outside the weigh-in range are rejected with one error`() {
+        listOf(19.99f, 500.01f, 1_000f, 9_999f, 0f, -70f, Float.NaN, Float.POSITIVE_INFINITY).forEach { weight ->
+            assertEquals(
+                listOf(SetupValidationError.TargetWeightOutOfRange),
+                SetupValidator.validate(Setup(targetWeightKg = weight)),
+            )
+        }
     }
 
     @Test
@@ -108,7 +96,7 @@ class SetupValidatorTest {
             setOf(
                 SetupValidationError.WeeklyTargetOutOfRange(DailyCheckType.GYM),
                 SetupValidationError.NegativeMonthlyOutingLimit,
-                SetupValidationError.NonPositiveTargetWeight,
+                SetupValidationError.TargetWeightOutOfRange,
                 SetupValidationError.NegativeTypicalOutingCost,
             ),
             SetupValidator.validate(setup).toSet(),

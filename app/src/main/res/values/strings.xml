@@ -108,7 +108,7 @@
     <string name="settings_goal_clear">Borrar</string>
     <string name="settings_goal_error_invalid_number">Escribe un número válido.</string>
     <string name="settings_goal_error_out_of_range">Elige entre 0 y 7 días.</string>
-    <string name="settings_goal_error_not_positive">El peso debe ser mayor que cero.</string>
+    <string name="settings_goal_error_weight_out_of_range">Peso fuera de rango. Acepta 20–500 kg.</string>
     <string name="settings_goal_error_negative">El valor no puede ser negativo.</string>
     <string name="settings_goal_saved">Guardado</string>
     <string name="settings_goal_save_failed">No se pudo guardar. Intenta de nuevo.</string>
