@@ -17,28 +17,64 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 private val LIMA = TimeZone.of("America/Lima")
-private val CARD = Debt(1, "Tarjeta", Money(320_000), Money(42_000), paymentDay = 15)
-private val MOTO = Debt(2, "Moto", Money(215_000), Money(31_000), paymentDay = 5)
-private val OCTOBER = YearMonthValue(2026, 10)
+private val CARD = Debt(1, "Tarjeta", Money(100_000), Money(20_000), paymentDay = 2)
+private val BANK = Debt(2, "Banco", Money(160_000), Money(40_000), paymentDay = 25)
+private val NOVEMBER = YearMonthValue(2026, 11)
+private val DECEMBER = YearMonthValue(2026, 12)
 
 class ObserveDebtListUseCaseTest {
 
-    private val clock = AppDayClock(FixedClock(LocalDateTime(2026, 10, 23, 12, 0).toInstant(LIMA)), LIMA)
+    private fun clockAt(dateTime: LocalDateTime) = AppDayClock(FixedClock(dateTime.toInstant(LIMA)), LIMA)
 
-    private fun useCase(payments: List<DebtPayment>) =
-        ObserveDebtListUseCase(FakeDebtRepository(listOf(CARD, MOTO), payments), clock)
+    private suspend fun items(payments: List<DebtPayment>, now: LocalDateTime): List<DebtListItem> =
+        ObserveDebtListUseCase(FakeDebtRepository(listOf(CARD, BANK), payments), clockAt(now))().first()
+
+    private suspend fun isCardPaid(payments: List<DebtPayment>, now: LocalDateTime): Boolean =
+        items(payments, now).first { it.debt == CARD }.isPaidThisMonth
 
     @Test
-    fun `flags only the debts paid in the current month`() = runTest {
-        val items = useCase(listOf(DebtPayment(MOTO.id, OCTOBER, MOTO.installment)))().first()
+    fun `flags only the debts whose due installment is paid`() = runTest {
+        val payments = listOf(DebtPayment(BANK.id, NOVEMBER, BANK.installment))
 
-        assertEquals(listOf(DebtListItem(CARD, false), DebtListItem(MOTO, true)), items)
+        val items = items(payments, LocalDateTime(2026, 11, 10, 10, 0))
+
+        assertEquals(listOf(DebtListItem(CARD, false), DebtListItem(BANK, true)), items)
+    }
+
+    @Test
+    fun `an early payment for next month shows paid before the new month starts`() = runTest {
+        val payments = listOf(DebtPayment(CARD.id, DECEMBER, CARD.installment))
+
+        assertEquals(true, isCardPaid(payments, LocalDateTime(2026, 11, 30, 10, 0)))
+    }
+
+    @Test
+    fun `an early payment for next month still shows paid on the first of that month`() = runTest {
+        val payments = listOf(DebtPayment(CARD.id, DECEMBER, CARD.installment))
+
+        assertEquals(true, isCardPaid(payments, LocalDateTime(2026, 12, 1, 10, 0)))
+    }
+
+    @Test
+    fun `a payment stops counting once its payment date has passed`() = runTest {
+        val payments = listOf(DebtPayment(CARD.id, DECEMBER, CARD.installment))
+
+        assertEquals(false, isCardPaid(payments, LocalDateTime(2026, 12, 3, 10, 0)))
+    }
+
+    @Test
+    fun `a new month asks for the installment again`() = runTest {
+        val payments = listOf(DebtPayment(BANK.id, NOVEMBER, BANK.installment))
+
+        val bankOnDecember = items(payments, LocalDateTime(2026, 12, 1, 10, 0)).first { it.debt == BANK }
+
+        assertEquals(false, bankOnDecember.isPaidThisMonth)
     }
 
     @Test
     fun `ignores payments of other months`() = runTest {
-        val september = DebtPayment(CARD.id, OCTOBER.minusMonths(1), CARD.installment)
+        val october = DebtPayment(CARD.id, NOVEMBER.minusMonths(1), CARD.installment)
 
-        assertEquals(listOf(false, false), useCase(listOf(september))().first().map { it.isPaidThisMonth })
+        assertEquals(false, isCardPaid(listOf(october), LocalDateTime(2026, 11, 10, 10, 0)))
     }
 }

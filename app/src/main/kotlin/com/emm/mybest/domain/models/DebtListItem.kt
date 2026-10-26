@@ -1,7 +1,7 @@
 package com.emm.mybest.domain.models
 
 /**
- * A [debt] together with whether its installment is already paid for the month of the current app day.
+ * A [debt] together with whether the installment due on the current app day is already paid.
  */
 data class DebtListItem(
     val debt: Debt,
