@@ -1,5 +1,6 @@
 package com.emm.mybest.features.settings.presentation
 
+import com.emm.mybest.domain.repository.AppRestarter
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.RestoreDatabaseBackupUseCase
@@ -11,4 +12,5 @@ data class SettingsDependencies(
     val goalsEditor: SettingsGoalsEditor,
     val remindersEditor: SettingsRemindersEditor,
     val rowSources: SettingsRowSources,
+    val appRestarter: AppRestarter,
 )

@@ -1,5 +1,7 @@
 package com.emm.mybest.di
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.room.Room
 import androidx.work.WorkManager
@@ -8,6 +10,7 @@ import com.emm.mybest.core.coroutines.CoroutineDispatchers
 import com.emm.mybest.core.coroutines.DefaultCoroutineDispatchers
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.data.AppDatabase
+import com.emm.mybest.data.AppRestarterImpl
 import com.emm.mybest.data.BackupRepositoryImpl
 import com.emm.mybest.data.DailyCheckRepositoryImpl
 import com.emm.mybest.data.DebtRepositoryImpl
@@ -36,6 +39,7 @@ import com.emm.mybest.domain.reminder.ReminderDelays
 import com.emm.mybest.domain.reminder.ReminderSchedulers
 import com.emm.mybest.domain.reminder.WeekendReminderSchedulers
 import com.emm.mybest.domain.reminder.WeightReminderScheduler
+import com.emm.mybest.domain.repository.AppRestarter
 import com.emm.mybest.domain.repository.BackupRepository
 import com.emm.mybest.domain.repository.DailyCheckRepository
 import com.emm.mybest.domain.repository.DebtRepository
@@ -166,6 +170,7 @@ val appModule = module {
     single<WeightRepository> { WeightRepositoryImpl(get(), get()) }
     single<PhotoRepository> { PhotoRepositoryImpl(androidContext(), get(), get()) }
     single<BackupRepository> { BackupRepositoryImpl(androidContext(), get(), get()) }
+    single<AppRestarter> { AppRestarterImpl(androidContext(), Handler(Looper.getMainLooper())) }
     single { WorkManager.getInstance(androidContext()) }
 
     single { get<AppDatabase>().userSetupDao() }
@@ -249,7 +254,7 @@ val appModule = module {
         ComparePhotosViewModel(beforeId, afterId, get())
     }
     viewModel { (initialPhotoId: String) -> PhotoViewerViewModel(initialPhotoId, get()) }
-    factory { SettingsDependencies(get(), get(), get(), get(), get(), get()) }
+    factory { SettingsDependencies(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { SettingsViewModel(get()) }
 
     factory { ObserveDebtListUseCase(get(), get()) }

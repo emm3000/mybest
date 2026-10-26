@@ -123,7 +123,7 @@ class SettingsViewModel(
             dependencies.restoreDatabaseBackupUseCase(sourceUri)
                 .onSuccess { result ->
                     when (result) {
-                        RestoreResult.RequiresRestart -> _effect.emit(SettingsEffect.BackupRestored)
+                        RestoreResult.RequiresRestart -> announceRestoredAndRestart()
                         RestoreResult.OtherSchemaVersion -> _effect.emit(SettingsEffect.BackupFromOtherVersion)
                     }
                 }.onFailure {
@@ -134,5 +134,10 @@ class SettingsViewModel(
                     )
                 }
         }
+    }
+
+    private suspend fun announceRestoredAndRestart() {
+        _effect.emit(SettingsEffect.BackupRestored)
+        dependencies.appRestarter.restart()
     }
 }

@@ -1,5 +1,6 @@
 package com.emm.mybest.features.settings.presentation
 
+import com.emm.mybest.domain.repository.AppRestarter
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
@@ -48,6 +49,7 @@ class SettingsReplayOnboardingFailureTest {
                 FakePurchaseGoalRepository(),
                 ObserveCaptureSummaryUseCase(FakeNotificationCaptureRepository()),
             ),
+            appRestarter = mockk<AppRestarter>(relaxUnitFun = true),
         ),
     )
 

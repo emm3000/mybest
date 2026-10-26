@@ -1,6 +1,7 @@
 package com.emm.mybest.features.settings.presentation
 
 import app.cash.turbine.test
+import com.emm.mybest.domain.repository.AppRestarter
 import com.emm.mybest.domain.repository.UserPreferencesRepository
 import com.emm.mybest.domain.usecase.ExportDatabaseBackupUseCase
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
@@ -44,6 +45,7 @@ class SettingsSectionRowsTest {
                     FakePurchaseGoalRepository(),
                     ObserveCaptureSummaryUseCase(FakeNotificationCaptureRepository()),
                 ),
+                appRestarter = mockk<AppRestarter>(relaxUnitFun = true),
             ),
         )
     }
