@@ -14,6 +14,7 @@ import com.emm.mybest.domain.models.PreOutingSnapshot
 import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.models.WonNight
+import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
 import com.emm.mybest.testing.FakeDebtRepository
 import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FakePurchaseGoalRepository
@@ -27,6 +28,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -49,18 +51,16 @@ class ObservePreOutingSnapshotUseCaseTest {
         private val clock =
             AppDayClock(FixedClock(LocalDateTime(today, kotlinx.datetime.LocalTime(12, 0)).toInstant(LIMA)), LIMA)
         private val setupRepository = FakeSetupRepository(setup)
+        private val debtRepository = FakeDebtRepository(debts, payments)
         private val estimate = GetEstimatedOutingCostUseCase(setupRepository, outingRepository)
         val useCase = ObservePreOutingSnapshotUseCase(
             PreOutingUseCases(
                 outingMonth = ObserveOutingMonthUseCase(outingRepository, setupRepository, clock),
-                nearestInstallment = ObserveNearestInstallmentUseCase(
-                    FakeDebtRepository(debts, payments),
-                    estimate,
-                    clock,
-                ),
+                nearestInstallment = ObserveNearestInstallmentUseCase(debtRepository, estimate, clock),
                 purchaseGoalLeft = ObservePurchaseGoalLeftUseCase(FakePurchaseGoalRepository(goal, contributions)),
                 estimatedOutingCost = estimate,
                 notSpentThisMonth = ObserveNotSpentThisMonthUseCase(outingRepository, clock),
+                debtSummary = ObserveDebtSummaryUseCase(debtRepository),
             ),
         )
 
@@ -152,8 +152,29 @@ class ObservePreOutingSnapshotUseCaseTest {
     }
 
     @Test
-    fun `there is no nearest installment without debts`() = runTest {
-        assertNull(Rig().snapshot().nearestInstallment)
+    fun `without debts there is no debt and no nearest installment`() = runTest {
+        val snapshot = Rig().snapshot()
+
+        assertFalse(snapshot.hasDebts)
+        assertNull(snapshot.nearestInstallment)
+    }
+
+    @Test
+    fun `a paid-off debt counts as a debt without a nearest installment`() = runTest {
+        val paidOff = debt(1, "Parcial", Due(400_00, 12)).copy(balance = Money.ZERO)
+
+        val snapshot = Rig(debts = listOf(paidOff)).snapshot()
+
+        assertTrue(snapshot.hasDebts)
+        assertNull(snapshot.nearestInstallment)
+    }
+
+    @Test
+    fun `a debt with a balance has a nearest installment`() = runTest {
+        val snapshot = Rig(debts = listOf(debt(1, "Banco", Due(400_00, 25)))).snapshot()
+
+        assertTrue(snapshot.hasDebts)
+        assertNotNull(snapshot.nearestInstallment)
     }
 
     @Test

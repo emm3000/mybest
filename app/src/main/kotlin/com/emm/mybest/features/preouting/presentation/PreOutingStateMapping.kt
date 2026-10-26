@@ -28,7 +28,7 @@ internal fun PreOutingSnapshot.toState(goalName: String?): PreOutingState = PreO
 
 private fun PreOutingSnapshot.missingInputs(): Set<PreOutingPrompt> = buildSet {
     if (estimatedOutingCost == null) add(PreOutingPrompt.TYPICAL_COST)
-    if (nearestInstallment == null) add(PreOutingPrompt.DEBTS)
+    if (!hasDebts) add(PreOutingPrompt.DEBTS)
     if (purchaseGoalLeft == null) add(PreOutingPrompt.PURCHASE_GOAL)
     if (monthlyOutingLimit == null) add(PreOutingPrompt.OUTING_LIMIT)
 }
