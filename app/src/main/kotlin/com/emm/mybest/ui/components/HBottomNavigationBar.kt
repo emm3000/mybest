@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
@@ -22,14 +24,15 @@ import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.emm.mybest.R
 import com.emm.mybest.core.navigation.Screen
 import com.emm.mybest.ui.components.atelier.Hairline
@@ -40,6 +43,9 @@ private val ICON_SIZE = 18.dp
 private val LABEL_GAP = 7.dp
 private val ITEM_TOP_PADDING = 10.dp
 private val ITEM_BOTTOM_PADDING = 12.dp
+private val LABEL_MIN_FONT_SIZE = 6.sp
+private val LABEL_FONT_STEP = 0.25.sp
+private val LABEL_SIDE_PADDING = 4.dp
 
 private data class AtelierNavItem(
     val screen: Screen,
@@ -111,11 +117,24 @@ private fun AtelierNavCell(
                 modifier = Modifier.size(ICON_SIZE),
             )
             Spacer(modifier = Modifier.height(LABEL_GAP))
-            Text(
-                text = stringResource(id = item.labelResId).uppercase(),
-                style = MaterialTheme.typography.labelSmall,
-                color = tone,
-            )
+            NavLabel(text = stringResource(id = item.labelResId).uppercase(), color = tone)
         }
     }
+}
+
+@Composable
+private fun NavLabel(text: String, color: Color, modifier: Modifier = Modifier) {
+    val style = MaterialTheme.typography.labelSmall
+    BasicText(
+        text = text,
+        modifier = modifier.padding(horizontal = LABEL_SIDE_PADDING),
+        style = style.copy(color = color),
+        softWrap = false,
+        maxLines = 1,
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = LABEL_MIN_FONT_SIZE,
+            maxFontSize = style.fontSize,
+            stepSize = LABEL_FONT_STEP,
+        ),
+    )
 }
