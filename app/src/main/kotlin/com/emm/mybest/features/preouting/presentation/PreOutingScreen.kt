@@ -1,6 +1,7 @@
 package com.emm.mybest.features.preouting.presentation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -36,7 +37,7 @@ fun PreOutingScreen(
         PreOutingBody(
             state = state,
             onIntent = viewModel::onIntent,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(paddingValues).consumeWindowInsets(paddingValues),
         )
     }
 }
