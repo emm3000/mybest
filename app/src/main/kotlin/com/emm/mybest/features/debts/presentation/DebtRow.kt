@@ -60,7 +60,7 @@ private fun DebtSummaryLine(item: DebtItemState, modifier: Modifier = Modifier) 
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        if (item.isPaidThisMonth) {
+        if (item.isDueInstallmentPaid) {
             MicroLabel(
                 text = stringResource(R.string.debts_paid_this_month),
                 style = MicroLabelStyle(tone = MicroLabelTone.Done),
@@ -95,7 +95,7 @@ private fun PayAction(
     modifier: Modifier = Modifier,
 ) {
     when {
-        item.isPaidThisMonth -> MicroLabel(
+        item.isDueInstallmentPaid -> MicroLabel(
             text = stringResource(R.string.debts_paid),
             style = MicroLabelStyle(tone = MicroLabelTone.Done),
             modifier = modifier.padding(vertical = ACTION_VERTICAL),

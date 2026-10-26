@@ -29,7 +29,7 @@ class ObserveNearestInstallmentUseCase(
             debtRepository.observePayments(),
             getEstimatedOutingCost(),
         ) { debts, payments, estimate ->
-            nearestDue(debts.filter { it.balance > Money.ZERO }, payments, today)?.toShare(estimate.cost)
+            nearestDue(debts.filter { it.hasBalance }, payments, today)?.toShare(estimate.cost)
         }
     }
 }

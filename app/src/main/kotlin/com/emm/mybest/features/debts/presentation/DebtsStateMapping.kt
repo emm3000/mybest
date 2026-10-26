@@ -14,8 +14,8 @@ internal fun DebtListItem.toItemState(): DebtItemState = DebtItemState(
     balanceLabel = debt.balance.formatPen(),
     installmentLabel = debt.installment.formatPen(),
     paymentDay = debt.paymentDay,
-    isPaidThisMonth = isPaidThisMonth,
-    canPay = debt.balance > Money.ZERO,
+    isDueInstallmentPaid = isDueInstallmentPaid,
+    canPay = debt.hasBalance,
 )
 
 internal fun Debt.toFormState(): DebtFormState = DebtFormState(

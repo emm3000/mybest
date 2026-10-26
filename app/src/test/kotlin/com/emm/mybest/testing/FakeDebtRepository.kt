@@ -1,7 +1,6 @@
 package com.emm.mybest.testing
 
 import com.emm.mybest.core.datetime.YearMonthValue
-import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.Debt
 import com.emm.mybest.domain.models.DebtPayment
 import com.emm.mybest.domain.repository.DebtRepository
@@ -33,7 +32,7 @@ class FakeDebtRepository(
     override suspend fun markInstallmentPaid(debtId: Long, month: YearMonthValue) {
         val debt = debts.value.first { it.id == debtId }
         val isAlreadyPaid = payments.value.any { it.debtId == debtId && it.month == month }
-        if (isAlreadyPaid || debt.balance == Money.ZERO) return
+        if (isAlreadyPaid || !debt.hasBalance) return
         val paid = debt.afterInstallmentPaid()
         payments.value = payments.value + DebtPayment(debtId, month, debt.balance - paid.balance)
         debts.value = debts.value.map { if (it.id == debtId) paid else it }

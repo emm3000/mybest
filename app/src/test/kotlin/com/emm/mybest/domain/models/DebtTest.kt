@@ -4,6 +4,7 @@ import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.money.Money
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -56,5 +57,33 @@ class DebtTest {
         val debt = debt(Money.ZERO).copy(paymentDay = 31)
 
         assertEquals(LocalDate(2026, 9, 30), debt.paymentDateIn(YearMonthValue(2026, 9)))
+    }
+
+    @Test
+    fun `a debt has balance from S 0_01 and not at zero`() {
+        assertTrue(debt(balance = Money(1)).hasBalance)
+        assertFalse(debt(balance = Money.ZERO).hasBalance)
+    }
+
+    @Test
+    fun `a payment day 31 falls due in February on the 28th and in March from the 1st`() {
+        val debt = debt(Money.ZERO).copy(paymentDay = 31)
+
+        assertEquals(YearMonthValue(2027, 2), debt.dueMonthOn(LocalDate(2027, 2, 10)))
+        assertEquals(YearMonthValue(2027, 2), debt.dueMonthOn(LocalDate(2027, 2, 28)))
+        assertEquals(YearMonthValue(2027, 3), debt.dueMonthOn(LocalDate(2027, 3, 1)))
+    }
+
+    @Test
+    fun `a payment day 2 on 15 December falls due in January`() {
+        val debt = debt(Money.ZERO).copy(paymentDay = 2)
+
+        assertEquals(YearMonthValue(2027, 1), debt.dueMonthOn(LocalDate(2026, 12, 15)))
+    }
+
+    @Test
+    fun `a payment on the due date is still the current month and the day after is the next`() {
+        assertEquals(YearMonthValue(2026, 11), debt(Money.ZERO).dueMonthOn(LocalDate(2026, 11, 15)))
+        assertEquals(YearMonthValue(2026, 12), debt(Money.ZERO).dueMonthOn(LocalDate(2026, 11, 16)))
     }
 }

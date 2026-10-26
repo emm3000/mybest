@@ -2,7 +2,6 @@ package com.emm.mybest.domain.usecase.reminder
 
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.datetime.YearMonthValue
-import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.InstallmentReminder
 import com.emm.mybest.domain.models.debtIdsPaidIn
 import com.emm.mybest.domain.repository.DebtRepository
@@ -35,7 +34,7 @@ class GetInstallmentRemindersUseCase(
         val month = YearMonthValue.from(dueDate)
         val paidDebtIds = debtRepository.observePayments().first().debtIdsPaidIn(month)
         return debtRepository.observeDebts().first()
-            .filter { it.balance > Money.ZERO && it.id !in paidDebtIds }
+            .filter { it.hasBalance && it.id !in paidDebtIds }
             .filter { it.paymentDateIn(month) == dueDate }
             .map { InstallmentReminder(it, dueDate) }
     }
