@@ -232,7 +232,7 @@ val appModule = module {
     factory { ObserveOutingMonthUseCase(get(), get(), get()) }
     factory { ObserveNearestInstallmentUseCase(get(), get(), get()) }
     factory { ObservePurchaseGoalLeftUseCase(get()) }
-    factory { PreOutingUseCases(get(), get(), get(), get(), get()) }
+    factory { PreOutingUseCases(get(), get(), get(), get(), get(), get()) }
     factory { ObservePreOutingSnapshotUseCase(get()) }
     factory { HasDecisionOnUseCase(get()) }
     factory { PlanOutingUseCase(get(), get(), get()) }

@@ -49,6 +49,7 @@ private val EMPTY_SNAPSHOT = PreOutingSnapshot(
     isNextOutingOverLimit = false,
     estimatedOutingCost = null,
     isEstimateAveraged = false,
+    hasDebts = false,
     nearestInstallment = null,
     purchaseGoalLeft = null,
     notSpentThisMonth = Money.ZERO,
@@ -61,6 +62,7 @@ private val FULL_SNAPSHOT = PreOutingSnapshot(
     isNextOutingOverLimit = true,
     estimatedOutingCost = Money(380_00),
     isEstimateAveraged = true,
+    hasDebts = true,
     nearestInstallment = InstallmentShare("Banco", LocalDate(2026, 11, 15), Money(420_00), nightPercent = 90),
     purchaseGoalLeft = Money(270_00),
     notSpentThisMonth = Money(380_00),
@@ -173,6 +175,25 @@ class PreOutingViewModelTest {
         val state = stateOf(viewModel(noEstimate, PurchaseGoal("zapatillas", Money(370_00))))
 
         assertEquals(setOf(PreOutingPrompt.TYPICAL_COST), state.prompts)
+        assertNull(state.nightPercent)
+    }
+
+    @Test
+    fun `no debts at all asks for debts`() = runTest {
+        val noDebts = FULL_SNAPSHOT.copy(hasDebts = false, nearestInstallment = null)
+
+        val state = stateOf(viewModel(noDebts, PurchaseGoal("zapatillas", Money(370_00))))
+
+        assertTrue(PreOutingPrompt.DEBTS in state.prompts)
+    }
+
+    @Test
+    fun `only paid-off debts ask for nothing and show no night percent`() = runTest {
+        val paidOff = FULL_SNAPSHOT.copy(hasDebts = true, nearestInstallment = null)
+
+        val state = stateOf(viewModel(paidOff, PurchaseGoal("zapatillas", Money(370_00))))
+
+        assertFalse(PreOutingPrompt.DEBTS in state.prompts)
         assertNull(state.nightPercent)
     }
 
