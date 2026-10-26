@@ -3,6 +3,7 @@ package com.emm.mybest.features.debts.presentation
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -75,7 +76,7 @@ private fun DebtActions(
     onIntent: (DebtsIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    FlowRow(
         modifier = modifier.padding(top = ACTION_VERTICAL),
         horizontalArrangement = Arrangement.spacedBy(ACTIONS_GAP),
     ) {
