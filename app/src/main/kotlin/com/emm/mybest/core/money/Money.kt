@@ -17,14 +17,13 @@ value class Money(val cents: Long) : Comparable<Money> {
      * This amount as a whole percentage of [whole], rounded half-up, or null when [whole] is zero.
      */
     fun percentOf(whole: Money): Int? =
-        if (whole.cents == 0L) null else divideRoundingHalfUp(cents * PERCENT_SCALE, whole.cents).toInt()
+        if (whole.cents == 0L) null else percentRoundingHalfUp(cents, whole.cents)
 
     override fun compareTo(other: Money): Int = cents.compareTo(other.cents)
 
     companion object {
         const val CENTS_PER_SOL = 100L
 
-        private const val PERCENT_SCALE = 100
         private const val CENT_DIGITS = 2
         private const val MAX_SOLES = Long.MAX_VALUE / CENTS_PER_SOL - 1
         private val INPUT_PATTERN = Regex("""(\d+)(?:[.,](\d{1,2}))?""")

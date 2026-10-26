@@ -100,6 +100,29 @@ class MoneyTest {
     }
 
     @Test
+    fun percentOfCapsAtIntMaxForSixteenDigitAmountAgainstSmallWhole() {
+        assertEquals(Int.MAX_VALUE, Money(999_999_999_999_999_900).percentOf(Money(40_000)))
+    }
+
+    @Test
+    fun percentOfDoesNotOverflowAtLongMax() {
+        assertEquals(100, Money(Long.MAX_VALUE).percentOf(Money(Long.MAX_VALUE)))
+        assertEquals(50, Money(Long.MAX_VALUE / 2).percentOf(Money(Long.MAX_VALUE)))
+        assertEquals(0, Money(1).percentOf(Money(Long.MAX_VALUE)))
+    }
+
+    @Test
+    fun percentOfCapsExactlyAboveIntMax() {
+        assertEquals(2_147_483_647, Money(2_147_483_647).percentOf(Money(100)))
+        assertEquals(Int.MAX_VALUE, Money(2_147_483_648).percentOf(Money(100)))
+    }
+
+    @Test
+    fun percentOfFullyFundedSixteenDigitGoalIsOneHundred() {
+        assertEquals(100, Money(999_999_999_999_999_900).percentOf(Money(999_999_999_999_999_900)))
+    }
+
+    @Test
     fun averageOfReturnsMeanOfAmounts() {
         assertEquals(Money(200), averageOf(listOf(Money(100), Money(300))))
     }
