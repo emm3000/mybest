@@ -9,6 +9,8 @@ import com.emm.mybest.domain.models.PreOutingSnapshot
 import com.emm.mybest.domain.models.Tonight
 import kotlinx.datetime.LocalDate
 
+private const val MAX_DISPLAYED_NIGHT_PERCENT = 999
+
 internal fun PreOutingSnapshot.toState(goalName: String?): PreOutingState = PreOutingState(
     isLoaded = true,
     spentOnOutingsLabel = spentOnOutingsThisMonth.formatPen(),
@@ -17,6 +19,7 @@ internal fun PreOutingSnapshot.toState(goalName: String?): PreOutingState = PreO
     debtName = nearestInstallment?.debtName.orEmpty(),
     paymentDay = nearestInstallment?.paymentDate?.day ?: 0,
     nightPercent = nearestInstallment?.nightPercent,
+    isNightPercentCapped = (nearestInstallment?.nightPercent ?: 0) > MAX_DISPLAYED_NIGHT_PERCENT,
     goalName = goalName,
     goalLeftLabel = purchaseGoalLeft?.formatPen(),
     outingsThisMonth = outingsThisMonth,

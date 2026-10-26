@@ -204,6 +204,7 @@
     <string name="pre_outing_estimate_caption_typical">tu costo típico de una salida</string>
     <string name="pre_outing_spent_label">Gastado en salidas este mes</string>
     <string name="pre_outing_installment_share">Una noche ≈ %1$d%% de tu cuota de %2$s del %3$d</string>
+    <string name="pre_outing_installment_share_capped">Una noche &gt; 999%% de tu cuota de %1$s del %2$d</string>
     <string name="pre_outing_goal_left">Te falta %1$s para %2$s</string>
     <string name="pre_outing_outings_used">Salidas este mes: %1$d de %2$d</string>
     <string name="pre_outing_over_limit">La próxima salida pasa tu límite del mes</string>

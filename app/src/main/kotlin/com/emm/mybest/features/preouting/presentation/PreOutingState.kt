@@ -8,6 +8,7 @@ data class PreOutingState(
     val debtName: String = "",
     val paymentDay: Int = 0,
     val nightPercent: Int? = null,
+    val isNightPercentCapped: Boolean = false,
     val goalName: String? = null,
     val goalLeftLabel: String? = null,
     val outingsThisMonth: Int = 0,
