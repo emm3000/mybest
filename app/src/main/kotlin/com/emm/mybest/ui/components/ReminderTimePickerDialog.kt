@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -98,7 +100,10 @@ internal fun HTimePickerDialog(
             tonalElevation = 0.dp,
             shadowElevation = 8.dp,
         ) {
-            Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()).padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+            ) {
                 TimePickerHeader(hour = selectedHour, minute = selectedMinute)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
