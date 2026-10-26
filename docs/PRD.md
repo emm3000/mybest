@@ -43,7 +43,7 @@ One user, the owner. Single device, Android, Spanish-speaking (Peru), currency s
 - Shows, before the decision: money spent on outings this month, the nearest debt installment and what an average night represents of it ("a night ≈ 23% of your installment on the 15th"), what is left for the purchase goal, and outings used vs the monthly limit (warning when the next outing would exceed it).
 - **Going out**: the user sets three limits — money, drinks, return time — and completes a two-item checklist: credit cards off and out of the phone wallet; outing account loaded with the money limit. An outing is recorded as planned.
 - **Staying in**: the night is recorded as a won night and adds the estimated outing cost to the "not spent this month (estimated)" counter.
-- Estimated outing cost: the typical cost declared in setup until three outings are recorded, then the average of recorded outings.
+- Estimated outing cost: the typical cost declared in setup until three outings have a check-in, then the average total spent of those outings. Only a check-in records what was actually spent; an outing without one counts only its planned limits.
 - Acceptance: the comparison numbers recompute from stored data; a won night never changes debt balances or purchase-goal progress.
 
 ### 4. Next-day check-in
