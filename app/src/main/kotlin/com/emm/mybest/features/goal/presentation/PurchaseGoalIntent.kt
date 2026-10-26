@@ -7,6 +7,8 @@ sealed interface PurchaseGoalIntent {
 
     data class OnGoalChange(val field: GoalFormField, val value: String) : GoalIntent
     data object OnGoalSave : GoalIntent
+    data object OnEditClick : GoalIntent
+    data object OnEditCancel : GoalIntent
     data object OnAddContributionClick : ContributionIntent
     data class OnContributionChange(val value: String) : ContributionIntent
     data object OnContributionSave : ContributionIntent

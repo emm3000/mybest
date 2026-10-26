@@ -18,6 +18,7 @@ internal fun GoalProgress.toSummaryState(): GoalSummaryState = GoalSummaryState(
     percent = percent,
     progressFraction = percent / PERCENT_SCALE,
     contributions = contributions.map { it.toItemState() },
+    priceInput = goal.price.toInput(),
 )
 
 internal fun GoalContribution.toItemState(): ContributionItemState = ContributionItemState(
@@ -37,4 +38,16 @@ internal fun GoalFormState.withValue(field: GoalFormField, value: String): GoalF
         GoalFormField.PRICE -> copy(price = value)
     }
     return edited.copy(errors = emptySet())
+}
+
+internal fun GoalSummaryState.toEditFormState(): GoalFormState = GoalFormState(
+    name = name,
+    price = priceInput,
+    isEditing = true,
+)
+
+private fun Money.toInput(): String {
+    val soles = cents / Money.CENTS_PER_SOL
+    val fraction = cents % Money.CENTS_PER_SOL
+    return if (fraction == 0L) "$soles" else "$soles.%02d".format(fraction)
 }

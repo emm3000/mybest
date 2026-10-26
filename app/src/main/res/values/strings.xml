@@ -331,6 +331,8 @@
     <string name="purchase_goal_clear_title">¿Quitar la meta?</string>
     <string name="purchase_goal_clear_message">Se borrará %1$s con todos sus aportes.</string>
     <string name="purchase_goal_clear_confirm">Quitar</string>
+    <string name="purchase_goal_edit">EDITAR META</string>
+    <string name="purchase_goal_edit_title">Edita tu meta de compra</string>
     <string name="purchase_goal_not_spent_label">NO GASTADO ESTE MES (ESTIMADO)</string>
     <string name="purchase_goal_not_spent_caption">Es un estimado, no dinero real. No suma a tu meta.</string>
     <string name="purchase_goal_action_failed">No se pudo completar la acción</string>

@@ -82,7 +82,7 @@ private fun GoalAmounts(goal: GoalSummaryState, modifier: Modifier = Modifier) {
 }
 
 private val PREVIEW_GOAL =
-    GoalSummaryState("Zapatillas", "ZAPATILLAS", "S/ 450.00", "S/ 180.00", "S/ 270.00", 40, 0.4f, emptyList())
+    GoalSummaryState("Zapatillas", "ZAPATILLAS", "S/ 450.00", "S/ 180.00", "S/ 270.00", 40, 0.4f, emptyList(), "450")
 
 @Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)
 @Composable

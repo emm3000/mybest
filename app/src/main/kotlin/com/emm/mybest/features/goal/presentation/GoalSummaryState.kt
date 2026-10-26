@@ -9,4 +9,5 @@ data class GoalSummaryState(
     val percent: Int,
     val progressFraction: Float,
     val contributions: List<ContributionItemState>,
+    val priceInput: String,
 )

@@ -63,6 +63,8 @@ class PurchaseGoalViewModel(
         when (intent) {
             is PurchaseGoalIntent.OnGoalChange -> goalForm.update { it.withValue(intent.field, intent.value) }
             is PurchaseGoalIntent.OnGoalSave -> saveGoal()
+            is PurchaseGoalIntent.OnEditClick -> startEditing()
+            is PurchaseGoalIntent.OnEditCancel -> goalForm.value = GoalFormState()
         }
     }
 
@@ -103,6 +105,10 @@ class PurchaseGoalViewModel(
         }
     }
 
+    private fun startEditing() {
+        state.value.goal?.let { goalForm.value = it.toEditFormState() }
+    }
+
     private fun saveContribution() {
         val current = contributionForm.value ?: return
         if (contributionJob?.isActive == true) return
@@ -122,6 +128,7 @@ class PurchaseGoalViewModel(
 
     private fun clearGoal() {
         isClearConfirmationVisible.value = false
+        goalForm.value = GoalFormState()
         viewModelScope.launch {
             attempt { useCases.purchaseGoalRepository.clearGoal() }
                 .onFailure { _effect.emit(PurchaseGoalEffect.ActionFailed) }
