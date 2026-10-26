@@ -62,7 +62,7 @@ private fun DebtSummaryLine(item: DebtItemState, modifier: Modifier = Modifier) 
         }
         if (item.isDueInstallmentPaid) {
             MicroLabel(
-                text = stringResource(R.string.debts_paid_this_month),
+                text = stringResource(R.string.debts_installment_paid),
                 style = MicroLabelStyle(tone = MicroLabelTone.Done),
             )
         }
@@ -95,17 +95,23 @@ private fun PayAction(
     modifier: Modifier = Modifier,
 ) {
     when {
-        item.isDueInstallmentPaid -> MicroLabel(
-            text = stringResource(R.string.debts_paid),
-            style = MicroLabelStyle(tone = MicroLabelTone.Done),
-            modifier = modifier.padding(vertical = ACTION_VERTICAL),
-        )
-        item.canPay -> RowAction(
+        item.isPaidOff -> DoneTag(text = stringResource(R.string.debts_paid_off), modifier = modifier)
+        item.isDueInstallmentPaid -> DoneTag(text = stringResource(R.string.debts_paid), modifier = modifier)
+        else -> RowAction(
             text = stringResource(R.string.debts_mark_paid),
             onClick = { onIntent(DebtsIntent.OnPayClick(item.id)) },
             modifier = modifier,
         )
     }
+}
+
+@Composable
+private fun DoneTag(text: String, modifier: Modifier = Modifier) {
+    MicroLabel(
+        text = text,
+        style = MicroLabelStyle(tone = MicroLabelTone.Done),
+        modifier = modifier.padding(vertical = ACTION_VERTICAL),
+    )
 }
 
 @Composable

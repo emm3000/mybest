@@ -74,8 +74,16 @@ private fun DebtList(
 }
 
 private val PREVIEW_DEBTS = listOf(
-    DebtItemState(2, "Letra moto", "S/ 2,150.00", "S/ 310.00", 5, isDueInstallmentPaid = true, canPay = true),
-    DebtItemState(1, "Tarjeta de crédito", "S/ 3,200.00", "S/ 420.00", 15, isDueInstallmentPaid = false, canPay = true),
+    DebtItemState(2, "Letra moto", "S/ 2,150.00", "S/ 310.00", 5, isDueInstallmentPaid = true, isPaidOff = false),
+    DebtItemState(
+        1,
+        "Tarjeta de crédito",
+        "S/ 3,200.00",
+        "S/ 420.00",
+        15,
+        isDueInstallmentPaid = false,
+        isPaidOff = false,
+    ),
 )
 
 @Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)

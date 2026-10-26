@@ -277,9 +277,10 @@
     <string name="debts_empty">Agrega tu primera deuda</string>
     <string name="debts_add">Agregar deuda</string>
     <string name="debts_row_details">%1$s · día %2$d · saldo %3$s</string>
-    <string name="debts_paid_this_month">PAGADO ESTE MES</string>
+    <string name="debts_installment_paid">CUOTA PAGADA</string>
     <string name="debts_mark_paid">MARCAR CUOTA PAGADA</string>
     <string name="debts_paid">PAGADO</string>
+    <string name="debts_paid_off">SALDADA</string>
     <string name="debts_edit">EDITAR</string>
     <string name="debts_delete">ELIMINAR</string>
     <string name="debts_delete_confirm">Eliminar</string>

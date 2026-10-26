@@ -36,6 +36,24 @@ import org.junit.Test
 private val LIMA = TimeZone.of("America/Lima")
 private val CARD = Debt(1, "Tarjeta", Money(320_000), Money(42_000), paymentDay = 15)
 private val MOTO = Debt(2, "Moto", Money(215_000), Money(31_000), paymentDay = 5)
+private val CARD_ITEM = DebtItemState(
+    id = 1,
+    name = "Tarjeta",
+    balanceLabel = "S/ 3,200.00",
+    installmentLabel = "S/ 420.00",
+    paymentDay = 15,
+    isDueInstallmentPaid = false,
+    isPaidOff = false,
+)
+private val MOTO_ITEM = DebtItemState(
+    id = 2,
+    name = "Moto",
+    balanceLabel = "S/ 2,150.00",
+    installmentLabel = "S/ 310.00",
+    paymentDay = 5,
+    isDueInstallmentPaid = false,
+    isPaidOff = false,
+)
 private val NOVEMBER = YearMonthValue(2026, 11)
 
 private data class DebtFields(
@@ -128,29 +146,29 @@ class DebtsViewModelTest {
 
         assertTrue(state.isLoaded)
         assertEquals(
-            listOf(
-                DebtItemState(
-                    1,
-                    "Tarjeta",
-                    "S/ 3,200.00",
-                    "S/ 420.00",
-                    15,
-                    isDueInstallmentPaid = false,
-                    canPay = true,
-                ),
-                DebtItemState(2, "Moto", "S/ 2,150.00", "S/ 310.00", 5, isDueInstallmentPaid = true, canPay = true),
-            ),
+            listOf(CARD_ITEM, MOTO_ITEM.copy(isDueInstallmentPaid = true)),
             state.debts,
         )
     }
 
     @Test
-    fun `a paid-off debt offers no pay action while a debt with balance does`() = runTest {
+    fun `a debt with zero balance is paid off while a debt with balance is not`() = runTest {
         val paidOff = MOTO.copy(balance = Money.ZERO)
 
         val state = stateOf(viewModel(repository(debts = listOf(CARD, paidOff))))
 
-        assertEquals(listOf(true, false), state.debts.map { it.canPay })
+        assertEquals(listOf(false, true), state.debts.map { it.isPaidOff })
+    }
+
+    @Test
+    fun `paying the last installment leaves the debt paid off with its due installment paid`() = runTest {
+        val lastInstallment = CARD.copy(balance = Money(15_000), installment = Money(20_000))
+
+        val state = send(viewModel(repository(debts = listOf(lastInstallment))), DebtsIntent.OnPayClick(CARD.id))
+
+        val card = state.debts.single()
+        assertTrue(card.isPaidOff)
+        assertTrue(card.isDueInstallmentPaid)
     }
 
     @Test
