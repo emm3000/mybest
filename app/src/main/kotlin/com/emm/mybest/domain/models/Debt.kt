@@ -28,6 +28,11 @@ data class Debt(
     fun afterInstallmentPaid(): Debt = copy(balance = maxOf(balance - installment, Money.ZERO))
 
     /**
+     * Whether any of the debt is still owed.
+     */
+    val hasBalance: Boolean get() = balance > Money.ZERO
+
+    /**
      * What the next installment asks for: the installment, or the balance left when it is smaller.
      */
     val nextInstallment: Money get() = minOf(installment, balance)

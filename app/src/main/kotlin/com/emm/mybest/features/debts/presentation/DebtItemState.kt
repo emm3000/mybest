@@ -6,6 +6,6 @@ data class DebtItemState(
     val balanceLabel: String,
     val installmentLabel: String,
     val paymentDay: Int,
-    val isPaidThisMonth: Boolean,
+    val isDueInstallmentPaid: Boolean,
     val canPay: Boolean,
 )

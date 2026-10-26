@@ -129,8 +129,16 @@ class DebtsViewModelTest {
         assertTrue(state.isLoaded)
         assertEquals(
             listOf(
-                DebtItemState(1, "Tarjeta", "S/ 3,200.00", "S/ 420.00", 15, isPaidThisMonth = false, canPay = true),
-                DebtItemState(2, "Moto", "S/ 2,150.00", "S/ 310.00", 5, isPaidThisMonth = true, canPay = true),
+                DebtItemState(
+                    1,
+                    "Tarjeta",
+                    "S/ 3,200.00",
+                    "S/ 420.00",
+                    15,
+                    isDueInstallmentPaid = false,
+                    canPay = true,
+                ),
+                DebtItemState(2, "Moto", "S/ 2,150.00", "S/ 310.00", 5, isDueInstallmentPaid = true, canPay = true),
             ),
             state.debts,
         )
@@ -242,9 +250,9 @@ class DebtsViewModelTest {
         val state = send(viewModel(repository()), DebtsIntent.OnPayClick(CARD.id))
 
         val card = state.debts.first { it.id == CARD.id }
-        assertTrue(card.isPaidThisMonth)
+        assertTrue(card.isDueInstallmentPaid)
         assertEquals("S/ 2,780.00", card.balanceLabel)
-        assertFalse(state.debts.first { it.id == MOTO.id }.isPaidThisMonth)
+        assertFalse(state.debts.first { it.id == MOTO.id }.isDueInstallmentPaid)
     }
 
     @Test

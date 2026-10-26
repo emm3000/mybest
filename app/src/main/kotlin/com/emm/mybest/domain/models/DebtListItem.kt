@@ -5,5 +5,5 @@ package com.emm.mybest.domain.models
  */
 data class DebtListItem(
     val debt: Debt,
-    val isPaidThisMonth: Boolean,
+    val isDueInstallmentPaid: Boolean,
 )

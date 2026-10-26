@@ -30,7 +30,7 @@ class ObserveDebtListUseCaseTest {
         ObserveDebtListUseCase(FakeDebtRepository(listOf(CARD, BANK), payments), clockAt(now))().first()
 
     private suspend fun isCardPaid(payments: List<DebtPayment>, now: LocalDateTime): Boolean =
-        items(payments, now).first { it.debt == CARD }.isPaidThisMonth
+        items(payments, now).first { it.debt == CARD }.isDueInstallmentPaid
 
     @Test
     fun `flags only the debts whose due installment is paid`() = runTest {
@@ -68,7 +68,7 @@ class ObserveDebtListUseCaseTest {
 
         val bankOnDecember = items(payments, LocalDateTime(2026, 12, 1, 10, 0)).first { it.debt == BANK }
 
-        assertEquals(false, bankOnDecember.isPaidThisMonth)
+        assertEquals(false, bankOnDecember.isDueInstallmentPaid)
     }
 
     @Test
