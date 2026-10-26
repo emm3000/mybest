@@ -7,6 +7,7 @@ import com.emm.mybest.domain.models.Setup
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalTime
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class SetupMappersTest {
@@ -72,5 +73,27 @@ class SetupMappersTest {
 
         assertEquals(mapOf(DailyCheckType.GYM to 3), setup.weeklyTargets)
         assertEquals(DayOfWeek.MONDAY, setup.weighInDay)
+    }
+
+    @Test
+    fun `out-of-range stored target weight maps to unset`() {
+        val outOfRange = listOf(9_999f, 19.99f, 500.01f, 0f)
+
+        outOfRange.forEach { weight ->
+            val setup = UserSetupEntity(targetWeightKg = weight).toDomain()
+
+            assertNull("$weight kg", setup.targetWeightKg)
+        }
+    }
+
+    @Test
+    fun `in-range stored target weight maps unchanged`() {
+        val inRange = listOf(20f, 72.5f, 500f)
+
+        inRange.forEach { weight ->
+            val setup = UserSetupEntity(targetWeightKg = weight).toDomain()
+
+            assertEquals(weight, setup.targetWeightKg)
+        }
     }
 }

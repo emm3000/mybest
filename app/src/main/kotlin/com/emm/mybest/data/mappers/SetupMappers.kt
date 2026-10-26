@@ -4,6 +4,7 @@ import com.emm.mybest.core.money.Money
 import com.emm.mybest.data.entities.UserSetupEntity
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.validation.WeightInputValidator
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.isoDayNumber
 
@@ -24,7 +25,7 @@ fun Setup.toEntity(): UserSetupEntity = UserSetupEntity(
 )
 
 fun UserSetupEntity.toDomain(): Setup = Setup(
-    targetWeightKg = targetWeightKg,
+    targetWeightKg = targetWeightKg?.takeIf(WeightInputValidator::isWeightInRange),
     monthlyOutingLimit = monthlyOutingLimit,
     typicalOutingCost = typicalOutingCostCents?.let(::Money),
     weeklyTargets = weeklyTargets(),
