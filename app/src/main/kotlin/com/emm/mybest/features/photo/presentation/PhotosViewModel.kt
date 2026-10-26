@@ -55,15 +55,15 @@ class PhotosViewModel(
     fun onIntent(intent: PhotosIntent) {
         when (intent) {
             is PhotosIntent.SelectType -> _selectedType.update { intent.type }
-            is PhotosIntent.OnPhotoCaptured -> savePhoto(intent.uri)
+            is PhotosIntent.OnPhotoCaptured -> savePhoto(intent.uri, intent.type)
             is PhotosIntent.DeletePhoto -> deletePhoto(intent.id)
             PhotosIntent.OpenCompare -> openCompare()
         }
     }
 
-    private fun savePhoto(uri: String) {
+    private fun savePhoto(uri: String, type: PhotoType) {
+        _selectedType.update { type }
         viewModelScope.launch {
-            val type = _selectedType.value
             runCatching {
                 savePhotosUseCase(listOf(NewProgressPhoto(photoPath = uri, type = type, date = appDayClock.today())))
             }.onFailure { error ->

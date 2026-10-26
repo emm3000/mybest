@@ -27,29 +27,32 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.emm.mybest.R
 import com.emm.mybest.domain.media.PhotoCaptureFiles
+import com.emm.mybest.domain.models.PhotoType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Stable
 internal data class PhotoCameraHandler(
-    val launch: () -> Unit,
+    val launch: (PhotoType) -> Unit,
 )
 
 @Composable
 internal fun rememberPhotoCameraHandler(
     snackbarHostState: SnackbarHostState,
     photoCaptureFiles: PhotoCaptureFiles,
-    onPhotoCaptured: (String) -> Unit,
+    onPhotoCaptured: (String, PhotoType) -> Unit,
 ): PhotoCameraHandler {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var tempPhotoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var pendingPhotoType by rememberSaveable { mutableStateOf<PhotoType?>(null) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
     ) { success ->
         val uri = tempPhotoUri ?: return@rememberLauncherForActivityResult
-        if (success) persistAndNotify(photoCaptureFiles, scope, PhotoCaptureRequest(uri, onPhotoCaptured))
+        val type = pendingPhotoType ?: return@rememberLauncherForActivityResult
+        if (success) persistAndNotify(photoCaptureFiles, scope, PhotoCaptureRequest(uri, type, onPhotoCaptured))
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -65,7 +68,8 @@ internal fun rememberPhotoCameraHandler(
     }
 
     return remember(permissionLauncher, cameraLauncher) {
-        val launchAction: () -> Unit = {
+        val launchAction: (PhotoType) -> Unit = { type ->
+            pendingPhotoType = type
             checkAndLaunch(context, permissionLauncher) {
                 val uri = photoCaptureFiles.createCaptureUri().toUri()
                 tempPhotoUri = uri
@@ -98,7 +102,7 @@ private fun persistAndNotify(
     request: PhotoCaptureRequest,
 ) {
     scope.launch {
-        photoCaptureFiles.persistCapture(request.uri.toString())?.let(request.onPhotoCaptured)
+        photoCaptureFiles.persistCapture(request.uri.toString())?.let { request.onPhotoCaptured(it, request.type) }
     }
 }
 
