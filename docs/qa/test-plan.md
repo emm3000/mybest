@@ -30,7 +30,9 @@ Order inside a suite: P0 cases first, then P1, then the rest. A tester who hits 
 - In every command below `S=<serial>` (e.g. `emulator-5556`) and `PKG=com.emm.mybest`.
 - Install: `ANDROID_SERIAL=$S ./gradlew :app:installDebug` from the peer's worktree. Never `installQa`.
 - Fresh state at the start of every suite and wherever a case says "fresh": `adb -s $S shell pm clear $PKG`, then grant notifications (§3.6) and re-grant the listener if the suite needs it (§3.7). After `pm clear` the onboarding shows again.
-- Launch: `adb -s $S shell monkey -p $PKG -c android.intent.category.LAUNCHER 1`.
+- Launch: `adb -s $S shell am start -n $PKG/.MainActivity`. `monkey -p $PKG -c android.intent.category.LAUNCHER 1` exits with rc 251 and does not start the app on this image (Phase 0).
+- uiautomator dump occasionally fails ("null root node" or a UiAutomation connect timeout): delete `/sdcard/ui.xml` and retry. The timeout writes a FATAL EXCEPTION from the uiautomator process into `logcat -b crash`; it is not an app crash. Compose switches dump as `View` with `checked="false"` whatever their state, so judge a switch from the screenshot.
+- Fast seeding: besides the UI import (§6.2), replace the database directly: `adb -s $S push f.db /data/local/tmp/x.db`, `am force-stop $PKG`, `adb -s $S shell run-as $PKG sh -c 'cp /data/local/tmp/x.db databases/my_best_db && rm -f databases/my_best_db-wal databases/my_best_db-shm'`, relaunch (Phase 0).
 - Navigate only with `adb -s $S shell uiautomator dump /sdcard/ui.xml && adb -s $S pull /sdcard/ui.xml` and tap the center of the node's `bounds`. Type with `adb -s $S shell input text '80,5'` (a space is `%s`).
 - Screenshot: `adb -s $S exec-out screencap -p > <ID>-<sha>.png` (sha = `git rev-parse --short HEAD` of the build).
 - Build SHA in every report and file name.
@@ -70,17 +72,17 @@ All local time, America/Lima. "Clock Kn" in a precondition means: apply the Phas
 
 ### 3.4 Controlling the clock — options
 
-The image is `google_apis_playstore` API 36: user build, no `adb root`, so `adb shell date` cannot set the time. Phase 0 tries these in order and keeps the first that works (P0-04).
+The image is `google_apis_playstore` API 36: user build, no `adb root`, so `adb shell date` cannot set the time. Phase 0 (build `e2315235`, 2026-10-26) kept **M1**; use it in every suite.
 
 | Method | Commands | Status |
 |---|---|---|
-| M1 shell alarm | `adb -s $S shell settings put global auto_time 0` then `adb -s $S shell cmd alarm set-time <epoch_ms>` (epoch ms from `date -j -f "%Y-%m-%d %H:%M %z" "2026-11-06 20:00 -0500" +%s` x1000 on the macOS host) | `settings put global` is standard-adb; `set-time` exists in AlarmManager's shell but needs `SET_TIME` for the shell UID: **must-verify in Phase 0** |
-| M2 time detector | `adb -s $S shell cmd time_detector suggest_manual_time --elapsed_realtime <ms> --unix_epoch_time <ms>` (auto time off first) | **must-verify in Phase 0** (syntax and permission vary by release) |
-| M3 Settings UI | Settings > System > Date & time: "Set time automatically" off, then the date and time pickers, driven by uiautomator | standard; slow but very likely to work. **must-verify in Phase 0** |
+| M1 shell alarm | `adb -s $S shell settings put global auto_time 0` then `adb -s $S shell cmd alarm set-time <epoch_ms>` (epoch ms from `date -j -f "%Y-%m-%d %H:%M:%S %z" "2026-11-06 20:00:00 -0500" +%s` x1000 on the macOS host) | **works, kept** (Phase 0). Force-stop and relaunch after every set |
+| M2 time detector | `adb -s $S shell cmd time_detector suggest_manual_time --elapsed_realtime <ms> --unix_epoch_time <ms>` (auto time off first) | **fails**: SecurityException, uid 2000 lacks `SUGGEST_MANUAL_TIME_AND_ZONE` |
+| M3 Settings UI | `adb -s $S shell am start -a android.settings.DATE_SETTINGS`, auto time off, then the date and time pickers, driven by uiautomator | works; slow. Fallback for M1 |
 | M4 rooted image | AVD on `system-images;android-36;google_apis;arm64-v8a` (non-Play), `adb -s $S root`, `adb -s $S shell date 110620002026.00` (toybox `MMDDhhmmCCYY.ss`) | standard on userdebug images; needs a new image download and an AVD outside the `Medium_Phone_<port>` set, so the orchestrator must approve |
 | M5 debug clock override | A debug-only Koin binding that replaces `Clock.System` with an offset clock set from adb (for example `adb shell setprop debug.mybest.now <epoch_ms>` read on start) | **code change: recommendation only** (§9 Q1). Not available to testers. |
 
-Time zone: use the boot flag. To change it on a running device: Settings UI, or `adb -s $S shell cmd time_zone_detector suggest_manual_time_zone --zone_id America/Lima` (**must-verify**). Then force-stop.
+Time zone: use the boot flag. To change it on a running device: `adb -s $S shell cmd alarm set-timezone America/Lima` (works; `persist.sys.timezone` and `date` follow), or the Settings UI. `cmd time_zone_detector suggest_manual_time_zone` fails with the same SecurityException as M2. Then force-stop.
 
 Reset after a suite: `adb -s $S shell settings put global auto_time 1`.
 
@@ -91,21 +93,21 @@ Facts (verified in code): every reminder is a unique `PeriodicWorkRequest` (`dat
 | Method | How | Status |
 |---|---|---|
 | W1 schedule then wait | Set the clock (K-preset) a few minutes before the target, force-stop, relaunch; in Settings set the reminder to a time 2–3 min ahead (pick a time different from the current value, or Borrar first, so it re-enqueues); keep the screen on; wait up to 15 min | standard; slow; WorkManager/JobScheduler may defer a few minutes |
-| W2 advance clock and force the job | After scheduling, move the wall clock past the target (do not force-stop), find the job: `adb -s $S shell dumpsys jobscheduler $PKG` (look for `SystemJobService` jobs and their id), then `adb -s $S shell cmd jobscheduler run -f $PKG <jobId>`. WorkManager compares the next run time with the wall clock, so the worker should run | `cmd jobscheduler run -f` is standard-adb; that WorkManager accepts the run after a wall-clock jump is **must-verify in Phase 0** |
-| W3 diagnostics | `adb -s $S shell am broadcast -a androidx.work.diagnostics.REQUEST_DIAGNOSTICS -p $PKG`, then `adb -s $S logcat -d -s WM-DiagnosticsWrkr` lists enqueued work with tags `reminder-time:<HH:MM>@<zone>` | WorkManager 2.12 ships the receiver; **must-verify in Phase 0** |
+| W2 advance clock and force the job | After scheduling, move the wall clock past the target (do not force-stop), find the job: `adb -s $S shell dumpsys jobscheduler $PKG` (jobs show as `androidx.work.systemjobscheduler:u0a<uid>/<jobId>`), then `adb -s $S shell cmd jobscheduler run -f -n androidx.work.systemjobscheduler $PKG <jobId>`. The `-n` namespace is required: without it the command answers "Could not find job" | **works, kept** (Phase 0): the worker runs after a wall-clock jump without force-stop |
+| W3 diagnostics | `adb -s $S shell am broadcast -a androidx.work.diagnostics.REQUEST_DIAGNOSTICS -p $PKG`, then `adb -s $S logcat -d -s WM-DiagnosticsWrkr` lists enqueued work with tags `reminder-time:<HH:MM>@<zone>` | **works** (Phase 0) |
 | W4 deep link only | `adb -s $S shell am start -n $PKG/.MainActivity -a <ACTION>` with `com.emm.mybest.ACTION_PRE_OUTING`, `ACTION_CHECK_IN`, `ACTION_DEBTS`, `ACTION_ADD_WEIGHT`, `ACTION_ADD_PHOTO`, `ACTION_WEEKLY_SUMMARY` | verified-in-code (`MainActivity` is exported; `AppNavigation.HandleIntentAction`). Tests routing, not the worker |
 
 Check posted notifications: `adb -s $S shell dumpsys notification --noredact` (search for `pkg=com.emm.mybest`), open the shade with `adb -s $S shell cmd statusbar expand-notifications`, tap via uiautomator. Channel IDs (verified in code): `weight_reminder`, `pre_outing_reminder`, `check_in_reminder`, `photo_reminder`, `debt_reminder`.
 
 ### 3.6 POST_NOTIFICATIONS
 
-`MainActivity` asks for it on first launch (API 33+, verified in code). Grant without the dialog: `adb -s $S shell pm grant $PKG android.permission.POST_NOTIFICATIONS`; revoke with `pm revoke` (standard-adb). Whether `pm clear` resets the grant is **must-verify**; grant again after every clear. There is no in-app notifications switch; the stored preference defaults to on (`UserPreferencesRepositoryImpl`).
+`MainActivity` asks for it on first launch (API 33+, verified in code). Grant without the dialog: `adb -s $S shell pm grant $PKG android.permission.POST_NOTIFICATIONS`; revoke with `pm revoke` (standard-adb). `pm clear` resets the grant (Phase 0); grant again after every clear. There is no in-app notifications switch; the stored preference defaults to on (`UserPreferencesRepositoryImpl`).
 
 ### 3.7 Notification listener (capture)
 
 Component (verified in manifest): `com.emm.mybest/com.emm.mybest.data.capture.NotificationCaptureService`, declared `exported="false"` with `BIND_NOTIFICATION_LISTENER_SERVICE`.
 
-- Grant: `adb -s $S shell cmd notification allow_listener com.emm.mybest/com.emm.mybest.data.capture.NotificationCaptureService`; revoke: `disallow_listener` with the same component (standard-adb). Because the service is not exported, whether the system binds it and lists it in Settings is **must-verify in Phase 0**.
+- Grant: `adb -s $S shell cmd notification allow_listener com.emm.mybest/com.emm.mybest.data.capture.NotificationCaptureService`; revoke: `disallow_listener` with the same component (standard-adb). The system binds the non-exported service and Ajustes lists the apps (Phase 0). `pm clear` drops the grant; grant again after every clear.
 - UI path: Capture screen > "Abrir ajustes" opens the system notification access list.
 
 ### 3.8 Posting notifications to capture
@@ -114,12 +116,12 @@ The capture list shows only apps with a launcher activity (`InstalledAppsReposit
 
 | Method | How | Status |
 |---|---|---|
-| N1 SMS | `adb -s $S emu sms send 5551234 "Yapeaste S/ 12.50 a José"` → Messages posts a notification | `emu sms send` is standard; that Messages is the default SMS app and posts on this image is **must-verify** (open Messages once first) |
+| N1 SMS | `adb -s $S emu sms send 5551234 "Yapeaste S/ 12.50 a José"` → Messages posts a notification | **works** (Phase 0). Open Messages once first (`am start -a android.intent.action.MAIN -c android.intent.category.APP_MESSAGING`, "Use Messages without an account"); the stored row title is `555-1234` |
 | N2 shell post | `adb -s $S shell cmd notification post -S bigtext -t "Plin" qa1 "Recibiste S/ 30.00"` posts as `com.android.shell` | standard-adb; Shell has no launcher entry, so use it only for the "not selected, not captured" case |
 | N3 MyBest itself | Select "MyBest" in the capture list and trigger a MyBest reminder (§3.5) | verified-in-code (MyBest has a launcher entry) |
-| N4 Clock timer | `adb -s $S shell am start -a android.intent.action.SET_TIMER --ei android.intent.extra.alarm.LENGTH 5 --ez android.intent.extra.alarm.SKIP_UI true` | **must-verify** |
+| N4 Clock timer | `adb -s $S shell am start -a android.intent.action.SET_TIMER --ei android.intent.extra.alarm.LENGTH 5 --ez android.intent.extra.alarm.SKIP_UI true` | **works** (Phase 0): Clock posts an ongoing "Firing" notification after 5 s; dismiss with `am force-stop com.google.android.deskclock` |
 
-Read stored rows without the UI (debug build is debuggable): `adb -s $S shell run-as $PKG ls databases/` and copy out with `adb -s $S exec-out run-as $PKG cat databases/my_best_db > db` plus the `-wal` and `-shm` files, then `sqlite3 db "SELECT title, text FROM captured_notification"` on the host. **must-verify** (P0-15).
+Read stored rows without the UI (debug build is debuggable): `adb -s $S shell run-as $PKG ls databases/` and copy out with `adb -s $S exec-out run-as $PKG cat databases/my_best_db > db` plus the `-wal` and `-shm` files, then `sqlite3 db "SELECT title, text FROM captured_notification"` on the host. Works (P0-15); always copy the `-wal`, the main file alone is nearly empty.
 
 ### 3.9 Other device controls (standard-adb)
 
@@ -133,8 +135,8 @@ Read stored rows without the UI (debug build is debuggable): `adb -s $S shell ru
 | Back | `adb -s $S shell input keyevent KEYCODE_BACK` |
 | Double tap | Two taps in one shell call: `adb -s $S shell "input tap X Y; input tap X Y"` |
 | Permissions list | `adb -s $S shell dumpsys package $PKG` (section `requested permissions`); or `aapt2 dump permissions app/build/outputs/apk/debug/app-debug.apk` |
-| TalkBack | `adb -s $S shell settings put secure enabled_accessibility_services com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService` (**must-verify** it is installed); fallback: check `content-desc`/`text` in the uiautomator dump |
-| Push/pull files | `adb -s $S push f /sdcard/Download/`; make it visible to the picker with `adb -s $S shell content call --uri content://media --method scan_volume --arg external_primary` (**must-verify**) |
+| TalkBack | `adb -s $S shell settings put secure enabled_accessibility_services com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService` (installed at `/product/app/talkback`, Phase 0); fallback: check `content-desc`/`text` in the uiautomator dump |
+| Push/pull files | `adb -s $S push f /sdcard/Download/`; make it visible to the picker with `adb -s $S shell content call --uri content://media --method scan_volume --arg external_primary` (works, Phase 0) |
 
 Phase 0 report table to fill (one row per must-verify item): item, method kept, exact command, result, fallback.
 
@@ -151,7 +153,7 @@ Common seed **S0** (UI, any clock): fresh install, POST_NOTIFICATIONS granted, o
 | P0-01 | Install and first launch | P0 | F | emulator booted, TZ Lima | 1) `installDebug` 2) `pm clear` 3) launch | Notification permission dialog, then onboarding "1 / 5" "Gana el fin de semana" | P0-01 |
 | P0-02 | Skip onboarding and tabs | P0 | F | P0-01 | 1) Tap "Omitir" 2) Tap each bottom tab "Diario", "Resumen", "Historia", "Ajustes" | Home "Un día a la vez." then each tab opens without crash | P0-02 |
 | P0-03 | uiautomator navigation | P0 | F | S0 | Dump, find "Ajustes" node, tap its bounds center | Settings opens; dump shows "METAS Y LÍMITES" | — |
-| P0-04 | Clock method | P0 | F | S0 | Try M1, then M2, M3 (§3.4) to reach K3; `adb shell date`; force-stop; relaunch | `date` shows Fri 6 Nov 2026 20:00 -05; Home shows the pre-outing headline "¿Sales esta noche?" with "VIE · 6 NOV". Record the method | P0-04 |
+| P0-04 | Clock method | P0 | F | S0 | Try M1, then M2, M3 (§3.4) to reach K3; `adb shell date`; force-stop; relaunch | `date` shows Fri 6 Nov 2026 20:00 -05; Home shows the pre-outing headline "¿Sales esta noche?" (the pre-outing screen has no date label). Record the method | P0-04 |
 | P0-05 | Clock back to a weekday | P0 | F | P0-04 | Apply K13 | Home shows the daily checks ("HOY · 0 DE 4") | — |
 | P0-06 | Time zone is Lima | P1 | F | — | `adb shell getprop persist.sys.timezone` | `America/Lima` | — |
 | P0-07 | POST_NOTIFICATIONS grant/revoke | P0 | F | S0 | `pm grant`, `dumpsys package` check, `pm revoke`, check, grant again; then `pm clear` and check | Grant state toggles; record whether `pm clear` reset it | — |
@@ -177,8 +179,8 @@ Data owned: outings, won nights, check-ins, relapses, weekly summary. Base seed 
 |---|---|---|---|---|---|---|---|
 | A-001 | Evening starts live at 18:00 | P1 | F | S-A0, Clock K2, app on Home | Wait on Home up to 4 min real time (no relaunch) | Home switches from the daily checks to the pre-outing at 18:00 (§3) | A-001 |
 | A-002 | Friday evening routes Home | P0 | F | S-A0, K3 | Launch | Home shows "¿Sales esta noche?", "Me quedo" and "Salgo", plus "Ver mis checks de hoy" at the bottom (§3) | A-002 |
-| A-003 | Pre-outing reachable on a weekday | P1 | F | S-A0, K1 | 1) Home shows daily checks 2) Tap shortcut "Antes de salir" | Pre-outing opens with "MIÉ · 4 NOV" numbers; only "Salgo" shown, no "Me quedo" (won nights only Fri/Sat) (§3) | A-003 |
-| A-004 | 02:00 still belongs to Friday | P1 | E | S-A0, K4, Friday undecided | Launch | Home shows the pre-outing for "VIE · 6 NOV", not Saturday (ADR 0003) | A-004 |
+| A-003 | Pre-outing reachable on a weekday | P1 | F | S-A0, K1 | 1) Home shows daily checks 2) Tap shortcut "Antes de salir" | Pre-outing opens; only "Salgo" shown, no "Me quedo" (won nights only Fri/Sat); tapping "Salgo" opens the form headed "SALIDA · MIÉ · 4 NOV" (§3). The pre-outing screen itself has no date label | A-003 |
+| A-004 | 02:00 still belongs to Friday | P1 | E | S-A0, K4, Friday undecided | Launch | Home shows the pre-outing; tapping "Salgo" opens the form headed "SALIDA · VIE · 6 NOV", not Saturday (ADR 0003) | A-004 |
 | A-005 | Dismiss routed screen | P2 | F | A-002 | 1) Tap "Ver mis checks de hoy" 2) Go to "Historia" and back to "Diario" | Daily checks shown both times; pre-outing not forced back while still undecided | — |
 | A-006 | Sunday evening routes to summary | P1 | F | S-A0 | 1) K10 launch 2) K11 launch 3) K12 launch | K10 and K11: Home shows "Resumen de la semana"; K12: daily checks (§8, ADR 0003) | A-006 |
 | A-007 | Morning after a planned outing | P0 | F | S-A1, K6 | Launch | Home opens the check-in form "VIE · 6 NOV · CHECK-IN", "¿Cómo te fue anoche?" (§4) | A-007 |
@@ -233,7 +235,7 @@ Data owned: outings, won nights, check-ins, relapses, weekly summary. Base seed 
 | A-056 | Deep link while on another screen | P2 | X | S-A0, app on Historia | W4 `ACTION_PRE_OUTING`; then back | Pre-outing opens; back returns to Historia | — |
 | A-057 | Recents relaunch does not repeat the deep link | P3 | X | A-056 | Back out to launcher; reopen from Recents | Opens Home, not the pre-outing (`LaunchActionRule`) | — |
 | A-058 | Font scale 2.0 | P2 | X | S-A0, K3, font 2.0 | Open pre-outing, going-out form, check-in form | All text visible, no clipped or overlapping labels; every button reachable by scroll | A-058 |
-| A-059 | Accessibility labels | P3 | X | S-A0, K6 check-in | uiautomator dump of mood selector and decision buttons | Mood options read "Ánimo 1 de 5"…"Ánimo 5 de 5"; buttons have text | — |
+| A-059 | Accessibility labels | P3 | X | S-A0, K6 check-in | uiautomator dump of mood selector and decision buttons | Mood options read "Ánimo 1 de 5"…"Ánimo 5 de 5"; buttons have text. Selection and switch state are not exposed in the dump (§3.1); judge them from the screenshot | — |
 
 ### 4.2 Suite B — money and setup (emulator-5556)
 
