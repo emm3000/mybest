@@ -36,7 +36,7 @@ import org.junit.Test
 private val LIMA = TimeZone.of("America/Lima")
 private val CARD = Debt(1, "Tarjeta", Money(320_000), Money(42_000), paymentDay = 15)
 private val MOTO = Debt(2, "Moto", Money(215_000), Money(31_000), paymentDay = 5)
-private val OCTOBER = YearMonthValue(2026, 10)
+private val NOVEMBER = YearMonthValue(2026, 11)
 
 private data class DebtFields(
     val name: String,
@@ -122,7 +122,7 @@ class DebtsViewModelTest {
 
     @Test
     fun `lists every debt with formatted money and its paid flag`() = runTest {
-        val payments = listOf(DebtPayment(MOTO.id, OCTOBER, MOTO.installment))
+        val payments = listOf(DebtPayment(MOTO.id, NOVEMBER, MOTO.installment))
 
         val state = stateOf(viewModel(repository(payments = payments)))
 

@@ -37,4 +37,13 @@ data class Debt(
      * last day.
      */
     fun paymentDateIn(month: YearMonthValue): LocalDate = month.atDay(minOf(paymentDay, month.lengthOfMonth()))
+
+    /**
+     * The month of the installment due on app day [today]: the current month while its payment date has not passed,
+     * otherwise the next one.
+     */
+    fun dueMonthOn(today: LocalDate): YearMonthValue {
+        val month = YearMonthValue.from(today)
+        return if (paymentDateIn(month) >= today) month else month.plusMonths(1)
+    }
 }
