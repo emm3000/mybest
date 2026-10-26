@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.components.atelier.MicroLabel
@@ -40,11 +40,11 @@ private fun LegendItem(kind: HistoryMarkKind, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(LEGEND_ITEM_GAP),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        HistoryMark(kind = kind)
+        HistoryMark(kind = kind, modifier = Modifier.alignBy { it.measuredHeight })
         MicroLabel(
             text = stringResource(kind.legendRes()),
+            modifier = Modifier.alignBy(FirstBaseline),
             style = MicroLabelStyle(tone = MicroLabelTone.Dim),
         )
     }
