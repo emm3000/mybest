@@ -3,6 +3,7 @@ package com.emm.mybest.features.checkin.presentation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -24,14 +25,15 @@ internal fun CheckInPage(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = CONTENT_GUTTER, vertical = SECTION_GAP),
-        verticalArrangement = Arrangement.spacedBy(SECTION_GAP),
     ) {
+        Column(verticalArrangement = Arrangement.spacedBy(SECTION_GAP), content = content)
+        Spacer(modifier = Modifier.weight(1f))
         Column(
-            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(SECTION_GAP),
-            content = content,
+            modifier = Modifier.padding(top = SECTION_GAP),
+            verticalArrangement = Arrangement.spacedBy(FOOTER_GAP),
+            content = footer,
         )
-        Column(verticalArrangement = Arrangement.spacedBy(FOOTER_GAP), content = footer)
     }
 }
