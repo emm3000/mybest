@@ -9,6 +9,7 @@ import com.emm.mybest.domain.usecase.preouting.ObservePreOutingSnapshotUseCase
 import com.emm.mybest.domain.usecase.preouting.PlanOutingResult
 import com.emm.mybest.domain.usecase.preouting.PreOutingDecisionUseCases
 import com.emm.mybest.domain.usecase.preouting.RecordWonNightResult
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +31,7 @@ class PreOutingViewModel(
     val effect: SharedFlow<PreOutingEffect> = _effect.asSharedFlow()
 
     private val form = MutableStateFlow(PreOutingForm())
+    private var confirmJob: Job? = null
 
     val state: StateFlow<PreOutingState> = combine(
         combine(observeSnapshot(), purchaseGoalRepository.observeGoal().map { it?.name }) { snapshot, goalName ->
@@ -68,8 +70,9 @@ class PreOutingViewModel(
     }
 
     private fun confirmOuting() {
+        if (confirmJob?.isActive == true) return
         val limits = form.value.takeIf { it.canConfirm }?.toLimits() ?: return
-        viewModelScope.launch {
+        confirmJob = viewModelScope.launch {
             when (decisions.planOuting(limits)) {
                 PlanOutingResult.Planned -> form.value = PreOutingForm()
                 PlanOutingResult.DayAlreadyDecided -> _effect.tryEmit(PreOutingEffect.DayAlreadyDecided)
