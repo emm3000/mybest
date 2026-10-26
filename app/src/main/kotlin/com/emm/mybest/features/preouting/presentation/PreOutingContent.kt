@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,12 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.emm.mybest.R
 import com.emm.mybest.ui.theme.AtelierTheme
 
 private val CONTENT_GUTTER = 24.dp
 private val SECTION_GAP = 32.dp
 private val HERO_GAP = 4.dp
+private val HERO_AMOUNT_MIN_SIZE = 12.sp
 
 @Composable
 fun PreOutingContent(
@@ -49,7 +52,7 @@ private fun PreOutingHero(state: PreOutingState) {
     Column(verticalArrangement = Arrangement.spacedBy(HERO_GAP)) {
         Text(text = stringResource(R.string.pre_outing_headline), style = MaterialTheme.typography.headlineLarge)
         if (state.estimatedOutingCostLabel != null) {
-            Text(text = state.estimatedOutingCostLabel, style = MaterialTheme.typography.displaySmall)
+            HeroAmount(label = state.estimatedOutingCostLabel)
             Text(
                 text = stringResource(state.estimateCaptionRes),
                 style = MaterialTheme.typography.bodyMedium,
@@ -57,6 +60,19 @@ private fun PreOutingHero(state: PreOutingState) {
             )
         }
     }
+}
+
+@Composable
+private fun HeroAmount(label: String, modifier: Modifier = Modifier) {
+    val style = MaterialTheme.typography.displaySmall
+    Text(
+        text = label,
+        modifier = modifier,
+        style = style,
+        softWrap = false,
+        maxLines = 1,
+        autoSize = TextAutoSize.StepBased(minFontSize = HERO_AMOUNT_MIN_SIZE, maxFontSize = style.fontSize),
+    )
 }
 
 @Composable
