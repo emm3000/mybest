@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
@@ -36,7 +37,7 @@ internal fun TimelineRail(
         ),
     ) {
         MicroLabel(
-            text = stringResource(R.string.photos_timeline_header_format, photos.size),
+            text = pluralStringResource(R.plurals.photos_timeline_header, photos.size, photos.size),
             style = MicroLabelStyle(tone = MicroLabelTone.Dim),
             modifier = Modifier.padding(bottom = HEADER_BOTTOM_PADDING),
         )
