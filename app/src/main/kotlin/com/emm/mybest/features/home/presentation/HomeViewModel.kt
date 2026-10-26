@@ -86,8 +86,15 @@ class HomeViewModel(
     private fun visibleDestination(routed: HomeDestination): HomeDestination {
         routedDestination = routed
         if (routed != dismissedDestination) dismissedDestination = null
-        return if (dismissedDestination == null) routed else HomeDestination.DAILY_CHECKS
+        return when {
+            dismissedDestination != null -> HomeDestination.DAILY_CHECKS
+            isCheckInSettled(routed) -> HomeDestination.CHECK_IN
+            else -> routed
+        }
     }
+
+    private fun isCheckInSettled(routed: HomeDestination): Boolean =
+        routed == HomeDestination.DAILY_CHECKS && _state.value.destination == HomeDestination.CHECK_IN
 
     private fun toggle(type: DailyCheckType) {
         viewModelScope.launch { useCases.toggleDailyCheck(_state.value.today, type) }
