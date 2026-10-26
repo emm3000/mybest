@@ -17,6 +17,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
@@ -56,6 +57,9 @@ private fun overviewWith(before: ProgressPhoto?, after: ProgressPhoto?): PhotoTy
         beforeWeightKg = null,
         afterWeightKg = null,
     )
+
+private suspend fun PhotosViewModel.selectedTypeNow(): PhotoType =
+    state.first { !it.isLoading }.selectedType
 
 class PhotosViewModelTest {
 
@@ -104,29 +108,12 @@ class PhotosViewModelTest {
     }
 
     @Test
-    fun `OnPhotoCaptured calls savePhotosUseCase with current tab type`() = runTest {
+    fun `a capture of FACE saves FACE and selects FACE on a fresh ViewModel`() = runTest {
         coEvery { savePhotosUseCase(any()) } returns Unit
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onIntent(PhotosIntent.OnPhotoCaptured("/tmp/photo.jpg"))
-        advanceUntilIdle()
-
-        coVerify {
-            savePhotosUseCase(
-                listOf(NewProgressPhoto(photoPath = "/tmp/photo.jpg", type = PhotoType.TRUNK, date = FRIDAY)),
-            )
-        }
-    }
-
-    @Test
-    fun `OnPhotoCaptured with FACE tab saves with FACE type`() = runTest {
-        coEvery { savePhotosUseCase(any()) } returns Unit
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
-
-        viewModel.onIntent(PhotosIntent.SelectType(PhotoType.FACE))
-        viewModel.onIntent(PhotosIntent.OnPhotoCaptured("/tmp/photo.jpg"))
+        viewModel.onIntent(PhotosIntent.OnPhotoCaptured("/tmp/photo.jpg", PhotoType.FACE))
         advanceUntilIdle()
 
         coVerify {
@@ -134,6 +121,25 @@ class PhotosViewModelTest {
                 listOf(NewProgressPhoto(photoPath = "/tmp/photo.jpg", type = PhotoType.FACE, date = FRIDAY)),
             )
         }
+        assertEquals(PhotoType.FACE, viewModel.selectedTypeNow())
+    }
+
+    @Test
+    fun `a capture of TRUNK saves TRUNK and selects TRUNK while FACE is selected`() = runTest {
+        coEvery { savePhotosUseCase(any()) } returns Unit
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.onIntent(PhotosIntent.SelectType(PhotoType.FACE))
+        viewModel.onIntent(PhotosIntent.OnPhotoCaptured("/tmp/photo.jpg", PhotoType.TRUNK))
+        advanceUntilIdle()
+
+        coVerify {
+            savePhotosUseCase(
+                listOf(NewProgressPhoto(photoPath = "/tmp/photo.jpg", type = PhotoType.TRUNK, date = FRIDAY)),
+            )
+        }
+        assertEquals(PhotoType.TRUNK, viewModel.selectedTypeNow())
     }
 
     @Test
@@ -142,7 +148,7 @@ class PhotosViewModelTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onIntent(PhotosIntent.OnPhotoCaptured("/tmp/photo.jpg"))
+        viewModel.onIntent(PhotosIntent.OnPhotoCaptured("/tmp/photo.jpg", PhotoType.TRUNK))
         advanceUntilIdle()
 
         coVerify { savePhotosUseCase(match { photos -> photos.single().date == FRIDAY }) }

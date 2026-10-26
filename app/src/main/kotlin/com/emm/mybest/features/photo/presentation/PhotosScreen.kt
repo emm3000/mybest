@@ -44,7 +44,7 @@ fun PhotosScreen(
     val cameraHandler = rememberPhotoCameraHandler(
         snackbarHostState = snackbarHostState,
         photoCaptureFiles = photoCaptureFiles,
-        onPhotoCaptured = { uri -> viewModel.onIntent(PhotosIntent.OnPhotoCaptured(uri)) },
+        onPhotoCaptured = { uri, type -> viewModel.onIntent(PhotosIntent.OnPhotoCaptured(uri, type)) },
     )
 
     LaunchedEffect(viewModel.effect) {
@@ -67,7 +67,7 @@ fun PhotosScreen(
                     HIconButton(
                         icon = Icons.Default.Add,
                         contentDescription = stringResource(R.string.photos_add_action_cd),
-                        onClick = { cameraHandler.launch() },
+                        onClick = { cameraHandler.launch(state.selectedType) },
                     )
                 },
             )
