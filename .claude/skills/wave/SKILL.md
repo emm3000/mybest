@@ -31,10 +31,10 @@ Rows are ordered by blast radius. A ticket that matches several rows takes the h
 | 1 | Docs, strings, renames; every criterion is a command with empty output | sonnet:low | verify clause (below) |
 | 2 | One screen, layout or restyle only | sonnet:medium | visual check |
 | 3 | ViewModel or use-case behavior | sonnet:high | load `mattpocock-skills:tdd`, red-green-refactor |
-| 4 | Shared `ui/components` or theme change | sonnet:high | visual check of every affected screen |
+| 4 | Shared `ui/components` or theme change | opus:medium | visual check of every affected screen |
 | 5 | Room schema or migration, DI wiring, WorkManager or reminders, backup import/export | opus:high | visual check if a screen changes |
 
-Sonnet writes the code on rows 1-4. Row 5 is the only Opus implementation row: its failures (data-dropping migrations, missing Koin bindings, workers that never run) compile and pass CI, so no gate catches them.
+Sonnet writes the code on rows 1-3. Rows 4 and 5 are Opus implementation rows. Row 4 changes reach several screens at once. Row 5 failures (data-dropping migrations, missing Koin bindings, workers that never run) compile and pass CI, so no gate catches them.
 
 Other roles: every PR review opus:high (the reviewer is the only judgment check, and a review costs far less than an implementation), post-review fixes sonnet:low with the verify clause, ticket-writer opus:medium.
 
@@ -45,6 +45,7 @@ Verify clause, pasted into every sonnet:low dispatch: "Before you report done, r
 Every row is a bet until `docs/agents/dispatch-log.md` says otherwise. When a row shows two or more first-review FIX FIRST verdicts with cause `judgment`, raise it one step and note why here.
 
 - Row 3 moved from sonnet:medium to sonnet:high (2026-10-23): PRs #44, #45 and #48 each got a first-review FIX FIRST with cause `judgment` (ignored use-case result, unguarded save/delete, view logic left in composables).
+- Row 4 moved from sonnet:high to opus:medium (2026-10-27): PRs #99 and #141 each got a first-review FIX FIRST with cause `judgment` (grouping types left inside files, a doubled gap that hid Guardar on a shared page layout).
 
 ## Execution Steps
 
