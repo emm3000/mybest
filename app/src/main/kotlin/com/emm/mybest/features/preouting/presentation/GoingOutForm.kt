@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,6 +39,7 @@ fun GoingOutForm(
 ) {
     Column(
         modifier = modifier
+            .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = CONTENT_GUTTER, vertical = SECTION_GAP),
         verticalArrangement = Arrangement.spacedBy(SECTION_GAP),
