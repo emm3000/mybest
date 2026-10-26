@@ -62,7 +62,10 @@
     <string name="photos_tab_face">Cara</string>
     <string name="photos_label_before">ANTES</string>
     <string name="photos_label_after">AHORA</string>
-    <string name="photos_timeline_header_format">TIMELINE · %1$d FOTOS</string>
+    <plurals name="photos_timeline_header">
+        <item quantity="one">TIMELINE · %1$d FOTO</item>
+        <item quantity="other">TIMELINE · %1$d FOTOS</item>
+    </plurals>
     <plurals name="photos_compare_days_part">
         <item quantity="one">%d DÍA</item>
         <item quantity="other">%d DÍAS</item>
