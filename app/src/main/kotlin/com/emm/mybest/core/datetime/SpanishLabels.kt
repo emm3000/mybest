@@ -69,7 +69,7 @@ fun DayOfWeek.narrowEs(): String = when (this) {
 fun LocalDate.formatEsLongDate(): String = "$day de ${monthNameEs(month.ordinal + 1)}, $year"
 
 fun LocalDate.formatEsWeekdayDayMonth(): String {
-    val weekday = dayNameEs(dayOfWeek).replaceFirstChar { it.uppercase() }
+    val weekday = dayOfWeek.longEs()
     return "$weekday $day ${monthNameEs(month.ordinal + 1)}"
 }
 
@@ -81,14 +81,4 @@ fun YearMonthValue.formatEsMonthYear(): String {
 private fun monthNameEs(month: Int): String = when (month) {
     in FIRST_MONTH..MONTHS_PER_YEAR -> SPANISH_MONTHS[month - FIRST_MONTH]
     else -> error("Invalid month: $month")
-}
-
-private fun dayNameEs(dayOfWeek: DayOfWeek): String = when (dayOfWeek) {
-    DayOfWeek.MONDAY -> "lunes"
-    DayOfWeek.TUESDAY -> "martes"
-    DayOfWeek.WEDNESDAY -> "miercoles"
-    DayOfWeek.THURSDAY -> "jueves"
-    DayOfWeek.FRIDAY -> "viernes"
-    DayOfWeek.SATURDAY -> "sabado"
-    DayOfWeek.SUNDAY -> "domingo"
 }

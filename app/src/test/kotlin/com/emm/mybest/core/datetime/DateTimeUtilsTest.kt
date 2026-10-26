@@ -108,11 +108,16 @@ class DateTimeUtilsTest {
     fun `formatEsWeekdayDayMonth returns expected weekday names for full week`() {
         assertEquals("Lunes 9 marzo", LocalDate(2026, 3, 9).formatEsWeekdayDayMonth())
         assertEquals("Martes 10 marzo", LocalDate(2026, 3, 10).formatEsWeekdayDayMonth())
-        assertEquals("Miercoles 11 marzo", LocalDate(2026, 3, 11).formatEsWeekdayDayMonth())
+        assertEquals("Miércoles 11 marzo", LocalDate(2026, 3, 11).formatEsWeekdayDayMonth())
         assertEquals("Jueves 12 marzo", LocalDate(2026, 3, 12).formatEsWeekdayDayMonth())
         assertEquals("Viernes 13 marzo", LocalDate(2026, 3, 13).formatEsWeekdayDayMonth())
-        assertEquals("Sabado 14 marzo", LocalDate(2026, 3, 14).formatEsWeekdayDayMonth())
+        assertEquals("Sábado 14 marzo", LocalDate(2026, 3, 14).formatEsWeekdayDayMonth())
         assertEquals("Domingo 15 marzo", LocalDate(2026, 3, 15).formatEsWeekdayDayMonth())
+    }
+
+    @Test
+    fun `formatEsWeekdayDayMonth keeps the accent when uppercased`() {
+        assertEquals("SÁBADO 7 NOVIEMBRE", LocalDate(2026, 11, 7).formatEsWeekdayDayMonth().uppercase())
     }
 
     @Test
