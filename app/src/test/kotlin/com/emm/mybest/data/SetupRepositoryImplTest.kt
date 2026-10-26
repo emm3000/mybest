@@ -3,11 +3,14 @@ package com.emm.mybest.data
 import com.emm.mybest.data.entities.UserSetupDao
 import com.emm.mybest.data.entities.UserSetupEntity
 import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.usecase.UpdateSetupUseCase
+import com.emm.mybest.domain.validation.SetupValidationError
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class SetupRepositoryImplTest {
@@ -34,5 +37,16 @@ class SetupRepositoryImplTest {
         repository.save(setup)
 
         assertEquals(setup, repository.observe().first())
+    }
+
+    @Test
+    fun `saving another field clears a legacy out-of-range target weight`() = runTest {
+        storedRow.value = UserSetupEntity(targetWeightKg = 9_999f, monthlyOutingLimit = 2)
+
+        val errors = UpdateSetupUseCase(repository)(repository.observe().first().copy(monthlyOutingLimit = 4))
+
+        assertEquals(emptyList<SetupValidationError>(), errors)
+        assertEquals(4, storedRow.value?.monthlyOutingLimit)
+        assertNull(storedRow.value?.targetWeightKg)
     }
 }
