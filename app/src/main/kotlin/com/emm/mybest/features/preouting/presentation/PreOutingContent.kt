@@ -62,12 +62,16 @@ private fun PreOutingHero(state: PreOutingState) {
 @Composable
 private fun InstallmentLines(state: PreOutingState, onPromptClick: (PreOutingPrompt) -> Unit) {
     if (state.nightPercent != null) {
-        val text = stringResource(
-            R.string.pre_outing_installment_share,
-            state.nightPercent,
-            state.debtName,
-            state.paymentDay,
-        )
+        val text = if (state.isNightPercentCapped) {
+            stringResource(R.string.pre_outing_installment_share_capped, state.debtName, state.paymentDay)
+        } else {
+            stringResource(
+                R.string.pre_outing_installment_share,
+                state.nightPercent,
+                state.debtName,
+                state.paymentDay,
+            )
+        }
         SentenceRow(text = text)
     }
     PromptLines(PreOutingPrompt.TYPICAL_COST, state, onPromptClick)
