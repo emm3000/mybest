@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,31 +25,47 @@ class CheckInViewModel(
 ) : ViewModel() {
 
     private var isSubmitting = false
+    private var isResultAcknowledged = false
     private val form = MutableStateFlow(CheckInForm())
     private val saved = MutableStateFlow<Outing?>(null)
+    private val whileObserved = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS, replayExpirationMillis = 0)
     private val task: StateFlow<CheckInTask?> = useCases.observeTask().stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
+        started = whileObserved,
         initialValue = null,
     )
 
     private val _effect = effectFlow<CheckInEffect>()
     val effect: SharedFlow<CheckInEffect> = _effect.asSharedFlow()
 
-    val state: StateFlow<CheckInState> = combine(task, form, saved, ::toCheckInState).stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
-        initialValue = CheckInState(),
-    )
+    val state: StateFlow<CheckInState> = combine(task, form, saved, ::toCheckInState)
+        .onCompletion { releaseAcknowledgedResult() }
+        .stateIn(
+            scope = viewModelScope,
+            started = whileObserved,
+            initialValue = CheckInState(),
+        )
 
     fun onIntent(intent: CheckInIntent) {
         when (intent) {
             CheckInIntent.OnSaveClick -> save()
             CheckInIntent.OnWentOutYesClick -> answerYes()
             CheckInIntent.OnWentOutNoClick -> answerNo()
-            CheckInIntent.OnNotNowClick, CheckInIntent.OnDoneClick -> _effect.tryEmit(CheckInEffect.Close)
+            CheckInIntent.OnNotNowClick -> _effect.tryEmit(CheckInEffect.Close)
+            CheckInIntent.OnDoneClick -> finish()
             else -> form.update { it.reduce(intent) }
         }
+    }
+
+    private fun finish() {
+        isResultAcknowledged = true
+        _effect.tryEmit(CheckInEffect.Close)
+    }
+
+    private fun releaseAcknowledgedResult() {
+        if (!isResultAcknowledged) return
+        isResultAcknowledged = false
+        saved.value = null
     }
 
     private fun submit(action: suspend () -> Unit) {
