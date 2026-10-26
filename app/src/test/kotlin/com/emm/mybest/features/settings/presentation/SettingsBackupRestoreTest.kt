@@ -116,14 +116,23 @@ class SettingsBackupRestoreTest {
     }
 
     @Test
-    fun `a failed import shows the error and does not relaunch the app`() = runTest {
+    fun `a failed import announces the import failed and does not relaunch the app`() = runTest {
         val viewModel = buildViewModel(Result.failure(IllegalStateException("Invalid SQLite backup file")))
 
         viewModel.onIntent(SettingsIntent.OnImportBackup("content://backup"))
 
-        assertEquals(SettingsEffect.ShowError("Invalid SQLite backup file"), viewModel.effect.first())
+        assertEquals(SettingsEffect.BackupImportFailed, viewModel.effect.first())
         advanceUntilIdle()
         verify(exactly = 0) { appRestarter.restart() }
+    }
+
+    @Test
+    fun `a failed import without a message announces the import failed`() = runTest {
+        val viewModel = buildViewModel(Result.failure(IllegalStateException()))
+
+        viewModel.onIntent(SettingsIntent.OnImportBackup("content://backup"))
+
+        assertEquals(SettingsEffect.BackupImportFailed, viewModel.effect.first())
     }
 
     private companion object {
