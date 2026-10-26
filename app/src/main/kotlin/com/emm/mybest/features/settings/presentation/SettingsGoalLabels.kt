@@ -20,6 +20,6 @@ internal val SettingsFieldError.messageRes: Int
     get() = when (this) {
         SettingsFieldError.INVALID_NUMBER -> R.string.settings_goal_error_invalid_number
         SettingsFieldError.OUT_OF_RANGE -> R.string.settings_goal_error_out_of_range
-        SettingsFieldError.NOT_POSITIVE -> R.string.settings_goal_error_not_positive
+        SettingsFieldError.WEIGHT_OUT_OF_RANGE -> R.string.settings_goal_error_weight_out_of_range
         SettingsFieldError.NEGATIVE -> R.string.settings_goal_error_negative
     }

@@ -255,8 +255,8 @@ Data owned: onboarding, setup, debts, payments, purchase goal, contributions, ba
 | B-010 | Deep link during onboarding | P3 | E | fresh, onboarding shown | W4 `ACTION_DEBTS`; then "Omitir" | Onboarding stays; after finishing, no crash (opening Deudas or Home both acceptable; note which) | — |
 | B-011 | Nothing set by default | P1 | F | S-B0 | Open Ajustes | Every METAS Y LÍMITES row and every RECORDATORIOS row "Sin definir"; photo switch off; DEUDAS and META rows show their empty values; CAPTURA "Desactivada" (§1, principles) | B-011 |
 | B-012 | Empty fields never crash | P0 | F | S-B0, K3 | Visit Diario, pre-outing, Resumen, Historia, Pesaje, Deudas, Meta de compra, Captura | Each opens; each missing input shows its call to set (texts as in A-009, A-051, C-011, "Agrega tu primera deuda", "Define tu meta de compra") (§1 acceptance) | — |
-| B-013 | Target weight input | P1 | N | S-B0 | PESO OBJETIVO: `72,5`; then `0`, `-3`, `abc`, empty; "Borrar" | "72.5 kg"; "El peso debe ser mayor que cero." for 0 and -3; "Escribe un número válido." for abc and empty; Borrar → "Sin definir" | — |
-| B-014 | Target weight range | P3 | E | S-B0 | Enter `1e3`, then `9999` | FLAG: saved as 1000 / 9999 kg with no range (weigh-in accepts 20–500). File as S4 if accepted | — |
+| B-013 | Target weight input | P1 | N | S-B0 | PESO OBJETIVO: `72,5`; then `0`, `-3`, `abc`, empty; "Borrar" | "72.5 kg"; "Peso fuera de rango. Acepta 20–500 kg." for 0; "Escribe un número válido." for -3, abc and empty; Borrar → "Sin definir" | — |
+| B-014 | Target weight range | P3 | E | S-B0 | Enter `1e3`, then `9999` | `1e3`: "Escribe un número válido."; `9999`: "Peso fuera de rango. Acepta 20–500 kg."; the row keeps its old value in both cases (weigh-in range 20–500). File as S4 if either is saved | — |
 | B-015 | Monthly outing limit input | P2 | N | S-B0 | `0`, `-1`, `2.5`, `99999999999` | 0 saved; "El valor no puede ser negativo."; "Escribe un número válido." twice | — |
 | B-016 | Typical cost input | P2 | N | S-B0 | `120,5`, `120.505`, `1,234.50`, `-10`, `0` | "S/ 120.50"; invalid number for the next two; `-10` shows an error (code shows "Escribe un número válido.", the negative message is unreachable: S4 copy note); `0` saves "S/ 0.00" | — |
 | B-017 | Weekly targets 0..7 | P2 | N | S-B0 | GYM `7`, `8`, `-1`, empty | 7 saved; "Elige entre 0 y 7 días." for 8 and -1; invalid number for empty; alcohol row label "ALCOHOL · MÁX. DÍAS POR SEMANA" | — |
@@ -537,4 +537,4 @@ Phase 0 additionally returns the tooling table from §3.9.
 12. **Backup scope:** the DB only; photos and preferences (onboarding flag) are not included (C-055).
 13. **Listener declared `exported="false"`**; if the system cannot bind it, capture never works (P0-12).
 14. **Copy:** raw English/exception messages in snackbars ("Invalid SQLite backup file", "Error al guardar: <exception>"), unaccented weekday names ("sabado", "miercoles") in contribution dates (B-046, B-059).
-15. **Target weight has no range** while weigh-ins accept 20–500 kg (B-014).
+15. **Target weight range** is now 20–500 kg like the weigh-in (B-014). A target already stored out of range blocks saving other setup fields until it is fixed or cleared.

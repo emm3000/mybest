@@ -3,6 +3,7 @@ package com.emm.mybest.features.settings.presentation
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.validation.WeightInputValidator
 
 internal fun SettingsField.inputFor(setup: Setup): String = when (this) {
     SettingsField.TARGET_WEIGHT -> setup.targetWeightKg?.toString()?.removeSuffix(".0")
@@ -25,8 +26,10 @@ internal fun SettingsField.withInput(setup: Setup, input: String): Setup? = when
     else -> checkType?.let { setup.withWeeklyTarget(it, input) }
 }
 
-private fun Setup.withWeight(input: String): Setup? =
-    input.trim().replace(',', '.').toFloatOrNull()?.let { copy(targetWeightKg = it) }
+private fun Setup.withWeight(input: String): Setup? = input.trim()
+    .takeIf(WeightInputValidator::isValidWeightInput)
+    ?.let(WeightInputValidator::parse)
+    ?.let { copy(targetWeightKg = it) }
 
 private fun Setup.withLimit(input: String): Setup? = input.trim().toIntOrNull()?.let { copy(monthlyOutingLimit = it) }
 
