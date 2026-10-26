@@ -127,11 +127,7 @@ class SettingsViewModel(
                         RestoreResult.OtherSchemaVersion -> _effect.emit(SettingsEffect.BackupFromOtherVersion)
                     }
                 }.onFailure {
-                    _effect.emit(
-                        SettingsEffect.ShowError(
-                            it.message ?: "No se pudo importar el backup",
-                        ),
-                    )
+                    _effect.emit(SettingsEffect.BackupImportFailed)
                 }
         }
     }

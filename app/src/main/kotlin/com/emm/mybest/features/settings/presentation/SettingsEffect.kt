@@ -8,4 +8,5 @@ sealed class SettingsEffect {
     object ReminderSaveFailed : SettingsEffect()
     object BackupRestored : SettingsEffect()
     object BackupFromOtherVersion : SettingsEffect()
+    object BackupImportFailed : SettingsEffect()
 }
