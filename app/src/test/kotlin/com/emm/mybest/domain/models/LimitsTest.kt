@@ -7,6 +7,7 @@ import org.junit.Test
 
 private val OVERNIGHT_LIMITS = Limits(money = Money(12_000), drinks = 4, returnTime = LocalTime(2, 0))
 private val EVENING_LIMITS = OVERNIGHT_LIMITS.copy(returnTime = LocalTime(23, 0))
+private val LATE_EVENING_LIMITS = OVERNIGHT_LIMITS.copy(returnTime = LocalTime(23, 30))
 
 private fun returnTimeExcess(limits: Limits, returnTime: LocalTime): Long? {
     val checkIn = CheckIn(totalSpent = Money(0), drinks = null, returnTime = returnTime, mood = 3)
@@ -53,5 +54,45 @@ class LimitsTest {
     @Test
     fun `returning at 00_15 against a 23_00 limit breaks it by 75 minutes across midnight`() {
         assertEquals(75L, returnTimeExcess(EVENING_LIMITS, LocalTime(0, 15)))
+    }
+
+    @Test
+    fun `returning at 02_30 against a 02_00 limit breaks it by 30 minutes`() {
+        assertEquals(30L, returnTimeExcess(OVERNIGHT_LIMITS, LocalTime(2, 30)))
+    }
+
+    @Test
+    fun `returning at 07_00 against a 02_00 limit breaks it by 300 minutes`() {
+        assertEquals(300L, returnTimeExcess(OVERNIGHT_LIMITS, LocalTime(7, 0)))
+    }
+
+    @Test
+    fun `returning at 12_30 against a 02_00 limit breaks it by 630 minutes the next day`() {
+        assertEquals(630L, returnTimeExcess(OVERNIGHT_LIMITS, LocalTime(12, 30)))
+    }
+
+    @Test
+    fun `returning at 17_59 against a 02_00 limit breaks it by 959 minutes the next day`() {
+        assertEquals(959L, returnTimeExcess(OVERNIGHT_LIMITS, LocalTime(17, 59)))
+    }
+
+    @Test
+    fun `returning at 18_00 against a 02_00 limit keeps the return time limit the same evening`() {
+        assertEquals(0L, returnTimeExcess(OVERNIGHT_LIMITS, LocalTime(18, 0)))
+    }
+
+    @Test
+    fun `returning at 23_00 against a 02_00 limit keeps the return time limit the same evening`() {
+        assertEquals(0L, returnTimeExcess(OVERNIGHT_LIMITS, LocalTime(23, 0)))
+    }
+
+    @Test
+    fun `returning at 00_15 against a 23_30 limit breaks it by 45 minutes across midnight`() {
+        assertEquals(45L, returnTimeExcess(LATE_EVENING_LIMITS, LocalTime(0, 15)))
+    }
+
+    @Test
+    fun `returning at 23_00 against a 23_30 limit keeps the return time limit`() {
+        assertEquals(0L, returnTimeExcess(LATE_EVENING_LIMITS, LocalTime(23, 0)))
     }
 }
