@@ -188,10 +188,10 @@ class BackupRepositoryImplRestoreTest {
         }
 
     @Test
-    fun export_and_restore_keep_one_row_of_every_v1_table() = runBlocking {
+    fun export_and_restore_keep_one_row_of_every_table() = runBlocking {
         deleteDatabaseFiles()
         val liveDb = openDatabase()
-        ONE_ROW_PER_V1_TABLE.forEach { liveDb.openHelper.writableDatabase.execSQL(it) }
+        ONE_ROW_PER_CURRENT_TABLE.forEach { liveDb.openHelper.writableDatabase.execSQL(it) }
         val seeded = snapshotOf(liveDb.openHelper.readableDatabase)
         val exportFile = File(context.cacheDir, "test-round-trip.db").apply { delete() }
         BackupRepositoryImpl(context, liveDb, UnconfinedDispatchers).exportDatabase(exportFile.toURI().toString()).getOrThrow()
@@ -205,7 +205,7 @@ class BackupRepositoryImplRestoreTest {
         val restored = snapshotOf(reopened.openHelper.readableDatabase)
         reopened.close()
 
-        assertEquals(V1_TABLES, seeded.keys)
+        assertEquals(CURRENT_TABLES, seeded.keys)
         assertTrue(seeded.values.all { it.size == 1 })
         assertEquals(seeded, restored)
     }

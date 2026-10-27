@@ -14,7 +14,9 @@ private const val TEST_DB = "migration-test-db"
 private const val PRE_V1_SCHEMA_VERSION = 5
 private const val V10_SCHEMA_VERSION = 10
 private const val V11_SCHEMA_VERSION = 11
+private const val V12_SCHEMA_VERSION = 12
 private const val CAPTURED_NOTIFICATION = "captured_notification"
+private const val NOTE = "note"
 private const val PRE_V1_WEIGHT_ROW =
     "INSERT INTO daily_weight VALUES ('w1', '2026-01-01', 70.0, NULL, NULL, 1000, 1000)"
 private const val V10_CAPTURED_ROW =
@@ -49,8 +51,9 @@ class AppDatabaseMigrationsTest {
 
         assertEquals(V1_TABLES, seeded.keys)
         assertTrue(seeded.values.all { it.size == 1 })
-        assertEquals(seeded, reopened.withoutKeyColumn())
+        assertEquals(seeded, reopened.minus(NOTE).withoutKeyColumn())
         assertTrue(reopened.getValue(CAPTURED_NOTIFICATION).all { it.last() == null })
+        assertTrue(reopened.getValue(NOTE).isEmpty())
     }
 
     @Test
@@ -69,6 +72,23 @@ class AppDatabaseMigrationsTest {
     }
 
     @Test
+    fun v11_database_keeps_one_row_of_every_table_and_gets_an_empty_note_table() {
+        val seeded = helper.createDatabase(TEST_DB, V11_SCHEMA_VERSION).use { db ->
+            ONE_ROW_PER_V1_TABLE.forEach { db.execSQL(it) }
+            snapshotOf(db)
+        }
+
+        val migrated = helper.runMigrationsAndValidate(TEST_DB, V12_SCHEMA_VERSION, true, MIGRATION_11_12).use { db ->
+            snapshotOf(db)
+        }
+
+        assertEquals(V1_TABLES, seeded.keys)
+        assertTrue(seeded.values.all { it.size == 1 })
+        assertEquals(seeded, migrated.minus(NOTE))
+        assertEquals(emptyList<List<String?>>(), migrated.getValue(NOTE))
+    }
+
+    @Test
     fun pre_v1_database_is_recreated_empty_when_opened_by_the_app() {
         helper.createDatabase(TEST_DB, PRE_V1_SCHEMA_VERSION).use { db -> db.execSQL(PRE_V1_WEIGHT_ROW) }
 
@@ -78,7 +98,7 @@ class AppDatabaseMigrationsTest {
         opened.close()
 
         assertEquals(AppDatabase.SCHEMA_VERSION, version)
-        assertEquals(V1_TABLES, recreated.keys)
+        assertEquals(CURRENT_TABLES, recreated.keys)
         assertTrue(recreated.values.all { it.isEmpty() })
     }
 

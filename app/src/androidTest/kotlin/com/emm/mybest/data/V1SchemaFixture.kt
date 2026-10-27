@@ -24,6 +24,11 @@ internal val ONE_ROW_PER_V1_TABLE = listOf(
     "INSERT INTO progress_photo VALUES ('p1', '2026-03-15', 'TRUNK', 'photos/p1.jpg', 1773600000000, 1773600000001)",
 )
 
+internal val CURRENT_TABLES = V1_TABLES + "note"
+
+internal val ONE_ROW_PER_CURRENT_TABLE = ONE_ROW_PER_V1_TABLE +
+    "INSERT INTO note (id, app_day, created_at_epoch_ms, text) VALUES (1, '2026-03-14', 1773546600000, 'Volví a las 2')"
+
 internal fun snapshotOf(database: SupportSQLiteDatabase): Map<String, List<List<String?>>> =
     userTablesOf(database).associateWith { table -> rowsOf(database, table) }
 

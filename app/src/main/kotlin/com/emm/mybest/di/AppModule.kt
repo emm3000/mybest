@@ -14,6 +14,7 @@ import com.emm.mybest.data.AppRestarterImpl
 import com.emm.mybest.data.BackupRepositoryImpl
 import com.emm.mybest.data.DailyCheckRepositoryImpl
 import com.emm.mybest.data.DebtRepositoryImpl
+import com.emm.mybest.data.NoteRepositoryImpl
 import com.emm.mybest.data.NotificationCaptureRepositoryImpl
 import com.emm.mybest.data.OutingRepositoryImpl
 import com.emm.mybest.data.PhotoRepositoryImpl
@@ -44,6 +45,7 @@ import com.emm.mybest.domain.repository.BackupRepository
 import com.emm.mybest.domain.repository.DailyCheckRepository
 import com.emm.mybest.domain.repository.DebtRepository
 import com.emm.mybest.domain.repository.InstalledAppsRepository
+import com.emm.mybest.domain.repository.NoteRepository
 import com.emm.mybest.domain.repository.NotificationAccessChecker
 import com.emm.mybest.domain.repository.NotificationCaptureRepository
 import com.emm.mybest.domain.repository.OutingRepository
@@ -79,6 +81,9 @@ import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.HistoryBodySources
 import com.emm.mybest.domain.usecase.history.HistoryNightSources
 import com.emm.mybest.domain.usecase.home.ResolveHomeDestinationUseCase
+import com.emm.mybest.domain.usecase.note.AddNoteUseCase
+import com.emm.mybest.domain.usecase.note.DeleteNoteUseCase
+import com.emm.mybest.domain.usecase.note.UpdateNoteUseCase
 import com.emm.mybest.domain.usecase.onboarding.ObserveOnboardingCompletedUseCase
 import com.emm.mybest.domain.usecase.onboarding.SetOnboardingCompletedUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
@@ -187,6 +192,12 @@ val appModule = module {
     single { get<AppDatabase>().purchaseGoalDao() }
     single<DebtRepository> { DebtRepositoryImpl(get()) }
     single<PurchaseGoalRepository> { PurchaseGoalRepositoryImpl(get()) }
+
+    single { get<AppDatabase>().noteDao() }
+    single<NoteRepository> { NoteRepositoryImpl(get()) }
+    factory { AddNoteUseCase(get(), get()) }
+    factory { UpdateNoteUseCase(get()) }
+    factory { DeleteNoteUseCase(get()) }
 
     single { get<AppDatabase>().notificationCaptureDao() }
     single<NotificationCaptureRepository> { NotificationCaptureRepositoryImpl(get()) }
