@@ -39,7 +39,7 @@ Feature scope and acceptance live in [`PRD.md`](PRD.md); per-feature behavior in
 Navigation is Navigation 3 (`core/navigation/`): typed `Screen` keys, four top-level tabs (Home, Summary, History, Settings) and pushed screens on top. `core/` also holds `datetime/` (app day, 05:00 cutoff, ADR 0003), `money/`, `flow/`, `coroutines/`, `notification/` and `permission/`.
 
 ## 5. Persistence
-Room database `my_best_db`, version 11 (`AppDatabase.SCHEMA_VERSION`). Schema JSON per version is committed under `app/schemas/`. Tables (the entities of `data/AppDatabase.kt`):
+Room database `my_best_db`, version 12 (`AppDatabase.SCHEMA_VERSION`). Schema JSON per version is committed under `app/schemas/`. Tables (the entities of `data/AppDatabase.kt`):
 
 | Table                   | Description                                                   |
 |-------------------------|---------------------------------------------------------------|
@@ -56,6 +56,7 @@ Room database `my_best_db`, version 11 (`AppDatabase.SCHEMA_VERSION`). Schema JS
 | `goal_contribution`     | Real contributions to the Purchase goal                       |
 | `capture_app`           | Apps selected for notification capture                        |
 | `captured_notification` | Raw captured notifications (ADR 0002)                         |
+| `note`                  | Bitácora notes                                                |
 
 Migration rule (PRD section 12, `.claude/rules/room.md`):
 - Version 10 is the v1 baseline (`AppDatabase.V1_SCHEMA_VERSION`). Only databases below it are recreated; the tables of the dropped plans went that way (ADR 0004).
