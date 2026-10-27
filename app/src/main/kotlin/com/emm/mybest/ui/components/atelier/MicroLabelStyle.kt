@@ -7,4 +7,5 @@ import androidx.compose.ui.unit.sp
 data class MicroLabelStyle(
     val tone: MicroLabelTone = MicroLabelTone.Default,
     val size: TextUnit = 10.sp,
+    val isSingleLine: Boolean = false,
 )

@@ -38,6 +38,8 @@ fun MicroLabel(
         fontSize = style.size,
         letterSpacing = TRACKING_EM,
         fontWeight = FontWeight.Normal,
+        softWrap = !style.isSingleLine,
+        maxLines = if (style.isSingleLine) 1 else Int.MAX_VALUE,
     )
 }
 
