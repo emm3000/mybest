@@ -136,6 +136,7 @@ class PreOutingViewModelFormTest {
         advanceUntilIdle()
 
         assertEquals(PreOutingDecisionState.Undecided, stateNow(viewModel).decision)
+        assertEquals(0, gatedOutingRepository.recordPlannedCalls)
     }
 
     @Test
