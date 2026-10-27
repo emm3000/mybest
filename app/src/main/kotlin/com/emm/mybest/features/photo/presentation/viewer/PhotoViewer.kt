@@ -14,7 +14,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emm.mybest.R
 import com.emm.mybest.domain.media.PhotoCaptureFiles
 import com.emm.mybest.domain.models.ProgressPhoto
-import com.emm.mybest.features.photo.presentation.rememberPhotoCameraHandler
+import com.emm.mybest.ui.components.rememberPhotoCameraHandler
 import kotlinx.coroutines.flow.Flow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject

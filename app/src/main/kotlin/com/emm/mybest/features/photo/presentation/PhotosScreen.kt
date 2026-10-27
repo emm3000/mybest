@@ -28,6 +28,7 @@ import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.atelier.FaceSilhouette
 import com.emm.mybest.ui.components.atelier.Hairline
 import com.emm.mybest.ui.components.atelier.TrunkSilhouette
+import com.emm.mybest.ui.components.rememberPhotoCameraHandler
 
 @Composable
 fun PhotosScreen(
