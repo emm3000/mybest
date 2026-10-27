@@ -198,6 +198,14 @@
     <string name="logbook_kind_return">VOLVISTE</string>
     <string name="logbook_kind_weigh_in">PESAJE</string>
     <string name="logbook_kind_photo">FOTO</string>
+    <plurals name="logbook_photos_trunk">
+        <item quantity="one">Tronco</item>
+        <item quantity="other">Tronco ×%1$d</item>
+    </plurals>
+    <plurals name="logbook_photos_face">
+        <item quantity="one">Cara</item>
+        <item quantity="other">Cara ×%1$d</item>
+    </plurals>
     <string name="logbook_kind_installment">CUOTA PAGADA</string>
     <string name="logbook_kind_contribution">APORTE</string>
     <string name="logbook_spent">Gasto %1$s</string>
