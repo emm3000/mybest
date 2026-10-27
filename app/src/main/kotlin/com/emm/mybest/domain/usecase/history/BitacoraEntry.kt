@@ -1,11 +1,13 @@
 package com.emm.mybest.domain.usecase.history
 
 import com.emm.mybest.core.money.Money
+import com.emm.mybest.domain.models.Note
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.RelapseReason
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.models.WonNight
+import kotlinx.datetime.LocalTime
 
 /**
  * One recorded event of an app day in the Bitácora.
@@ -26,4 +28,6 @@ sealed interface BitacoraEntry {
     data class InstallmentEntry(val debtName: String, val amount: Money) : BitacoraEntry
 
     data class ContributionEntry(val amount: Money) : BitacoraEntry
+
+    data class NoteEntry(val note: Note, val time: LocalTime) : BitacoraEntry
 }

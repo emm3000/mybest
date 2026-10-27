@@ -249,6 +249,8 @@ val appModule = module {
                 HistoryNightSources(get(), get()),
                 get(),
                 BitacoraMoneySources(get(), get()),
+                get(),
+                get(),
             ),
         )
     }

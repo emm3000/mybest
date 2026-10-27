@@ -9,7 +9,7 @@ import com.emm.mybest.domain.usecase.history.BitacoraEntry
 internal fun BitacoraEntry.OutingEntry.toOutingRow(): BitacoraRowState {
     val isRelapse = relapseReasons.isNotEmpty()
     val labelRes = if (isRelapse) R.string.bitacora_kind_relapse else R.string.bitacora_kind_outing
-    return BitacoraRowState(labelRes, outingParts(), isRelapse)
+    return BitacoraRowState(textRes(labelRes), outingParts(), isRelapse)
 }
 
 private fun BitacoraEntry.OutingEntry.outingParts(): List<BitacoraTextPart> =

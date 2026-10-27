@@ -1,11 +1,11 @@
 package com.emm.mybest.features.history.presentation
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 
 @Immutable
 data class BitacoraRowState(
-    @StringRes val labelRes: Int,
+    val label: BitacoraTextPart,
     val parts: List<BitacoraTextPart>,
     val isRelapse: Boolean = false,
+    val noteId: Long? = null,
 )

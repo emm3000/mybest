@@ -9,7 +9,7 @@ private val PREVIEW_DAY = LocalDate(2026, 11, 6)
 private val PREVIEW_TODAY = LocalDate(2026, 11, 10)
 
 internal fun previewRelapseRow(): BitacoraRowState = BitacoraRowState(
-    labelRes = R.string.bitacora_kind_relapse,
+    label = textRes(R.string.bitacora_kind_relapse),
     parts = listOf(
         textRes(R.string.history_detail_outing_planned),
         textRes(R.string.bitacora_spent, "S/ 150.00"),
@@ -20,12 +20,12 @@ internal fun previewRelapseRow(): BitacoraRowState = BitacoraRowState(
 )
 
 private fun previewReturnRow(): BitacoraRowState = BitacoraRowState(
-    labelRes = R.string.bitacora_kind_return,
+    label = textRes(R.string.bitacora_kind_return),
     parts = listOf(BitacoraTextPart.Plural(R.plurals.bitacora_return_days, 1)),
 )
 
 private fun previewStayedInRow(): BitacoraRowState = BitacoraRowState(
-    labelRes = R.string.bitacora_kind_stayed_in,
+    label = textRes(R.string.bitacora_kind_stayed_in),
     parts = listOf(textRes(R.string.bitacora_stayed_in)),
 )
 

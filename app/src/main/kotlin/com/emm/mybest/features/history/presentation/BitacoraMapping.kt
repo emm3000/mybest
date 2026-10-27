@@ -2,6 +2,7 @@ package com.emm.mybest.features.history.presentation
 
 import androidx.annotation.StringRes
 import com.emm.mybest.R
+import com.emm.mybest.core.datetime.formatHhMm
 import com.emm.mybest.core.money.formatPen
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.WonNight
@@ -42,10 +43,15 @@ private fun BitacoraEntry.toRow(): BitacoraRowState = when (this) {
         R.string.bitacora_kind_contribution,
         listOf(textRes(R.string.bitacora_contribution, amount.formatPen())),
     )
+    is BitacoraEntry.NoteEntry -> BitacoraRowState(
+        label = BitacoraTextPart.Text(time.formatHhMm()),
+        parts = listOf(BitacoraTextPart.Text(note.text)),
+        noteId = note.id,
+    )
 }
 
 private fun row(@StringRes labelRes: Int, parts: List<BitacoraTextPart>): BitacoraRowState =
-    BitacoraRowState(labelRes, parts)
+    BitacoraRowState(textRes(labelRes), parts)
 
 private fun WonNight.toParts(): List<BitacoraTextPart> {
     val estimate = estimatedCost?.let { textRes(R.string.bitacora_won_night_estimate, it.formatPen()) }

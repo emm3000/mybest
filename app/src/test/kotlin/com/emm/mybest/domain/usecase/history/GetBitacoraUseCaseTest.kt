@@ -10,6 +10,7 @@ import com.emm.mybest.domain.models.Debt
 import com.emm.mybest.domain.models.DebtPayment
 import com.emm.mybest.domain.models.GoalContribution
 import com.emm.mybest.domain.models.Limits
+import com.emm.mybest.domain.models.Note
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.OutingKind
 import com.emm.mybest.domain.models.PhotoType
@@ -21,6 +22,7 @@ import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
 import com.emm.mybest.domain.usecase.history.BitacoraEntry.ContributionEntry
 import com.emm.mybest.domain.usecase.history.BitacoraEntry.InstallmentEntry
+import com.emm.mybest.domain.usecase.history.BitacoraEntry.NoteEntry
 import com.emm.mybest.domain.usecase.history.BitacoraEntry.OutingEntry
 import com.emm.mybest.domain.usecase.history.BitacoraEntry.PhotosEntry
 import com.emm.mybest.domain.usecase.history.BitacoraEntry.ReturnEntry
@@ -31,6 +33,7 @@ import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveReturnTimesUseCase
 import com.emm.mybest.testing.FakeDailyCheckRepository
 import com.emm.mybest.testing.FakeDebtRepository
+import com.emm.mybest.testing.FakeNoteRepository
 import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FakePurchaseGoalRepository
 import com.emm.mybest.testing.FakeSetupRepository
@@ -68,6 +71,9 @@ private fun unplanned(id: Long, appDay: LocalDate, checkIn: CheckIn? = null) =
 private fun photo(date: LocalDate, type: PhotoType, createdAt: Long) =
     ProgressPhoto("p$createdAt", date, type, "/tmp/$createdAt.jpg", createdAt)
 
+private fun note(id: Long, writtenAt: LocalDateTime, appDay: LocalDate, text: String = "nota $id") =
+    Note(id, appDay, writtenAt.toInstant(LIMA), text)
+
 private fun check(appDay: LocalDate, type: DailyCheckType, isDone: Boolean = true) =
     DailyCheck(appDay, type, isDone)
 
@@ -81,6 +87,7 @@ private data class Records(
     val debts: List<Debt> = emptyList(),
     val payments: List<DebtPayment> = emptyList(),
     val contributions: List<GoalContribution> = emptyList(),
+    val notes: List<Note> = emptyList(),
 )
 
 private fun useCase(records: Records): GetBitacoraUseCase {
@@ -101,6 +108,8 @@ private fun useCase(records: Records): GetBitacoraUseCase {
                 FakeDebtRepository(records.debts, records.payments),
                 FakePurchaseGoalRepository(initialContributions = records.contributions),
             ),
+            noteRepository = FakeNoteRepository(records.notes),
+            appDayClock = appDayClock,
         ),
     )
 }
@@ -235,5 +244,43 @@ class GetBitacoraUseCaseTest {
     @Test
     fun `an empty month gives nothing`() = runTest {
         assertTrue(days(Records()).isEmpty())
+    }
+
+    @Test
+    fun `a note written after midnight sits in the app day before, after the outing of that day`() = runTest {
+        val night = note(1, LocalDateTime(2026, 11, 7, 2, 30), day(11, 6))
+        val entries = days(fxC().copy(notes = listOf(night))).first { it.appDay == day(11, 6) }.entries
+
+        assertEquals(2, entries.size)
+        assertTrue(entries.first() is OutingEntry)
+        assertEquals(NoteEntry(night, LocalTime(2, 30)), entries.last())
+    }
+
+    @Test
+    fun `two notes of one day come newest first after every event of the day`() = runTest {
+        val early = note(1, LocalDateTime(2026, 11, 7, 1, 10), day(11, 6))
+        val late = note(2, LocalDateTime(2026, 11, 7, 3, 45), day(11, 6))
+        val entries = days(fxC().copy(notes = listOf(early, late))).first { it.appDay == day(11, 6) }.entries
+
+        assertEquals(listOf(NoteEntry(late, LocalTime(3, 45)), NoteEntry(early, LocalTime(1, 10))), entries.drop(1))
+        assertTrue(entries.first() is OutingEntry)
+    }
+
+    @Test
+    fun `a day with only a note has a group`() = runTest {
+        val onlyNote = note(1, LocalDateTime(2026, 11, 12, 9, 0), day(11, 12))
+
+        assertEquals(
+            listOf(NoteEntry(onlyNote, LocalTime(9, 0))),
+            days(Records(notes = listOf(onlyNote))).single().entries,
+        )
+    }
+
+    @Test
+    fun `a note of October is not in November`() = runTest {
+        val october = note(1, LocalDateTime(2026, 10, 31, 20, 0), day(10, 31))
+
+        assertTrue(days(Records(notes = listOf(october))).isEmpty())
+        assertEquals(1, days(Records(notes = listOf(october)), OCTOBER).size)
     }
 }

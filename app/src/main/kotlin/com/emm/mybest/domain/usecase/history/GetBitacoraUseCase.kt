@@ -38,6 +38,7 @@ private data class BitacoraMonthRecords(
     val nights: BitacoraNightRecords,
     val returns: List<ReturnTime>,
     val money: BitacoraMoneyRecords,
+    val notes: List<DatedEntry>,
 )
 
 private data class DatedEntry(val appDay: LocalDate, val entry: BitacoraEntry)
@@ -50,7 +51,7 @@ class GetBitacoraUseCase(
      * Emits the days of [month] that have a recorded event, newest app day first. Inside a day the order is fixed:
      * outing, won night, stayed in, return, weigh-in, photos, installments by debt name, contributions by id. A
      * return lands on its return app day, an installment on the payment date of its month, and daily checks are never
-     * listed.
+     * listed. Notes close the day, newest first, each with the local time it was written.
      */
     operator fun invoke(month: YearMonthValue): Flow<List<BitacoraDay>> {
         val days = month.days()
@@ -59,6 +60,7 @@ class GetBitacoraUseCase(
             nightRecords(days),
             sources.observeReturnTimes(),
             moneyRecords(),
+            noteEntries(days),
             ::BitacoraMonthRecords,
         ).map { it.toDays(days) }
     }
@@ -80,6 +82,14 @@ class GetBitacoraUseCase(
         )
     }
 
+    private fun noteEntries(days: ClosedRange<LocalDate>): Flow<List<DatedEntry>> =
+        sources.noteRepository.observeRange(days.start, days.endInclusive).map { notes ->
+            notes.map { note ->
+                val time = sources.appDayClock.localDateTimeOf(note.createdAt).time
+                DatedEntry(note.appDay, BitacoraEntry.NoteEntry(note, time))
+            }
+        }
+
     private fun moneyRecords(): Flow<BitacoraMoneyRecords> = combine(
         sources.money.debtRepository.observeDebts(),
         sources.money.debtRepository.observePayments(),
@@ -97,7 +107,8 @@ private fun BitacoraMonthRecords.toDays(days: ClosedRange<LocalDate>): List<Bita
 
 private fun BitacoraMonthRecords.datedEntries(): List<DatedEntry> =
     outingEntries() + wonNightEntries() + stayedInEntries() + returnEntries() +
-        weighInEntries() + photoEntries() + installmentEntries() + contributionEntries()
+        weighInEntries() + photoEntries() + installmentEntries() + contributionEntries() +
+        notes
 
 private fun BitacoraMonthRecords.outingEntries(): List<DatedEntry> = nights.outings.map {
     DatedEntry(it.appDay, BitacoraEntry.OutingEntry(it, nights.reasonsByDay[it.appDay].orEmpty()))
