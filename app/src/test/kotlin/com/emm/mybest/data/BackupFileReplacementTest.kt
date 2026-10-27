@@ -183,6 +183,19 @@ class BackupFileReplacementTest {
         assertFalse(isDatabaseClosed)
         assertArrayEquals(LIVE_BYTES, target.readBytes())
     }
+
+    @Test
+    fun `a close that fails keeps the live file and requires a restart`() {
+        val target = folder.newFile("my_best_db").apply { writeBytes(LIVE_BYTES) }
+
+        val result = replaceDatabaseFile(ByteArrayInputStream(BACKUP_BYTES), target) {
+            throw IllegalStateException("close failed")
+        }
+
+        assertEquals(RestoreResult.NotRestoredRequiresRestart, result)
+        assertArrayEquals(LIVE_BYTES, target.readBytes())
+        assertEquals(listOf("my_best_db"), folder.root.list()?.toList())
+    }
 }
 
 private fun failMove(staged: File, target: File) {
