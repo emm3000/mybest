@@ -7,6 +7,7 @@ import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.models.PreOutingSnapshot
 import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.Setup
+import com.emm.mybest.domain.models.WonNight
 import com.emm.mybest.domain.repository.OutingRepository
 import com.emm.mybest.domain.usecase.preouting.GetEstimatedOutingCostUseCase
 import com.emm.mybest.domain.usecase.preouting.HasDecisionOnUseCase
@@ -70,12 +71,22 @@ internal class GatedOutingRepository(
     var gate: CompletableDeferred<Unit>? = null
     var failure: Throwable? = null
     var recordPlannedCalls = 0
+    var wonNightGate: CompletableDeferred<Unit>? = null
+    var wonNightFailure: Throwable? = null
+    var recordWonNightCalls = 0
 
     override suspend fun recordPlanned(appDay: LocalDate, limits: Limits): Long {
         recordPlannedCalls++
         failure?.let { throw it }
         gate?.await()
         return delegate.recordPlanned(appDay, limits)
+    }
+
+    override suspend fun recordWonNight(wonNight: WonNight) {
+        recordWonNightCalls++
+        wonNightFailure?.let { throw it }
+        wonNightGate?.await()
+        delegate.recordWonNight(wonNight)
     }
 }
 
@@ -116,7 +127,7 @@ internal fun decisionUseCases(
     return PreOutingDecisionUseCases(
         observeTonight = ObserveTonightUseCase(outings, clock),
         planOuting = PlanOutingUseCase(gatedOutings, hasDecisionOn, clock),
-        recordWonNight = RecordWonNightUseCase(outings, hasDecisionOn, estimate, clock),
+        recordWonNight = RecordWonNightUseCase(gatedOutings, hasDecisionOn, estimate, clock),
     )
 }
 
