@@ -13,7 +13,8 @@ private val HOME_LOAD_TIMEOUT = 2.seconds
 
 /**
  * What the Home tab shows right now, after the user dismissed a routed screen. Home publishes it; a launch action
- * reads it. Null until Home has loaded, and again once the Home that published it is gone.
+ * reads it. Null until Home has loaded, and again once the Home that published it is gone. Only the Home that
+ * claimed last can publish or clear.
  */
 class HomeVisibleDestination {
 
@@ -22,21 +23,24 @@ class HomeVisibleDestination {
     private var owner: Any? = null
 
     /**
-     * Makes [owner] the Home that publishes from now on and drops what an older Home published, so a wait sees only
-     * the new Home.
+     * Makes [owner] the only Home that can publish or clear from now on and drops what an older Home published, so a
+     * wait sees only the new Home. This is the only way to become the owner.
      */
     fun claim(owner: Any) {
         this.owner = owner
         _destination.value = null
     }
 
+    /**
+     * Shows [destination] only if [owner] claimed last; a publish from a Home that lost ownership is ignored.
+     */
     fun publish(owner: Any, destination: HomeDestination) {
-        this.owner = owner
+        if (this.owner !== owner) return
         _destination.value = destination
     }
 
     /**
-     * Clears the destination only if [owner] published it last, so a Home that is going away never clears what a
+     * Clears the destination only if [owner] claimed last, so a Home that is going away never clears what a
      * newer Home already published.
      */
     fun clear(owner: Any) {

@@ -109,9 +109,8 @@ class HomeCheckInRoutingTest {
         visibleDestination.claim(olderHome)
         visibleDestination.publish(olderHome, HomeDestination.DAILY_CHECKS)
         buildViewModel(FakeOutingRepository(initialOutings = listOf(PENDING_FRIDAY)), FixedClock(SATURDAY_MORNING))
-        advanceUntilIdle()
-
         visibleDestination.clear(olderHome)
+        advanceUntilIdle()
 
         assertEquals(HomeDestination.CHECK_IN, visibleDestination.destination.value)
     }
