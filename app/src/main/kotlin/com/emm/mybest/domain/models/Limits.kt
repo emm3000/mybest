@@ -1,9 +1,6 @@
 package com.emm.mybest.domain.models
 
-import com.emm.mybest.core.datetime.APP_DAY_START
-import com.emm.mybest.core.datetime.MINUTES_PER_DAY
-import com.emm.mybest.core.datetime.MORNING_AFTER_CUTOFF
-import com.emm.mybest.core.datetime.minutesIntoAppDay
+import com.emm.mybest.core.datetime.minutesIntoEvening
 import com.emm.mybest.core.money.Money
 import kotlinx.datetime.LocalTime
 
@@ -17,9 +14,9 @@ data class Limits(
 ) {
     /**
      * How far [checkIn] went past each limit. Money is always evaluated; drinks and return time only when the check-in
-     * answers them, so a null answer leaves that limit out. Return times are compared on the app-day timeline that
-     * starts at 05:00, so 00:15 is later than 23:30. Returns from 05:00 to before 12:00 are placed on the next morning
-     * and therefore count as past any evening or overnight limit.
+     * answers them, so a null answer leaves that limit out. Return times are compared on the evening timeline that
+     * starts at 18:00: a time from 18:00 to 23:59 belongs to the outing's evening and a time from 00:00 to 17:59 is the
+     * next day, so 00:15 is later than 23:30 and 12:30 is past a 02:00 limit.
      */
     fun evaluate(checkIn: CheckIn): List<LimitResult> = listOfNotNull(
         LimitResult(LimitKind.MONEY, excess(checkIn.totalSpent.cents, money.cents)),
@@ -28,12 +25,7 @@ data class Limits(
     )
 
     private fun returnTimeExcess(actual: LocalTime): Long =
-        excess(actual.returnPosition(), returnTime.minutesIntoAppDay().toLong())
-
-    private fun LocalTime.returnPosition(): Long {
-        val minutes = minutesIntoAppDay().toLong()
-        return if (this >= APP_DAY_START && this < MORNING_AFTER_CUTOFF) minutes + MINUTES_PER_DAY else minutes
-    }
+        excess(actual.minutesIntoEvening().toLong(), returnTime.minutesIntoEvening().toLong())
 
     private fun excess(actual: Long, limit: Long): Long = (actual - limit).coerceAtLeast(0)
 }

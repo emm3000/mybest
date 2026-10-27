@@ -70,6 +70,14 @@ class OutingTest {
     }
 
     @Test
+    fun `returning at 12_30 against a 02_00 limit breaks it by 630 minutes the next day`() {
+        val outing = plannedOuting(KEPT_CHECK_IN.copy(returnTime = LocalTime(12, 30)))
+
+        assertEquals(true, outing.hasBrokenLimit)
+        assertEquals(630L, outing.exceededBy(LimitKind.RETURN_TIME))
+    }
+
+    @Test
     fun `unanswered drinks and return time are not evaluated`() {
         val outing = plannedOuting(KEPT_CHECK_IN.copy(drinks = null, returnTime = null))
 
