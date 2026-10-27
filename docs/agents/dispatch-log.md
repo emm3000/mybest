@@ -17,7 +17,7 @@ Totals of rows already folded out of Recent.
 | 3 | sonnet:medium | 7 | 3 | 1 | 3 | 0 |
 | 3 | sonnet:high | 20 | 12 | 5 | 3 | 0 |
 | 4 | sonnet:high | 4 | 2 | 0 | 2 | 1 |
-| 5 | opus:high | 23 | 18 | 1 | 4 | 0 |
+| 5 | opus:high | 24 | 19 | 1 | 4 | 0 |
 
 ## Recent
 
@@ -25,7 +25,6 @@ Last 20 PRs, oldest first. Model:effort is what actually ran, which may differ f
 
 | PR | Issue | Row | Model:effort | First review | Cause |
 |---|---|---|---|---|---|
-| #150 | #148 | 5 | opus:high | MERGE | - |
 | #151 | #147 | 3 | sonnet:high | MERGE | - |
 | #152 | #133 | 3 | sonnet:high | MERGE | - |
 | #153 | #131 | 3 | sonnet:high | MERGE | - |
@@ -45,3 +44,4 @@ Last 20 PRs, oldest first. Model:effort is what actually ran, which may differ f
 | #172 | #28 | 1 | sonnet:medium | FIX FIRST | checklist |
 | #173 | #171 | 2 | sonnet:medium | MERGE | - |
 | #175 | #174 | 3 | sonnet:high | MERGE | - |
+| #177 | #176 | 3 | sonnet:high | MERGE | - |
