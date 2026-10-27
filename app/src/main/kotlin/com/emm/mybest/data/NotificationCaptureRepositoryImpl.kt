@@ -44,6 +44,9 @@ class NotificationCaptureRepositoryImpl(
         )
     }
 
+    override suspend fun latestCapturedWithKey(key: String): CapturedNotification? =
+        notificationCaptureDao.findLatestByKey(key)?.toDomain()
+
     override suspend fun deleteAllCaptured() {
         notificationCaptureDao.deleteAllCaptured()
     }

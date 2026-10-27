@@ -27,6 +27,12 @@ interface NotificationCaptureDao {
     @Query("SELECT * FROM captured_notification ORDER BY posted_at_epoch_ms DESC, id DESC")
     fun observeCaptured(): Flow<List<CapturedNotificationEntity>>
 
+    @Query(
+        "SELECT * FROM captured_notification WHERE notification_key = :key " +
+            "ORDER BY posted_at_epoch_ms DESC, id DESC LIMIT 1",
+    )
+    suspend fun findLatestByKey(key: String): CapturedNotificationEntity?
+
     @Query("DELETE FROM captured_notification")
     suspend fun deleteAllCaptured()
 }

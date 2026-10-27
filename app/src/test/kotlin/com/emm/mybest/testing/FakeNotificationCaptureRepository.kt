@@ -37,6 +37,11 @@ class FakeNotificationCaptureRepository(
         captured.value = listOf(stored) + captured.value
     }
 
+    override suspend fun latestCapturedWithKey(key: String): CapturedNotification? =
+        captured.value
+            .filter { it.key == key }
+            .maxWithOrNull(compareBy({ it.postedAt }, { it.id }))
+
     override suspend fun deleteAllCaptured() {
         captured.value = emptyList()
     }

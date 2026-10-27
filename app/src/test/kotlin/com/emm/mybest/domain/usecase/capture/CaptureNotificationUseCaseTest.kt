@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 private const val YAPE = "com.bcp.innovacxion.yapeapp"
@@ -36,6 +37,57 @@ class CaptureNotificationUseCaseTest {
         CaptureNotificationUseCase(repository)(posted(key = "0|$YAPE|7|qa|10100"))
 
         assertEquals(listOf("0|$YAPE|7|qa|10100"), repository.observeCaptured().first().map { it.key })
+    }
+
+    @Test
+    fun `two posts with the same key, title and text store one row`() = runTest {
+        val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
+
+        CaptureNotificationUseCase(repository)(posted())
+        CaptureNotificationUseCase(repository)(posted())
+
+        assertEquals(1, repository.observeCaptured().first().size)
+    }
+
+    @Test
+    fun `the same key with a different text stores two rows`() = runTest {
+        val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
+
+        CaptureNotificationUseCase(repository)(posted(text = "Te yapearon S/ 25.00"))
+        CaptureNotificationUseCase(repository)(posted(text = "Te yapearon S/ 45.00"))
+
+        assertEquals(2, repository.observeCaptured().first().size)
+    }
+
+    @Test
+    fun `the same key with a different title stores two rows`() = runTest {
+        val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
+
+        CaptureNotificationUseCase(repository)(posted(title = "Yape"))
+        CaptureNotificationUseCase(repository)(posted(title = "Yape Perú"))
+
+        assertEquals(2, repository.observeCaptured().first().size)
+    }
+
+    @Test
+    fun `only the latest row of a key is compared so text A, B, A stores three rows`() = runTest {
+        val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
+
+        CaptureNotificationUseCase(repository)(posted(text = "A", postedAt = POSTED_AT))
+        CaptureNotificationUseCase(repository)(posted(text = "B", postedAt = POSTED_AT + 1.seconds))
+        CaptureNotificationUseCase(repository)(posted(text = "A", postedAt = POSTED_AT + 2.seconds))
+
+        assertEquals(listOf("A", "B", "A"), repository.observeCaptured().first().map { it.text }.reversed())
+    }
+
+    @Test
+    fun `different keys with the same title and text store two rows`() = runTest {
+        val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
+
+        CaptureNotificationUseCase(repository)(posted(key = "k1"))
+        CaptureNotificationUseCase(repository)(posted(key = "k2"))
+
+        assertEquals(listOf("k2", "k1"), repository.observeCaptured().first().map { it.key })
     }
 
     @Test
@@ -103,4 +155,5 @@ private fun posted(
     title: String? = "Yape",
     text: String? = "Te yapearon S/ 25.00",
     isGroupSummary: Boolean = false,
-) = PostedNotification(packageName, key, title, text, POSTED_AT, isGroupSummary)
+    postedAt: Instant = POSTED_AT,
+) = PostedNotification(packageName, key, title, text, postedAt, isGroupSummary)

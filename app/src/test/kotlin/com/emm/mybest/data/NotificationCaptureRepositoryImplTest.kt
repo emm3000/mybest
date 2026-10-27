@@ -3,6 +3,7 @@ package com.emm.mybest.data
 import com.emm.mybest.data.entities.CaptureAppEntity
 import com.emm.mybest.data.entities.CapturedNotificationEntity
 import com.emm.mybest.data.entities.NotificationCaptureDao
+import com.emm.mybest.domain.models.CapturedNotification
 import com.emm.mybest.domain.models.PostedNotification
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import kotlin.time.Instant
 
@@ -68,5 +70,30 @@ class NotificationCaptureRepositoryImplTest {
                 ),
             )
         }
+    }
+
+    @Test
+    fun `latestCapturedWithKey maps the stored row to the domain model`() = runTest {
+        val entity = CapturedNotificationEntity(7, YAPE, " Yape ", "Te yapearon S/ 25.00\n", 1_000, "k1")
+        coEvery { dao.findLatestByKey("k1") } returns entity
+
+        assertEquals(
+            CapturedNotification(
+                7,
+                YAPE,
+                " Yape ",
+                "Te yapearon S/ 25.00\n",
+                Instant.fromEpochMilliseconds(1_000),
+                "k1",
+            ),
+            repository.latestCapturedWithKey("k1"),
+        )
+    }
+
+    @Test
+    fun `latestCapturedWithKey is null when the dao finds nothing`() = runTest {
+        coEvery { dao.findLatestByKey("missing") } returns null
+
+        assertNull(repository.latestCapturedWithKey("missing"))
     }
 }

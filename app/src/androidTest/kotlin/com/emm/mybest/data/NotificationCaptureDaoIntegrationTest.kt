@@ -2,11 +2,13 @@ package com.emm.mybest.data
 
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
+import com.emm.mybest.data.entities.CapturedNotificationEntity
 import com.emm.mybest.domain.models.PostedNotification
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -65,4 +67,39 @@ class NotificationCaptureDaoIntegrationTest {
         assertTrue(repository.observeCaptured().first().isEmpty())
         assertEquals(setOf(YAPE), repository.observeSelectedApps().first())
     }
+
+    @Test
+    fun the_lookup_returns_the_newest_row_of_the_key_and_breaks_ties_by_id() = runBlocking {
+        repository.saveCaptured(posted("k1", "old", 1_000))
+        repository.saveCaptured(posted("k1", "newest", 3_000))
+        repository.saveCaptured(posted("k1", "same time, later id", 3_000))
+        repository.saveCaptured(posted("k2", "other key", 9_000))
+
+        assertEquals("same time, later id", repository.latestCapturedWithKey("k1")?.text)
+    }
+
+    @Test
+    fun the_lookup_returns_null_for_an_unknown_key() = runBlocking {
+        repository.saveCaptured(posted("k1", "text", 1_000))
+
+        assertNull(repository.latestCapturedWithKey("unknown"))
+    }
+
+    @Test
+    fun the_lookup_never_returns_a_row_without_a_key() = runBlocking {
+        database.notificationCaptureDao().insertCaptured(
+            CapturedNotificationEntity(
+                packageName = YAPE,
+                title = "Yape",
+                text = "stored before keys",
+                postedAtEpochMs = 1_000,
+                notificationKey = null,
+            ),
+        )
+
+        assertNull(repository.latestCapturedWithKey("k1"))
+    }
+
+    private fun posted(key: String, text: String, postedAtEpochMs: Long) =
+        PostedNotification(YAPE, key, "Yape", text, Instant.fromEpochMilliseconds(postedAtEpochMs))
 }
