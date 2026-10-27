@@ -50,4 +50,13 @@ class HomeVisibleDestination {
      */
     suspend fun awaitLoaded(): HomeDestination? =
         withTimeoutOrNull(HOME_LOAD_TIMEOUT) { destination.filterNotNull().first() }
+
+    /**
+     * Returns the screen [action] opens, per [LaunchActionRule.screenFor]. Waits for Home to load only while
+     * [isHomeVisible], then reads [isHomeVisible] again, since the user may leave Home during the wait.
+     */
+    suspend fun screenForLaunchAction(action: String, isHomeVisible: () -> Boolean): Screen? {
+        val homeDestination = if (isHomeVisible()) awaitLoaded() else null
+        return LaunchActionRule.screenFor(action, homeDestination, isHomeVisible())
+    }
 }
