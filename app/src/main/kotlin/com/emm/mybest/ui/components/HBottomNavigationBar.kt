@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
@@ -30,7 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emm.mybest.R
@@ -51,6 +55,13 @@ private data class AtelierNavItem(
     val screen: Screen,
     val icon: ImageVector,
     val labelResId: Int,
+)
+
+private data class AtelierNavCellModel(
+    val item: AtelierNavItem,
+    val label: String,
+    val isActive: Boolean,
+    val labelFontSize: TextUnit,
 )
 
 private val NAV_ITEMS = listOf(
@@ -74,11 +85,26 @@ fun HBottomNavigationBar(
             .windowInsetsPadding(WindowInsets.navigationBars),
     ) {
         Hairline(color = AtelierHairline)
+        AtelierNavRow(currentRoute = currentRoute, onNavItemClick = onNavItemClick)
+    }
+}
+
+@Composable
+private fun AtelierNavRow(
+    currentRoute: Screen?,
+    onNavItemClick: (Screen) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val labels = NAV_ITEMS.map { stringResource(id = it.labelResId).uppercase() }
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val labelMaxWidthPx = constraints.maxWidth / NAV_ITEMS.size - with(LocalDensity.current) {
+            LABEL_SIDE_PADDING.roundToPx() * 2
+        }
+        val labelFontSize = rememberSharedLabelFontSize(labels, labelMaxWidthPx)
         Row(modifier = Modifier.fillMaxWidth().heightIn(min = NAV_BAR_HEIGHT)) {
-            NAV_ITEMS.forEach { item ->
+            NAV_ITEMS.forEachIndexed { index, item ->
                 AtelierNavCell(
-                    item = item,
-                    isActive = currentRoute == item.screen,
+                    model = AtelierNavCellModel(item, labels[index], currentRoute == item.screen, labelFontSize),
                     onClick = { onNavItemClick(item.screen) },
                     modifier = Modifier.weight(1f),
                 )
@@ -88,14 +114,30 @@ fun HBottomNavigationBar(
 }
 
 @Composable
+private fun rememberSharedLabelFontSize(labels: List<String>, labelMaxWidthPx: Int): TextUnit {
+    val style = MaterialTheme.typography.labelSmall
+    val density = LocalDensity.current
+    val textMeasurer = rememberTextMeasurer(cacheSize = labels.size)
+    return remember(labels, labelMaxWidthPx, style, density) {
+        generateSequence(style.fontSize.value) { it - LABEL_FONT_STEP.value }
+            .takeWhile { it >= LABEL_MIN_FONT_SIZE.value }
+            .map { it.sp }
+            .firstOrNull { size ->
+                labels.all { label ->
+                    textMeasurer.measure(label, style.copy(fontSize = size), softWrap = false).size.width <= labelMaxWidthPx
+                }
+            } ?: LABEL_MIN_FONT_SIZE
+    }
+}
+
+@Composable
 private fun AtelierNavCell(
-    item: AtelierNavItem,
-    isActive: Boolean,
+    model: AtelierNavCellModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val cs = MaterialTheme.colorScheme
-    val tone = if (isActive) cs.onBackground else cs.outline
+    val tone = if (model.isActive) cs.onBackground else cs.outline
     val interactionSource = remember { MutableInteractionSource() }
     Box(
         modifier = modifier
@@ -111,30 +153,30 @@ private fun AtelierNavCell(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
-                imageVector = item.icon,
-                contentDescription = stringResource(id = item.labelResId),
+                imageVector = model.item.icon,
+                contentDescription = stringResource(id = model.item.labelResId),
                 tint = tone,
                 modifier = Modifier.size(ICON_SIZE),
             )
             Spacer(modifier = Modifier.height(LABEL_GAP))
-            NavLabel(text = stringResource(id = item.labelResId).uppercase(), color = tone)
+            NavLabel(text = model.label, color = tone, fontSize = model.labelFontSize)
         }
     }
 }
 
 @Composable
-private fun NavLabel(text: String, color: Color, modifier: Modifier = Modifier) {
-    val style = MaterialTheme.typography.labelSmall
+private fun NavLabel(text: String, color: Color, fontSize: TextUnit, modifier: Modifier = Modifier) {
     BasicText(
         text = text,
-        modifier = modifier.padding(horizontal = LABEL_SIDE_PADDING),
-        style = style.copy(color = color),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = LABEL_SIDE_PADDING),
+        style = MaterialTheme.typography.labelSmall.copy(
+            color = color,
+            fontSize = fontSize,
+            textAlign = TextAlign.Center,
+        ),
         softWrap = false,
         maxLines = 1,
-        autoSize = TextAutoSize.StepBased(
-            minFontSize = LABEL_MIN_FONT_SIZE,
-            maxFontSize = style.fontSize,
-            stepSize = LABEL_FONT_STEP,
-        ),
     )
 }
