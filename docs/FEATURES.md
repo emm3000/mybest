@@ -74,8 +74,8 @@ PRD: [section 8](PRD.md#8-weekly-summary).
 PRD: [section 9](PRD.md#9-calendar).
 
 - `features/history/` (History tab): month pager with marks for checks, outings, relapses, won nights, weigh-ins and photos and a day detail (`domain/usecase/history/`).
-- Bitácora: a "CALENDARIO" / "BITÁCORA" switch under the month hero picks the view, and the month pager and swipe work in both. The Bitácora lists one month newest app day first, grouped by app day: outings with their check-in or relapse, won nights, stayed-in answers, returns, weigh-ins, photos, paid installments (on the due date of their month) and purchase-goal contributions. Daily checks are left out. `GetBitacoraUseCase` merges the existing repositories, so there is no event table. A row opens that app day's detail.
-- Notes: the Bitácora of the current month has an "Escribir nota" button. A note is stamped with the time and app day of writing, sits after the events of its day newest first, and is edited or deleted by tapping its row (`domain/usecase/note/`).
+- Logbook: a "CALENDARIO" / "BITÁCORA" switch under the month hero picks the view, and the month pager and swipe work in both. The Logbook lists one month newest app day first, grouped by app day: outings with their check-in or relapse, won nights, stayed-in answers, returns, weigh-ins, photos, paid installments (on the due date of their month) and purchase-goal contributions. Daily checks are left out. `GetLogbookUseCase` merges the existing repositories, so there is no event table. A row opens that app day's detail.
+- Notes: the Logbook of the current month has an "Escribir nota" button. A note is stamped with the time and app day of writing, sits after the events of its day newest first, and is edited or deleted by tapping its row (`domain/usecase/note/`).
 
 ## 10. Notification capture
 

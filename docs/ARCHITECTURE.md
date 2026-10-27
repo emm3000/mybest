@@ -56,7 +56,7 @@ Room database `my_best_db`, version 12 (`AppDatabase.SCHEMA_VERSION`). Schema JS
 | `goal_contribution`     | Real contributions to the Purchase goal                       |
 | `capture_app`           | Apps selected for notification capture                        |
 | `captured_notification` | Raw captured notifications (ADR 0002)                         |
-| `note`                  | Bitácora notes                                                |
+| `note`                  | Logbook notes                                                 |
 
 Migration rule (PRD section 12, `.claude/rules/room.md`):
 - Version 10 is the v1 baseline (`AppDatabase.V1_SCHEMA_VERSION`). Only databases below it are recreated; the tables of the dropped plans went that way (ADR 0004).
