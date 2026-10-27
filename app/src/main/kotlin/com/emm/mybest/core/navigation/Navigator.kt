@@ -28,4 +28,7 @@ class Navigator(val state: NavigationState) {
             currentStack.removeLastOrNull()
         }
     }
+
+    val isStartRouteShown: Boolean
+        get() = state.topLevelRoute == state.startRoute && state.backStacks[state.startRoute]?.size == 1
 }

@@ -1,6 +1,7 @@
 package com.emm.mybest.features.home.presentation
 
 import com.emm.mybest.core.datetime.AppDayClock
+import com.emm.mybest.core.navigation.HomeVisibleDestination
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.testing.MainDispatcherRule
@@ -28,7 +29,11 @@ class HomeLastPhotoTest {
 
     private fun buildViewModel(photos: List<ProgressPhoto>): HomeViewModel {
         val appDayClock = AppDayClock(FIXED_CLOCK, TimeZone.UTC)
-        return HomeViewModel(HomeUseCasesFixture(photos = photos).build(appDayClock), appDayClock)
+        return HomeViewModel(
+            HomeUseCasesFixture(photos = photos).build(appDayClock),
+            appDayClock,
+            HomeVisibleDestination(),
+        )
     }
 
     @Test
