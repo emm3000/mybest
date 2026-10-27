@@ -73,7 +73,8 @@ PRD: [section 8](PRD.md#8-weekly-summary).
 
 PRD: [section 9](PRD.md#9-calendar).
 
-- `features/history/` (History tab): month pager with marks for checks, outings, relapses, won nights, weigh-ins and photos, plus a day detail and a recent list (`domain/usecase/history/`).
+- `features/history/` (History tab): month pager with marks for checks, outings, relapses, won nights, weigh-ins and photos and a day detail (`domain/usecase/history/`).
+- Bitácora: a "CALENDARIO" / "BITÁCORA" switch under the month hero picks the view, and the month pager and swipe work in both. The Bitácora lists one month newest app day first, grouped by app day: outings with their check-in or relapse, won nights, stayed-in answers, returns, weigh-ins, photos, paid installments (on the due date of their month) and purchase-goal contributions. Daily checks are left out. `GetBitacoraUseCase` merges the existing repositories, so there is no event table. A row opens that app day's detail.
 
 ## 10. Notification capture
 
