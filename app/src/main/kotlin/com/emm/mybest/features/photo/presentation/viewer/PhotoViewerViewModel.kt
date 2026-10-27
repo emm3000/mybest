@@ -2,12 +2,12 @@ package com.emm.mybest.features.photo.presentation.viewer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
 import com.emm.mybest.domain.usecase.photo.ReplacePhotoResult
 import com.emm.mybest.domain.usecase.photo.ReplacePhotoUseCase
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -57,6 +57,3 @@ class PhotoViewerViewModel(
         ReplacePhotoResult.PhotoNotFound -> PhotoViewerEffect.PhotoNotFound
     }
 }
-
-private suspend inline fun <T> attempt(block: () -> T): Result<T> =
-    runCatching { block() }.onFailure { if (it is CancellationException) throw it }
