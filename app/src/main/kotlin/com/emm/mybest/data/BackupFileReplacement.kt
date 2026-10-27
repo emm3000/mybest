@@ -30,14 +30,16 @@ internal fun replaceDatabaseFile(
     closeDatabase: () -> Unit,
 ): RestoreResult {
     var isCloseStarted = false
+    var isReplaced = false
     val replacement = runCatching {
         source.use { input ->
-            replaceFileAtomically(input, target, move) {
+            replaceFileAtomically(input, target, { staged, live -> move(staged, live).also { isReplaced = true } }) {
                 isCloseStarted = true
                 closeDatabase()
             }
         }
     }
+    if (isReplaced) return RestoreResult.RequiresRestart
     if (replacement.isFailure && isCloseStarted) return RestoreResult.NotRestoredRequiresRestart
     replacement.getOrThrow()
     return RestoreResult.RequiresRestart
