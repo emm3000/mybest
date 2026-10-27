@@ -34,6 +34,11 @@ interface NotificationCaptureRepository {
     suspend fun saveCaptured(notification: PostedNotification)
 
     /**
+     * Returns the newest captured notification stored with [key], or null when none carries it.
+     */
+    suspend fun latestCapturedWithKey(key: String): CapturedNotification?
+
+    /**
      * Removes every captured notification.
      */
     suspend fun deleteAllCaptured()
