@@ -12,6 +12,9 @@ import com.emm.mybest.domain.usecase.history.DaySummary
 import com.emm.mybest.domain.usecase.history.GetBitacoraUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.HistoryResult
+import com.emm.mybest.domain.usecase.note.AddNoteUseCase
+import com.emm.mybest.domain.usecase.note.DeleteNoteUseCase
+import com.emm.mybest.domain.usecase.note.UpdateNoteUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.testing.FixedClock
@@ -48,6 +51,11 @@ class HistoryViewModelTest {
     private val getBitacoraUseCase = mockk<GetBitacoraUseCase>()
     private val deleteWeightByDate = mockk<DeleteWeightByDateUseCase>(relaxed = true)
     private val deletePhoto = mockk<DeletePhotoUseCase>(relaxed = true)
+    private val noteUseCases = HistoryNoteUseCases(
+        mockk<AddNoteUseCase>(),
+        mockk<UpdateNoteUseCase>(),
+        mockk<DeleteNoteUseCase>(),
+    )
 
     private val mayAppDayClock = appDayClockAt(LocalDateTime(2026, 5, 15, 12, 0))
 
@@ -80,7 +88,14 @@ class HistoryViewModelTest {
     ): HistoryViewModel {
         every { getHistoryUseCase(any()) } returns flowOf(result)
         every { getBitacoraUseCase(any()) } returns flowOf(bitacoraDays)
-        return HistoryViewModel(getHistoryUseCase, getBitacoraUseCase, deleteWeightByDate, deletePhoto, appDayClock)
+        return HistoryViewModel(
+            getHistoryUseCase,
+            getBitacoraUseCase,
+            deleteWeightByDate,
+            deletePhoto,
+            noteUseCases,
+            appDayClock,
+        )
     }
 
     @Test
@@ -302,6 +317,7 @@ class HistoryViewModelTest {
             getBitacoraUseCase,
             deleteWeightByDate,
             deletePhoto,
+            noteUseCases,
             mayAppDayClock,
         )
 

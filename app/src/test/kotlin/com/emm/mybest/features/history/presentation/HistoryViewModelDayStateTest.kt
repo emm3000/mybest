@@ -77,6 +77,7 @@ class HistoryViewModelDayStateTest {
             getBitacora,
             mockk<DeleteWeightByDateUseCase>(),
             mockk<DeletePhotoUseCase>(),
+            HistoryNoteUseCases(mockk(), mockk(), mockk()),
             clock,
         )
     }

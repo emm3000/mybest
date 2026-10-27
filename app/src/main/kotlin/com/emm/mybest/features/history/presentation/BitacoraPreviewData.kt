@@ -29,6 +29,12 @@ private fun previewStayedInRow(): BitacoraRowState = BitacoraRowState(
     parts = listOf(textRes(R.string.bitacora_stayed_in)),
 )
 
+private fun previewNoteRow(): BitacoraRowState = BitacoraRowState(
+    label = BitacoraTextPart.Text("02:30"),
+    parts = listOf(BitacoraTextPart.Text("Volví a las 2 y dormí bien")),
+    noteId = 1,
+)
+
 internal fun previewBitacoraDays(): ImmutableList<BitacoraDayState> = persistentListOf(
     BitacoraDayState(
         appDay = PREVIEW_TODAY,
@@ -40,6 +46,6 @@ internal fun previewBitacoraDays(): ImmutableList<BitacoraDayState> = persistent
         appDay = PREVIEW_DAY,
         dateLabel = "06 NOV · VIE",
         isToday = false,
-        rows = persistentListOf(previewRelapseRow(), previewReturnRow()),
+        rows = persistentListOf(previewRelapseRow(), previewReturnRow(), previewNoteRow()),
     ),
 )
