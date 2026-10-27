@@ -135,10 +135,7 @@ class LogbookMappingTest {
             listOf(LogbookTextPart.Text("79.9 kg · ayuno")),
             rowOf(LogbookEntry.WeighInEntry(WeightEntry("w", FRIDAY, 79.9f, note = "ayuno"))).parts,
         )
-        assertEquals(
-            listOf(res(R.string.photo_type_trunk), res(R.string.photo_type_face)),
-            rowOf(LogbookEntry.PhotosEntry(listOf(PhotoType.TRUNK, PhotoType.FACE))).parts,
-        )
+        assertEquals(res(R.string.logbook_kind_photo), rowOf(LogbookEntry.PhotosEntry(listOf(PhotoType.TRUNK))).label)
         assertEquals(
             listOf(LogbookTextPart.Text("Banco"), LogbookTextPart.Text("S/ 400.00")),
             rowOf(LogbookEntry.InstallmentEntry("Banco", Money(40_000))).parts,
@@ -186,5 +183,43 @@ class LogbookMappingTest {
     @Test
     fun `event rows have no note id`() {
         assertEquals(null, rowOf(LogbookEntry.StayedInEntry).noteId)
+    }
+
+    @Test
+    fun `photos of different types show one part per type`() {
+        assertEquals(
+            listOf(
+                LogbookTextPart.Plural(R.plurals.logbook_photos_trunk, 1),
+                LogbookTextPart.Plural(R.plurals.logbook_photos_face, 1),
+            ),
+            rowOf(LogbookEntry.PhotosEntry(listOf(PhotoType.TRUNK, PhotoType.FACE))).parts,
+        )
+    }
+
+    @Test
+    fun `two photos of the same type show that type once with its count`() {
+        assertEquals(
+            listOf(LogbookTextPart.Plural(R.plurals.logbook_photos_trunk, 2)),
+            rowOf(LogbookEntry.PhotosEntry(listOf(PhotoType.TRUNK, PhotoType.TRUNK))).parts,
+        )
+    }
+
+    @Test
+    fun `a repeated type keeps the photo type order and counts only itself`() {
+        assertEquals(
+            listOf(
+                LogbookTextPart.Plural(R.plurals.logbook_photos_trunk, 2),
+                LogbookTextPart.Plural(R.plurals.logbook_photos_face, 1),
+            ),
+            rowOf(LogbookEntry.PhotosEntry(listOf(PhotoType.TRUNK, PhotoType.TRUNK, PhotoType.FACE))).parts,
+        )
+    }
+
+    @Test
+    fun `three photos of one type show its count`() {
+        assertEquals(
+            listOf(LogbookTextPart.Plural(R.plurals.logbook_photos_face, 3)),
+            rowOf(LogbookEntry.PhotosEntry(listOf(PhotoType.FACE, PhotoType.FACE, PhotoType.FACE))).parts,
+        )
     }
 }

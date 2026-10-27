@@ -1,5 +1,6 @@
 package com.emm.mybest.features.history.presentation
 
+import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import com.emm.mybest.R
 import com.emm.mybest.core.datetime.formatHhMm
@@ -43,7 +44,7 @@ private fun LogbookEntry.toRow(): LogbookRowState = when (this) {
         R.string.logbook_kind_weigh_in,
         listOf(LogbookTextPart.Text(weight.toLabel())),
     )
-    is LogbookEntry.PhotosEntry -> row(R.string.logbook_kind_photo, types.map { textRes(it.toLabelRes()) })
+    is LogbookEntry.PhotosEntry -> row(R.string.logbook_kind_photo, types.toParts())
     is LogbookEntry.InstallmentEntry -> row(
         R.string.logbook_kind_installment,
         listOf(LogbookTextPart.Text(debtName), LogbookTextPart.Text(amount.formatPen())),
@@ -68,8 +69,11 @@ private fun WonNight.toParts(): List<LogbookTextPart> {
     return listOf(textRes(R.string.logbook_won_night_stayed), estimate)
 }
 
-@StringRes
-private fun PhotoType.toLabelRes(): Int = when (this) {
-    PhotoType.TRUNK -> R.string.photo_type_trunk
-    PhotoType.FACE -> R.string.photo_type_face
+private fun List<PhotoType>.toParts(): List<LogbookTextPart> =
+    groupingBy { it }.eachCount().map { (type, count) -> LogbookTextPart.Plural(type.toPluralRes(), count) }
+
+@PluralsRes
+private fun PhotoType.toPluralRes(): Int = when (this) {
+    PhotoType.TRUNK -> R.plurals.logbook_photos_trunk
+    PhotoType.FACE -> R.plurals.logbook_photos_face
 }
