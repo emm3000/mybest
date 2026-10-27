@@ -1,6 +1,7 @@
 package com.emm.mybest.features.history.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.emm.mybest.R
 
@@ -10,6 +11,6 @@ internal fun HistoryRecentDescription.resolve(): String {
     val weightPart = weight?.let { stringResource(R.string.history_recent_weight, it) }
     val photoLabels = photoLabelResIds.map { stringResource(it) }
     val photoPart = photoLabels.takeIf { it.isNotEmpty() }
-        ?.let { stringResource(R.string.history_recent_photos, it.joinToString(separator)) }
+        ?.let { pluralStringResource(R.plurals.history_recent_photos, photoCount, it.joinToString(separator)) }
     return listOfNotNull(weightPart, photoPart).joinToString(separator)
 }

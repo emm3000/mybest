@@ -19,7 +19,10 @@ class HistoryRecentRowStateTest {
 
         val row = entry.toRowState(today)
 
-        assertEquals(HistoryRecentDescription(weight = 80.5f, photoLabelResIds = emptyList()), row.description)
+        assertEquals(
+            HistoryRecentDescription(weight = 80.5f, photoLabelResIds = emptyList(), photoCount = 0),
+            row.description,
+        )
     }
 
     @Test
@@ -29,7 +32,11 @@ class HistoryRecentRowStateTest {
         val row = entry.toRowState(today)
 
         assertEquals(
-            HistoryRecentDescription(weight = null, photoLabelResIds = listOf(R.string.photo_type_face)),
+            HistoryRecentDescription(
+                weight = null,
+                photoLabelResIds = listOf(R.string.photo_type_face),
+                photoCount = 1,
+            ),
             row.description,
         )
     }
@@ -48,6 +55,27 @@ class HistoryRecentRowStateTest {
             HistoryRecentDescription(
                 weight = 80.5f,
                 photoLabelResIds = listOf(R.string.photo_type_trunk, R.string.photo_type_face),
+                photoCount = 2,
+            ),
+            row.description,
+        )
+    }
+
+    @Test
+    fun `two photos of the same type show the label once and count both`() {
+        val entry = HistoryRecentEntry(
+            date = today,
+            weight = null,
+            photoTypes = listOf(PhotoType.TRUNK, PhotoType.TRUNK),
+        )
+
+        val row = entry.toRowState(today)
+
+        assertEquals(
+            HistoryRecentDescription(
+                weight = null,
+                photoLabelResIds = listOf(R.string.photo_type_trunk),
+                photoCount = 2,
             ),
             row.description,
         )

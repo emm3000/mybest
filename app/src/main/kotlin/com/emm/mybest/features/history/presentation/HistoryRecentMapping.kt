@@ -9,7 +9,11 @@ internal fun HistoryRecentEntry.toRowState(today: LocalDate): HistoryRecentRowSt
     HistoryRecentRowState(
         date = date,
         dateLabel = formatRecentDate(date),
-        description = HistoryRecentDescription(weight, photoTypes.map { it.toLabelRes() }),
+        description = HistoryRecentDescription(
+            weight = weight,
+            photoLabelResIds = photoTypes.distinct().map { it.toLabelRes() },
+            photoCount = photoTypes.size,
+        ),
         isToday = date == today,
     )
 
