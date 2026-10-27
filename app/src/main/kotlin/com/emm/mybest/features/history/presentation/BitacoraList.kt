@@ -35,9 +35,9 @@ internal fun BitacoraList(
         return
     }
     Column(modifier = modifier) {
-        days.forEach { day ->
+        days.forEachIndexed { index, day ->
+            if (index > 0) Hairline()
             BitacoraDayHeader(day = day)
-            Hairline()
             BitacoraDayRows(day = day, onDayClick = onDayClick)
         }
     }
