@@ -43,6 +43,7 @@ private val LIMA = TimeZone.of("America/Lima")
 private val MAY_FIFTEENTH = LocalDate(2026, 5, 15)
 private val CLOCK = AppDayClock(FixedClock(LocalDateTime(2026, 5, 15, 12, 0).toInstant(LIMA)), LIMA)
 private val STORED_NOTE = Note(5, MAY_FIFTEENTH, Instant.fromEpochSeconds(0), "Volví a las 2")
+private val TOO_LONG_TEXT = "a".repeat(501)
 private val EMPTY_EDITOR = NoteEditorState(noteId = null, text = "", error = null, isConfirmingDelete = false)
 
 class HistoryViewModelNoteTest {
@@ -168,6 +169,65 @@ class HistoryViewModelNoteTest {
             assertEquals(HistoryEffect.NoteActionFailed, awaitItem())
             assertEquals(EMPTY_EDITOR.copy(text = "texto"), state.noteEditor)
         }
+    }
+
+    @Test
+    fun `a failing delete emits one effect, closes the dialog and keeps the editor open`() = runTest {
+        val viewModel = buildViewModel()
+        coEvery { deleteNote(any()) } throws IllegalStateException("db")
+
+        viewModel.effect.test {
+            val state = send(
+                viewModel,
+                HistoryIntent.OnNoteClick(STORED_NOTE.id),
+                HistoryIntent.OnNoteDeleteClick,
+                HistoryIntent.OnNoteDeleteConfirm,
+            )
+
+            assertEquals(HistoryEffect.NoteActionFailed, awaitItem())
+            expectNoEvents()
+            assertEquals(NoteEditorState(STORED_NOTE.id, STORED_NOTE.text, null, false), state.noteEditor)
+        }
+        coVerify(exactly = 1) { deleteNote(STORED_NOTE.id) }
+    }
+
+    @Test
+    fun `a too long update keeps the editor with the error and the typed text`() = runTest {
+        val viewModel = buildViewModel()
+        coEvery { updateNote(any(), any()) } returns NoteValidationError.TooLong
+
+        viewModel.effect.test {
+            val state = send(
+                viewModel,
+                HistoryIntent.OnNoteClick(STORED_NOTE.id),
+                HistoryIntent.OnNoteTextChange(TOO_LONG_TEXT),
+                HistoryIntent.OnNoteSave,
+            )
+
+            expectNoEvents()
+            assertEquals(
+                NoteEditorState(STORED_NOTE.id, TOO_LONG_TEXT, NoteValidationError.TooLong, false),
+                state.noteEditor,
+            )
+        }
+        coVerify(exactly = 1) { updateNote(STORED_NOTE.id, TOO_LONG_TEXT) }
+        coVerify(exactly = 0) { addNote(any()) }
+    }
+
+    @Test
+    fun `typing after a too long update clears the error and keeps the editor open`() = runTest {
+        val viewModel = buildViewModel()
+        coEvery { updateNote(any(), any()) } returns NoteValidationError.TooLong
+
+        send(
+            viewModel,
+            HistoryIntent.OnNoteClick(STORED_NOTE.id),
+            HistoryIntent.OnNoteTextChange(TOO_LONG_TEXT),
+            HistoryIntent.OnNoteSave,
+        )
+        val typed = send(viewModel, HistoryIntent.OnNoteTextChange("a"))
+
+        assertEquals(NoteEditorState(STORED_NOTE.id, "a", null, false), typed.noteEditor)
     }
 
     @Test
