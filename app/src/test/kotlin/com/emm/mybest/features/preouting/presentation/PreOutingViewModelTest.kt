@@ -161,6 +161,7 @@ private fun assertFilledFormKept(state: PreOutingState) {
     assertEquals(PreOutingDecisionState.Undecided, state.decision)
 }
 
+@Suppress("LargeClass")
 class PreOutingViewModelTest {
 
     @get:Rule
@@ -334,6 +335,59 @@ class PreOutingViewModelTest {
         assertTrue(stateNow(viewModel).canConfirmOuting)
         assertEquals("S/ 150.00", stateNow(viewModel).moneyLimitLabel)
         assertEquals("01:30", stateNow(viewModel).returnTimeLabel)
+    }
+
+    @Test
+    fun `a daytime return limit is flagged and cannot be confirmed`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        fillForm(viewModel)
+
+        viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(15, 0))
+        val state = stateNow(viewModel)
+        confirm(viewModel)
+
+        assertTrue(state.isReturnTimeOutOfRange)
+        assertFalse(state.canConfirmOuting)
+        assertEquals("15:00", state.returnTimeLabel)
+        assertTrue(outingRepository.observeAll().first().isEmpty())
+        assertEquals(PreOutingDecisionState.Undecided, stateNow(viewModel).decision)
+    }
+
+    @Test
+    fun `picking an allowed time after a daytime one clears the flag`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        fillForm(viewModel)
+        viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(15, 0))
+        assertTrue(stateNow(viewModel).isReturnTimeOutOfRange)
+
+        viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(1, 30))
+
+        assertFalse(stateNow(viewModel).isReturnTimeOutOfRange)
+        assertTrue(stateNow(viewModel).canConfirmOuting)
+    }
+
+    @Test
+    fun `the 18_00 and 04_59 return limits are not flagged`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        fillForm(viewModel)
+
+        viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(18, 0))
+        assertFalse(stateNow(viewModel).isReturnTimeOutOfRange)
+        viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(4, 59))
+
+        assertFalse(stateNow(viewModel).isReturnTimeOutOfRange)
+    }
+
+    @Test
+    fun `no return time chosen is not flagged`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        viewModel.onIntent(PreOutingIntent.OnGoOutClick)
+
+        assertFalse(stateNow(viewModel).isReturnTimeOutOfRange)
     }
 
     @Test

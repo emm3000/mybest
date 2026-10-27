@@ -98,6 +98,13 @@ private fun LimitsSection(
                 onClick = { onIntent(PreOutingIntent.OnReturnTimeClick) },
             )
         }
+        if (state.isReturnTimeOutOfRange) {
+            Text(
+                text = stringResource(R.string.pre_outing_error_return_time),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
     }
 }
 
@@ -138,6 +145,30 @@ private fun GoingOutFormPreview() {
                 ),
                 moneyLimitLabel = "S/ 200.00",
                 returnTimeLabel = "02:00",
+            ),
+            onIntent = {},
+        )
+    }
+}
+
+@Suppress("MagicNumber")
+@Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)
+@Composable
+private fun GoingOutFormDaytimeReturnPreview() {
+    AtelierTheme {
+        GoingOutForm(
+            state = PreOutingState(
+                tonightLabel = "VIE · 23 OCT",
+                form = PreOutingForm(
+                    isOpen = true,
+                    moneyInput = "200",
+                    drinksInput = "4",
+                    returnTime = LocalTime(15, 0),
+                    areCardsOff = true,
+                ),
+                moneyLimitLabel = "S/ 200.00",
+                returnTimeLabel = "15:00",
+                isReturnTimeOutOfRange = true,
             ),
             onIntent = {},
         )

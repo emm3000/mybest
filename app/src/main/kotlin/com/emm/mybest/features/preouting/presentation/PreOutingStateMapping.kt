@@ -43,6 +43,7 @@ internal fun PreOutingState.withDecision(tonight: Tonight, form: PreOutingForm):
     form = form,
     moneyLimitLabel = form.moneyLimit?.formatPen(),
     returnTimeLabel = form.returnTime?.formatHhMm(),
+    isReturnTimeOutOfRange = form.isReturnTimeOutOfRange,
     canConfirmOuting = form.canConfirm,
 )
 

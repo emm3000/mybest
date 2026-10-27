@@ -22,5 +22,6 @@ data class PreOutingState(
     val form: PreOutingForm = PreOutingForm(),
     val moneyLimitLabel: String? = null,
     val returnTimeLabel: String? = null,
+    val isReturnTimeOutOfRange: Boolean = false,
     val canConfirmOuting: Boolean = false,
 )

@@ -240,6 +240,7 @@
     <string name="pre_outing_limit_return_time">HORA DE REGRESO</string>
     <string name="pre_outing_limit_return_time_hint">a más tardar</string>
     <string name="pre_outing_limit_return_time_unset">--:--</string>
+    <string name="pre_outing_error_return_time">La hora de regreso va de 18:00 a 04:59</string>
     <string name="pre_outing_checklist_label">ANTES DE SALIR</string>
     <string name="pre_outing_checklist_cards">Tarjetas de crédito apagadas y fuera de la billetera del celular</string>
     <string name="pre_outing_checklist_account">Cuenta de salida cargada con %1$s</string>

@@ -7,5 +7,6 @@ sealed interface PlanOutingResult {
     data object Planned : PlanOutingResult
     data object NonPositiveMoney : PlanOutingResult
     data object NegativeDrinks : PlanOutingResult
+    data object ReturnTimeInDaytime : PlanOutingResult
     data object DayAlreadyDecided : PlanOutingResult
 }
