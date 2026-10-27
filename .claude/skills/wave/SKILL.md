@@ -31,7 +31,7 @@ Rows are ordered by blast radius. A ticket that matches several rows takes the h
 | 1 | Docs, strings, renames; every criterion is a command with empty output | sonnet:low | verify clause (below) |
 | 2 | One screen, layout or restyle only | sonnet:medium | visual check |
 | 3 | ViewModel or use-case behavior | sonnet:high | load `mattpocock-skills:tdd`, red-green-refactor |
-| 4 | Shared `ui/components` or theme change | opus:medium | visual check of every affected screen |
+| 4 | Shared `ui/components` or theme change | opus:high | visual check of every affected screen |
 | 5 | Room schema or migration, DI wiring, WorkManager or reminders, backup import/export | opus:high | visual check if a screen changes |
 
 Sonnet writes the code on rows 1-3. Rows 4 and 5 are Opus implementation rows. Row 4 changes reach several screens at once. Row 5 failures (data-dropping migrations, missing Koin bindings, workers that never run) compile and pass CI, so no gate catches them.
@@ -46,6 +46,7 @@ Every row is a bet until `docs/agents/dispatch-log.md` says otherwise. When a ro
 
 - Row 3 moved from sonnet:medium to sonnet:high (2026-10-23): PRs #44, #45 and #48 each got a first-review FIX FIRST with cause `judgment` (ignored use-case result, unguarded save/delete, view logic left in composables).
 - Row 4 moved from sonnet:high to opus:medium (2026-10-27): PRs #99 and #141 each got a first-review FIX FIRST with cause `judgment` (grouping types left inside files, a doubled gap that hid Guardar on a shared page layout).
+- Row 4 moved from opus:medium to opus:high (2026-10-27): PRs #216 and #237 each got a first-review FIX FIRST with cause `judgment` (a launch rule that ignored Home dismissal, overflow asserts that could never fail).
 
 ## Execution Steps
 
