@@ -80,6 +80,7 @@ PRD: [section 9](PRD.md#9-calendar).
 PRD: [section 10](PRD.md#10-notification-capture-groundwork-for-v11). ADR: [0002](adr/0002-capture-notifications-now-parse-later.md), [0001](adr/0001-all-data-stays-on-device.md).
 
 - `features/capture/` with `data/capture/NotificationCaptureService.kt`: pick apps from the installed ones, view captured notifications, delete all, turn capture off. Nothing is parsed.
+- Group summaries are not stored, and a repost with the same notification key, title and text as the latest stored row of that key is not stored again. A changed title or text is stored as a new row; stored rows are never modified. Rows stored before schema 11 have no key.
 
 ## 11. Backup
 
