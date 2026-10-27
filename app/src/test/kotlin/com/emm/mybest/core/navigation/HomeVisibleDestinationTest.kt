@@ -1,10 +1,13 @@
 package com.emm.mybest.core.navigation
 
 import com.emm.mybest.domain.usecase.home.HomeDestination
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 
 class HomeVisibleDestinationTest {
 
@@ -36,6 +39,16 @@ class HomeVisibleDestinationTest {
         holder.publish(newHome, HomeDestination.PRE_OUTING)
 
         assertEquals(HomeDestination.PRE_OUTING, holder.awaitLoaded())
+    }
+
+    @Test
+    fun `a Home that loads during the wait returns its destination`() = runTest {
+        val wait = async { holder.awaitLoaded() }
+        advanceTimeBy(1.seconds)
+
+        holder.publish(newHome, HomeDestination.CHECK_IN)
+
+        assertEquals(HomeDestination.CHECK_IN, wait.await())
     }
 
     @Test
