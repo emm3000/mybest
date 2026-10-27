@@ -170,6 +170,10 @@
     <string name="history_detail_check_unrecorded">—</string>
     <string name="history_delete_weight">Eliminar peso</string>
     <string name="history_delete_photo">Eliminar foto</string>
+    <string name="history_replace_photo">Reemplazar foto</string>
+    <string name="history_photo_replaced">Foto reemplazada</string>
+    <string name="history_photo_replace_failed">No se pudo reemplazar la foto. La anterior sigue guardada.</string>
+    <string name="history_photo_missing">Esa foto ya no está</string>
     <string name="history_photo_trunk_description">Foto de tronco</string>
     <string name="history_photo_face_description">Foto de cara</string>
     <string name="history_today_chip">HOY</string>

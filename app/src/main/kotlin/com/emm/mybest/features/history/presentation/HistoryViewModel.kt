@@ -9,6 +9,7 @@ import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.GetLogbookUseCase
+import com.emm.mybest.domain.usecase.photo.ReplacePhotoResult
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.validation.NoteValidationError
 import kotlinx.collections.immutable.toImmutableList
@@ -37,6 +38,24 @@ private fun initialHistoryState(today: LocalDate): HistoryState {
         selectedMonth = month,
         monthNavigationLabel = month.toNavigationLabel(),
     )
+}
+
+private suspend fun HistoryPhotoUseCases.handle(
+    intent: HistoryIntent.PhotoIntent,
+    effects: MutableSharedFlow<HistoryEffect>,
+) {
+    when (intent) {
+        is HistoryIntent.OnDeletePhoto -> delete(intent.photoId)
+        is HistoryIntent.OnPhotoReplacementCaptured -> effects.emit(
+            attempt { replace(intent.photoId, intent.uri) }
+                .fold(onSuccess = ::toReplaceEffect, onFailure = { HistoryEffect.PhotoReplaceFailed }),
+        )
+    }
+}
+
+private fun toReplaceEffect(result: ReplacePhotoResult): HistoryEffect = when (result) {
+    ReplacePhotoResult.Replaced -> HistoryEffect.PhotoReplaced
+    ReplacePhotoResult.PhotoNotFound -> HistoryEffect.PhotoNotFound
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -116,8 +135,8 @@ class HistoryViewModel(
             is HistoryIntent.OnDeleteWeight -> viewModelScope.launch {
                 deleteWeightByDate(intent.date)
             }
-            is HistoryIntent.OnDeletePhoto -> viewModelScope.launch {
-                photoUseCases.delete(intent.photoId)
+            is HistoryIntent.PhotoIntent -> viewModelScope.launch {
+                photoUseCases.handle(intent, _effect)
             }
         }
     }

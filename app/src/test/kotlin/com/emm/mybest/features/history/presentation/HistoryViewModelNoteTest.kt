@@ -66,7 +66,7 @@ class HistoryViewModelNoteTest {
             getHistory,
             getLogbook,
             mockk<DeleteWeightByDateUseCase>(relaxed = true),
-            HistoryPhotoUseCases(mockk(relaxed = true)),
+            HistoryPhotoUseCases(mockk(relaxed = true), mockk()),
             HistoryNoteUseCases(addNote, updateNote, deleteNote),
             CLOCK,
         )

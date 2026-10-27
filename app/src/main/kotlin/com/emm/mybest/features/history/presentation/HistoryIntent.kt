@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDate
 
 sealed class HistoryIntent {
     sealed interface NoteIntent
+    sealed interface PhotoIntent
     sealed interface NoteEditIntent : NoteIntent
     sealed interface NoteDeleteIntent : NoteIntent
 
@@ -12,7 +13,8 @@ sealed class HistoryIntent {
     data class OnDateSelected(val date: LocalDate) : HistoryIntent()
     object OnDateDismiss : HistoryIntent()
     data class OnDeleteWeight(val date: LocalDate) : HistoryIntent()
-    data class OnDeletePhoto(val photoId: String) : HistoryIntent()
+    data class OnDeletePhoto(val photoId: String) : HistoryIntent(), PhotoIntent
+    data class OnPhotoReplacementCaptured(val photoId: String, val uri: String) : HistoryIntent(), PhotoIntent
     data class OnViewSelected(val view: HistoryView) : HistoryIntent()
     data object OnWriteNoteClick : HistoryIntent(), NoteEditIntent
     data class OnNoteClick(val noteId: Long) : HistoryIntent(), NoteEditIntent

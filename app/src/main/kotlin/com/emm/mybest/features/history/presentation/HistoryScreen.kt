@@ -11,21 +11,28 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emm.mybest.R
+import com.emm.mybest.domain.media.PhotoCaptureFiles
+import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.AtelierAppBar
 import com.emm.mybest.ui.components.HBottomSheet
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.atelier.MicroLabel
 import com.emm.mybest.ui.components.atelier.MicroLabelStyle
 import com.emm.mybest.ui.components.atelier.MicroLabelTone
+import com.emm.mybest.ui.components.rememberPhotoCameraHandler
 import com.emm.mybest.ui.theme.AtelierBackground
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
+import org.koin.compose.koinInject
 
 private const val PAGER_COUNT = Int.MAX_VALUE
 private const val PAGER_INITIAL = PAGER_COUNT / 2
@@ -41,6 +48,7 @@ fun HistoryScreen(
     val today = state.today
     val snackbarHostState = remember { SnackbarHostState() }
     HistoryEffectsHandler(effects = viewModel.effect, snackbarHostState = snackbarHostState)
+    val onReplacePhoto = rememberPhotoReplacement(viewModel = viewModel, snackbarHostState = snackbarHostState)
     state.noteEditor?.let { NoteEditorOverlay(editor = it, onIntent = viewModel::onIntent) }
 
     state.dayDetail?.let { detail ->
@@ -48,15 +56,19 @@ fun HistoryScreen(
             onDismissRequest = { viewModel.onIntent(HistoryIntent.OnDateDismiss) },
             containerColor = AtelierBackground,
         ) {
-            DayDetailContent(
-                detail = detail,
-                callbacks = DayDetailCallbacks(
-                    onClose = { viewModel.onIntent(HistoryIntent.OnDateDismiss) },
-                    onDeleteWeight = { viewModel.onIntent(HistoryIntent.OnDeleteWeight(detail.date)) },
-                    onDeletePhoto = { viewModel.onIntent(HistoryIntent.OnDeletePhoto(it)) },
-                    onSeePhotosClick = onSeePhotosClick,
-                ),
-            )
+            Box {
+                DayDetailContent(
+                    detail = detail,
+                    callbacks = DayDetailCallbacks(
+                        onClose = { viewModel.onIntent(HistoryIntent.OnDateDismiss) },
+                        onDeleteWeight = { viewModel.onIntent(HistoryIntent.OnDeleteWeight(detail.date)) },
+                        onDeletePhoto = { viewModel.onIntent(HistoryIntent.OnDeletePhoto(it)) },
+                        onReplacePhoto = onReplacePhoto,
+                        onSeePhotosClick = onSeePhotosClick,
+                    ),
+                )
+                HSnackbarHost(snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter))
+            }
         }
     }
 
@@ -67,7 +79,7 @@ fun HistoryScreen(
             AtelierAppBar(title = stringResource(R.string.history_title))
         },
         bottomBar = bottomBar,
-        snackbarHost = { HSnackbarHost(snackbarHostState) },
+        snackbarHost = { if (state.dayDetail == null) HSnackbarHost(snackbarHostState) },
     ) { padding ->
         HistoryPagerContent(
             state = state,
@@ -96,13 +108,41 @@ private fun NoteEditorOverlay(editor: NoteEditorState, onIntent: (HistoryIntent)
 }
 
 @Composable
+private fun rememberPhotoReplacement(
+    viewModel: HistoryViewModel,
+    snackbarHostState: SnackbarHostState,
+): (ProgressPhoto) -> Unit {
+    val photoCaptureFiles: PhotoCaptureFiles = koinInject()
+    var replacingPhotoId by rememberSaveable { mutableStateOf<String?>(null) }
+    val cameraHandler = rememberPhotoCameraHandler(
+        snackbarHostState = snackbarHostState,
+        photoCaptureFiles = photoCaptureFiles,
+        onPhotoCaptured = { uri, _ ->
+            replacingPhotoId?.let { viewModel.onIntent(HistoryIntent.OnPhotoReplacementCaptured(it, uri)) }
+            replacingPhotoId = null
+        },
+    )
+    return { photo ->
+        replacingPhotoId = photo.id
+        cameraHandler.launch(photo.type)
+    }
+}
+
+@Composable
 private fun HistoryEffectsHandler(effects: Flow<HistoryEffect>, snackbarHostState: SnackbarHostState) {
     val failedMessage = stringResource(R.string.logbook_note_action_failed)
+    val replacedMessage = stringResource(R.string.history_photo_replaced)
+    val missingMessage = stringResource(R.string.history_photo_missing)
+    val replaceFailedMessage = stringResource(R.string.history_photo_replace_failed)
     LaunchedEffect(effects) {
         effects.collect { effect ->
-            when (effect) {
-                HistoryEffect.NoteActionFailed -> snackbarHostState.showSnackbar(failedMessage)
+            val message = when (effect) {
+                HistoryEffect.NoteActionFailed -> failedMessage
+                HistoryEffect.PhotoReplaced -> replacedMessage
+                HistoryEffect.PhotoNotFound -> missingMessage
+                HistoryEffect.PhotoReplaceFailed -> replaceFailedMessage
             }
+            snackbarHostState.showSnackbar(message)
         }
     }
 }

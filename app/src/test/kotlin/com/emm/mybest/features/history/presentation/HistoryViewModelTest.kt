@@ -92,7 +92,7 @@ class HistoryViewModelTest {
             getHistoryUseCase,
             getLogbookUseCase,
             deleteWeightByDate,
-            HistoryPhotoUseCases(deletePhoto),
+            HistoryPhotoUseCases(deletePhoto, mockk()),
             noteUseCases,
             appDayClock,
         )
@@ -316,7 +316,7 @@ class HistoryViewModelTest {
             getHistoryUseCase,
             getLogbookUseCase,
             deleteWeightByDate,
-            HistoryPhotoUseCases(deletePhoto),
+            HistoryPhotoUseCases(deletePhoto, mockk()),
             noteUseCases,
             mayAppDayClock,
         )

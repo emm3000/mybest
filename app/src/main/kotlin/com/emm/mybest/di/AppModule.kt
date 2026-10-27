@@ -284,7 +284,7 @@ val appModule = module {
             get(),
             get(),
             get(),
-            HistoryPhotoUseCases(get()),
+            HistoryPhotoUseCases(get(), get()),
             HistoryNoteUseCases(get(), get(), get()),
             get(),
         )
