@@ -14,6 +14,7 @@ class HomeVisibleDestinationTest {
     private val holder = HomeVisibleDestination()
     private val oldHome = Any()
     private val newHome = Any()
+    private var isHomeVisible = true
 
     @Test
     fun `the publishing Home clears its destination`() {
@@ -49,6 +50,27 @@ class HomeVisibleDestinationTest {
         holder.publish(newHome, HomeDestination.CHECK_IN)
 
         assertEquals(HomeDestination.CHECK_IN, wait.await())
+    }
+
+    @Test
+    fun `a launch action stays on Home when Home loads with its screen while on screen`() = runTest {
+        val screen = async { holder.screenForLaunchAction(ACTION_CHECK_IN) { isHomeVisible } }
+        advanceTimeBy(1.seconds)
+
+        holder.publish(newHome, HomeDestination.CHECK_IN)
+
+        assertEquals(Screen.Home, screen.await())
+    }
+
+    @Test
+    fun `a launch action pushes its screen when the user leaves Home during the wait`() = runTest {
+        val screen = async { holder.screenForLaunchAction(ACTION_CHECK_IN) { isHomeVisible } }
+        advanceTimeBy(1.seconds)
+
+        isHomeVisible = false
+        holder.publish(newHome, HomeDestination.CHECK_IN)
+
+        assertEquals(Screen.CheckIn, screen.await())
     }
 
     @Test

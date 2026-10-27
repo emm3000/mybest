@@ -164,9 +164,8 @@ private fun HandleIntentAction(
     val homeVisibleDestination: HomeVisibleDestination = koinInject()
     LaunchedEffect(intentAction) {
         if (intentAction == null) return@LaunchedEffect
-        val isHomeVisible = navigator.isStartRouteShown
-        val homeDestination = if (isHomeVisible) homeVisibleDestination.awaitLoaded() else null
-        LaunchActionRule.screenFor(intentAction, homeDestination, isHomeVisible)?.let(navigator::navigate)
+        homeVisibleDestination.screenForLaunchAction(intentAction) { navigator.isStartRouteShown }
+            ?.let(navigator::navigate)
         currentOnConsumeAction()
     }
 }
