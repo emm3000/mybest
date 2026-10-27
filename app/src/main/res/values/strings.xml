@@ -7,7 +7,6 @@
     <string name="nav_home">Diario</string>
     <string name="nav_history">Historia</string>
     <string name="nav_summary">Resumen</string>
-    <string name="nav_timeline">Fotos</string>
     <string name="nav_settings">Ajustes</string>
 
     <!-- Time Picker -->
