@@ -8,7 +8,7 @@ import com.emm.mybest.domain.usecase.weight.ObserveWeighInTrendUseCase
  */
 data class WeeklySummarySections(
     val outings: ObserveWeekOutingsUseCase,
-    val recovery: ObserveWeekRecoveryUseCase,
+    val relapses: ObserveWeekRelapsesUseCase,
     val weekProgress: ObserveWeekProgressUseCase,
     val weighInTrend: ObserveWeighInTrendUseCase,
     val money: ObserveWeekMoneyUseCase,

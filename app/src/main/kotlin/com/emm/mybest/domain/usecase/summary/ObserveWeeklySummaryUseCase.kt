@@ -16,7 +16,7 @@ class ObserveWeeklySummaryUseCase(
      */
     operator fun invoke(appDay: LocalDate): Flow<WeeklySummary> = combine(
         sections.outings(appDay),
-        sections.recovery(appDay),
+        sections.relapses(appDay),
         sections.weekProgress(appDay),
         sections.weighInTrend(appWeekOf(appDay).endInclusive),
         sections.money(appDay),
