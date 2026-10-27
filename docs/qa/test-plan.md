@@ -168,7 +168,7 @@ Common seed **S0** (UI, any clock): fresh install, POST_NOTIFICATIONS granted, o
 | P0-16 | Backup export to Downloads | P0 | F | S0 | Ajustes > BACKUP "Exportar" > save `mybest-backup.db` in Downloads; `adb pull /sdcard/Download/mybest-backup.db` | Snackbar "Backup exportado correctamente"; file starts with `SQLite format 3` | — |
 | P0-17 | Fixture import path | P0 | F | P0-16 | Build FX-A3 (§6.2), push, media scan, "+ Importar", pick it; force-stop; relaunch | Snackbar "Backup restaurado. Reinicia la app para aplicar."; after relaunch the fixture data shows (pre-outing hero "S/ 120.00"). Record whether direct `run-as` copy also works | P0-17 |
 | P0-18 | Rotation, process death, font scale | P1 | F | S0 | Run each §3.9 command once on Home | Rotates; relaunch after `am kill` works; text grows at 2.0; reset all | — |
-| P0-19 | Camera available | P1 | F | S0 | Fotos > take photo, allow permission | System camera opens and returns; photo appears | — |
+| P0-19 | Camera available | P1 | F | S0 | Fotos > "TOMAR FOTO · TRONCO", allow permission | System camera opens and returns; photo appears | — |
 | P0-20 | Assets branch publish | P1 | F | screenshots from P0-01..P0-17 | Follow "Visual check" with branch `assets/qa-smoke` | Branch pushed; one raw URL opens | — |
 
 ### 4.1 Suite A — weekend loop (emulator-5554)
@@ -334,12 +334,12 @@ Data owned: daily checks, weights, photos, history, capture, reminder settings. 
 | C-016 | Weigh-in at 02:00 | P2 | E | S-C0, Clock Wed 2026-11-11 02:00 | Save 79.0 | Historia puts it on Tue 10 Nov (replacing any Tue entry), nothing on Wed 11 | — |
 | C-017 | Weigh-in day shown | P2 | F | S-C0 | Ajustes "DÍA DE PESAJE" Domingo; open Pesaje | "Tu día de pesaje: domingo" | — |
 | C-018 | Empty photos | P2 | F | S0 | Diario "FOTO" | Tabs "Tronco"/"Cara"; empty placeholder; compare not available | — |
-| C-019 | Take a trunk photo | P0 | F | S0, K13 | Camera button, allow permission, shoot, accept | Photo in Tronco timeline; Diario photo caption "Tronco · hoy" (§7) | C-019 |
-| C-020 | Camera permission denied | P2 | N | fresh | Deny once; tap again and deny "don't ask again" | "Se necesita acceso a la cámara para tomar fotos."; then "Habilita el permiso de cámara en Ajustes." with "Ajustes" opening app info | — |
+| C-019 | Take a trunk photo | P0 | F | S0, K13 | "TOMAR FOTO · TRONCO", allow permission, shoot, accept | Photo in Tronco timeline; Diario photo caption "Tronco · hoy" (§7) | C-019 |
+| C-020 | Camera permission denied | P2 | N | fresh | Tap "TOMAR FOTO · TRONCO", deny once; tap it again and deny "don't ask again" | "Se necesita acceso a la cámara para tomar fotos."; then "Habilita el permiso de cámara en Ajustes." with "Ajustes" opening app info | — |
 | C-021 | Cancel the camera | P3 | N | S0 | Open camera, back | No photo added | — |
-| C-022 | Face photo | P1 | F | S0 | Tab "Cara", take a photo | Saved under Cara, not Tronco | — |
+| C-022 | Face photo from the Tronco tab | P1 | F | S0 | With tab "Tronco" selected, tap "TOMAR FOTO · CARA", shoot, accept | Saved under Cara, not Tronco; the tab switches to "Cara" | — |
 | C-023 | Compare two photos | P1 | F | Tronco photos on K12 and Clock Sat 2026-11-21 10:00, weights near both dates | "COMPARAR ↗" | Before "ANTES" / after "AHORA" with "12 DÍAS · −x KG" (or "— DÍAS · — KG" without weights) (§7) | C-023 |
-| C-024 | Process death during camera | P2 | X | S0, tab Cara, notification listener revoked (a bound listener keeps the process alive and `am kill` does nothing) | Open camera; `am kill $PKG` from another shell; shoot; accept | Photo saved as Cara. Risk: the selected tab resets and it saves as Tronco | — |
+| C-024 | Process death during camera | P2 | X | S0, notification listener revoked (a bound listener keeps the process alive and `am kill` does nothing) | "TOMAR FOTO · CARA"; `am kill $PKG` from another shell; shoot; accept | Photo saved as Cara | — |
 | C-025 | Rotation on Fotos | P3 | X | C-022 | Rotate | Selected tab and timeline kept | — |
 | C-026 | Delete a photo from History | P2 | F | C-019 | Historia > day > "Eliminar foto" > confirm | Photo gone from day detail and Fotos timeline | — |
 | C-027 | Calendar header and legend | P1 | F | FX-C, K13 | Open Historia | Month title, day 10 drawn as the outlined today cell, legend "PESO REGISTRADO", "FOTO", "CHECKS HECHOS", "SALIDA", "RECAÍDA", "NOCHE GANADA"; "SALIDAS 3 · NOCHES GANADAS 1"; "2 PESAJES · 0 FOTOS" (§9) | C-027 |
