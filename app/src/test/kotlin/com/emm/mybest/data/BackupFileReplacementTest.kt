@@ -150,12 +150,15 @@ class BackupFileReplacementTest {
     }
 
     @Test
-    fun `a source that fails to close after the database closed requires a restart`() {
+    fun `a source that fails to close after the swap counts as restored`() {
         val target = folder.newFile("my_best_db").apply { writeBytes(LIVE_BYTES) }
+        var closeCount = 0
 
-        val result = replaceDatabaseFile(FailingCloseInputStream(BACKUP_BYTES), target) {}
+        val result = replaceDatabaseFile(FailingCloseInputStream(BACKUP_BYTES), target) { closeCount++ }
 
-        assertEquals(RestoreResult.NotRestoredRequiresRestart, result)
+        assertEquals(RestoreResult.RequiresRestart, result)
+        assertArrayEquals(BACKUP_BYTES, target.readBytes())
+        assertEquals(1, closeCount)
     }
 
     @Test
