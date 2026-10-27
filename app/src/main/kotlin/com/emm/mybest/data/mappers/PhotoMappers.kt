@@ -12,8 +12,11 @@ fun ProgressPhotoEntity.toDomain(): ProgressPhoto = ProgressPhoto(
     createdAt = createdAt,
 )
 
-fun NewProgressPhoto.toEntity(): ProgressPhotoEntity = ProgressPhotoEntity(
-    date = date,
-    type = type,
-    photoPath = photoPath,
-)
+fun NewProgressPhoto.toEntity(): ProgressPhotoEntity {
+    val entity = ProgressPhotoEntity(
+        date = date,
+        type = type,
+        photoPath = photoPath,
+    )
+    return createdAt?.let { entity.copy(createdAt = it) } ?: entity
+}
