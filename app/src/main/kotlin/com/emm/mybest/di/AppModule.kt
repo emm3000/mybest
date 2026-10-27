@@ -92,6 +92,7 @@ import com.emm.mybest.domain.usecase.onboarding.SetOnboardingCompletedUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.GetPhotosOverviewUseCase
 import com.emm.mybest.domain.usecase.photo.ObservePhotosUseCase
+import com.emm.mybest.domain.usecase.photo.ReplacePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
 import com.emm.mybest.domain.usecase.preouting.GetEstimatedOutingCostUseCase
 import com.emm.mybest.domain.usecase.preouting.HasDecisionOnUseCase
@@ -236,6 +237,7 @@ val appModule = module {
 
     factory { SavePhotosUseCase(get()) }
     factory { DeletePhotoUseCase(get()) }
+    factory { ReplacePhotoUseCase(get()) }
     factory { ObservePhotosUseCase(get()) }
     factory { GetPhotosOverviewUseCase(get(), get()) }
 
