@@ -4,7 +4,7 @@ Status: draft for the first QA cycle. Build under test: the `origin/main` SHA th
 
 ## 1. Scope and references
 
-Read first: [`docs/PRD.md`](../PRD.md) (the contract, cited below as §n), [`docs/adr/`](../adr/) (0001 on-device data, 0002 raw capture, 0003 05:00 app day, 0005 return time instead of streaks), [`docs/agents/multi-session.md`](../agents/multi-session.md) ("Isolation: emulators" and "Visual check"), [`CLAUDE.md`](../../CLAUDE.md). `docs/FEATURES.md` and `docs/ARCHITECTURE.md` §4–5 still describe the removed diet/exercise app; ignore them for expected behavior.
+Read first: [`docs/PRD.md`](../PRD.md) (the contract, cited below as §n), [`docs/adr/`](../adr/) (0001 on-device data, 0002 raw capture, 0003 05:00 app day, 0005 return time instead of streaks), [`docs/agents/multi-session.md`](../agents/multi-session.md) ("Isolation: emulators" and "Visual check"), [`CLAUDE.md`](../../CLAUDE.md). `docs/FEATURES.md` and `docs/ARCHITECTURE.md` describe v1 (#28) but the PRD stays the contract.
 
 **In scope:** PRD §1–§12 as built: setup and onboarding, daily checks, pre-outing, check-in, relapse and return time, debts and installments, purchase goal, "not spent (estimated)", weigh-in and photos, weekly summary, history calendar, notification capture, backup export/import, reminders, and the cross-cutting behavior in §4.4.
 
@@ -205,7 +205,7 @@ Data owned: outings, won nights, check-ins, relapses, weekly summary. Base seed 
 | A-026 | Estimate frozen at decision time | P2 | E | A-023 | Ajustes typical cost 150; reopen pre-outing | Counter still S/ 100.00; hero now S/ 150.00 | — |
 | A-027 | Two won nights add up | P2 | F | A-023, then K8 "Me quedo" | Open pre-outing | "No gastado este mes (estimado)" S/ 200.00 | — |
 | A-028 | Average after three check-ins | P1 | F | FX-A3, K3 | Open pre-outing | Hero "S/ 120.00" + "lo que te cuesta una noche, en promedio" (§3) | A-028 |
-| A-029 | FLAG average after three recorded outings | P1 | F | FX-A2P (3 outings, 2 checked in at 90 and 150), K3 | Open pre-outing | Per PRD §3 ("three outings are recorded") the average caption shows. Code switches only after 3 check-ins and keeps "tu costo típico de una salida" S/ 100.00. File if so; see §9 Q2 | A-029 |
+| A-029 | Average waits for three check-ins | P1 | F | FX-A2P (3 outings, 2 checked in at 90 and 150), K3 | Open pre-outing | The average needs three outings with a check-in (PRD §3 after #117), so the hero keeps "tu costo típico de una salida" S/ 100.00 | A-029 |
 | A-030 | Unplanned spend in the average | P2 | F | FX-A3U (planned 90, 120, unplanned 300), K3 | Open pre-outing | Hero S/ 170.00 (all recorded outings with a spend) | — |
 | A-031 | Average rounds half-up | P3 | E | FX-A3 with spends 10.01, 10.01, 10.00 | Open pre-outing | Hero S/ 10.01 | — |
 | A-032 | Check-in form gating | P0 | F | S-A1, K6 | Fill in turn: spent, drinks, return time, mood | Hints "tope S/ 100.00", "tope 3", "tope 02:00"; "Guardar" enabled only after all four (§4: at most four inputs) | A-032 |
@@ -274,7 +274,7 @@ Data owned: onboarding, setup, debts, payments, purchase goal, contributions, ba
 | B-029 | Last partial installment | P1 | E | debt saldo 250, cuota 400 | Mark paid | Saldo S/ 0.00, never negative | — |
 | B-030 | Paid-off debt | P3 | E | B-029 | Next month (K16): look at the row and tap mark paid | Nothing changes. FLAG: the mark button still shows for a S/ 0.00 balance | — |
 | B-031 | New month resets paid | P1 | F | B-027, then K16 | Open Deudas | "MARCAR CUOTA PAGADA" back; saldo still S/ 1,600.00 | — |
-| B-032 | FLAG payment booked to the wrong month | P1 | F | Clock K15 (Mon 30 Nov): debt "Tarjeta", saldo 1000, cuota 200, día 2 | 1) Diario shows "PRÓXIMA CUOTA · 2 DIC"; Deudas shows "MARCAR CUOTA PAGADA" 2) Tap it (saldo S/ 800.00) 3) Clock K16 (Tue 1 Dec), open Deudas and Diario | Per PRD §6 the tap paid the installment shown as next (2 Dec): on 1 Dec the row reads "CUOTA PAGADA" and Diario shows "2 ENE". Code books the payment to November, so on 1 Dec the row asks again, Diario still shows "2 DIC", and a second tap drops the saldo to S/ 600.00. File if so (§9 Q3) | B-032 |
+| B-032 | FLAG payment booked to the wrong month | P1 | F | Clock K15 (Mon 30 Nov): debt "Tarjeta", saldo 1000, cuota 200, día 2 | 1) Diario shows "PRÓXIMA CUOTA · 2 DIC"; Deudas shows "MARCAR CUOTA PAGADA" 2) Tap it (saldo S/ 800.00) 3) Clock K16 (Tue 1 Dec), open Deudas and Diario | The tap paid the installment shown as next (2 Dec, PRD §6, #143): on 1 Dec the row reads "CUOTA PAGADA", there is no mark button and the saldo stays S/ 800.00. With "Tarjeta" as the only debt Diario shows "2 ENE"; with other debts it shows the nearest one | B-032 |
 | B-033 | Payment day 31 in a 30-day month | P1 | E | debt día 31, K13 | Diario and pre-outing | "PRÓXIMA CUOTA · 30 NOV"; pre-outing "…de tu cuota de <name> del 30" | — |
 | B-034 | Payment day 29–31 in February | P2 | E | debts día 29, 30, 31, K18 | Diario, pre-outing | Next date "28 FEB" for all three | — |
 | B-035 | Nearest of several debts | P1 | F | debts día 5 and día 20, K13 | Diario; mark día-20 paid; Diario | First "20 NOV"; then "5 DIC" | — |
@@ -339,10 +339,10 @@ Data owned: daily checks, weights, photos, history, capture, reminder settings. 
 | C-021 | Cancel the camera | P3 | N | S0 | Open camera, back | No photo added | — |
 | C-022 | Face photo | P1 | F | S0 | Tab "Cara", take a photo | Saved under Cara, not Tronco | — |
 | C-023 | Compare two photos | P1 | F | Tronco photos on K12 and Clock Sat 2026-11-21 10:00, weights near both dates | "COMPARAR ↗" | Before "ANTES" / after "AHORA" with "12 DÍAS · −x KG" (or "— DÍAS · — KG" without weights) (§7) | C-023 |
-| C-024 | Process death during camera | P2 | X | S0, tab Cara | Open camera; `am kill $PKG` from another shell; shoot; accept | Photo saved as Cara. Risk: the selected tab resets and it saves as Tronco | — |
+| C-024 | Process death during camera | P2 | X | S0, tab Cara, notification listener revoked (a bound listener keeps the process alive and `am kill` does nothing) | Open camera; `am kill $PKG` from another shell; shoot; accept | Photo saved as Cara. Risk: the selected tab resets and it saves as Tronco | — |
 | C-025 | Rotation on Fotos | P3 | X | C-022 | Rotate | Selected tab and timeline kept | — |
 | C-026 | Delete a photo from History | P2 | F | C-019 | Historia > day > "Eliminar foto" > confirm | Photo gone from day detail and Fotos timeline | — |
-| C-027 | Calendar header and legend | P1 | F | FX-C, K13 | Open Historia | Month title, "HOY" chip on 10, legend "PESO REGISTRADO", "FOTO", "CHECKS HECHOS", "SALIDA", "RECAÍDA", "NOCHE GANADA"; "SALIDAS 3 · NOCHES GANADAS 1"; "2 PESAJES · 0 FOTOS" (§9) | C-027 |
+| C-027 | Calendar header and legend | P1 | F | FX-C, K13 | Open Historia | Month title, day 10 drawn as the outlined today cell, legend "PESO REGISTRADO", "FOTO", "CHECKS HECHOS", "SALIDA", "RECAÍDA", "NOCHE GANADA"; "SALIDAS 3 · NOCHES GANADAS 1"; "2 PESAJES · 0 FOTOS" (§9) | C-027 |
 | C-028 | Day marks | P0 | F | FX-C, K13 | Inspect the grid | Days with checks, weights, the outing, the relapse outing (flagged differently) and the won night carry their marks; unmarked days plain (§9) | C-028 |
 | C-029 | Day detail content | P1 | F | FX-C, K13 | Tap Fri 6 Nov, Sat 7 Nov, Mon 9 Nov, Tue 3 Nov | Fri 6: "Salida" "Planeada", "Gasto" S/ 150.00, Dinero exceeded, "Ánimo" "2 de 5", "Recaída" "Rompiste un tope". Sat 7: "Noche ganada" "S/ 100.00 (estimado)", checks Dieta "Sí", alcohol "No". Mon 9: "No planeada", "Salida no planeada". Tue 3: Gym and Dieta "Sí", others "—" (§9) | C-029 |
 | C-030 | Empty day | P3 | F | FX-C | Tap a day with nothing | "Sin actividad" | — |
@@ -524,17 +524,17 @@ Phase 0 additionally returns the tooling table from §3.9.
 ## 9. Risks and open questions for the owner
 
 1. **Debug clock override (M5).** Every time-dependent case depends on changing the device clock. A debug-only offset clock bound in Koin would make Suite A and C runs fast and repeatable. Acceptable as a small debug-only change?
-2. **Estimated cost rule.** PRD §3: typical cost "until three outings are recorded". `GetEstimatedOutingCostUseCase` waits for three outings *with a check-in* and averages their spend (unplanned included). Which is intended? (A-029, A-030)
-3. **Which month a "mark paid" books.** `MarkInstallmentPaidUseCase` books the current app-day month, while Home, the pre-outing and the reminder may already show next month's installment. Paying early or late can double-deduct (B-032).
-4. **Paid-off debts as "next installment".** `ObserveNearestInstallmentUseCase` does not skip a S/ 0.00 balance; the reminder does (B-036, B-030).
+2. **Estimated cost rule.** Resolved (#117): the average waits for three outings with a check-in; the PRD now says so (A-029, A-030).
+3. **Which month a "mark paid" books.** Resolved (#143, PR #146): the tap books the installment shown as next (B-032).
+4. **Paid-off debts as "next installment".** Resolved (#143, PR #146): a S/ 0.00 balance is skipped (B-036, B-030).
 5. **Return at or after 12:00.** Resolved (owner, 2026-10-26, #176): 18:00–23:59 is the outing's evening, 00:00–17:59 the next day; a 12:30 return breaks a 02:00 limit by 630 min (A-036).
-6. **No double-tap guard** on "Confirmar salida" (a second insert throws in `OutingRepositoryImpl.insert`, likely a crash), new-debt "Guardar" and contribution "Guardar" (A-018, B-026, B-048). The goal save is an upsert, so its double tap is harmless (B-045).
-7. **Onboarding editor sheet closes on rotation** (`DismissEditorsOnLeave` runs on recreation) (B-007).
-8. **Restore after `database.close()`.** If `Files.move` fails, the DB is already closed and the app keeps running on it; nothing restarts the app after a successful restore either (B-057, B-060). Needs a unit/instrumented test with an injectable move; testers cannot force it.
+6. **Double-tap guards.** Resolved (#139, #161; PRs #140, #167) for "Confirmar salida", new-debt "Guardar" and contribution "Guardar" (A-018, B-026, B-048). The goal save is an upsert, so its double tap is harmless (B-045).
+7. **Onboarding editor sheet closes on rotation.** Not reproduced: B-007 passed in Phase 1.
+8. **Restore after `database.close()`.** The relaunch after a successful restore is fixed (#125, PR #142). If `Files.move` fails, the DB is already closed and the app keeps running on it (B-060, still BLOCKED). Needs a unit/instrumented test with an injectable move; testers cannot force it.
 9. **Weekly summary has no notification.** Only Home routing opens it on Sunday evening; `ACTION_WEEKLY_SUMMARY` exists but no worker posts it. Is a Sunday notification expected under §8?
 10. **No in-app notifications switch**; the preference defaults to on and can only be changed through system settings.
-11. **Purchase goal cannot be edited**, only removed with its contributions (B-052, PRD §1).
+11. **Purchase goal editing.** Resolved (#130, PR #154): editing keeps the contributions (B-052).
 12. **Backup scope:** the DB only; photos and preferences (onboarding flag) are not included (C-055).
-13. **Listener declared `exported="false"`**; if the system cannot bind it, capture never works (P0-12).
-14. **Copy:** raw English/exception messages in snackbars ("Invalid SQLite backup file", "Error al guardar: <exception>"), unaccented weekday names ("sabado", "miercoles") in contribution dates (B-046, B-059).
-15. **Target weight range** is now 20–500 kg like the weigh-in (B-014). A target already stored out of range blocks saving other setup fields until it is fixed or cleared.
+13. **Listener declared `exported="false"`.** Not a problem: P0-12 and C-037 bind it and capture works.
+14. **Copy.** Resolved: Spanish backup-import message (#136, PR #165) and accented weekday names (#113, PR #164) (B-046, B-059).
+15. **Target weight range** is 20–500 kg like the weigh-in (B-014). Resolved (#160, PR #162): a target stored out of range reads as unset and no longer blocks other setup saves.
