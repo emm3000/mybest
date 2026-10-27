@@ -19,7 +19,7 @@ Rules for writing UI against this system live in [`.claude/rules/ui.md`](../../.
 
 ## 2. Color tokens
 
-Source of truth: the color file in `app/src/main/kotlin/com/emm/mybest/ui/theme/`. Material 3 role mapping: `atelierScheme` in `Theme.kt`.
+Source of truth: `AtelierColors.kt` in `app/src/main/kotlin/com/emm/mybest/ui/theme/`. Material 3 role mapping: `atelierScheme` in `Theme.kt`.
 
 | Token | Value | Use |
 |---|---|---|
@@ -62,7 +62,7 @@ Source of truth: the color file in `app/src/main/kotlin/com/emm/mybest/ui/theme/
 
 ## 3. Typography
 
-Fonts: the font file in `ui/theme/` defines three families.
+Fonts: `AtelierFonts.kt` in `ui/theme/` defines three families.
 
 | Family | Font | Weights |
 |---|---|---|
@@ -97,6 +97,7 @@ Shared composables live in `app/src/main/kotlin/com/emm/mybest/ui/components/`; 
 | `HBottomSheet` | `BottomSheet.kt` | Modal bottom sheet |
 | `HSnackbarHost`, `HSnackbar` | `Snackbar.kt` | Snackbar host and snackbar |
 | `HBottomNavigationBar` | `HBottomNavigationBar.kt` | Four-tab bar (Home, Summary, History, Settings). All four labels share one font size: it starts at `labelSmall` and shrinks in 0.25 sp steps, down to 6 sp, until every label fits its cell on one line |
+| `LimitOutcomeState.message()` | `LimitOutcomeMessage.kt` | Composable extension returning the localized limit-outcome sentence for a `LimitOutcomeState` |
 | `ReminderTimePickerDialog` | `ReminderTimePickerDialog.kt` | Reminder time picker, see [`TIME_PICKER.md`](TIME_PICKER.md) |
 
 ### `ui/components/atelier/`
@@ -106,7 +107,7 @@ Shared composables live in `app/src/main/kotlin/com/emm/mybest/ui/components/`; 
 | `MicroLabel` | `MicroLabel.kt` | Geist Mono, all caps, 0.18 em tracking. Callers pass already-uppercase strings. `MicroLabelStyle` (`MicroLabelStyle.kt`) sets `tone`, `size` (default 10 sp) and `isSingleLine` (default `false`; when `true` the label stays on one line) |
 | `DisplayNumber` | `DisplayNumber.kt` | Instrument Serif numeric display with tabular digits. `DisplayNumberStyle` (`DisplayNumberStyle.kt`) sets `fontSize`, `italic` and `color` |
 | `Hairline` | `Hairline.kt` | 1 dp rule at 8% bone, with optional horizontal `inset` |
-| `CompletionCheck` | `CompletionCheck.kt` | Done/not-done check box: sage fill with a tick when done, 1 dp hairline outline when not |
+| `CompletionCheck` | `CompletionCheck.kt` | Done/not-done check box: sage fill with a tick when done, 1 dp `AtelierInkTertiary` outline when not |
 | `AtelierCaret` | `AtelierCaret.kt` | Decorative chevron, tertiary tint, no click handler |
 
 `MicroLabelTone` (`MicroLabelTone.kt`) has four values:
@@ -133,4 +134,4 @@ See [`.claude/rules/ui.md`](../../.claude/rules/ui.md): container/presentational
 Defined in `app/src/main/res/values/themes.xml` and `values-night/themes.xml`; colors in `values/colors.xml`.
 
 - `Theme.MyBest`: window background is the `app_window_background` color (black); status bar and navigation bar are `#000000`; light status and navigation bar icons are off (`windowLightStatusBar` and `windowLightNavigationBar` are `false`). The base theme is `android:Theme.Material.Light.NoActionBar` in `values/` and `android:Theme.Material.NoActionBar` in `values-night/`.
-- `Theme.MyBest.Starting`: splash theme (`Theme.SplashScreen.IconBackground`). Background is `splash_screen_background` (black); the animated icon is `ic_progress_foreground`; after the splash the app switches to `Theme.MyBest`.
+- `Theme.MyBest.Starting`: splash theme (`Theme.SplashScreen.IconBackground`). Background is `splash_screen_background` (black); the splash icon background (`windowSplashScreenIconBackgroundColor`) is `@color/atelier_black`; the animated icon is `ic_progress_foreground`; after the splash the app switches to `Theme.MyBest`.
