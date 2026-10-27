@@ -61,7 +61,7 @@ PRD: [section 6](PRD.md#6-money).
 PRD: [section 7](PRD.md#7-body).
 
 - Weigh-in (`features/weight/`): weekly record, target weight and trend (`domain/usecase/weight/`). Weekly reminder on the chosen day and time (`data/reminder/WeightReminderSchedulerImpl.kt`).
-- Progress photos (`features/photo/`): trunk and face, camera capture, viewer, timeline and before/after comparison. Optional photo reminder, off by default, published by the weigh-in reminder work when the latest photo is 28 days old or more.
+- Progress photos (`features/photo/`): trunk and face, camera capture, viewer, replace from the viewer (same type, date and place in the timeline; `ReplacePhotoUseCase`), timeline and before/after comparison. Optional photo reminder, off by default, published by the weigh-in reminder work when the latest photo is 28 days old or more.
 
 ## 8. Weekly summary
 
