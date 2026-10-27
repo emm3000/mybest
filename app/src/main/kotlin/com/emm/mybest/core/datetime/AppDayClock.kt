@@ -24,6 +24,12 @@ class AppDayClock(
     private val timeZone: TimeZone,
 ) {
 
+    /**
+     * The current instant of the clock this app day clock reads, so a caller can stamp a record and derive its
+     * app day from the same moment.
+     */
+    fun now(): Instant = clock.now()
+
     fun today(): LocalDate = appDayOf(clock.now())
 
     fun appDayOf(instant: Instant): LocalDate {

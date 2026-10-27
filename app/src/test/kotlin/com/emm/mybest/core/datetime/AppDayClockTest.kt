@@ -61,6 +61,11 @@ class AppDayClockTest {
     }
 
     @Test
+    fun `now returns the clock instant`() {
+        assertEquals(lima(SATURDAY, 2, 30), clockAt(lima(SATURDAY, 2, 30)).now())
+    }
+
+    @Test
     fun `appDayOf maps an instant with the cutoff`() {
         val clock = clockAt(lima(FRIDAY, 12))
 
