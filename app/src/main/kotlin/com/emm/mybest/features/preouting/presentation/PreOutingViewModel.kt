@@ -2,6 +2,7 @@ package com.emm.mybest.features.preouting.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.repository.PurchaseGoalRepository
@@ -9,7 +10,6 @@ import com.emm.mybest.domain.usecase.preouting.ObservePreOutingSnapshotUseCase
 import com.emm.mybest.domain.usecase.preouting.PlanOutingResult
 import com.emm.mybest.domain.usecase.preouting.PreOutingDecisionUseCases
 import com.emm.mybest.domain.usecase.preouting.RecordWonNightResult
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -91,6 +91,3 @@ class PreOutingViewModel(
         }
     }
 }
-
-private suspend inline fun <T> attempt(block: () -> T): Result<T> =
-    runCatching { block() }.onFailure { if (it is CancellationException) throw it }

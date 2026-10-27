@@ -2,13 +2,13 @@ package com.emm.mybest.features.checkin.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.usecase.checkin.CheckInTask
 import com.emm.mybest.domain.usecase.checkin.RecordUnplannedOutingResult
 import com.emm.mybest.domain.usecase.checkin.SaveCheckInResult
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -130,6 +130,3 @@ class CheckInViewModel(
         }
     }
 }
-
-private suspend inline fun <T> attempt(block: () -> T): Result<T> =
-    runCatching { block() }.onFailure { if (it is CancellationException) throw it }

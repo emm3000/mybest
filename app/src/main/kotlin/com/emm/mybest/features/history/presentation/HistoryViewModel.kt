@@ -2,6 +2,7 @@ package com.emm.mybest.features.history.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
@@ -13,7 +14,6 @@ import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.validation.NoteValidationError
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -188,6 +188,3 @@ class HistoryViewModel(
         noteJob = viewModelScope.launch { action() }
     }
 }
-
-private suspend inline fun <T> attempt(block: () -> T): Result<T> =
-    runCatching { block() }.onFailure { if (it is CancellationException) throw it }
