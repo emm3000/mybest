@@ -117,7 +117,7 @@ import com.emm.mybest.domain.usecase.reminder.SyncRemindersUseCase
 import com.emm.mybest.domain.usecase.summary.ObserveWeekDebtUseCase
 import com.emm.mybest.domain.usecase.summary.ObserveWeekMoneyUseCase
 import com.emm.mybest.domain.usecase.summary.ObserveWeekOutingsUseCase
-import com.emm.mybest.domain.usecase.summary.ObserveWeekRecoveryUseCase
+import com.emm.mybest.domain.usecase.summary.ObserveWeekRelapsesUseCase
 import com.emm.mybest.domain.usecase.summary.ObserveWeeklySummaryUseCase
 import com.emm.mybest.domain.usecase.summary.WeeklySummarySections
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
@@ -323,7 +323,7 @@ val appModule = module {
     viewModel { CheckInViewModel(get()) }
 
     factory { ObserveWeekOutingsUseCase(get()) }
-    factory { ObserveWeekRecoveryUseCase(get(), get()) }
+    factory { ObserveWeekRelapsesUseCase(get(), get()) }
     factory { ObserveWeekDebtUseCase(get(), get()) }
     factory { ObserveWeekMoneyUseCase(get(), get(), get()) }
     factory { WeeklySummarySections(get(), get(), get(), get(), get()) }

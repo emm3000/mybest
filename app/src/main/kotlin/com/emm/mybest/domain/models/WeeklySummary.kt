@@ -7,7 +7,7 @@ package com.emm.mybest.domain.models
  */
 data class WeeklySummary(
     val outings: WeekOutings,
-    val recovery: WeekRecovery,
+    val relapses: WeekRelapses,
     val checks: Map<DailyCheckType, WeekProgress>,
     val weighInTrend: WeighInTrend,
     val money: WeekMoney,

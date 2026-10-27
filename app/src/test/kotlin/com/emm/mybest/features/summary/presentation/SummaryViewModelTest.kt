@@ -15,7 +15,7 @@ import com.emm.mybest.domain.models.WeekDebt
 import com.emm.mybest.domain.models.WeekMoney
 import com.emm.mybest.domain.models.WeekOutings
 import com.emm.mybest.domain.models.WeekProgress
-import com.emm.mybest.domain.models.WeekRecovery
+import com.emm.mybest.domain.models.WeekRelapses
 import com.emm.mybest.domain.models.WeeklySummary
 import com.emm.mybest.domain.models.WeighInTrend
 import com.emm.mybest.domain.usecase.summary.ObserveWeeklySummaryUseCase
@@ -48,7 +48,7 @@ private val FRIDAY_EVENING = LocalDateTime(2026, 10, 23, 20, 0)
 
 private val EMPTY_SUMMARY = WeeklySummary(
     outings = WeekOutings(0, Money.ZERO, 0, LimitsKept(0, 0)),
-    recovery = WeekRecovery(emptyList(), null, emptyList()),
+    relapses = WeekRelapses(emptyList(), null, emptyList()),
     checks = emptyMap(),
     weighInTrend = WeighInTrend(),
     money = WeekMoney(emptyList(), Money.ZERO, WeekDebt(Money.ZERO, 0, 0), null),
@@ -126,34 +126,34 @@ class SummaryViewModelTest {
         )
     }
 
-    private fun recoveryOf(vararg times: ReturnTime) = EMPTY_SUMMARY.copy(
-        recovery = WeekRecovery(emptyList(), times.firstOrNull(), times.toList()),
+    private fun relapsesOf(vararg times: ReturnTime) = EMPTY_SUMMARY.copy(
+        relapses = WeekRelapses(emptyList(), times.firstOrNull(), times.toList()),
     )
 
     private fun returned(relapse: LocalDate, days: Int) =
         ReturnTime(relapse, relapse.plus(days, DateTimeUnit.DAY), days)
 
     @Test
-    fun `recovery section says the week had no relapse`() = runTest {
-        val section = sectionOf(EMPTY_SUMMARY, R.string.summary_section_recovery)
+    fun `relapses section says the week had no relapse`() = runTest {
+        val section = sectionOf(EMPTY_SUMMARY, R.string.summary_section_relapses)
 
         assertEquals(
-            listOf(line(R.string.summary_recovery_label, SummaryText(R.string.summary_recovery_none))),
+            listOf(line(R.string.summary_relapses_label, SummaryText(R.string.summary_relapses_none))),
             section.rows,
         )
     }
 
     @Test
-    fun `recovery section says how long the return took and lists the history`() = runTest {
-        val summary = recoveryOf(returned(LocalDate(2026, 10, 17), days = 2))
+    fun `relapses section says how long the return took and lists the history`() = runTest {
+        val summary = relapsesOf(returned(LocalDate(2026, 10, 17), days = 2))
 
-        val section = sectionOf(summary, R.string.summary_section_recovery)
+        val section = sectionOf(summary, R.string.summary_section_relapses)
 
         assertEquals(
             listOf(
-                line(R.string.summary_recovery_label, SummaryText(R.string.summary_recovery_returned_other, listOf(2))),
+                line(R.string.summary_relapses_label, SummaryText(R.string.summary_relapses_returned_other, listOf(2))),
                 SummaryRowState.Line(
-                    SummaryText(R.string.summary_recovery_history_label, listOf("SÁB 17 OCT")),
+                    SummaryText(R.string.summary_relapses_history_label, listOf("SÁB 17 OCT")),
                     SummaryText(R.string.summary_days_other, listOf(2)),
                     AtelierInk,
                 ),
@@ -163,28 +163,28 @@ class SummaryViewModelTest {
     }
 
     @Test
-    fun `recovery section uses the singular for a one day return`() = runTest {
+    fun `relapses section uses the singular for a one day return`() = runTest {
         val section =
-            sectionOf(recoveryOf(returned(LocalDate(2026, 10, 17), days = 1)), R.string.summary_section_recovery)
+            sectionOf(relapsesOf(returned(LocalDate(2026, 10, 17), days = 1)), R.string.summary_section_relapses)
 
         assertEquals(
-            line(R.string.summary_recovery_label, SummaryText(R.string.summary_recovery_returned_one, listOf(1))),
+            line(R.string.summary_relapses_label, SummaryText(R.string.summary_relapses_returned_one, listOf(1))),
             section.rows.first(),
         )
     }
 
     @Test
-    fun `recovery section counts the days without a return up to today`() = runTest {
+    fun `relapses section counts the days without a return up to today`() = runTest {
         val open = ReturnTime(LocalDate(2026, 10, 21), returnAppDay = null, days = null)
 
-        val section = sectionOf(recoveryOf(open), R.string.summary_section_recovery)
+        val section = sectionOf(relapsesOf(open), R.string.summary_section_relapses)
 
         assertEquals(
             listOf(
-                line(R.string.summary_recovery_label, SummaryText(R.string.summary_recovery_open_other, listOf(2))),
+                line(R.string.summary_relapses_label, SummaryText(R.string.summary_relapses_open_other, listOf(2))),
                 SummaryRowState.Line(
-                    SummaryText(R.string.summary_recovery_history_label, listOf("MIÉ 21 OCT")),
-                    SummaryText(R.string.summary_recovery_history_open),
+                    SummaryText(R.string.summary_relapses_history_label, listOf("MIÉ 21 OCT")),
+                    SummaryText(R.string.summary_relapses_history_open),
                     AtelierInk,
                 ),
             ),

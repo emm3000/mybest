@@ -97,7 +97,7 @@ class ObserveWeeklySummaryUseCaseTest {
         return ObserveWeeklySummaryUseCase(
             WeeklySummarySections(
                 outings = ObserveWeekOutingsUseCase(outingRepository),
-                recovery = ObserveWeekRecoveryUseCase(
+                relapses = ObserveWeekRelapsesUseCase(
                     relapses,
                     ObserveReturnTimesUseCase(relapses, checkRepository, appDayClock),
                 ),
@@ -199,14 +199,14 @@ class ObserveWeeklySummaryUseCaseTest {
             planned(4, SATURDAY, checkIn(120_00)),
         )
 
-        assertEquals(listOf(3L, 4L), summaryOf(Records(outings)).recovery.relapses.map { it.outing.id })
+        assertEquals(listOf(3L, 4L), summaryOf(Records(outings)).relapses.relapses.map { it.outing.id })
     }
 
     @Test
     fun `gives the latest return time`() = runTest {
         val records = Records(listOf(unplanned(1, FRIDAY)), listOf(dietDone(SATURDAY)))
 
-        assertEquals(ReturnTime(FRIDAY, SATURDAY, days = 1), summaryOf(records).recovery.latestReturnTime)
+        assertEquals(ReturnTime(FRIDAY, SATURDAY, days = 1), summaryOf(records).relapses.latestReturnTime)
     }
 
     @Test
@@ -216,7 +216,7 @@ class ObserveWeeklySummaryUseCaseTest {
             checks = listOf(dietDone(PREVIOUS_SATURDAY), dietDone(SATURDAY)),
         )
 
-        val latest = summaryOf(records, appDay = PREVIOUS_SUNDAY).recovery.latestReturnTime
+        val latest = summaryOf(records, appDay = PREVIOUS_SUNDAY).relapses.latestReturnTime
 
         assertEquals(ReturnTime(PREVIOUS_FRIDAY, PREVIOUS_SATURDAY, days = 1), latest)
     }
@@ -225,7 +225,7 @@ class ObserveWeeklySummaryUseCaseTest {
     fun `has no latest return time when the week has no relapse`() = runTest {
         val records = Records(listOf(unplanned(1, PREVIOUS_FRIDAY)), listOf(dietDone(PREVIOUS_SATURDAY)))
 
-        assertNull(summaryOf(records).recovery.latestReturnTime)
+        assertNull(summaryOf(records).relapses.latestReturnTime)
     }
 
     @Test
@@ -236,7 +236,7 @@ class ObserveWeeklySummaryUseCaseTest {
         )
 
         val history = listOf(ReturnTime(FRIDAY, SATURDAY, days = 1), ReturnTime(PREVIOUS_SUNDAY, MONDAY, days = 1))
-        assertEquals(history, summaryOf(records).recovery.returnTimeHistory)
+        assertEquals(history, summaryOf(records).relapses.returnTimeHistory)
     }
 
     @Test
@@ -246,7 +246,7 @@ class ObserveWeeklySummaryUseCaseTest {
             checks = listOf(dietDone(PREVIOUS_SATURDAY), dietDone(SATURDAY)),
         )
 
-        val history = summaryOf(records, appDay = PREVIOUS_SUNDAY).recovery.returnTimeHistory
+        val history = summaryOf(records, appDay = PREVIOUS_SUNDAY).relapses.returnTimeHistory
 
         assertEquals(listOf(ReturnTime(PREVIOUS_FRIDAY, PREVIOUS_SATURDAY, days = 1)), history)
     }

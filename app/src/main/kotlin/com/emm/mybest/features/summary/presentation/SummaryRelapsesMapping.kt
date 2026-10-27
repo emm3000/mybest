@@ -5,7 +5,7 @@ import com.emm.mybest.R
 import com.emm.mybest.core.datetime.MONTH_ABBR_ES
 import com.emm.mybest.core.datetime.shortEs
 import com.emm.mybest.domain.models.ReturnTime
-import com.emm.mybest.domain.models.WeekRecovery
+import com.emm.mybest.domain.models.WeekRelapses
 import com.emm.mybest.ui.theme.AtelierInk
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
@@ -17,18 +17,18 @@ private data class DaysTexts(
     @StringRes val otherRes: Int,
 )
 
-private val RETURNED_TEXTS = DaysTexts(R.string.summary_recovery_returned_one, R.string.summary_recovery_returned_other)
-private val OPEN_TEXTS = DaysTexts(R.string.summary_recovery_open_one, R.string.summary_recovery_open_other)
+private val RETURNED_TEXTS = DaysTexts(R.string.summary_relapses_returned_one, R.string.summary_relapses_returned_other)
+private val OPEN_TEXTS = DaysTexts(R.string.summary_relapses_open_one, R.string.summary_relapses_open_other)
 private val HISTORY_TEXTS = DaysTexts(R.string.summary_days_one, R.string.summary_days_other)
 
-internal fun WeekRecovery.toRecoverySection(today: LocalDate): SummarySectionState = SummarySectionState(
-    titleRes = R.string.summary_section_recovery,
+internal fun WeekRelapses.toRelapsesSection(today: LocalDate): SummarySectionState = SummarySectionState(
+    titleRes = R.string.summary_section_relapses,
     rows = listOf(latestReturnTime.toHeadlineRow(today)) + returnTimeHistory.map { it.toHistoryRow() },
 )
 
 private fun ReturnTime?.toHeadlineRow(today: LocalDate): SummaryRowState = SummaryRowState.Line(
-    label = SummaryText(R.string.summary_recovery_label),
-    value = this?.toHeadlineText(today) ?: SummaryText(R.string.summary_recovery_none),
+    label = SummaryText(R.string.summary_relapses_label),
+    value = this?.toHeadlineText(today) ?: SummaryText(R.string.summary_relapses_none),
     valueColor = AtelierInk,
 )
 
@@ -38,9 +38,9 @@ private fun ReturnTime.toHeadlineText(today: LocalDate): SummaryText = when (day
 }
 
 private fun ReturnTime.toHistoryRow(): SummaryRowState = SummaryRowState.Line(
-    label = SummaryText(R.string.summary_recovery_history_label, listOf(relapseAppDay.toDayLabel())),
+    label = SummaryText(R.string.summary_relapses_history_label, listOf(relapseAppDay.toDayLabel())),
     value = days?.let { daysText(it, HISTORY_TEXTS) }
-        ?: SummaryText(R.string.summary_recovery_history_open),
+        ?: SummaryText(R.string.summary_relapses_history_open),
     valueColor = AtelierInk,
 )
 
