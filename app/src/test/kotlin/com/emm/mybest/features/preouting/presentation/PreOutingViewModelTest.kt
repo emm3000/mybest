@@ -90,6 +90,77 @@ private class GatedOutingRepository(
     }
 }
 
+private fun TestScope.fillForm(viewModel: PreOutingViewModel) {
+    viewModel.onIntent(PreOutingIntent.OnGoOutClick)
+    viewModel.onIntent(PreOutingIntent.OnMoneyChange("150"))
+    viewModel.onIntent(PreOutingIntent.OnDrinksChange("4"))
+    viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(1, 30))
+    viewModel.onIntent(PreOutingIntent.OnCardsOffToggle)
+    viewModel.onIntent(PreOutingIntent.OnAccountLoadedToggle)
+    advanceUntilIdle()
+}
+
+private fun TestScope.stateNow(viewModel: PreOutingViewModel): PreOutingState {
+    advanceUntilIdle()
+    return viewModel.state.value
+}
+
+private suspend fun TestScope.stateOf(viewModel: PreOutingViewModel): PreOutingState {
+    backgroundScope.launch { viewModel.state.collect {} }
+    advanceUntilIdle()
+    return stateNow(viewModel)
+}
+
+private data class Scenario(
+    val now: LocalDateTime = LocalDateTime(FRIDAY, LocalTime(21, 0)),
+    val setup: Setup = Setup(typicalOutingCost = Money(380_00)),
+)
+
+private fun decisionUseCases(
+    scenario: Scenario,
+    outings: OutingRepository,
+    gatedOutings: OutingRepository,
+): PreOutingDecisionUseCases {
+    val clock = AppDayClock(FixedClock(scenario.now.toInstant(LIMA)), LIMA)
+    val estimate = GetEstimatedOutingCostUseCase(FakeSetupRepository(scenario.setup), outings)
+    val hasDecisionOn = HasDecisionOnUseCase(outings)
+    return PreOutingDecisionUseCases(
+        observeTonight = ObserveTonightUseCase(outings, clock),
+        planOuting = PlanOutingUseCase(gatedOutings, hasDecisionOn, clock),
+        recordWonNight = RecordWonNightUseCase(outings, hasDecisionOn, estimate, clock),
+    )
+}
+
+private fun preOutingViewModel(
+    snapshot: PreOutingSnapshot,
+    goal: PurchaseGoal?,
+    decisions: PreOutingDecisionUseCases,
+): PreOutingViewModel {
+    val observeSnapshot = mockk<ObservePreOutingSnapshotUseCase>()
+    every { observeSnapshot() } returns flowOf(snapshot)
+    return PreOutingViewModel(observeSnapshot, FakePurchaseGoalRepository(goal), decisions)
+}
+
+private suspend fun TestScope.openFilledForm(viewModel: PreOutingViewModel) {
+    stateOf(viewModel)
+    fillForm(viewModel)
+}
+
+private fun TestScope.confirm(viewModel: PreOutingViewModel) {
+    viewModel.onIntent(PreOutingIntent.OnConfirmOutingClick)
+    advanceUntilIdle()
+}
+
+private fun assertFilledFormKept(state: PreOutingState) {
+    assertTrue(state.form.isOpen)
+    assertEquals("150", state.form.moneyInput)
+    assertEquals("4", state.form.drinksInput)
+    assertEquals(LocalTime(1, 30), state.form.returnTime)
+    assertTrue(state.form.areCardsOff)
+    assertTrue(state.form.isAccountLoaded)
+    assertEquals(PreOutingDecisionState.Undecided, state.decision)
+}
+
 class PreOutingViewModelTest {
 
     @get:Rule
@@ -98,56 +169,12 @@ class PreOutingViewModelTest {
     private val outingRepository = FakeOutingRepository()
     private val gatedOutingRepository = GatedOutingRepository(outingRepository)
 
-    private fun decisionUseCases(now: LocalDateTime, setup: Setup): PreOutingDecisionUseCases {
-        val clock = AppDayClock(FixedClock(now.toInstant(LIMA)), LIMA)
-        val estimate = GetEstimatedOutingCostUseCase(FakeSetupRepository(setup), outingRepository)
-        val hasDecisionOn = HasDecisionOnUseCase(outingRepository)
-        return PreOutingDecisionUseCases(
-            observeTonight = ObserveTonightUseCase(outingRepository, clock),
-            planOuting = PlanOutingUseCase(gatedOutingRepository, hasDecisionOn, clock),
-            recordWonNight = RecordWonNightUseCase(outingRepository, hasDecisionOn, estimate, clock),
-        )
-    }
-
-    private data class Scenario(
-        val now: LocalDateTime = LocalDateTime(FRIDAY, LocalTime(21, 0)),
-        val setup: Setup = Setup(typicalOutingCost = Money(380_00)),
-    )
-
     private fun viewModel(
         snapshot: PreOutingSnapshot,
         goal: PurchaseGoal? = null,
         scenario: Scenario = Scenario(),
-    ): PreOutingViewModel {
-        val observeSnapshot = mockk<ObservePreOutingSnapshotUseCase>()
-        every { observeSnapshot() } returns flowOf(snapshot)
-        return PreOutingViewModel(
-            observeSnapshot,
-            FakePurchaseGoalRepository(goal),
-            decisionUseCases(scenario.now, scenario.setup),
-        )
-    }
-
-    private fun TestScope.fillForm(viewModel: PreOutingViewModel) {
-        viewModel.onIntent(PreOutingIntent.OnGoOutClick)
-        viewModel.onIntent(PreOutingIntent.OnMoneyChange("150"))
-        viewModel.onIntent(PreOutingIntent.OnDrinksChange("4"))
-        viewModel.onIntent(PreOutingIntent.OnReturnTimeSelected(1, 30))
-        viewModel.onIntent(PreOutingIntent.OnCardsOffToggle)
-        viewModel.onIntent(PreOutingIntent.OnAccountLoadedToggle)
-        advanceUntilIdle()
-    }
-
-    private fun TestScope.stateNow(viewModel: PreOutingViewModel): PreOutingState {
-        advanceUntilIdle()
-        return viewModel.state.value
-    }
-
-    private suspend fun TestScope.stateOf(viewModel: PreOutingViewModel): PreOutingState {
-        backgroundScope.launch { viewModel.state.collect {} }
-        advanceUntilIdle()
-        return stateNow(viewModel)
-    }
+    ): PreOutingViewModel =
+        preOutingViewModel(snapshot, goal, decisionUseCases(scenario, outingRepository, gatedOutingRepository))
 
     @Test
     fun `an empty setup asks for every missing input`() = runTest {
@@ -457,5 +484,50 @@ class PreOutingViewModelTest {
 
         assertEquals(2, gatedOutingRepository.recordPlannedCalls)
         assertEquals(1, outingRepository.observeAll().first().size)
+    }
+
+    @Test
+    fun `a failed save reports the failure and keeps the form as filled`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        openFilledForm(viewModel)
+        gatedOutingRepository.failure = IllegalStateException("disk full")
+
+        viewModel.effect.test {
+            viewModel.onIntent(PreOutingIntent.OnConfirmOutingClick)
+            assertEquals(PreOutingEffect.ActionFailed, awaitItem())
+            expectNoEvents()
+        }
+
+        assertFilledFormKept(stateNow(viewModel))
+    }
+
+    @Test
+    fun `confirming again after a failed save saves the outing`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        openFilledForm(viewModel)
+        gatedOutingRepository.failure = IllegalStateException("disk full")
+        confirm(viewModel)
+        gatedOutingRepository.failure = null
+
+        viewModel.effect.test {
+            confirm(viewModel)
+            expectNoEvents()
+        }
+
+        assertEquals(2, gatedOutingRepository.recordPlannedCalls)
+        assertEquals(1, outingRepository.observeAll().first().size)
+        assertFalse(stateNow(viewModel).form.isOpen)
+    }
+
+    @Test
+    fun `an interrupted save does not report a failure`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        openFilledForm(viewModel)
+        gatedOutingRepository.failure = CancellationException("save interrupted")
+
+        viewModel.effect.test {
+            confirm(viewModel)
+            expectNoEvents()
+        }
     }
 }
