@@ -2,13 +2,13 @@ package com.emm.mybest.features.history.presentation
 
 import kotlinx.datetime.LocalDate
 
-internal data class BitacoraCallbacks(
+internal data class LogbookCallbacks(
     val onDayClick: (LocalDate) -> Unit,
     val onNoteClick: (Long) -> Unit,
     val onWriteNoteClick: () -> Unit,
 ) {
 
-    fun onRowClick(appDay: LocalDate, row: BitacoraRowState) {
+    fun onRowClick(appDay: LocalDate, row: LogbookRowState) {
         val noteId = row.noteId
         if (noteId == null) onDayClick(appDay) else onNoteClick(noteId)
     }

@@ -76,7 +76,7 @@ fun HistoryScreen(
                 onMonthChange = { viewModel.onIntent(HistoryIntent.OnMonthChange(it)) },
                 onDateClick = { viewModel.onIntent(HistoryIntent.OnDateSelected(it)) },
                 onViewSelect = { viewModel.onIntent(HistoryIntent.OnViewSelected(it)) },
-                bitacora = BitacoraCallbacks(
+                logbook = LogbookCallbacks(
                     onDayClick = { viewModel.onIntent(HistoryIntent.OnDateSelected(it)) },
                     onNoteClick = { viewModel.onIntent(HistoryIntent.OnNoteClick(it)) },
                     onWriteNoteClick = { viewModel.onIntent(HistoryIntent.OnWriteNoteClick) },
@@ -97,7 +97,7 @@ private fun NoteEditorOverlay(editor: NoteEditorState, onIntent: (HistoryIntent)
 
 @Composable
 private fun HistoryEffectsHandler(effects: Flow<HistoryEffect>, snackbarHostState: SnackbarHostState) {
-    val failedMessage = stringResource(R.string.bitacora_note_action_failed)
+    val failedMessage = stringResource(R.string.logbook_note_action_failed)
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {

@@ -28,8 +28,8 @@ private val ROW_VERTICAL_PADDING = 12.dp
 private val DESCRIPTION_START_PADDING = 14.dp
 
 @Composable
-internal fun BitacoraRow(
-    row: BitacoraRowState,
+internal fun LogbookRow(
+    row: LogbookRowState,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -63,8 +63,8 @@ internal fun BitacoraRow(
 
 @Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)
 @Composable
-private fun BitacoraRowPreview() {
+private fun LogbookRowPreview() {
     AtelierTheme {
-        BitacoraRow(row = previewRelapseRow(), onClick = {})
+        LogbookRow(row = previewRelapseRow(), onClick = {})
     }
 }

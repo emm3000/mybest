@@ -26,24 +26,24 @@ private val EMPTY_VERTICAL_PADDING = 48.dp
 private val ROW_HAIRLINE_INSET = 28.dp
 
 @Composable
-internal fun BitacoraList(
-    days: ImmutableList<BitacoraDayState>,
+internal fun LogbookList(
+    days: ImmutableList<LogbookDayState>,
     canWriteNote: Boolean,
-    callbacks: BitacoraCallbacks,
+    callbacks: LogbookCallbacks,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         if (canWriteNote) WriteNoteRow(onClick = callbacks.onWriteNoteClick)
-        if (days.isEmpty()) BitacoraEmpty() else BitacoraDays(days = days, callbacks = callbacks)
+        if (days.isEmpty()) LogbookEmpty() else LogbookDays(days = days, callbacks = callbacks)
     }
 }
 
 @Composable
-private fun BitacoraDays(days: ImmutableList<BitacoraDayState>, callbacks: BitacoraCallbacks) {
+private fun LogbookDays(days: ImmutableList<LogbookDayState>, callbacks: LogbookCallbacks) {
     days.forEachIndexed { index, day ->
         if (index > 0) Hairline()
-        BitacoraDayHeader(day = day)
-        BitacoraDayRows(day = day, callbacks = callbacks)
+        LogbookDayHeader(day = day)
+        LogbookDayRows(day = day, callbacks = callbacks)
     }
 }
 
@@ -55,7 +55,7 @@ private fun WriteNoteRow(onClick: () -> Unit, modifier: Modifier = Modifier) {
             .padding(horizontal = HISTORY_GUT, vertical = HEADER_VERTICAL_PADDING),
     ) {
         HButton(
-            text = stringResource(R.string.bitacora_write_note),
+            text = stringResource(R.string.logbook_write_note),
             onClick = onClick,
             variant = ButtonVariant.Outline,
         )
@@ -64,15 +64,15 @@ private fun WriteNoteRow(onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun BitacoraDayRows(day: BitacoraDayState, callbacks: BitacoraCallbacks) {
+private fun LogbookDayRows(day: LogbookDayState, callbacks: LogbookCallbacks) {
     day.rows.forEachIndexed { index, row ->
-        BitacoraRow(row = row, onClick = { callbacks.onRowClick(day.appDay, row) })
+        LogbookRow(row = row, onClick = { callbacks.onRowClick(day.appDay, row) })
         if (index < day.rows.lastIndex) Hairline(inset = ROW_HAIRLINE_INSET)
     }
 }
 
 @Composable
-private fun BitacoraDayHeader(day: BitacoraDayState, modifier: Modifier = Modifier) {
+private fun LogbookDayHeader(day: LogbookDayState, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -90,7 +90,7 @@ private fun BitacoraDayHeader(day: BitacoraDayState, modifier: Modifier = Modifi
 }
 
 @Composable
-private fun BitacoraEmpty(modifier: Modifier = Modifier) {
+private fun LogbookEmpty(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -98,26 +98,26 @@ private fun BitacoraEmpty(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.Center,
     ) {
         MicroLabel(
-            text = stringResource(R.string.bitacora_empty),
+            text = stringResource(R.string.logbook_empty),
             style = MicroLabelStyle(tone = MicroLabelTone.Dim),
         )
     }
 }
 
-private val PREVIEW_CALLBACKS = BitacoraCallbacks(onDayClick = {}, onNoteClick = {}, onWriteNoteClick = {})
+private val PREVIEW_CALLBACKS = LogbookCallbacks(onDayClick = {}, onNoteClick = {}, onWriteNoteClick = {})
 
 @Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)
 @Composable
-private fun BitacoraListPreview() {
+private fun LogbookListPreview() {
     AtelierTheme {
-        BitacoraList(days = previewBitacoraDays(), canWriteNote = true, callbacks = PREVIEW_CALLBACKS)
+        LogbookList(days = previewLogbookDays(), canWriteNote = true, callbacks = PREVIEW_CALLBACKS)
     }
 }
 
 @Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)
 @Composable
-private fun BitacoraListEmptyPreview() {
+private fun LogbookListEmptyPreview() {
     AtelierTheme {
-        BitacoraList(days = persistentListOf(), canWriteNote = false, callbacks = PREVIEW_CALLBACKS)
+        LogbookList(days = persistentListOf(), canWriteNote = false, callbacks = PREVIEW_CALLBACKS)
     }
 }

@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 import kotlinx.datetime.LocalDate
 
 /**
- * One Bitácora note on an app day, with the instant it was written stored as epoch milliseconds.
+ * One Logbook note on an app day, with the instant it was written stored as epoch milliseconds.
  */
 @Entity(tableName = "note", indices = [Index("app_day")])
 data class NoteEntity(

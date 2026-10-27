@@ -60,13 +60,13 @@ private fun Segment(text: String, isSelected: Boolean, onSelect: () -> Unit) {
 @StringRes
 private fun HistoryView.labelRes(): Int = when (this) {
     HistoryView.CALENDAR -> R.string.history_view_calendar
-    HistoryView.BITACORA -> R.string.history_view_bitacora
+    HistoryView.LOGBOOK -> R.string.history_view_logbook
 }
 
 @Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)
 @Composable
 private fun HistoryViewSwitchPreview() {
     AtelierTheme {
-        HistoryViewSwitch(selected = HistoryView.BITACORA, onSelect = {})
+        HistoryViewSwitch(selected = HistoryView.LOGBOOK, onSelect = {})
     }
 }

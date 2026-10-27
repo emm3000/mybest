@@ -27,10 +27,10 @@ internal fun HistoryMonthPage(
         Hairline()
         when (state.selectedView) {
             HistoryView.CALENDAR -> HistoryCalendarContent(state, today, callbacks.onDateClick)
-            HistoryView.BITACORA -> BitacoraList(
-                days = state.bitacoraDays,
+            HistoryView.LOGBOOK -> LogbookList(
+                days = state.logbookDays,
                 canWriteNote = state.canWriteNote,
-                callbacks = callbacks.bitacora,
+                callbacks = callbacks.logbook,
             )
         }
     }
