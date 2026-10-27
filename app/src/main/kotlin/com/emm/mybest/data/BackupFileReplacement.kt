@@ -29,16 +29,16 @@ internal fun replaceDatabaseFile(
     move: (File, File) -> Unit = ::moveAtomically,
     closeDatabase: () -> Unit,
 ): RestoreResult {
-    var isDatabaseClosed = false
+    var isCloseStarted = false
     val replacement = runCatching {
         source.use { input ->
             replaceFileAtomically(input, target, move) {
+                isCloseStarted = true
                 closeDatabase()
-                isDatabaseClosed = true
             }
         }
     }
-    if (replacement.isFailure && isDatabaseClosed) return RestoreResult.NotRestoredRequiresRestart
+    if (replacement.isFailure && isCloseStarted) return RestoreResult.NotRestoredRequiresRestart
     replacement.getOrThrow()
     return RestoreResult.RequiresRestart
 }
