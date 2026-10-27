@@ -9,6 +9,7 @@ internal fun StatusBarNotification.toPostedNotification(): PostedNotification {
     val extras = notification.extras
     return PostedNotification(
         packageName = packageName,
+        key = key,
         title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString(),
         text = bodyOf(
             bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT),

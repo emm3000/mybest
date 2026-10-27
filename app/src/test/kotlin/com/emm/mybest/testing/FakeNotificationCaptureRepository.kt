@@ -32,6 +32,7 @@ class FakeNotificationCaptureRepository(
             title = notification.title,
             text = notification.text,
             postedAt = notification.postedAt,
+            key = notification.key,
         )
         captured.value = listOf(stored) + captured.value
     }

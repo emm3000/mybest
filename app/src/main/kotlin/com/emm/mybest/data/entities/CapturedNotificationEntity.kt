@@ -2,12 +2,17 @@ package com.emm.mybest.data.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
  * A raw notification from a selected app, with its post time stored as epoch milliseconds.
+ * [notificationKey] is null for rows stored before the key was recorded.
  */
-@Entity(tableName = "captured_notification")
+@Entity(
+    tableName = "captured_notification",
+    indices = [Index("notification_key")],
+)
 data class CapturedNotificationEntity(
 
     @PrimaryKey(autoGenerate = true)
@@ -25,4 +30,7 @@ data class CapturedNotificationEntity(
 
     @ColumnInfo(name = "posted_at_epoch_ms")
     val postedAtEpochMs: Long,
+
+    @ColumnInfo(name = "notification_key")
+    val notificationKey: String?,
 )

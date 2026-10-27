@@ -53,7 +53,7 @@ class ObserveCaptureOverviewUseCaseTest {
     @Test
     fun `labels each captured notification with its app`() = runTest {
         val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
-        repository.saveCaptured(PostedNotification(YAPE, "Yape", "Te yapearon S/ 25.00", POSTED_AT))
+        repository.saveCaptured(PostedNotification(YAPE, "key", "Yape", "Te yapearon S/ 25.00", POSTED_AT))
 
         val entries = useCase(repository)().first().entries
 
@@ -67,7 +67,7 @@ class ObserveCaptureOverviewUseCaseTest {
     @Test
     fun `falls back to the package name when the app is no longer installed`() = runTest {
         val repository = FakeNotificationCaptureRepository()
-        repository.saveCaptured(PostedNotification(REMOVED, "Hola", null, POSTED_AT))
+        repository.saveCaptured(PostedNotification(REMOVED, "key", "Hola", null, POSTED_AT))
 
         val entries = useCase(repository)().first().entries
 
@@ -77,8 +77,8 @@ class ObserveCaptureOverviewUseCaseTest {
     @Test
     fun `keeps the newest captured notification first`() = runTest {
         val repository = FakeNotificationCaptureRepository()
-        repository.saveCaptured(PostedNotification(YAPE, "first", null, POSTED_AT))
-        repository.saveCaptured(PostedNotification(PLIN, "second", null, POSTED_AT + 1.minutes))
+        repository.saveCaptured(PostedNotification(YAPE, "key", "first", null, POSTED_AT))
+        repository.saveCaptured(PostedNotification(PLIN, "key", "second", null, POSTED_AT + 1.minutes))
 
         val entries = useCase(repository)().first().entries
 
@@ -97,7 +97,7 @@ class ObserveCaptureOverviewUseCaseTest {
     @Test
     fun `shows no apps and labels notifications by package when the installed apps cannot be listed`() = runTest {
         val repository = FakeNotificationCaptureRepository()
-        repository.saveCaptured(PostedNotification(YAPE, "Yape", null, POSTED_AT))
+        repository.saveCaptured(PostedNotification(YAPE, "key", "Yape", null, POSTED_AT))
         val failingApps = object : InstalledAppsRepository {
             override suspend fun list(): List<InstalledApp> = error("boom")
         }

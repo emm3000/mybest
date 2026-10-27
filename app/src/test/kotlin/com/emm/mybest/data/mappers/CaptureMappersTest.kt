@@ -15,19 +15,21 @@ class CaptureMappersTest {
             title = " Yape ",
             text = "Te yapearon S/ 25.00\n",
             postedAt = Instant.fromEpochMilliseconds(1_792_710_900_123),
+            key = "0|com.bcp.innovacxion.yapeapp|1|tag|10100",
         )
 
         assertEquals(notification, notification.toEntity().toDomain())
     }
 
     @Test
-    fun `a captured notification without title or text round-trips through the entity`() {
+    fun `a captured notification without title, text or key round-trips through the entity`() {
         val notification = CapturedNotification(
             id = 5,
             packageName = "com.interbank.plin",
             title = null,
             text = null,
             postedAt = Instant.fromEpochMilliseconds(0),
+            key = null,
         )
 
         assertEquals(notification, notification.toEntity().toDomain())

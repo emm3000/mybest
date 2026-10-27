@@ -39,6 +39,7 @@ class NotificationCaptureRepositoryImpl(
                 title = notification.title,
                 text = notification.text,
                 postedAtEpochMs = notification.postedAt.toEpochMilliseconds(),
+                notificationKey = notification.key,
             ),
         )
     }
