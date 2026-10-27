@@ -22,8 +22,6 @@ import com.emm.mybest.ui.theme.AtelierTheme
 /**
  * Standard confirmation dialog.
  *
- * Usage: "Review session finished" in StudyScreen.
- *
  * @param title         Dialog title
  * @param description   Descriptive body (optional)
  * @param icon          Optional icon above the title

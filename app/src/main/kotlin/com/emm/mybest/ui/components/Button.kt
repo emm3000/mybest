@@ -37,8 +37,6 @@ private const val BUTTON_DISABLED_ALPHA = 0.5f
 
 /**
  * Main button with default, destructive, outline, secondary, ghost and link variants.
- *
- * Supports variants: Default, Destructive, Outline, Secondary, Ghost, Link.
  * Has support for loading state with [isLoading].
  */
 @Composable
