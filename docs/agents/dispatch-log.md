@@ -13,7 +13,8 @@ Totals of rows already folded out of Recent.
 | Row | Model:effort | PRs | MERGE | FIX FIRST checklist | FIX FIRST judgment | FIX FIRST spec |
 |---|---|---|---|---|---|---|
 | 1 | sonnet:low | 2 | 2 | 0 | 0 | 0 |
-| 2 | sonnet:medium | 8 | 6 | 2 | 0 | 0 |
+| 1 | sonnet:medium | 1 | 0 | 1 | 0 | 0 |
+| 2 | sonnet:medium | 9 | 7 | 2 | 0 | 0 |
 | 3 | sonnet:medium | 7 | 3 | 1 | 3 | 0 |
 | 3 | sonnet:high | 31 | 23 | 5 | 3 | 0 |
 | 4 | sonnet:high | 4 | 2 | 0 | 2 | 1 |
@@ -26,8 +27,6 @@ Last 20 PRs, oldest first. Model:effort is what actually ran, which may differ f
 
 | PR | Issue | Row | Model:effort | First review | Cause |
 |---|---|---|---|---|---|
-| #172 | #28 | 1 | sonnet:medium | FIX FIRST | checklist |
-| #173 | #171 | 2 | sonnet:medium | MERGE | - |
 | #175 | #174 | 3 | sonnet:high | MERGE | - |
 | #177 | #176 | 3 | sonnet:high | MERGE | - |
 | #178 | #42 | 5 | opus:high | MERGE | - |
@@ -46,3 +45,5 @@ Last 20 PRs, oldest first. Model:effort is what actually ran, which may differ f
 | #210 | #202 | 3 | sonnet:high | MERGE | - |
 | #211 | #199 | 3 | sonnet:high | MERGE | - |
 | #212 | #203 | 3 | sonnet:high | MERGE | - |
+| #213 | #204 | 3 | sonnet:high | MERGE | - |
+| #215 | #205 | 4 | opus:medium | MERGE | - |
