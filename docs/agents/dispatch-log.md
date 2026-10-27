@@ -15,7 +15,7 @@ Totals of rows already folded out of Recent.
 | 1 | sonnet:low | 2 | 2 | 0 | 0 | 0 |
 | 2 | sonnet:medium | 4 | 3 | 1 | 0 | 0 |
 | 3 | sonnet:medium | 7 | 3 | 1 | 3 | 0 |
-| 3 | sonnet:high | 20 | 12 | 6 | 2 | 0 |
+| 3 | sonnet:high | 20 | 12 | 5 | 3 | 0 |
 | 4 | sonnet:high | 4 | 2 | 0 | 2 | 1 |
 | 5 | opus:high | 23 | 18 | 1 | 4 | 0 |
 
