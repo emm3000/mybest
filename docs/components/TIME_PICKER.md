@@ -7,7 +7,7 @@
 Main goals:
 
 - Keep the existing app contract unchanged.
-- Match the app's shadcn-inspired visual system.
+- Match the Atelier Dark visual system.
 - Provide predictable centered snapping while scrolling.
 - Stay reusable for future time-based inputs.
 
@@ -29,7 +29,7 @@ The app already uses custom primitives such as:
 
 This picker was rebuilt to follow the same visual language:
 
-- neutral shadcn-like surface and border tokens
+- Atelier surface and border tokens
 - compact rounded shapes
 - external labels
 - explicit selected state
@@ -132,7 +132,7 @@ Theme/system dependencies reused from the app:
 - `MaterialTheme.shapes`
 - `MaterialTheme.typography`
 - `HButton`
-- existing shadcn-oriented theme mapping in `ui/theme`
+- Atelier Dark theme mapping in `ui/theme`
 
 ## What Was Validated
 
