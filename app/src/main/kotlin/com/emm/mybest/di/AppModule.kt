@@ -279,7 +279,7 @@ val appModule = module {
     viewModel { (beforeId: String, afterId: String) ->
         ComparePhotosViewModel(beforeId, afterId, get())
     }
-    viewModel { (initialPhotoId: String) -> PhotoViewerViewModel(initialPhotoId, get()) }
+    viewModel { (initialPhotoId: String) -> PhotoViewerViewModel(initialPhotoId, get(), get()) }
     factory { SettingsDependencies(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { SettingsViewModel(get()) }
 

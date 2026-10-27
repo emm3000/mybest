@@ -77,6 +77,11 @@
     <string name="photos_camera_permission_denied">Habilita el permiso de cámara en Ajustes.</string>
     <string name="photos_camera_permission_settings">Ajustes</string>
     <string name="photos_camera_permission_required">Se necesita acceso a la cámara para tomar fotos.</string>
+    <string name="photo_viewer_back_cd">Volver</string>
+    <string name="photo_viewer_replace">REEMPLAZAR</string>
+    <string name="photo_viewer_replaced">Foto reemplazada</string>
+    <string name="photo_viewer_replace_failed">No se pudo reemplazar la foto. La anterior sigue guardada.</string>
+    <string name="photo_viewer_photo_missing">Esa foto ya no está</string>
 
     <!-- Settings screen (C17) -->
     <string name="settings_title">Ajustes</string>
