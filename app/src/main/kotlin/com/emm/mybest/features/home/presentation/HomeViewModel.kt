@@ -66,6 +66,7 @@ class HomeViewModel(
     private var dismissedDestination: HomeDestination? = null
 
     init {
+        homeVisibleDestination.claim(this)
         appDayClock.observeToday()
             .flatMapLatest(::observeInputs)
             .onEach { _state.value = buildHomeState(it, visibleDestination(it.agenda.destination)) }

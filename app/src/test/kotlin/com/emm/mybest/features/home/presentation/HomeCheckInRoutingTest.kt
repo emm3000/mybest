@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Clock
@@ -87,6 +88,27 @@ class HomeCheckInRoutingTest {
     fun `home publishes the check-in it shows`() = runTest {
         buildViewModel(FakeOutingRepository(initialOutings = listOf(PENDING_FRIDAY)), FixedClock(SATURDAY_MORNING))
         advanceUntilIdle()
+
+        assertEquals(HomeDestination.CHECK_IN, visibleDestination.destination.value)
+    }
+
+    @Test
+    fun `a new Home resets what an older Home published while it loads`() = runTest {
+        visibleDestination.publish(Any(), HomeDestination.DAILY_CHECKS)
+
+        buildViewModel(FakeOutingRepository(initialOutings = listOf(PENDING_FRIDAY)), FixedClock(SATURDAY_MORNING))
+
+        assertNull(visibleDestination.destination.value)
+    }
+
+    @Test
+    fun `an older Home going away keeps what a new Home published`() = runTest {
+        val olderHome = Any()
+        visibleDestination.publish(olderHome, HomeDestination.DAILY_CHECKS)
+        buildViewModel(FakeOutingRepository(initialOutings = listOf(PENDING_FRIDAY)), FixedClock(SATURDAY_MORNING))
+        advanceUntilIdle()
+
+        visibleDestination.clear(olderHome)
 
         assertEquals(HomeDestination.CHECK_IN, visibleDestination.destination.value)
     }

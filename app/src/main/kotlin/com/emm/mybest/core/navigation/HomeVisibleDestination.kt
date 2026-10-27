@@ -21,6 +21,15 @@ class HomeVisibleDestination {
     val destination: StateFlow<HomeDestination?> = _destination.asStateFlow()
     private var owner: Any? = null
 
+    /**
+     * Makes [owner] the Home that publishes from now on and drops what an older Home published, so a wait sees only
+     * the new Home.
+     */
+    fun claim(owner: Any) {
+        this.owner = owner
+        _destination.value = null
+    }
+
     fun publish(owner: Any, destination: HomeDestination) {
         this.owner = owner
         _destination.value = destination
