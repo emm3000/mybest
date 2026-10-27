@@ -1,5 +1,6 @@
 package com.emm.mybest.features.settings.presentation
 
+import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
@@ -192,6 +193,43 @@ class SettingsGoalsEditorTest {
         val effect = saveTargetWeight(editor, "72")
 
         assertEquals(SettingsEffect.GoalSaveFailed, effect)
+    }
+
+    @Test
+    fun `an error from another stored field fails the save and keeps the typed input`() = runTest {
+        val repository = FakeSetupRepository(Setup(typicalOutingCost = Money(-100)))
+        val editor = editorOn(repository)
+
+        val effect = saveTargetWeight(editor, "72")
+
+        assertEquals(SettingsEffect.GoalSaveFailed, effect)
+        assertEquals(emptyList<Setup>(), repository.saved)
+        assertEquals(SettingsEditorState(SettingsField.TARGET_WEIGHT, "72"), editor.goals.first().editor)
+    }
+
+    @Test
+    fun `a stored out-of-range weekly target fails a save of another weekly goal without a field error`() = runTest {
+        val repository = FakeSetupRepository(Setup(weeklyTargets = mapOf(DailyCheckType.GYM to 9)))
+        val editor = editorOn(repository)
+
+        editor.handle(SettingsIntent.OnFieldOpen(SettingsField.WEEKLY_DIET))
+        editor.handle(SettingsIntent.OnFieldInputChange("3"))
+        val effect = editor.handle(SettingsIntent.OnFieldSave)
+
+        assertEquals(SettingsEffect.GoalSaveFailed, effect)
+        assertEquals(null, editor.goals.first().editor?.error)
+    }
+
+    @Test
+    fun `an out-of-range weekly target is shown on its own field`() = runTest {
+        val editor = editorOn(FakeSetupRepository())
+
+        editor.handle(SettingsIntent.OnFieldOpen(SettingsField.WEEKLY_GYM))
+        editor.handle(SettingsIntent.OnFieldInputChange("9"))
+        val effect = editor.handle(SettingsIntent.OnFieldSave)
+
+        assertEquals(null, effect)
+        assertEquals(SettingsFieldError.OUT_OF_RANGE, editor.goals.first().editor?.error)
     }
 
     private fun editorOn(repository: FakeSetupRepository) =

@@ -70,10 +70,14 @@ class SettingsGoalsEditor(
             .getOrElse { SettingsEffect.GoalSaveFailed }
 
     private fun resultOf(field: SettingsField, errors: List<SetupValidationError>): SettingsEffect? {
-        val error = errors.firstOrNull() ?: return SettingsEffect.GoalSaved.also {
-            editor.update { open -> open?.takeUnless { it.field == field } }
-        }
-        return showError(field, error.toFieldError())
+        if (errors.isEmpty()) return closeAsSaved(field)
+        val own = errors.firstOrNull { it.field() == field } ?: return SettingsEffect.GoalSaveFailed
+        return showError(field, own.toFieldError())
+    }
+
+    private fun closeAsSaved(field: SettingsField): SettingsEffect {
+        editor.update { open -> open?.takeUnless { it.field == field } }
+        return SettingsEffect.GoalSaved
     }
 
     private fun showError(field: SettingsField, error: SettingsFieldError): SettingsEffect? {
