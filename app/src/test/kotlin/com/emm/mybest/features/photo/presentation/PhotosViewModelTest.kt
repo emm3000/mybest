@@ -16,6 +16,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -164,6 +165,64 @@ class PhotosViewModelTest {
         advanceUntilIdle()
 
         coVerify { deletePhotoUseCase("photo-123") }
+    }
+
+    @Test
+    fun `a cancelled save emits no error`() = runTest {
+        coEvery { savePhotosUseCase(any()) } throws CancellationException("cancelled")
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.effect.test {
+            viewModel.onIntent(PhotosIntent.OnPhotoCaptured("/tmp/photo.jpg", PhotoType.TRUNK))
+            advanceUntilIdle()
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `a cancelled delete emits no error`() = runTest {
+        coEvery { deletePhotoUseCase(any()) } throws CancellationException("cancelled")
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.effect.test {
+            viewModel.onIntent(PhotosIntent.DeletePhoto("photo-123"))
+            advanceUntilIdle()
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `a failed save emits one ShowError with the cause`() = runTest {
+        coEvery { savePhotosUseCase(any()) } throws IllegalStateException("db")
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.effect.test {
+            viewModel.onIntent(PhotosIntent.OnPhotoCaptured("/tmp/photo.jpg", PhotoType.TRUNK))
+            advanceUntilIdle()
+            assertEquals(PhotosEffect.ShowError("Error al guardar: db"), awaitItem())
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `a failed delete emits one ShowError with the cause`() = runTest {
+        coEvery { deletePhotoUseCase(any()) } throws IllegalStateException("db")
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.effect.test {
+            viewModel.onIntent(PhotosIntent.DeletePhoto("photo-123"))
+            advanceUntilIdle()
+            assertEquals(PhotosEffect.ShowError("Error al eliminar: db"), awaitItem())
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
