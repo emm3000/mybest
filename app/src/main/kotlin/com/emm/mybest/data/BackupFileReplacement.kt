@@ -1,5 +1,6 @@
 package com.emm.mybest.data
 
+import com.emm.mybest.domain.repository.RestoreResult
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -20,6 +21,26 @@ internal fun replaceFileAtomically(
     } finally {
         staged.delete()
     }
+}
+
+internal fun replaceDatabaseFile(
+    source: InputStream,
+    target: File,
+    move: (File, File) -> Unit = ::moveAtomically,
+    closeDatabase: () -> Unit,
+): RestoreResult {
+    var isDatabaseClosed = false
+    val replacement = runCatching {
+        source.use { input ->
+            replaceFileAtomically(input, target, move) {
+                closeDatabase()
+                isDatabaseClosed = true
+            }
+        }
+    }
+    if (replacement.isFailure && isDatabaseClosed) return RestoreResult.NotRestoredRequiresRestart
+    replacement.getOrThrow()
+    return RestoreResult.RequiresRestart
 }
 
 internal fun moveAtomically(source: File, target: File) {

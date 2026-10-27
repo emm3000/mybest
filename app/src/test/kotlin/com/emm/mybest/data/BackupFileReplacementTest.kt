@@ -1,5 +1,6 @@
 package com.emm.mybest.data
 
+import com.emm.mybest.domain.repository.RestoreResult
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -135,6 +136,53 @@ class BackupFileReplacementTest {
         assertArrayEquals(BACKUP_BYTES, target.readBytes())
         assertEquals(listOf("my_best_db"), folder.root.list()?.toList())
     }
+
+    @Test
+    fun `a database replaced after closing it requires a restart`() {
+        val target = folder.newFile("my_best_db").apply { writeBytes(LIVE_BYTES) }
+        var closeCount = 0
+
+        val result = replaceDatabaseFile(ByteArrayInputStream(BACKUP_BYTES), target) { closeCount++ }
+
+        assertEquals(RestoreResult.RequiresRestart, result)
+        assertArrayEquals(BACKUP_BYTES, target.readBytes())
+        assertEquals(1, closeCount)
+    }
+
+    @Test
+    fun `a source that fails to close after the database closed requires a restart`() {
+        val target = folder.newFile("my_best_db").apply { writeBytes(LIVE_BYTES) }
+
+        val result = replaceDatabaseFile(FailingCloseInputStream(BACKUP_BYTES), target) {}
+
+        assertEquals(RestoreResult.NotRestoredRequiresRestart, result)
+    }
+
+    @Test
+    fun `a move that fails after closing the database keeps the live file and requires a restart`() {
+        val target = folder.newFile("my_best_db").apply { writeBytes(LIVE_BYTES) }
+
+        val result = replaceDatabaseFile(ByteArrayInputStream(BACKUP_BYTES), target, move = ::failMove) {}
+
+        assertEquals(RestoreResult.NotRestoredRequiresRestart, result)
+        assertArrayEquals(LIVE_BYTES, target.readBytes())
+        assertEquals(listOf("my_best_db"), folder.root.list()?.toList())
+    }
+
+    @Test
+    fun `a source that fails mid-copy is rethrown without closing the database`() {
+        val target = folder.newFile("my_best_db").apply { writeBytes(LIVE_BYTES) }
+        var isDatabaseClosed = false
+
+        assertThrows(IOException::class.java) {
+            replaceDatabaseFile(FailingInputStream(BACKUP_BYTES, failAfter = 4096), target) {
+                isDatabaseClosed = true
+            }
+        }
+
+        assertFalse(isDatabaseClosed)
+        assertArrayEquals(LIVE_BYTES, target.readBytes())
+    }
 }
 
 private fun failMove(staged: File, target: File) {
@@ -149,5 +197,15 @@ private class FailingInputStream(bytes: ByteArray, private val failAfter: Int) :
         if (bytesRead >= failAfter) throw IOException("Simulated failure after $failAfter bytes")
         bytesRead++
         return source.read()
+    }
+}
+
+private class FailingCloseInputStream(bytes: ByteArray) : InputStream() {
+    private val source = ByteArrayInputStream(bytes)
+
+    override fun read(): Int = source.read()
+
+    override fun close() {
+        throw IOException("Simulated failure closing the source")
     }
 }

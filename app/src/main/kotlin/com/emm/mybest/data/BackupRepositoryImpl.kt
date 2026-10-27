@@ -81,18 +81,7 @@ class BackupRepositoryImpl(
     private fun replaceDatabaseWith(backupCopy: File): RestoreResult {
         val databaseFile = context.getDatabasePath(AppDatabase.DB_NAME)
         databaseFile.parentFile?.mkdirs()
-        var isDatabaseClosed = false
-        val replacement = runCatching {
-            FileInputStream(backupCopy).use { input ->
-                replaceFileAtomically(input, databaseFile, moveFile) {
-                    database.close()
-                    isDatabaseClosed = true
-                }
-            }
-        }
-        if (replacement.isFailure && isDatabaseClosed) return RestoreResult.NotRestoredRequiresRestart
-        replacement.getOrThrow()
-        return RestoreResult.RequiresRestart
+        return replaceDatabaseFile(FileInputStream(backupCopy), databaseFile, moveFile, database::close)
     }
 
     private fun deleteSqliteSideFiles(file: File) {
