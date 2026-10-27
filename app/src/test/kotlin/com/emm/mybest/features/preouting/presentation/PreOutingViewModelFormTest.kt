@@ -69,6 +69,7 @@ class PreOutingViewModelFormTest {
         val state = stateNow(viewModel)
         confirm(viewModel)
 
+        assertEquals(0, gatedOutingRepository.recordPlannedCalls)
         assertTrue(state.isReturnTimeOutOfRange)
         assertFalse(state.canConfirmOuting)
         assertEquals("15:00", state.returnTimeLabel)
