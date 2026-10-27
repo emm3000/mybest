@@ -70,8 +70,7 @@ class BackupRepositoryImpl(
         if (backupHash == null || backupHash != readLiveIdentityHash(database)) {
             return RestoreResult.OtherSchemaVersion
         }
-        replaceDatabaseWith(backupCopy)
-        return RestoreResult.RequiresRestart
+        return replaceDatabaseWith(backupCopy)
     }
 
     private fun readHeaderCheck(file: File): BackupHeaderCheck = FileInputStream(file).use { input ->
@@ -79,12 +78,21 @@ class BackupRepositoryImpl(
         checkBackupHeader(header, input.read(header), AppDatabase.SCHEMA_VERSION)
     }
 
-    private fun replaceDatabaseWith(backupCopy: File) {
+    private fun replaceDatabaseWith(backupCopy: File): RestoreResult {
         val databaseFile = context.getDatabasePath(AppDatabase.DB_NAME)
         databaseFile.parentFile?.mkdirs()
-        FileInputStream(backupCopy).use { input ->
-            replaceFileAtomically(input, databaseFile, moveFile) { database.close() }
+        var isDatabaseClosed = false
+        val replacement = runCatching {
+            FileInputStream(backupCopy).use { input ->
+                replaceFileAtomically(input, databaseFile, moveFile) {
+                    database.close()
+                    isDatabaseClosed = true
+                }
+            }
         }
+        if (replacement.isFailure && isDatabaseClosed) return RestoreResult.NotRestoredRequiresRestart
+        replacement.getOrThrow()
+        return RestoreResult.RequiresRestart
     }
 
     private fun deleteSqliteSideFiles(file: File) {
