@@ -12,7 +12,6 @@ import com.emm.mybest.domain.usecase.history.LogbookEntry
 import com.emm.mybest.domain.usecase.note.AddNoteUseCase
 import com.emm.mybest.domain.usecase.note.DeleteNoteUseCase
 import com.emm.mybest.domain.usecase.note.UpdateNoteUseCase
-import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.validation.NoteValidationError
 import com.emm.mybest.testing.FixedClock
@@ -67,7 +66,7 @@ class HistoryViewModelNoteTest {
             getHistory,
             getLogbook,
             mockk<DeleteWeightByDateUseCase>(relaxed = true),
-            mockk<DeletePhotoUseCase>(relaxed = true),
+            HistoryPhotoUseCases(mockk(relaxed = true)),
             HistoryNoteUseCases(addNote, updateNote, deleteNote),
             CLOCK,
         )

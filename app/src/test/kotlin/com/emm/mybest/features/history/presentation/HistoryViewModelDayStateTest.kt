@@ -20,7 +20,6 @@ import com.emm.mybest.domain.usecase.history.DaySummary
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.GetLogbookUseCase
 import com.emm.mybest.domain.usecase.history.HistoryResult
-import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.testing.FixedClock
 import com.emm.mybest.testing.MainDispatcherRule
@@ -76,7 +75,7 @@ class HistoryViewModelDayStateTest {
             getHistory,
             getLogbook,
             mockk<DeleteWeightByDateUseCase>(),
-            mockk<DeletePhotoUseCase>(),
+            HistoryPhotoUseCases(mockk()),
             HistoryNoteUseCases(mockk(), mockk(), mockk()),
             clock,
         )

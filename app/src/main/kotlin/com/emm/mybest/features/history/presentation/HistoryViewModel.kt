@@ -9,7 +9,6 @@ import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.GetLogbookUseCase
-import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.validation.NoteValidationError
 import kotlinx.collections.immutable.toImmutableList
@@ -45,7 +44,7 @@ class HistoryViewModel(
     private val getHistoryUseCase: GetHistoryUseCase,
     private val getLogbookUseCase: GetLogbookUseCase,
     private val deleteWeightByDate: DeleteWeightByDateUseCase,
-    private val deletePhoto: DeletePhotoUseCase,
+    private val photoUseCases: HistoryPhotoUseCases,
     private val noteUseCases: HistoryNoteUseCases,
     appDayClock: AppDayClock,
 ) : ViewModel() {
@@ -118,7 +117,7 @@ class HistoryViewModel(
                 deleteWeightByDate(intent.date)
             }
             is HistoryIntent.OnDeletePhoto -> viewModelScope.launch {
-                deletePhoto(intent.photoId)
+                photoUseCases.delete(intent.photoId)
             }
         }
     }
