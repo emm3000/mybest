@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.emm.mybest.ui.theme.AtelierTheme
 
 /**
- * Standard Dialog inspired by shadcn/ui `<AlertDialog />`.
+ * Standard confirmation dialog.
  *
  * Usage: "Review session finished" in StudyScreen.
  *

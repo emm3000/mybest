@@ -31,14 +31,12 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.ui.theme.AtelierTheme
 
-// ─── Variants ──────────────────────────────────────────────────────────────
-
 enum class ButtonVariant { Default, Destructive, Outline, Secondary, Ghost, Link }
 
 private const val BUTTON_DISABLED_ALPHA = 0.5f
 
 /**
- * Main button inspired by shadcn/ui.
+ * Main button with default, destructive, outline, secondary, ghost and link variants.
  *
  * Supports variants: Default, Destructive, Outline, Secondary, Ghost, Link.
  * Has support for loading state with [isLoading].
@@ -138,8 +136,6 @@ private fun RowScope.ButtonContent(
     content()
 }
 
-// ─── Convenience overloads ───────────────────────────────────────────────────
-
 @Composable
 fun HButton(
     text: String,
@@ -164,8 +160,6 @@ fun HButton(
         )
     }
 }
-
-// ─── Previews ────────────────────────────────────────────────────────────────
 
 @PreviewLightDark
 @Composable
