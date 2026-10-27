@@ -36,7 +36,7 @@ Feature scope and acceptance live in [`PRD.md`](PRD.md); per-feature behavior in
 | `capture` | Notification capture settings and captured list |
 | `settings` | Setup, reminders, backup and restore |
 
-Navigation is Navigation 3 (`core/navigation/`): typed `Screen` keys, four top-level tabs (Home, Summary, History, Settings) and pushed screens on top. `core/` also holds `datetime/` (app day, 05:00 cutoff, ADR 0003), `money/`, `flow/`, `coroutines/`, `notification/` and `permission/`.
+Navigation is Navigation 3 (`core/navigation/`): typed `Screen` keys, four top-level tabs (Home, Summary, History, Settings) and pushed screens on top. Each back stack entry gets its own saveable state and ViewModel store (`NavigationState.toEntries`), so a `koinViewModel()` inside an entry lives as long as the entry. `core/` also holds `datetime/` (app day, 05:00 cutoff, ADR 0003), `money/`, `flow/`, `coroutines/`, `notification/` and `permission/`.
 
 ## 5. Persistence
 Room database `my_best_db`, version 12 (`AppDatabase.SCHEMA_VERSION`). Schema JSON per version is committed under `app/schemas/`. Tables (the entities of `data/AppDatabase.kt`):
