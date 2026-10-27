@@ -133,6 +133,7 @@ import com.emm.mybest.features.debts.presentation.DebtsViewModel
 import com.emm.mybest.features.goal.presentation.PurchaseGoalUseCases
 import com.emm.mybest.features.goal.presentation.PurchaseGoalViewModel
 import com.emm.mybest.features.history.presentation.HistoryNoteUseCases
+import com.emm.mybest.features.history.presentation.HistoryPhotoUseCases
 import com.emm.mybest.features.history.presentation.HistoryViewModel
 import com.emm.mybest.features.home.presentation.HomeUseCases
 import com.emm.mybest.features.home.presentation.HomeViewModel
@@ -278,7 +279,16 @@ val appModule = module {
     viewModel { HomeViewModel(get(), get()) }
     viewModel { AddWeightViewModel(get(), get(), get()) }
     viewModel { PhotosViewModel(get(), get(), get(), get()) }
-    viewModel { HistoryViewModel(get(), get(), get(), get(), HistoryNoteUseCases(get(), get(), get()), get()) }
+    viewModel {
+        HistoryViewModel(
+            get(),
+            get(),
+            get(),
+            HistoryPhotoUseCases(get()),
+            HistoryNoteUseCases(get(), get(), get()),
+            get(),
+        )
+    }
     viewModel { (beforeId: String, afterId: String) ->
         ComparePhotosViewModel(beforeId, afterId, get())
     }
