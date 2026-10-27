@@ -22,5 +22,3 @@ internal class AddWeightViewModelFixture {
         return AddWeightViewModel(saveWeightUseCase, observeWeighInTrendUseCase, FakeSetupRepository(setup))
     }
 }
-
-internal fun newAddWeightFixture() = AddWeightViewModelFixture()

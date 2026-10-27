@@ -18,7 +18,7 @@ class AddWeightViewModelSaveTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val fixture = newAddWeightFixture()
+    private val fixture = AddWeightViewModelFixture()
     private val saveWeightUseCase = fixture.saveWeightUseCase
 
     private fun buildViewModel(): AddWeightViewModel = fixture.buildViewModel()
@@ -26,7 +26,6 @@ class AddWeightViewModelSaveTest {
     @Test
     fun `OnSaveClick with blank weight sets error and does not call use case`() = runTest {
         val viewModel = buildViewModel()
-        // weight is blank by default
 
         viewModel.onIntent(AddWeightIntent.OnSaveClick)
         advanceUntilIdle()

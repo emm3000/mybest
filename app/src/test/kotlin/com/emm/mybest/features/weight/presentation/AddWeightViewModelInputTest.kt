@@ -12,7 +12,7 @@ class AddWeightViewModelInputTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val fixture = newAddWeightFixture()
+    private val fixture = AddWeightViewModelFixture()
 
     private fun buildViewModel(): AddWeightViewModel = fixture.buildViewModel()
 
