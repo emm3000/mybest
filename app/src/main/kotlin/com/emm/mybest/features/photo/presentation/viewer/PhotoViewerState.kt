@@ -6,4 +6,5 @@ data class PhotoViewerState(
     val photos: List<ProgressPhoto> = emptyList(),
     val initialPhotoId: String,
     val isLoading: Boolean = true,
+    val initialPage: Int = 0,
 )

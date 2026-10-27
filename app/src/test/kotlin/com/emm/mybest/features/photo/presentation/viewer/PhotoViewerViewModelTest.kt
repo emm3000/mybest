@@ -41,12 +41,48 @@ class PhotoViewerViewModelTest {
 
     private fun buildViewModel() = PhotoViewerViewModel("old", observePhotosUseCase, replacePhotoUseCase)
 
+    private fun buildThreePhotoViewModel(initialPhotoId: String): PhotoViewerViewModel {
+        every { observePhotosUseCase() } returns flowOf(
+            listOf(photoOf("a", 1L), photoOf("b", 2L), photoOf("c", 3L)),
+        )
+        return PhotoViewerViewModel(initialPhotoId, observePhotosUseCase, replacePhotoUseCase)
+    }
+
     @Test
     fun `state lists photos by creation stamp descending and keeps the initial photo`() = runTest {
         val state = buildViewModel().state.first { !it.isLoading }
 
         assertEquals(listOf("new", "old"), state.photos.map { it.id })
         assertEquals("old", state.initialPhotoId)
+    }
+
+    @Test
+    fun `initial page is the index of the tapped photo in the sorted list`() = runTest {
+        val state = buildThreePhotoViewModel("a").state.first { !it.isLoading }
+
+        assertEquals(2, state.initialPage)
+    }
+
+    @Test
+    fun `initial page is zero when the tapped photo is the newest`() = runTest {
+        val state = buildThreePhotoViewModel("c").state.first { !it.isLoading }
+
+        assertEquals(0, state.initialPage)
+    }
+
+    @Test
+    fun `initial page is zero when the tapped photo is not in the list`() = runTest {
+        val state = buildThreePhotoViewModel("gone").state.first { !it.isLoading }
+
+        assertEquals(0, state.initialPage)
+    }
+
+    @Test
+    fun `loading state starts on page zero`() = runTest {
+        val state = buildThreePhotoViewModel("a").state.value
+
+        assertEquals(true, state.isLoading)
+        assertEquals(0, state.initialPage)
     }
 
     @Test

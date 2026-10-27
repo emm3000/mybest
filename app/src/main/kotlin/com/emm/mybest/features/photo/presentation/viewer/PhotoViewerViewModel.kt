@@ -24,10 +24,12 @@ class PhotoViewerViewModel(
 
     val state: StateFlow<PhotoViewerState> = observePhotosUseCase()
         .map { photos ->
+            val sortedPhotos = photos.sortedByDescending { it.createdAt }
             PhotoViewerState(
-                photos = photos.sortedByDescending { it.createdAt },
+                photos = sortedPhotos,
                 initialPhotoId = initialPhotoId,
                 isLoading = false,
+                initialPage = sortedPhotos.indexOfFirst { it.id == initialPhotoId }.coerceAtLeast(0),
             )
         }
         .stateIn(

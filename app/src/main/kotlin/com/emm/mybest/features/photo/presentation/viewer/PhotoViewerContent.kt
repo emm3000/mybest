@@ -39,8 +39,7 @@ internal fun PhotoViewerContent(
     modifier: Modifier = Modifier,
 ) {
     val photos = state.photos
-    val initialPage = photos.indexOfFirst { it.id == state.initialPhotoId }.coerceAtLeast(0)
-    val pagerState = rememberPagerState(initialPage = initialPage) { photos.size }
+    val pagerState = rememberPagerState(initialPage = state.initialPage) { photos.size }
     var isOverlayVisible by remember { mutableStateOf(true) }
     val currentPhoto = photos.getOrNull(pagerState.currentPage)
 
