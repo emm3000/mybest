@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.flow.effectFlow
+import com.emm.mybest.core.navigation.HomeVisibleDestination
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.usecase.home.HomeDestination
 import kotlinx.coroutines.flow.Flow
@@ -13,8 +14,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -43,6 +46,7 @@ private fun buildHomeState(inputs: HomeInputs, destination: HomeDestination): Ho
 class HomeViewModel(
     private val useCases: HomeUseCases,
     private val appDayClock: AppDayClock,
+    private val homeVisibleDestination: HomeVisibleDestination,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -66,6 +70,14 @@ class HomeViewModel(
             .flatMapLatest(::observeInputs)
             .onEach { _state.value = buildHomeState(it, visibleDestination(it.agenda.destination)) }
             .launchIn(viewModelScope)
+        state.filterNot { it.isLoading }
+            .map { it.destination }
+            .onEach { homeVisibleDestination.publish(this, it) }
+            .launchIn(viewModelScope)
+    }
+
+    override fun onCleared() {
+        homeVisibleDestination.clear(this)
     }
 
     fun onIntent(intent: HomeIntent) {

@@ -1,5 +1,6 @@
 package com.emm.mybest.core.navigation
 
+import com.emm.mybest.domain.usecase.home.HomeDestination
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -54,5 +55,77 @@ class LaunchActionRuleTest {
         val pending = LaunchActionRule.resolve(saved, ACTION_DEBTS, isFromHistory = false)
 
         assertEquals(ACTION_CHECK_IN, pending)
+    }
+
+    @Test
+    fun `an action for the screen Home shows on screen stays on Home`() {
+        val screens = listOf(
+            LaunchActionRule.screenFor(ACTION_CHECK_IN, HomeDestination.CHECK_IN, isHomeVisible = true),
+            LaunchActionRule.screenFor(ACTION_PRE_OUTING, HomeDestination.PRE_OUTING, isHomeVisible = true),
+            LaunchActionRule.screenFor(ACTION_WEEKLY_SUMMARY, HomeDestination.WEEKLY_SUMMARY, isHomeVisible = true),
+        )
+
+        assertEquals(listOf(Screen.Home, Screen.Home, Screen.Home), screens)
+    }
+
+    @Test
+    fun `check-in action pushes the check-in when Home shows the daily checks`() {
+        val screen = LaunchActionRule.screenFor(ACTION_CHECK_IN, HomeDestination.DAILY_CHECKS, isHomeVisible = true)
+
+        assertEquals(Screen.CheckIn, screen)
+    }
+
+    @Test
+    fun `check-in action pushes the check-in when Home shows another embedded screen`() {
+        val screen = LaunchActionRule.screenFor(ACTION_CHECK_IN, HomeDestination.PRE_OUTING, isHomeVisible = true)
+
+        assertEquals(Screen.CheckIn, screen)
+    }
+
+    @Test
+    fun `check-in action pushes the check-in when Home's destination is unknown`() {
+        val screen = LaunchActionRule.screenFor(ACTION_CHECK_IN, homeDestination = null, isHomeVisible = true)
+
+        assertEquals(Screen.CheckIn, screen)
+    }
+
+    @Test
+    fun `check-in action pushes the check-in when Home is not on screen`() {
+        val screen = LaunchActionRule.screenFor(ACTION_CHECK_IN, HomeDestination.CHECK_IN, isHomeVisible = false)
+
+        assertEquals(Screen.CheckIn, screen)
+    }
+
+    @Test
+    fun `pre-outing action pushes the pre-outing when Home shows the daily checks`() {
+        val screen = LaunchActionRule.screenFor(ACTION_PRE_OUTING, HomeDestination.DAILY_CHECKS, isHomeVisible = true)
+
+        assertEquals(Screen.PreOuting, screen)
+    }
+
+    @Test
+    fun `weekly summary action opens the summary when Home shows the daily checks`() {
+        val screen = LaunchActionRule.screenFor(
+            ACTION_WEEKLY_SUMMARY,
+            HomeDestination.DAILY_CHECKS,
+            isHomeVisible = true,
+        )
+
+        assertEquals(Screen.WeeklySummary, screen)
+    }
+
+    @Test
+    fun `actions Home never embeds open their screen`() {
+        val screens = listOf(ACTION_ADD_WEIGHT, ACTION_ADD_PHOTO, ACTION_DEBTS)
+            .map { LaunchActionRule.screenFor(it, HomeDestination.CHECK_IN, isHomeVisible = true) }
+
+        assertEquals(listOf(Screen.AddWeight, Screen.Photos, Screen.Debts), screens)
+    }
+
+    @Test
+    fun `an unknown action opens nothing`() {
+        val screen = LaunchActionRule.screenFor(MAIN_ACTION, HomeDestination.CHECK_IN, isHomeVisible = true)
+
+        assertNull(screen)
     }
 }

@@ -9,6 +9,7 @@ import com.emm.mybest.core.coroutines.APP_SCOPE_NAME
 import com.emm.mybest.core.coroutines.CoroutineDispatchers
 import com.emm.mybest.core.coroutines.DefaultCoroutineDispatchers
 import com.emm.mybest.core.datetime.AppDayClock
+import com.emm.mybest.core.navigation.HomeVisibleDestination
 import com.emm.mybest.data.AppDatabase
 import com.emm.mybest.data.AppRestarterImpl
 import com.emm.mybest.data.BackupRepositoryImpl
@@ -276,7 +277,8 @@ val appModule = module {
     }
     single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(androidContext()) }
 
-    viewModel { HomeViewModel(get(), get()) }
+    single { HomeVisibleDestination() }
+    viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { AddWeightViewModel(get(), get(), get()) }
     viewModel { PhotosViewModel(get(), get(), get(), get()) }
     viewModel {

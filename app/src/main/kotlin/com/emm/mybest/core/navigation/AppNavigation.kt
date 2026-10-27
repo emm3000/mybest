@@ -161,16 +161,12 @@ private fun HandleIntentAction(
     onConsumeAction: () -> Unit,
 ) {
     val currentOnConsumeAction by rememberUpdatedState(onConsumeAction)
+    val homeVisibleDestination: HomeVisibleDestination = koinInject()
     LaunchedEffect(intentAction) {
         if (intentAction == null) return@LaunchedEffect
-        when (intentAction) {
-            ACTION_ADD_WEIGHT -> navigator.navigate(Screen.AddWeight)
-            ACTION_ADD_PHOTO -> navigator.navigate(Screen.Photos)
-            ACTION_PRE_OUTING -> navigator.navigate(Screen.PreOuting)
-            ACTION_DEBTS -> navigator.navigate(Screen.Debts)
-            ACTION_CHECK_IN -> navigator.navigate(Screen.CheckIn)
-            ACTION_WEEKLY_SUMMARY -> navigator.navigate(Screen.WeeklySummary)
-        }
+        val isHomeVisible = navigator.isStartRouteShown
+        val homeDestination = if (isHomeVisible) homeVisibleDestination.awaitLoaded() else null
+        LaunchActionRule.screenFor(intentAction, homeDestination, isHomeVisible)?.let(navigator::navigate)
         currentOnConsumeAction()
     }
 }

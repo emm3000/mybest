@@ -2,6 +2,7 @@ package com.emm.mybest.features.home.presentation
 
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
+import com.emm.mybest.core.navigation.HomeVisibleDestination
 import com.emm.mybest.domain.models.CheckIn
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.OutingKind
@@ -31,9 +32,15 @@ class HomeCheckInRoutingTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
+    private val visibleDestination = HomeVisibleDestination()
+
     private fun buildViewModel(outings: FakeOutingRepository, clock: Clock): HomeViewModel {
         val appDayClock = AppDayClock(clock, TimeZone.UTC)
-        return HomeViewModel(HomeUseCasesFixture(outings = outings).build(appDayClock), appDayClock)
+        return HomeViewModel(
+            HomeUseCasesFixture(outings = outings).build(appDayClock),
+            appDayClock,
+            visibleDestination,
+        )
     }
 
     private suspend fun TestScope.openAndSaveCheckIn(clock: Clock = FixedClock(SATURDAY_MORNING)): HomeViewModel {
@@ -74,5 +81,25 @@ class HomeCheckInRoutingTest {
         advanceUntilIdle()
 
         assertEquals(HomeDestination.PRE_OUTING, viewModel.state.value.destination)
+    }
+
+    @Test
+    fun `home publishes the check-in it shows`() = runTest {
+        buildViewModel(FakeOutingRepository(initialOutings = listOf(PENDING_FRIDAY)), FixedClock(SATURDAY_MORNING))
+        advanceUntilIdle()
+
+        assertEquals(HomeDestination.CHECK_IN, visibleDestination.destination.value)
+    }
+
+    @Test
+    fun `home publishes the daily checks after the check-in is dismissed`() = runTest {
+        val outings = FakeOutingRepository(initialOutings = listOf(PENDING_FRIDAY))
+        val viewModel = buildViewModel(outings, FixedClock(SATURDAY_MORNING))
+        advanceUntilIdle()
+
+        viewModel.onIntent(HomeIntent.ShowDailyChecks)
+        advanceUntilIdle()
+
+        assertEquals(HomeDestination.DAILY_CHECKS, visibleDestination.destination.value)
     }
 }

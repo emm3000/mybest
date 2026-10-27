@@ -3,6 +3,7 @@ package com.emm.mybest.features.home.presentation
 import app.cash.turbine.test
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.money.Money
+import com.emm.mybest.core.navigation.HomeVisibleDestination
 import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.models.DailyCheckType
 import com.emm.mybest.domain.models.Debt
@@ -58,7 +59,7 @@ class HomeViewModelTest {
         clock: Clock = FIXED_CLOCK,
     ): HomeViewModel {
         val appDayClock = AppDayClock(clock, TimeZone.UTC)
-        return HomeViewModel(fixture.build(appDayClock), appDayClock)
+        return HomeViewModel(fixture.build(appDayClock), appDayClock, HomeVisibleDestination())
     }
 
     @Test
