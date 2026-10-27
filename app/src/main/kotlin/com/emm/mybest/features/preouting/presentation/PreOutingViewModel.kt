@@ -33,6 +33,7 @@ class PreOutingViewModel(
 
     private val form = MutableStateFlow(PreOutingForm())
     private var confirmJob: Job? = null
+    private var stayInJob: Job? = null
 
     val state: StateFlow<PreOutingState> = combine(
         combine(observeSnapshot(), purchaseGoalRepository.observeGoal().map { it?.name }) { snapshot, goalName ->
@@ -61,7 +62,8 @@ class PreOutingViewModel(
     }
 
     private fun stayIn() {
-        viewModelScope.launch {
+        if (stayInJob?.isActive == true) return
+        stayInJob = viewModelScope.launch {
             attempt { decisions.recordWonNight() }
                 .onSuccess(::onStayInResult)
                 .onFailure { _effect.emit(PreOutingEffect.ActionFailed) }

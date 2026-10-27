@@ -165,6 +165,25 @@ class PreOutingViewModelSaveTest {
         assertEquals(2, gatedOutingRepository.recordWonNightCalls)
     }
 
+    @Test
+    fun `staying in three times while the won night is being saved records it once`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        val gate = CompletableDeferred<Unit>()
+        gatedOutingRepository.wonNightGate = gate
+
+        viewModel.effect.test {
+            repeat(3) { viewModel.onIntent(PreOutingIntent.OnStayInClick) }
+            runCurrent()
+            gate.complete(Unit)
+            advanceUntilIdle()
+            expectNoEvents()
+        }
+
+        assertEquals(1, gatedOutingRepository.recordWonNightCalls)
+        assertEquals(PreOutingDecisionState.StayedIn("S/ 380.00"), stateNow(viewModel).decision)
+    }
+
     private fun TestScope.stayIn(viewModel: PreOutingViewModel) {
         viewModel.onIntent(PreOutingIntent.OnStayInClick)
         advanceUntilIdle()
