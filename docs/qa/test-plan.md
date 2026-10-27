@@ -342,7 +342,7 @@ Data owned: daily checks, weights, photos, history, capture, reminder settings. 
 | C-024 | Process death during camera | P2 | X | S0, tab Cara | Open camera; `am kill $PKG` from another shell; shoot; accept | Photo saved as Cara. Risk: the selected tab resets and it saves as Tronco | — |
 | C-025 | Rotation on Fotos | P3 | X | C-022 | Rotate | Selected tab and timeline kept | — |
 | C-026 | Delete a photo from History | P2 | F | C-019 | Historia > day > "Eliminar foto" > confirm | Photo gone from day detail and Fotos timeline | — |
-| C-027 | Calendar header and legend | P1 | F | FX-C, K13 | Open Historia | Month title, "HOY" chip on 10, legend "PESO REGISTRADO", "FOTO", "CHECKS HECHOS", "SALIDA", "RECAÍDA", "NOCHE GANADA"; "SALIDAS 3 · NOCHES GANADAS 1"; "2 PESO · 0 FOTOS" (§9) | C-027 |
+| C-027 | Calendar header and legend | P1 | F | FX-C, K13 | Open Historia | Month title, "HOY" chip on 10, legend "PESO REGISTRADO", "FOTO", "CHECKS HECHOS", "SALIDA", "RECAÍDA", "NOCHE GANADA"; "SALIDAS 3 · NOCHES GANADAS 1"; "2 PESAJES · 0 FOTOS" (§9) | C-027 |
 | C-028 | Day marks | P0 | F | FX-C, K13 | Inspect the grid | Days with checks, weights, the outing, the relapse outing (flagged differently) and the won night carry their marks; unmarked days plain (§9) | C-028 |
 | C-029 | Day detail content | P1 | F | FX-C, K13 | Tap Fri 6 Nov, Sat 7 Nov, Mon 9 Nov, Tue 3 Nov | Fri 6: "Salida" "Planeada", "Gasto" S/ 150.00, Dinero exceeded, "Ánimo" "2 de 5", "Recaída" "Rompiste un tope". Sat 7: "Noche ganada" "S/ 100.00 (estimado)", checks Dieta "Sí", alcohol "No". Mon 9: "No planeada", "Salida no planeada". Tue 3: Gym and Dieta "Sí", others "—" (§9) | C-029 |
 | C-030 | Empty day | P3 | F | FX-C | Tap a day with nothing | "Sin actividad" | — |
