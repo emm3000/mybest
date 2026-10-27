@@ -4,6 +4,7 @@ import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
+import com.emm.mybest.domain.validation.SetupValidationError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,5 +61,6 @@ class SettingsRemindersEditor(
         attempt { updateSetupUseCase(change(observeSetupUseCase().first())) }.failureEffect()
     }
 
-    private fun Result<*>.failureEffect(): SettingsEffect? = exceptionOrNull()?.let { SettingsEffect.ReminderSaveFailed }
+    private fun Result<List<SetupValidationError>>.failureEffect(): SettingsEffect? =
+        SettingsEffect.ReminderSaveFailed.takeUnless { getOrNull()?.isEmpty() == true }
 }

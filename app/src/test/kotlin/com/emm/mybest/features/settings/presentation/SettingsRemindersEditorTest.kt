@@ -1,5 +1,6 @@
 package com.emm.mybest.features.settings.presentation
 
+import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
@@ -74,5 +75,27 @@ class SettingsRemindersEditorTest {
         val effect = editor.handle(SettingsIntent.OnPhotoReminderToggle(isEnabled = true))
 
         assertEquals(SettingsEffect.ReminderSaveFailed, effect)
+    }
+
+    @Test
+    fun `a reminder change that validation rejects reports a failure and stores nothing`() = runTest {
+        val repository = FakeSetupRepository(Setup(typicalOutingCost = Money(-100)))
+        val editor = SettingsRemindersEditor(ObserveSetupUseCase(repository), UpdateSetupUseCase(repository))
+
+        val effect = editor.handle(SettingsIntent.OnPhotoReminderToggle(isEnabled = true))
+
+        assertEquals(SettingsEffect.ReminderSaveFailed, effect)
+        assertEquals(emptyList<Setup>(), repository.saved)
+    }
+
+    @Test
+    fun `a valid reminder change is stored without an effect`() = runTest {
+        val repository = FakeSetupRepository()
+        val editor = SettingsRemindersEditor(ObserveSetupUseCase(repository), UpdateSetupUseCase(repository))
+
+        val effect = editor.handle(SettingsIntent.OnPhotoReminderToggle(isEnabled = true))
+
+        assertEquals(null, effect)
+        assertEquals(listOf(Setup(isPhotoReminderEnabled = true)), repository.saved)
     }
 }
