@@ -38,7 +38,7 @@ Layer boundaries (keep intact):
 - `core/` — cross-cutting `datetime/` and `navigation/`.
 - `ui/components/` and `ui/theme/` — shared UI helpers.
 
-Feature areas: `home`, `habit`, `photo`, `weight`, `history`, `timeline`, `insights`, `settings`. See `docs/ARCHITECTURE.md` and `docs/FEATURES.md` for the layer model and feature behavior — link to these instead of duplicating their content.
+Feature areas: `home`, `onboarding`, `checkin`, `preouting`, `debts`, `goal`, `capture`, `summary`, `history`, `weight`, `photo`, `settings`. See `docs/ARCHITECTURE.md` and `docs/FEATURES.md` for the layer model and feature behavior — link to these instead of duplicating their content.
 
 ## Conventions
 
