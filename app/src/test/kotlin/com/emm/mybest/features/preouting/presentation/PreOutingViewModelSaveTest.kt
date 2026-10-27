@@ -7,11 +7,13 @@ import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.MainDispatcherRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import kotlin.coroutines.cancellation.CancellationException
@@ -112,5 +114,59 @@ class PreOutingViewModelSaveTest {
             confirm(viewModel)
             expectNoEvents()
         }
+    }
+
+    @Test
+    fun `a failed stay in reports the failure and records no won night`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        gatedOutingRepository.wonNightFailure = IllegalStateException("disk full")
+
+        viewModel.effect.test {
+            viewModel.onIntent(PreOutingIntent.OnStayInClick)
+            assertEquals(PreOutingEffect.ActionFailed, awaitItem())
+            expectNoEvents()
+        }
+
+        assertEquals(PreOutingDecisionState.Undecided, stateNow(viewModel).decision)
+        assertTrue(outingRepository.observeWonNights(FRIDAY, FRIDAY).first().isEmpty())
+    }
+
+    @Test
+    fun `staying in again after a failed stay in records the won night`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        gatedOutingRepository.wonNightFailure = IllegalStateException("disk full")
+        stayIn(viewModel)
+        gatedOutingRepository.wonNightFailure = null
+
+        viewModel.effect.test {
+            stayIn(viewModel)
+            expectNoEvents()
+        }
+
+        assertEquals(2, gatedOutingRepository.recordWonNightCalls)
+        assertEquals(PreOutingDecisionState.StayedIn("S/ 380.00"), stateNow(viewModel).decision)
+    }
+
+    @Test
+    fun `an interrupted stay in does not report a failure and can be repeated`() = runTest {
+        val viewModel = viewModel(EMPTY_SNAPSHOT)
+        stateOf(viewModel)
+        gatedOutingRepository.wonNightFailure = CancellationException("save interrupted")
+
+        viewModel.effect.test {
+            stayIn(viewModel)
+            expectNoEvents()
+        }
+        gatedOutingRepository.wonNightFailure = null
+        stayIn(viewModel)
+
+        assertEquals(2, gatedOutingRepository.recordWonNightCalls)
+    }
+
+    private fun TestScope.stayIn(viewModel: PreOutingViewModel) {
+        viewModel.onIntent(PreOutingIntent.OnStayInClick)
+        advanceUntilIdle()
     }
 }

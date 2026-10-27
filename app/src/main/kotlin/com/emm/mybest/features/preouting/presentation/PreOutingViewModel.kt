@@ -62,11 +62,17 @@ class PreOutingViewModel(
 
     private fun stayIn() {
         viewModelScope.launch {
-            when (decisions.recordWonNight()) {
-                is RecordWonNightResult.Recorded -> Unit
-                RecordWonNightResult.NotWonNightDay -> _effect.tryEmit(PreOutingEffect.NotWonNightDay)
-                RecordWonNightResult.DayAlreadyDecided -> _effect.tryEmit(PreOutingEffect.DayAlreadyDecided)
-            }
+            attempt { decisions.recordWonNight() }
+                .onSuccess(::onStayInResult)
+                .onFailure { _effect.emit(PreOutingEffect.ActionFailed) }
+        }
+    }
+
+    private fun onStayInResult(result: RecordWonNightResult) {
+        when (result) {
+            is RecordWonNightResult.Recorded -> Unit
+            RecordWonNightResult.NotWonNightDay -> _effect.tryEmit(PreOutingEffect.NotWonNightDay)
+            RecordWonNightResult.DayAlreadyDecided -> _effect.tryEmit(PreOutingEffect.DayAlreadyDecided)
         }
     }
 
