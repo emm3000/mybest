@@ -3,6 +3,7 @@ package com.emm.mybest.domain.usecase.preouting
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.domain.models.Limits
 import com.emm.mybest.domain.repository.OutingRepository
+import com.emm.mybest.domain.validation.ReturnLimitValidator
 
 class PlanOutingUseCase(
     private val outingRepository: OutingRepository,
@@ -12,7 +13,7 @@ class PlanOutingUseCase(
 
     /**
      * Records a planned outing with [limits] on the current app day. Nothing is recorded when the money limit is not
-     * positive, the drinks limit is negative, or the app day already has an outing or a won night.
+     * positive, the drinks limit is negative, the return time is in the daytime, or the app day already has an outing or a won night.
      */
     suspend operator fun invoke(limits: Limits): PlanOutingResult {
         limitsRejection(limits)?.let { return it }
@@ -25,6 +26,7 @@ class PlanOutingUseCase(
     private fun limitsRejection(limits: Limits): PlanOutingResult? = when {
         limits.money.cents <= 0 -> PlanOutingResult.NonPositiveMoney
         limits.drinks < 0 -> PlanOutingResult.NegativeDrinks
+        !ReturnLimitValidator.isAllowed(limits.returnTime) -> PlanOutingResult.ReturnTimeInDaytime
         else -> null
     }
 }

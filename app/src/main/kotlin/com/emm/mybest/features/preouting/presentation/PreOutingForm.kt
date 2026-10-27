@@ -2,6 +2,7 @@ package com.emm.mybest.features.preouting.presentation
 
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.Limits
+import com.emm.mybest.domain.validation.ReturnLimitValidator
 import kotlinx.datetime.LocalTime
 
 private val DEFAULT_RETURN_TIME = LocalTime(2, 0)
@@ -19,7 +20,10 @@ data class PreOutingForm(
 
     val pickerTime: LocalTime get() = returnTime ?: DEFAULT_RETURN_TIME
 
-    val canConfirm: Boolean get() = toLimits() != null && areCardsOff && isAccountLoaded
+    val isReturnTimeOutOfRange: Boolean get() = returnTime?.let { !ReturnLimitValidator.isAllowed(it) } ?: false
+
+    val canConfirm: Boolean
+        get() = toLimits() != null && !isReturnTimeOutOfRange && areCardsOff && isAccountLoaded
 
     fun toLimits(): Limits? {
         val money = moneyLimit

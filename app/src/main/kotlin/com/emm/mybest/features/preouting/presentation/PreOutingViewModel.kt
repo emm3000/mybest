@@ -84,7 +84,10 @@ class PreOutingViewModel(
         when (result) {
             PlanOutingResult.Planned -> form.value = PreOutingForm()
             PlanOutingResult.DayAlreadyDecided -> _effect.tryEmit(PreOutingEffect.DayAlreadyDecided)
-            PlanOutingResult.NonPositiveMoney, PlanOutingResult.NegativeDrinks -> Unit
+            PlanOutingResult.NonPositiveMoney,
+            PlanOutingResult.NegativeDrinks,
+            PlanOutingResult.ReturnTimeInDaytime,
+            -> Unit
         }
     }
 }

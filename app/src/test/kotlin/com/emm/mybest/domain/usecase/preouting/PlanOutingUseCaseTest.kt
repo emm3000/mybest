@@ -97,6 +97,27 @@ class PlanOutingUseCaseTest {
     }
 
     @Test
+    fun `rejects a return limit in the daytime and records nothing`() = runTest {
+        listOf(LocalTime(5, 0), LocalTime(17, 59)).forEach { returnTime ->
+            val repository = FakeOutingRepository()
+
+            val result = useCase(repository)(LIMITS.copy(returnTime = returnTime))
+
+            assertEquals(PlanOutingResult.ReturnTimeInDaytime, result)
+            assertTrue(repository.observeAll().first().isEmpty())
+        }
+    }
+
+    @Test
+    fun `accepts the last small-hours minute and the first evening minute`() = runTest {
+        listOf(LocalTime(4, 59), LocalTime(18, 0)).forEach { returnTime ->
+            val result = useCase(FakeOutingRepository())(LIMITS.copy(returnTime = returnTime))
+
+            assertEquals(PlanOutingResult.Planned, result)
+        }
+    }
+
+    @Test
     fun `rejects an app day that already has an outing`() = runTest {
         val repository = FakeOutingRepository(initialOutings = listOf(existingOuting()))
 
