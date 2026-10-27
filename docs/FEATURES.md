@@ -86,7 +86,7 @@ PRD: [section 10](PRD.md#10-notification-capture-groundwork-for-v11). ADR: [0002
 
 PRD: [section 11](PRD.md#11-backup). ADR: [0001](adr/0001-all-data-stays-on-device.md).
 
-- Export and restore of the database file from Settings (`domain/usecase/ExportDatabaseBackupUseCase.kt`, `domain/usecase/RestoreDatabaseBackupUseCase.kt`, `data/BackupRepositoryImpl.kt`). A backup from another schema version is refused; a successful restore restarts the app.
+- Export and restore of the database file from Settings (`domain/usecase/ExportDatabaseBackupUseCase.kt`, `domain/usecase/RestoreDatabaseBackupUseCase.kt`, `data/BackupRepositoryImpl.kt`). A backup from another schema version is refused; a successful restore restarts the app; a restore that fails after closing the database keeps the current data and also restarts the app.
 
 ## 12. Data safety after v1
 

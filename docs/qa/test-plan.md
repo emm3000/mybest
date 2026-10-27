@@ -302,7 +302,7 @@ Data owned: onboarding, setup, debts, payments, purchase goal, contributions, ba
 | B-057 | Use the app right after restore | P1 | E | B-056 before relaunch | Without restarting: Diario toggle a check, open Deudas | No crash (the live DB was closed by restore). Crash = S1 | — |
 | B-058 | Other-version backup | P1 | N | FX-V9 and FX-HASH (§6.2) | Import each | "Este backup es de otra versión de la app y no se puede restaurar"; current data unchanged (§11) | — |
 | B-059 | Not a database | P2 | N | a `.txt` file in Downloads | Import it | Error snackbar; data unchanged. FLAG S4: message is the raw English "Invalid SQLite backup file" | — |
-| B-060 | Restore fails after the DB is closed | P1 | E | — | Make `Files.move` fail after `database.close()` (`BackupFileReplacement.kt`) | Expected: error shown, live data intact, app usable. Cannot be induced on the emulator without a code hook: mark BLOCKED and say so (§9 Q8) | — |
+| B-060 | Restore fails after the DB is closed | P1 | E | — | Run `BackupRepositoryImplRestoreTest` with `connectedDebugAndroidTest` (move forced to fail by `moveFile`) and `SettingsBackupRestoreTest` | Restore reports not restored; after the restart the live rows are there and a write succeeds; Settings shows 'No se pudo restaurar el backup. Tus datos no cambiaron; la app se va a reiniciar.' and relaunches once | — |
 | B-061 | Huge amounts | P2 | E | S-B0 | Balance `9999999999999999` (16 digits); then 17 digits; typical cost 16 digits, open pre-outing at K3 | 16 digits saved and formatted with commas; 17 digits rejected; pre-outing percent is sane or hidden, no crash (percent math can overflow) | — |
 | B-062 | No INTERNET permission | P1 | X | installed debug APK | `dumpsys package` and `aapt2 dump permissions` | Only CAMERA and POST_NOTIFICATIONS (plus library-internal ones); no `android.permission.INTERNET` (ADR 0001) | — |
 | B-063 | Dark theme only | P2 | X | S-B0 | `cmd uimode night no`; launch; open Ajustes, Deudas, a sheet | App stays Atelier Dark; no white flash on launch; status bar icons legible | B-063 |
@@ -506,7 +506,7 @@ Each peer sends the orchestrator one message at the end of its suite:
 Suite <A|B|C> · build <sha> · emulator-<port> · clock method <M1..M4>
 PASS <n> · FAIL <n> · BLOCKED <n> · SKIP <n> (of <total>)
 Bugs: #<n> (S1, A-018), #<n> (S3, A-029) …
-Blocked: A-053 (W2 and W1 both failed: …), B-060 (needs code hook)
+Blocked: A-053 (W2 and W1 both failed: …)
 FLAGs confirmed: A-029, B-032 …
 Assets: assets/qa-<suite>
 ```
@@ -530,7 +530,7 @@ Phase 0 additionally returns the tooling table from §3.9.
 5. **Return at or after 12:00.** Resolved (owner, 2026-10-26, #176): 18:00–23:59 is the outing's evening, 00:00–17:59 the next day; a 12:30 return breaks a 02:00 limit by 630 min (A-036).
 6. **Double-tap guards.** Resolved (#139, #161; PRs #140, #167) for "Confirmar salida", new-debt "Guardar" and contribution "Guardar" (A-018, B-026, B-048). The goal save is an upsert, so its double tap is harmless (B-045).
 7. **Onboarding editor sheet closes on rotation.** Not reproduced: B-007 passed in Phase 1.
-8. **Restore after `database.close()`.** The relaunch after a successful restore is fixed (#125, PR #142). If `Files.move` fails, the DB is already closed and the app keeps running on it (B-060, still BLOCKED). Needs a unit/instrumented test with an injectable move; testers cannot force it.
+8. **Restore after `database.close()`.** Resolved (#180): a move failure after the close keeps the original file, shows 'No se pudo restaurar el backup…' and relaunches the app; B-060 runs through `BackupRepositoryImplRestoreTest`.
 9. **Weekly summary has no notification.** Only Home routing opens it on Sunday evening; `ACTION_WEEKLY_SUMMARY` exists but no worker posts it. Is a Sunday notification expected under §8?
 10. **No in-app notifications switch**; the preference defaults to on and can only be changed through system settings.
 11. **Purchase goal editing.** Resolved (#130, PR #154): editing keeps the contributions (B-052).
