@@ -12,6 +12,7 @@ import kotlin.time.Instant
 
 private const val YAPE = "com.bcp.innovacxion.yapeapp"
 private const val PLIN = "com.interbank.plin"
+private const val KEY = "0|com.bcp.innovacxion.yapeapp|1|tag|10100"
 private val POSTED_AT = Instant.parse("2026-10-23T23:15:00Z")
 
 class CaptureNotificationUseCaseTest {
@@ -23,9 +24,18 @@ class CaptureNotificationUseCaseTest {
         CaptureNotificationUseCase(repository)(posted(title = " Yape ", text = "Te yapearon S/ 25.00 \n"))
 
         assertEquals(
-            listOf(CapturedNotification(1, YAPE, " Yape ", "Te yapearon S/ 25.00 \n", POSTED_AT)),
+            listOf(CapturedNotification(1, YAPE, " Yape ", "Te yapearon S/ 25.00 \n", POSTED_AT, KEY)),
             repository.observeCaptured().first(),
         )
+    }
+
+    @Test
+    fun `the saved notification carries the posted key`() = runTest {
+        val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
+
+        CaptureNotificationUseCase(repository)(posted(key = "0|$YAPE|7|qa|10100"))
+
+        assertEquals(listOf("0|$YAPE|7|qa|10100"), repository.observeCaptured().first().map { it.key })
     }
 
     @Test
@@ -89,7 +99,8 @@ class CaptureNotificationUseCaseTest {
 
 private fun posted(
     packageName: String = YAPE,
+    key: String = KEY,
     title: String? = "Yape",
     text: String? = "Te yapearon S/ 25.00",
     isGroupSummary: Boolean = false,
-) = PostedNotification(packageName, title, text, POSTED_AT, isGroupSummary)
+) = PostedNotification(packageName, key, title, text, POSTED_AT, isGroupSummary)

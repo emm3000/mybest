@@ -18,7 +18,8 @@ internal val ONE_ROW_PER_V1_TABLE = listOf(
     "INSERT INTO purchase_goal VALUES (1, 'Bicicleta', 150000)",
     "INSERT INTO goal_contribution VALUES (1, '2026-03-15', 5000)",
     "INSERT INTO capture_app VALUES ('com.bcp.innovacxion.yapeapp')",
-    "INSERT INTO captured_notification VALUES (1, 'com.bcp.innovacxion.yapeapp', 'Yape', 'Te yapearon S/ 20', 1773600000000)",
+    "INSERT INTO captured_notification (id, package_name, title, text, posted_at_epoch_ms) " +
+        "VALUES (1, 'com.bcp.innovacxion.yapeapp', 'Yape', 'Te yapearon S/ 20', 1773600000000)",
     "INSERT INTO daily_weight VALUES ('w1', '2026-03-15', 71.4, 'photos/w1.jpg', 'ayuno', 1773600000000, 1773600000001)",
     "INSERT INTO progress_photo VALUES ('p1', '2026-03-15', 'TRUNK', 'photos/p1.jpg', 1773600000000, 1773600000001)",
 )
@@ -32,7 +33,7 @@ private fun userTablesOf(database: SupportSQLiteDatabase): Set<String> =
             "('android_metadata', 'room_master_table', 'sqlite_sequence')",
     ).use { cursor -> buildSet { while (cursor.moveToNext()) add(cursor.getString(0)) } }
 
-private fun rowsOf(database: SupportSQLiteDatabase, table: String): List<List<String?>> =
+internal fun rowsOf(database: SupportSQLiteDatabase, table: String): List<List<String?>> =
     database.query("SELECT * FROM $table").use { cursor ->
         buildList {
             while (cursor.moveToNext()) add((0 until cursor.columnCount).map { cursor.getString(it) })

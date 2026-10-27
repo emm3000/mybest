@@ -15,10 +15,16 @@ import kotlin.time.Instant
 class PostedNotificationMappingTest {
 
     @Test
-    fun `the package and the post time are copied`() {
-        val posted = sbn(packageName = "com.interbank.plin", postTime = 1_700_000_000_123L).toPostedNotification()
+    fun `the package, the key and the post time are copied`() {
+        val posted = sbn(
+            packageName = "com.interbank.plin",
+            key = "0|com.interbank.plin|1|tag|10100",
+            postTime = 1_700_000_000_123L,
+        )
+            .toPostedNotification()
 
         assertEquals("com.interbank.plin", posted.packageName)
+        assertEquals("0|com.interbank.plin|1|tag|10100", posted.key)
         assertEquals(Instant.fromEpochMilliseconds(1_700_000_000_123L), posted.postedAt)
     }
 
@@ -91,6 +97,7 @@ class PostedNotificationMappingTest {
 
     private fun sbn(
         packageName: String = "com.android.shell",
+        key: String = "0|com.android.shell|1|tag|10100",
         postTime: Long = 0L,
         extras: Bundle = extras(),
         flags: Int = 0,
@@ -101,6 +108,7 @@ class PostedNotificationMappingTest {
         val sbn = mockk<StatusBarNotification>()
         every { sbn.notification } returns notification
         every { sbn.packageName } returns packageName
+        every { sbn.key } returns key
         every { sbn.postTime } returns postTime
         return sbn
     }

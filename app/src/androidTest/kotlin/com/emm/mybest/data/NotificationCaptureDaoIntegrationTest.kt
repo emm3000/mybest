@@ -46,8 +46,8 @@ class NotificationCaptureDaoIntegrationTest {
 
     @Test
     fun captured_notifications_come_back_newest_first_and_unmodified() = runBlocking {
-        repository.saveCaptured(PostedNotification(YAPE, "Yape", "Te yapearon S/ 25.00", Instant.fromEpochMilliseconds(1_000)))
-        repository.saveCaptured(PostedNotification(PLIN, null, " Recibiste S/ 10.00 \n", Instant.fromEpochMilliseconds(2_000)))
+        repository.saveCaptured(PostedNotification(YAPE, "key", "Yape", "Te yapearon S/ 25.00", Instant.fromEpochMilliseconds(1_000)))
+        repository.saveCaptured(PostedNotification(PLIN, "key", null, " Recibiste S/ 10.00 \n", Instant.fromEpochMilliseconds(2_000)))
 
         val captured = repository.observeCaptured().first()
 
@@ -58,7 +58,7 @@ class NotificationCaptureDaoIntegrationTest {
     @Test
     fun deleting_all_captured_keeps_the_selected_apps() = runBlocking {
         repository.setAppSelected(YAPE, isSelected = true)
-        repository.saveCaptured(PostedNotification(YAPE, "Yape", "Te yapearon S/ 25.00", Instant.fromEpochMilliseconds(1_000)))
+        repository.saveCaptured(PostedNotification(YAPE, "key", "Yape", "Te yapearon S/ 25.00", Instant.fromEpochMilliseconds(1_000)))
 
         repository.deleteAllCaptured()
 

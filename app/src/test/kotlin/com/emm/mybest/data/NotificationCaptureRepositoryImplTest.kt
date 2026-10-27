@@ -44,11 +44,17 @@ class NotificationCaptureRepositoryImplTest {
     }
 
     @Test
-    fun `saveCaptured stores title and text exactly as given`() = runTest {
+    fun `saveCaptured stores the title, the text and the key exactly as given`() = runTest {
         coEvery { dao.insertCaptured(any()) } returns 1
 
         repository.saveCaptured(
-            PostedNotification(YAPE, " Yape ", "Te yapearon S/ 25.00\n", Instant.fromEpochMilliseconds(1_000)),
+            PostedNotification(
+                YAPE,
+                "0|$YAPE|1|tag|10100",
+                " Yape ",
+                "Te yapearon S/ 25.00\n",
+                Instant.fromEpochMilliseconds(1_000),
+            ),
         )
 
         coVerify {
@@ -58,6 +64,7 @@ class NotificationCaptureRepositoryImplTest {
                     title = " Yape ",
                     text = "Te yapearon S/ 25.00\n",
                     postedAtEpochMs = 1_000,
+                    notificationKey = "0|$YAPE|1|tag|10100",
                 ),
             )
         }

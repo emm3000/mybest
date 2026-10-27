@@ -12,8 +12,14 @@ import org.junit.Test
 
 private const val TEST_DB = "migration-test-db"
 private const val PRE_V1_SCHEMA_VERSION = 5
+private const val V10_SCHEMA_VERSION = 10
+private const val V11_SCHEMA_VERSION = 11
+private const val CAPTURED_NOTIFICATION = "captured_notification"
 private const val PRE_V1_WEIGHT_ROW =
     "INSERT INTO daily_weight VALUES ('w1', '2026-01-01', 70.0, NULL, NULL, 1000, 1000)"
+private const val V10_CAPTURED_ROW =
+    "INSERT INTO captured_notification (id, package_name, title, text, posted_at_epoch_ms) " +
+        "VALUES (1, 'com.bcp.innovacxion.yapeapp', ' Yape ', 'Te yapearon S/ 20\n', 1773600000000)"
 
 class AppDatabaseMigrationsTest {
 
@@ -43,7 +49,23 @@ class AppDatabaseMigrationsTest {
 
         assertEquals(V1_TABLES, seeded.keys)
         assertTrue(seeded.values.all { it.size == 1 })
-        assertEquals(seeded, reopened)
+        assertEquals(seeded, reopened.withoutKeyColumn())
+        assertTrue(reopened.getValue(CAPTURED_NOTIFICATION).all { it.last() == null })
+    }
+
+    @Test
+    fun v10_captured_notification_keeps_every_column_and_gets_a_null_key() {
+        val seeded = helper.createDatabase(TEST_DB, V10_SCHEMA_VERSION).use { db ->
+            db.execSQL(V10_CAPTURED_ROW)
+            rowsOf(db, CAPTURED_NOTIFICATION)
+        }
+
+        val migrated = helper.runMigrationsAndValidate(TEST_DB, V11_SCHEMA_VERSION, true, MIGRATION_10_11).use { db ->
+            rowsOf(db, CAPTURED_NOTIFICATION)
+        }
+
+        assertEquals(seeded, migrated.map { it.dropLast(1) })
+        assertTrue(migrated.all { it.last() == null })
     }
 
     @Test
@@ -65,3 +87,6 @@ class AppDatabaseMigrationsTest {
             .withAppMigrations()
             .build()
 }
+
+private fun Map<String, List<List<String?>>>.withoutKeyColumn(): Map<String, List<List<String?>>> =
+    mapValues { (table, rows) -> if (table == CAPTURED_NOTIFICATION) rows.map { it.dropLast(1) } else rows }

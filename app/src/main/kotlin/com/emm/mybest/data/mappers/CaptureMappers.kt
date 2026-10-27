@@ -10,6 +10,7 @@ fun CapturedNotification.toEntity(): CapturedNotificationEntity = CapturedNotifi
     title = title,
     text = text,
     postedAtEpochMs = postedAt.toEpochMilliseconds(),
+    notificationKey = key,
 )
 
 fun CapturedNotificationEntity.toDomain(): CapturedNotification = CapturedNotification(
@@ -18,4 +19,5 @@ fun CapturedNotificationEntity.toDomain(): CapturedNotification = CapturedNotifi
     title = title,
     text = text,
     postedAt = Instant.fromEpochMilliseconds(postedAtEpochMs),
+    key = notificationKey,
 )

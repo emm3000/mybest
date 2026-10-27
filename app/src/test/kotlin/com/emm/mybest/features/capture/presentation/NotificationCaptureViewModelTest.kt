@@ -113,7 +113,7 @@ class NotificationCaptureViewModelTest {
     @Test
     fun `turning capture off deselects every app but keeps what was captured`() = runTest {
         val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE, PLIN))
-        repository.saveCaptured(PostedNotification(YAPE, "Yape", "Te yapearon S/ 25.00", FRIDAY_18_15_LIMA))
+        repository.saveCaptured(PostedNotification(YAPE, "key", "Yape", "Te yapearon S/ 25.00", FRIDAY_18_15_LIMA))
 
         val state = send(viewModel(repository), NotificationCaptureIntent.OnTurnOffClick)
 
@@ -125,7 +125,7 @@ class NotificationCaptureViewModelTest {
     @Test
     fun `delete all asks for confirmation before deleting anything`() = runTest {
         val repository = FakeNotificationCaptureRepository()
-        repository.saveCaptured(PostedNotification(YAPE, "Yape", "Te yapearon S/ 25.00", FRIDAY_18_15_LIMA))
+        repository.saveCaptured(PostedNotification(YAPE, "key", "Yape", "Te yapearon S/ 25.00", FRIDAY_18_15_LIMA))
 
         val state = send(viewModel(repository), NotificationCaptureIntent.OnDeleteAllClick)
 
@@ -136,7 +136,7 @@ class NotificationCaptureViewModelTest {
     @Test
     fun `dismissing the confirmation keeps every captured notification`() = runTest {
         val repository = FakeNotificationCaptureRepository()
-        repository.saveCaptured(PostedNotification(YAPE, "Yape", null, FRIDAY_18_15_LIMA))
+        repository.saveCaptured(PostedNotification(YAPE, "key", "Yape", null, FRIDAY_18_15_LIMA))
 
         val state = send(
             viewModel(repository),
@@ -151,8 +151,8 @@ class NotificationCaptureViewModelTest {
     @Test
     fun `confirming delete all removes every captured notification`() = runTest {
         val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
-        repository.saveCaptured(PostedNotification(YAPE, "Yape", "uno", FRIDAY_18_15_LIMA))
-        repository.saveCaptured(PostedNotification(YAPE, "Yape", "dos", FRIDAY_18_15_LIMA))
+        repository.saveCaptured(PostedNotification(YAPE, "key", "Yape", "uno", FRIDAY_18_15_LIMA))
+        repository.saveCaptured(PostedNotification(YAPE, "key", "Yape", "dos", FRIDAY_18_15_LIMA))
 
         val state = send(
             viewModel(repository),
@@ -169,7 +169,7 @@ class NotificationCaptureViewModelTest {
     @Test
     fun `shows each notification as stored with its app, date and time`() = runTest {
         val repository = FakeNotificationCaptureRepository()
-        repository.saveCaptured(PostedNotification(YAPE, " Yape ", "Te yapearon S/ 25.00 \n", FRIDAY_18_15_LIMA))
+        repository.saveCaptured(PostedNotification(YAPE, "key", " Yape ", "Te yapearon S/ 25.00 \n", FRIDAY_18_15_LIMA))
 
         val item = send(viewModel(repository)).notifications.single()
 
@@ -183,8 +183,8 @@ class NotificationCaptureViewModelTest {
     @Test
     fun `an absent title or text stays absent`() = runTest {
         val repository = FakeNotificationCaptureRepository()
-        repository.saveCaptured(PostedNotification(YAPE, null, "solo texto", FRIDAY_18_15_LIMA))
-        repository.saveCaptured(PostedNotification(PLIN, "solo título", null, FRIDAY_18_15_LIMA))
+        repository.saveCaptured(PostedNotification(YAPE, "key", null, "solo texto", FRIDAY_18_15_LIMA))
+        repository.saveCaptured(PostedNotification(PLIN, "key", "solo título", null, FRIDAY_18_15_LIMA))
 
         val items = send(viewModel(repository)).notifications
 
