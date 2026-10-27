@@ -2,6 +2,7 @@ package com.emm.mybest.domain.usecase.home
 
 import com.emm.mybest.core.datetime.APP_DAY_START
 import com.emm.mybest.core.datetime.AppDayClock
+import com.emm.mybest.core.datetime.EVENING_START
 import com.emm.mybest.core.datetime.MORNING_AFTER_CUTOFF
 import com.emm.mybest.domain.models.NightDecision
 import com.emm.mybest.domain.models.Tonight
@@ -14,14 +15,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalTime
 
-private const val EVENING_START_HOUR = 18
-
-/**
- * The local time from which the evening begins, up to [APP_DAY_START].
- */
-val HOME_EVENING_START: LocalTime = LocalTime(EVENING_START_HOUR, 0)
-
-private val WINDOW_STARTS = listOf(APP_DAY_START, MORNING_AFTER_CUTOFF, HOME_EVENING_START)
+private val WINDOW_STARTS = listOf(APP_DAY_START, MORNING_AFTER_CUTOFF, EVENING_START)
 
 class ResolveHomeDestinationUseCase(
     private val observeCheckInTask: ObserveCheckInTaskUseCase,
@@ -50,5 +44,5 @@ class ResolveHomeDestinationUseCase(
 
     private fun isMorning(time: LocalTime): Boolean = time >= APP_DAY_START && time < MORNING_AFTER_CUTOFF
 
-    private fun isEvening(time: LocalTime): Boolean = time >= HOME_EVENING_START || time < APP_DAY_START
+    private fun isEvening(time: LocalTime): Boolean = time >= EVENING_START || time < APP_DAY_START
 }
