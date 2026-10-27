@@ -23,6 +23,9 @@ data class HistoryState(
     val selectedView: HistoryView = HistoryView.CALENDAR,
     val bitacoraDays: ImmutableList<BitacoraDayState> = persistentListOf(),
     val selectedDate: LocalDate? = null,
+    val noteEditor: NoteEditorState? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-)
+) {
+    val canWriteNote: Boolean get() = selectedMonth == currentMonth
+}

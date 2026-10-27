@@ -18,6 +18,15 @@ internal fun BitacoraDay.toState(today: LocalDate): BitacoraDayState = BitacoraD
     rows = entries.map(BitacoraEntry::toRow).toImmutableList(),
 )
 
+internal fun List<BitacoraDayState>.noteTextOf(noteId: Long): String? =
+    asSequence()
+        .flatMap { it.rows }
+        .firstOrNull { it.noteId == noteId }
+        ?.parts
+        ?.filterIsInstance<BitacoraTextPart.Text>()
+        ?.singleOrNull()
+        ?.value
+
 internal fun textRes(@StringRes resId: Int, vararg args: Any): BitacoraTextPart =
     BitacoraTextPart.Res(resId, args.toList())
 

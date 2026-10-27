@@ -212,6 +212,20 @@
     </plurals>
     <string name="bitacora_contribution">%1$s a tu meta</string>
     <string name="bitacora_separator">" · "</string>
+    <string name="bitacora_write_note">Escribir nota</string>
+    <string name="bitacora_note_new_title">NUEVA NOTA</string>
+    <string name="bitacora_note_edit_title">EDITAR NOTA</string>
+    <string name="bitacora_note_field">Nota</string>
+    <string name="bitacora_note_counter">%1$d/%2$d</string>
+    <string name="bitacora_note_error_blank">Escribe tu nota</string>
+    <string name="bitacora_note_error_too_long">La nota va hasta %1$d caracteres</string>
+    <string name="bitacora_note_save">Guardar</string>
+    <string name="bitacora_note_cancel">Cancelar</string>
+    <string name="bitacora_note_delete">Eliminar nota</string>
+    <string name="bitacora_note_delete_title">¿Eliminar la nota?</string>
+    <string name="bitacora_note_delete_message">No se puede deshacer.</string>
+    <string name="bitacora_note_delete_confirm">Eliminar</string>
+    <string name="bitacora_note_action_failed">No se pudo completar la acción</string>
 
     <!-- Weight reminder notification -->
     <string name="weight_reminder_title">Hoy te toca pesarte</string>
