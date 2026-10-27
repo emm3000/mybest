@@ -65,7 +65,6 @@ class HistoryViewModelDayStateTest {
         monthPhotoCount = 0,
         monthOutingCount = 0,
         monthWonNightCount = 0,
-        recentEntries = emptyList(),
     )
 
     private fun viewModel(result: HistoryResult): HistoryViewModel {

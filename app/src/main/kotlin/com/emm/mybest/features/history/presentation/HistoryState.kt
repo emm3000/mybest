@@ -20,7 +20,6 @@ data class HistoryState(
     val monthWonNightCount: Int = 0,
     val dayMarks: ImmutableMap<LocalDate, DayMarksState> = persistentMapOf(),
     val dayDetail: DayDetailState? = null,
-    val recentEntries: ImmutableList<HistoryRecentRowState> = persistentListOf(),
     val selectedView: HistoryView = HistoryView.CALENDAR,
     val bitacoraDays: ImmutableList<BitacoraDayState> = persistentListOf(),
     val selectedDate: LocalDate? = null,

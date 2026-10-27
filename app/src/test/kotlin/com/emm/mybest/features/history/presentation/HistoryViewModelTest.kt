@@ -11,7 +11,6 @@ import com.emm.mybest.domain.usecase.history.BitacoraEntry
 import com.emm.mybest.domain.usecase.history.DaySummary
 import com.emm.mybest.domain.usecase.history.GetBitacoraUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
-import com.emm.mybest.domain.usecase.history.HistoryRecentEntry
 import com.emm.mybest.domain.usecase.history.HistoryResult
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
@@ -66,16 +65,12 @@ class HistoryViewModelTest {
         createdAt = 1L,
     )
 
-    private fun historyResult(
-        summaries: List<DaySummary> = emptyList(),
-        recentEntries: List<HistoryRecentEntry> = emptyList(),
-    ) = HistoryResult(
+    private fun historyResult(summaries: List<DaySummary> = emptyList()) = HistoryResult(
         monthlyData = summaries.associateBy { it.date },
         monthWeightCount = summaries.count { it.hasWeight },
         monthPhotoCount = summaries.count { it.hasPhoto },
         monthOutingCount = 0,
         monthWonNightCount = 0,
-        recentEntries = recentEntries,
     )
 
     private fun buildViewModel(
@@ -145,8 +140,7 @@ class HistoryViewModelTest {
     @Test
     fun `monthWeightCount reflects result from use case`() = runTest {
         val summary = DaySummary(weightEntry.date, weight = weightEntry)
-        val entry = HistoryRecentEntry(date = weightEntry.date, weight = weightEntry.weight, photoTypes = emptyList())
-        val viewModel = buildViewModel(historyResult(listOf(summary), listOf(entry)))
+        val viewModel = buildViewModel(historyResult(listOf(summary)))
 
         viewModel.state.test {
             awaitItem()
@@ -160,32 +154,13 @@ class HistoryViewModelTest {
     @Test
     fun `monthPhotoCount reflects result from use case`() = runTest {
         val summary = DaySummary(photo.date, photos = listOf(photo))
-        val entry = HistoryRecentEntry(date = photo.date, weight = null, photoTypes = listOf(PhotoType.TRUNK))
-        val viewModel = buildViewModel(historyResult(listOf(summary), listOf(entry)))
+        val viewModel = buildViewModel(historyResult(listOf(summary)))
 
         viewModel.state.test {
             awaitItem()
             val loaded = awaitItem()
             assertEquals(0, loaded.monthWeightCount)
             assertEquals(1, loaded.monthPhotoCount)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `recentEntries are populated from use case result`() = runTest {
-        val entry = HistoryRecentEntry(
-            date = weightEntry.date,
-            weight = weightEntry.weight,
-            photoTypes = emptyList(),
-        )
-        val viewModel = buildViewModel(historyResult(recentEntries = listOf(entry)))
-
-        viewModel.state.test {
-            awaitItem()
-            val loaded = awaitItem()
-            assertEquals(1, loaded.recentEntries.size)
-            assertEquals(entry.toRowState(loaded.today), loaded.recentEntries[0])
             cancelAndIgnoreRemainingEvents()
         }
     }
