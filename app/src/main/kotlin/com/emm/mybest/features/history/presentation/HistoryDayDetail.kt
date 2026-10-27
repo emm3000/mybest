@@ -76,7 +76,12 @@ internal fun DayDetailContent(
             DetailSections(
                 detail = detail,
                 onDeleteWeight = callbacks.onDeleteWeight,
-                onDeletePhoto = { photoToDelete = it },
+                photoActions = { photo ->
+                    PhotoRowActions(
+                        onReplace = { callbacks.onReplacePhoto(photo) },
+                        onDelete = { photoToDelete = photo },
+                    )
+                },
             )
         }
 
@@ -145,11 +150,11 @@ private fun DetailEmptyState() {
 private fun DetailSections(
     detail: DayDetailState,
     onDeleteWeight: () -> Unit,
-    onDeletePhoto: (ProgressPhoto) -> Unit,
+    photoActions: (ProgressPhoto) -> PhotoRowActions,
 ) {
     detail.outing?.let { HistoryOutingDetail(outing = it) }
     detail.wonNight?.let { HistoryWonNightDetail(wonNight = it) }
     HistoryChecksDetail(checks = detail.checks)
     detail.weight?.let { DetailWeightRow(row = it, onDelete = onDeleteWeight) }
-    detail.photos.forEach { row -> DetailPhotoRow(row = row, onDelete = { onDeletePhoto(row.photo) }) }
+    detail.photos.forEach { row -> DetailPhotoRow(row = row, actions = photoActions(row.photo)) }
 }

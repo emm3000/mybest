@@ -75,7 +75,7 @@ class HistoryViewModelDayStateTest {
             getHistory,
             getLogbook,
             mockk<DeleteWeightByDateUseCase>(),
-            HistoryPhotoUseCases(mockk()),
+            HistoryPhotoUseCases(mockk(), mockk()),
             HistoryNoteUseCases(mockk(), mockk(), mockk()),
             clock,
         )

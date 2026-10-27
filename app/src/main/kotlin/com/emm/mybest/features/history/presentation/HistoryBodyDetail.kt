@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,10 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.emm.mybest.R
+import com.emm.mybest.domain.models.PhotoType
+import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.IconButtonVariant
 import com.emm.mybest.ui.components.atelier.Hairline
@@ -27,6 +31,8 @@ import com.emm.mybest.ui.components.atelier.MicroLabelTone
 import com.emm.mybest.ui.components.atelier.photoTypeLabel
 import com.emm.mybest.ui.theme.AtelierInk
 import com.emm.mybest.ui.theme.AtelierSansFamily
+import com.emm.mybest.ui.theme.AtelierTheme
+import kotlinx.datetime.LocalDate
 
 private val THUMBNAIL_SIZE = 88.dp
 private val ROW_TOP_PADDING = 16.dp
@@ -58,7 +64,7 @@ internal fun DetailWeightRow(row: WeightRowState, onDelete: () -> Unit, modifier
 }
 
 @Composable
-internal fun DetailPhotoRow(row: PhotoRowState, onDelete: () -> Unit, modifier: Modifier = Modifier) {
+internal fun DetailPhotoRow(row: PhotoRowState, actions: PhotoRowActions, modifier: Modifier = Modifier) {
     Hairline()
     Row(
         modifier = modifier
@@ -71,10 +77,11 @@ internal fun DetailPhotoRow(row: PhotoRowState, onDelete: () -> Unit, modifier: 
             modifier = Modifier.padding(top = PHOTO_LABEL_TOP_PADDING),
         )
         PhotoColumn(row = row, modifier = Modifier.weight(1f))
+        PhotoRowReplace(canReplace = row.canDelete, onReplace = actions.onReplace)
         BodyRowDelete(
             canDelete = row.canDelete,
             description = stringResource(R.string.history_delete_photo),
-            onDelete = onDelete,
+            onDelete = actions.onDelete,
         )
     }
 }
@@ -105,6 +112,17 @@ private fun BodyRowLabel(text: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
+private fun PhotoRowReplace(canReplace: Boolean, onReplace: () -> Unit) {
+    if (!canReplace) return
+    HIconButton(
+        icon = Icons.Rounded.PhotoCamera,
+        contentDescription = stringResource(R.string.history_replace_photo),
+        onClick = onReplace,
+        variant = IconButtonVariant.Ghost,
+    )
+}
+
+@Composable
 private fun BodyRowDelete(canDelete: Boolean, description: String, onDelete: () -> Unit) {
     if (!canDelete) return
     HIconButton(
@@ -113,4 +131,16 @@ private fun BodyRowDelete(canDelete: Boolean, description: String, onDelete: () 
         onClick = onDelete,
         variant = IconButtonVariant.Destructive,
     )
+}
+
+@Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)
+@Composable
+private fun DetailPhotoRowPreview() {
+    val photo = ProgressPhoto("p1", LocalDate(2026, 11, 10), PhotoType.TRUNK, "", 0L)
+    AtelierTheme {
+        DetailPhotoRow(
+            row = PhotoRowState(photo, canDelete = true, descriptionRes = R.string.history_photo_trunk_description),
+            actions = PhotoRowActions(onReplace = {}, onDelete = {}),
+        )
+    }
 }
