@@ -77,6 +77,9 @@ import com.emm.mybest.domain.usecase.debts.SaveDebtUseCase
 import com.emm.mybest.domain.usecase.goal.AddGoalContributionUseCase
 import com.emm.mybest.domain.usecase.goal.ObserveGoalProgressUseCase
 import com.emm.mybest.domain.usecase.goal.SavePurchaseGoalUseCase
+import com.emm.mybest.domain.usecase.history.BitacoraMoneySources
+import com.emm.mybest.domain.usecase.history.BitacoraSources
+import com.emm.mybest.domain.usecase.history.GetBitacoraUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.HistoryBodySources
 import com.emm.mybest.domain.usecase.history.HistoryNightSources
@@ -237,6 +240,16 @@ val appModule = module {
     factory { GetPhotosOverviewUseCase(get(), get()) }
 
     factory { GetHistoryUseCase(HistoryBodySources(get(), get()), HistoryNightSources(get(), get()), get()) }
+    factory {
+        GetBitacoraUseCase(
+            BitacoraSources(
+                HistoryBodySources(get(), get()),
+                HistoryNightSources(get(), get()),
+                get(),
+                BitacoraMoneySources(get(), get()),
+            ),
+        )
+    }
 
     factory { GetEstimatedOutingCostUseCase(get(), get()) }
     factory { ObserveNotSpentThisMonthUseCase(get(), get()) }
