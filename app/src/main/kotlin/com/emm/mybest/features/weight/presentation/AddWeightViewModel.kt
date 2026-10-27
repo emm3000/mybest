@@ -2,6 +2,7 @@ package com.emm.mybest.features.weight.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.repository.SetupRepository
 import com.emm.mybest.domain.usecase.weight.ObserveWeighInTrendUseCase
@@ -70,7 +71,7 @@ class AddWeightViewModel(
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            runCatching {
+            attempt {
                 saveWeightUseCase(
                     weight = weightValue,
                     note = _state.value.note.takeIf { it.isNotBlank() },

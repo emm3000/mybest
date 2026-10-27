@@ -11,6 +11,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -257,6 +258,20 @@ class AddWeightViewModelTest {
             val effect = awaitItem()
             assertTrue(effect is AddWeightEffect.ShowError)
             assertTrue((effect as AddWeightEffect.ShowError).message.contains("DB fail"))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `OnSaveClick emits neither ShowError nor NavigateBack when the save is cancelled`() = runTest {
+        coEvery { saveWeightUseCase(any(), any()) } throws CancellationException("cancelled")
+        val viewModel = buildViewModel()
+        viewModel.onIntent(AddWeightIntent.OnWeightChange("70.0"))
+
+        viewModel.effect.test {
+            viewModel.onIntent(AddWeightIntent.OnSaveClick)
+            advanceUntilIdle()
+            expectNoEvents()
             cancelAndIgnoreRemainingEvents()
         }
     }
