@@ -63,6 +63,8 @@ class PreOutingViewModelDecisionTest {
             assertEquals(PreOutingEffect.NotWonNightDay, awaitItem())
         }
         assertEquals(PreOutingDecisionState.Undecided, stateNow(viewModel).decision)
+        advanceUntilIdle()
+        assertEquals(0, gatedOutingRepository.recordWonNightCalls)
     }
 
     @Test
@@ -113,6 +115,8 @@ class PreOutingViewModelDecisionTest {
             assertEquals(PreOutingEffect.DayAlreadyDecided, awaitItem())
         }
         assertTrue(stateNow(viewModel).form.isOpen)
+        advanceUntilIdle()
+        assertEquals(0, gatedOutingRepository.recordPlannedCalls)
     }
 
     @Test
@@ -125,5 +129,7 @@ class PreOutingViewModelDecisionTest {
             viewModel.onIntent(PreOutingIntent.OnStayInClick)
             assertEquals(PreOutingEffect.DayAlreadyDecided, awaitItem())
         }
+        advanceUntilIdle()
+        assertEquals(0, gatedOutingRepository.recordWonNightCalls)
     }
 }
