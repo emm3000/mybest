@@ -84,7 +84,6 @@ class GetHistoryUseCaseTest {
         val result = useCase()(october).first()
 
         assertTrue(result.monthlyData.isEmpty())
-        assertTrue(result.recentEntries.isEmpty())
         assertEquals(0, result.monthOutingCount)
         assertEquals(0, result.monthWonNightCount)
     }
@@ -107,29 +106,6 @@ class GetHistoryUseCaseTest {
 
         assertEquals(2, result.monthWeightCount)
         assertEquals(1, result.monthPhotoCount)
-    }
-
-    @Test
-    fun `recent entries list weigh-ins and photos newest first`() = runTest {
-        val result = useCase(
-            HistoryFixture(weights = listOf(weight2, weight1), photos = listOf(photo)),
-        )(october).first()
-
-        assertEquals(listOf(october10, october7), result.recentEntries.map { it.date })
-        assertEquals(78.5f, result.recentEntries[1].weight)
-        assertEquals(listOf(PhotoType.TRUNK), result.recentEntries[1].photoTypes)
-    }
-
-    @Test
-    fun `recent entries skip days with only an outing or checks`() = runTest {
-        val fixture = HistoryFixture(
-            outings = listOf(plannedOuting(october24)),
-            checks = listOf(DailyCheck(october10, DailyCheckType.GYM, isDone = true)),
-        )
-
-        val result = useCase(fixture)(october).first()
-
-        assertTrue(result.recentEntries.isEmpty())
     }
 
     @Test

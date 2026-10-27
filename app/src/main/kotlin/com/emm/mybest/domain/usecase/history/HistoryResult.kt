@@ -8,5 +8,4 @@ data class HistoryResult(
     val monthPhotoCount: Int,
     val monthOutingCount: Int,
     val monthWonNightCount: Int,
-    val recentEntries: List<HistoryRecentEntry>,
 )

@@ -69,7 +69,6 @@ class HistoryViewModel(
                 monthWonNightCount = result.monthWonNightCount,
                 dayMarks = result.monthlyData.mapValues { it.value.toMarks() }.toImmutableMap(),
                 dayDetail = date?.let { toDayDetailState(it, result.monthlyData[it], baseState.today) },
-                recentEntries = result.recentEntries.map { it.toRowState(baseState.today) }.toImmutableList(),
                 selectedView = view,
                 bitacoraDays = bitacora.map { it.toState(baseState.today) }.toImmutableList(),
                 isLoading = false,

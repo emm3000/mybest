@@ -3,7 +3,6 @@ package com.emm.mybest.domain.usecase.history
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.DailyCheck
 import com.emm.mybest.domain.models.Outing
-import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.RelapseReason
 import com.emm.mybest.domain.models.WeightEntry
@@ -73,7 +72,6 @@ private fun MonthRecords.toResult(days: ClosedRange<LocalDate>): HistoryResult {
         monthPhotoCount = body.photos.count { it.date in days },
         monthOutingCount = nights.outings.size,
         monthWonNightCount = nights.wonNights.size,
-        recentEntries = buildRecentEntries(days, summaries),
     )
 }
 
@@ -96,17 +94,3 @@ private fun MonthRecords.toSummaries(): Map<LocalDate, DaySummary> {
         )
     }
 }
-
-private fun buildRecentEntries(
-    days: ClosedRange<LocalDate>,
-    summaries: Map<LocalDate, DaySummary>,
-): List<HistoryRecentEntry> = summaries.values
-    .filter { it.date in days && (it.hasWeight || it.hasPhoto) }
-    .sortedByDescending { it.date }
-    .map { summary ->
-        HistoryRecentEntry(
-            date = summary.date,
-            weight = summary.weight?.weight,
-            photoTypes = summary.photos.map { it.type }.sortedBy(PhotoType::ordinal),
-        )
-    }
