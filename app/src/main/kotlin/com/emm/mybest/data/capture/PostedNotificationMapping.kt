@@ -15,5 +15,6 @@ internal fun StatusBarNotification.toPostedNotification(): PostedNotification {
             text = extras.getCharSequence(Notification.EXTRA_TEXT),
         ),
         postedAt = Instant.fromEpochMilliseconds(postTime),
+        isGroupSummary = notification.flags and Notification.FLAG_GROUP_SUMMARY != 0,
     )
 }

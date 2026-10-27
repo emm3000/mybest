@@ -6,7 +6,9 @@ import android.service.notification.StatusBarNotification
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.time.Instant
 
@@ -51,6 +53,34 @@ class PostedNotificationMappingTest {
         assertNull(posted.text)
     }
 
+    @Test
+    fun `a group summary flag marks the notification as a group summary`() {
+        val posted = sbn(flags = Notification.FLAG_GROUP_SUMMARY).toPostedNotification()
+
+        assertTrue(posted.isGroupSummary)
+    }
+
+    @Test
+    fun `a group summary flag combined with another flag still marks a group summary`() {
+        val posted = sbn(
+            flags = Notification.FLAG_GROUP_SUMMARY or Notification.FLAG_ONGOING_EVENT,
+        ).toPostedNotification()
+
+        assertTrue(posted.isGroupSummary)
+    }
+
+    @Test
+    fun `no flags is not a group summary`() {
+        assertFalse(sbn(flags = 0).toPostedNotification().isGroupSummary)
+    }
+
+    @Test
+    fun `another flag alone is not a group summary`() {
+        val posted = sbn(flags = Notification.FLAG_ONGOING_EVENT).toPostedNotification()
+
+        assertFalse(posted.isGroupSummary)
+    }
+
     private fun extras(title: String? = null, bigText: String? = null, text: String? = null): Bundle {
         val bundle = mockk<Bundle>()
         every { bundle.getCharSequence(Notification.EXTRA_TITLE) } returns title
@@ -63,9 +93,11 @@ class PostedNotificationMappingTest {
         packageName: String = "com.android.shell",
         postTime: Long = 0L,
         extras: Bundle = extras(),
+        flags: Int = 0,
     ): StatusBarNotification {
         val notification = mockk<Notification>()
         notification.extras = extras
+        notification.flags = flags
         val sbn = mockk<StatusBarNotification>()
         every { sbn.notification } returns notification
         every { sbn.packageName } returns packageName
