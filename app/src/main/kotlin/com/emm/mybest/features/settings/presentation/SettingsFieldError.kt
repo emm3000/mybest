@@ -16,3 +16,10 @@ internal fun SetupValidationError.toFieldError(): SettingsFieldError = when (thi
     SetupValidationError.NegativeTypicalOutingCost,
     -> SettingsFieldError.NEGATIVE
 }
+
+internal fun SetupValidationError.field(): SettingsField = when (this) {
+    is SetupValidationError.WeeklyTargetOutOfRange -> SettingsField.entries.first { it.checkType == type }
+    SetupValidationError.NegativeMonthlyOutingLimit -> SettingsField.MONTHLY_OUTING_LIMIT
+    SetupValidationError.TargetWeightOutOfRange -> SettingsField.TARGET_WEIGHT
+    SetupValidationError.NegativeTypicalOutingCost -> SettingsField.TYPICAL_OUTING_COST
+}
