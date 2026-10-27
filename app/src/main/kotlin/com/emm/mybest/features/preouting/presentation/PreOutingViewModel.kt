@@ -9,6 +9,7 @@ import com.emm.mybest.domain.usecase.preouting.ObservePreOutingSnapshotUseCase
 import com.emm.mybest.domain.usecase.preouting.PlanOutingResult
 import com.emm.mybest.domain.usecase.preouting.PreOutingDecisionUseCases
 import com.emm.mybest.domain.usecase.preouting.RecordWonNightResult
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -73,11 +74,20 @@ class PreOutingViewModel(
         if (confirmJob?.isActive == true) return
         val limits = form.value.takeIf { it.canConfirm }?.toLimits() ?: return
         confirmJob = viewModelScope.launch {
-            when (decisions.planOuting(limits)) {
-                PlanOutingResult.Planned -> form.value = PreOutingForm()
-                PlanOutingResult.DayAlreadyDecided -> _effect.tryEmit(PreOutingEffect.DayAlreadyDecided)
-                PlanOutingResult.NonPositiveMoney, PlanOutingResult.NegativeDrinks -> Unit
-            }
+            attempt { decisions.planOuting(limits) }
+                .onSuccess(::onPlanResult)
+                .onFailure { _effect.emit(PreOutingEffect.ActionFailed) }
+        }
+    }
+
+    private fun onPlanResult(result: PlanOutingResult) {
+        when (result) {
+            PlanOutingResult.Planned -> form.value = PreOutingForm()
+            PlanOutingResult.DayAlreadyDecided -> _effect.tryEmit(PreOutingEffect.DayAlreadyDecided)
+            PlanOutingResult.NonPositiveMoney, PlanOutingResult.NegativeDrinks -> Unit
         }
     }
 }
+
+private suspend inline fun <T> attempt(block: () -> T): Result<T> =
+    runCatching { block() }.onFailure { if (it is CancellationException) throw it }

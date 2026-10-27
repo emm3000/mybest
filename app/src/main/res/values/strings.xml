@@ -285,6 +285,7 @@
     <string name="check_in_evening_already_recorded">Esa noche ya tiene una salida registrada</string>
     <string name="check_in_invalid_input">Revisa los datos del check-in</string>
     <string name="check_in_action_failed">No se pudo completar la acción</string>
+    <string name="pre_outing_action_failed">No se pudo completar la acción</string>
     <string name="pre_outing_day_already_decided">Esta noche ya tiene una decisión</string>
     <string name="pre_outing_not_won_night_day">Quedarte solo cuenta los viernes y sábados</string>
     <string name="pre_outing_won_night_added_unknown">Sumada a No gastado este mes (estimado)</string>

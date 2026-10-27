@@ -51,6 +51,7 @@ private fun PreOutingEffects(
     val currentCallbacks by rememberUpdatedState(callbacks)
     val dayAlreadyDecidedMessage = stringResource(R.string.pre_outing_day_already_decided)
     val notWonNightDayMessage = stringResource(R.string.pre_outing_not_won_night_day)
+    val actionFailedMessage = stringResource(R.string.pre_outing_action_failed)
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
@@ -59,6 +60,7 @@ private fun PreOutingEffects(
                 PreOutingEffect.OpenPurchaseGoal -> currentCallbacks.onOpenPurchaseGoal()
                 PreOutingEffect.DayAlreadyDecided -> launch { snackbarHostState.showSnackbar(dayAlreadyDecidedMessage) }
                 PreOutingEffect.NotWonNightDay -> launch { snackbarHostState.showSnackbar(notWonNightDayMessage) }
+                PreOutingEffect.ActionFailed -> launch { snackbarHostState.showSnackbar(actionFailedMessage) }
             }
         }
     }

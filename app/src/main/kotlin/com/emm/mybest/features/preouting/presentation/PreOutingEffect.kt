@@ -6,4 +6,5 @@ sealed interface PreOutingEffect {
     data object OpenPurchaseGoal : PreOutingEffect
     data object DayAlreadyDecided : PreOutingEffect
     data object NotWonNightDay : PreOutingEffect
+    data object ActionFailed : PreOutingEffect
 }
