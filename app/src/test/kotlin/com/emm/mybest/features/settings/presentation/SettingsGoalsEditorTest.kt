@@ -7,6 +7,7 @@ import com.emm.mybest.domain.usecase.UpdateSetupUseCase
 import com.emm.mybest.domain.validation.SetupValidationError
 import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.SlowSetupRepository
+import com.emm.mybest.testing.failingUpdateSetupUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.CancellationException
@@ -158,7 +159,7 @@ class SettingsGoalsEditorTest {
     @Test
     fun `a cancelled save rethrows the cancellation instead of reporting a failure`() = runTest {
         val cancellation = CancellationException("stop")
-        val editor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), failingUpdate(cancellation))
+        val editor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), failingUpdateSetupUseCase(cancellation))
 
         try {
             saveTargetWeight(editor, "72")
@@ -182,17 +183,15 @@ class SettingsGoalsEditorTest {
 
     @Test
     fun `a failed save reports a goal save failure`() = runTest {
-        val editor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), failingUpdate(IllegalStateException()))
+        val editor =
+            SettingsGoalsEditor(
+                ObserveSetupUseCase(setupRepository),
+                failingUpdateSetupUseCase(IllegalStateException()),
+            )
 
         val effect = saveTargetWeight(editor, "72")
 
         assertEquals(SettingsEffect.GoalSaveFailed, effect)
-    }
-
-    private fun failingUpdate(error: Throwable): UpdateSetupUseCase {
-        val update = mockk<UpdateSetupUseCase>()
-        coEvery { update(any()) } throws error
-        return update
     }
 
     private fun editorOn(repository: FakeSetupRepository) =

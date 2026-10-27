@@ -5,6 +5,7 @@ import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
 import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.SlowSetupRepository
+import com.emm.mybest.testing.failingUpdateSetupUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.CancellationException
@@ -37,7 +38,10 @@ class SettingsRemindersEditorTest {
     @Test
     fun `a cancelled save rethrows the cancellation instead of reporting a failure`() = runTest {
         val cancellation = CancellationException("stop")
-        val editor = SettingsRemindersEditor(ObserveSetupUseCase(FakeSetupRepository()), failingUpdate(cancellation))
+        val editor = SettingsRemindersEditor(
+            ObserveSetupUseCase(FakeSetupRepository()),
+            failingUpdateSetupUseCase(cancellation),
+        )
 
         try {
             editor.handle(SettingsIntent.OnPhotoReminderToggle(isEnabled = true))
@@ -62,16 +66,13 @@ class SettingsRemindersEditorTest {
     @Test
     fun `a failed save reports a reminder save failure`() = runTest {
         val editor =
-            SettingsRemindersEditor(ObserveSetupUseCase(FakeSetupRepository()), failingUpdate(IllegalStateException()))
+            SettingsRemindersEditor(
+                ObserveSetupUseCase(FakeSetupRepository()),
+                failingUpdateSetupUseCase(IllegalStateException()),
+            )
 
         val effect = editor.handle(SettingsIntent.OnPhotoReminderToggle(isEnabled = true))
 
         assertEquals(SettingsEffect.ReminderSaveFailed, effect)
-    }
-
-    private fun failingUpdate(error: Throwable): UpdateSetupUseCase {
-        val update = mockk<UpdateSetupUseCase>()
-        coEvery { update(any()) } throws error
-        return update
     }
 }
