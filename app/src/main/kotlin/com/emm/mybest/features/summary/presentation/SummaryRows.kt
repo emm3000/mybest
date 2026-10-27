@@ -3,10 +3,12 @@ package com.emm.mybest.features.summary.presentation
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
@@ -22,6 +24,7 @@ import com.emm.mybest.ui.components.atelier.Hairline
 private val ROW_PADDING = 12.dp
 private val ROW_GAP = 16.dp
 private val ARROW_SIZE = 18.dp
+private val LABEL_MIN_WIDTH = 140.dp
 
 @Composable
 internal fun SummaryRow(
@@ -44,19 +47,20 @@ private fun SummaryLine(
     onClick: (SummaryDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    FlowRow(
         modifier = modifier
             .fillMaxWidth()
             .then(row.destination.toClickModifier(onClick))
             .padding(vertical = ROW_PADDING),
         horizontalArrangement = Arrangement.spacedBy(ROW_GAP),
-        verticalAlignment = Alignment.Bottom,
+        verticalArrangement = Arrangement.spacedBy(ROW_GAP),
+        itemVerticalAlignment = Alignment.Bottom,
     ) {
         Text(
             text = row.label.resolve(),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).widthIn(min = LABEL_MIN_WIDTH),
         )
         Text(text = row.value.resolve(), style = MaterialTheme.typography.titleMedium, color = row.valueColor)
     }

@@ -1,7 +1,7 @@
 package com.emm.mybest.features.summary.presentation
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,7 +16,7 @@ internal fun SummaryWeekNavigation(
     onIntent: (SummaryIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    FlowRow(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         HButton(
             text = stringResource(R.string.summary_previous_week),
             onClick = { onIntent(SummaryIntent.OnPreviousWeekClick) },
