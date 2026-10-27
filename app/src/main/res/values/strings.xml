@@ -189,6 +189,30 @@
     <string name="history_month_stats">%1$s · %2$s</string>
     <string name="history_loading">CARGANDO</string>
     <string name="history_error_label">ERROR</string>
+    <string name="history_view_calendar">CALENDARIO</string>
+    <string name="history_view_bitacora">BITÁCORA</string>
+    <string name="bitacora_empty">SIN ENTRADAS ESTE MES</string>
+    <string name="bitacora_kind_outing">SALIDA</string>
+    <string name="bitacora_kind_relapse">RECAÍDA</string>
+    <string name="bitacora_kind_won_night">NOCHE GANADA</string>
+    <string name="bitacora_kind_stayed_in">EN CASA</string>
+    <string name="bitacora_kind_return">VOLVISTE</string>
+    <string name="bitacora_kind_weigh_in">PESAJE</string>
+    <string name="bitacora_kind_photo">FOTO</string>
+    <string name="bitacora_kind_installment">CUOTA PAGADA</string>
+    <string name="bitacora_kind_contribution">APORTE</string>
+    <string name="bitacora_spent">Gasto %1$s</string>
+    <string name="bitacora_limits_kept">Topes cumplidos</string>
+    <string name="bitacora_mood">Ánimo %1$d de 5</string>
+    <string name="bitacora_won_night_stayed">Te quedaste</string>
+    <string name="bitacora_won_night_estimate">%1$s no gastado (estimado)</string>
+    <string name="bitacora_stayed_in">No saliste</string>
+    <plurals name="bitacora_return_days">
+        <item quantity="one">%1$d día después de tu recaída</item>
+        <item quantity="other">%1$d días después de tu recaída</item>
+    </plurals>
+    <string name="bitacora_contribution">%1$s a tu meta</string>
+    <string name="bitacora_separator">" · "</string>
 
     <!-- Weight reminder notification -->
     <string name="weight_reminder_title">Hoy te toca pesarte</string>

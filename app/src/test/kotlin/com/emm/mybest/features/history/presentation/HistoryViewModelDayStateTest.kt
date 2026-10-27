@@ -17,6 +17,7 @@ import com.emm.mybest.domain.models.RelapseReason
 import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.models.WonNight
 import com.emm.mybest.domain.usecase.history.DaySummary
+import com.emm.mybest.domain.usecase.history.GetBitacoraUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.HistoryResult
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
@@ -70,7 +71,15 @@ class HistoryViewModelDayStateTest {
     private fun viewModel(result: HistoryResult): HistoryViewModel {
         val getHistory = mockk<GetHistoryUseCase>()
         every { getHistory(any()) } returns flowOf(result)
-        return HistoryViewModel(getHistory, mockk<DeleteWeightByDateUseCase>(), mockk<DeletePhotoUseCase>(), clock)
+        val getBitacora = mockk<GetBitacoraUseCase>()
+        every { getBitacora(any()) } returns flowOf(emptyList())
+        return HistoryViewModel(
+            getHistory,
+            getBitacora,
+            mockk<DeleteWeightByDateUseCase>(),
+            mockk<DeletePhotoUseCase>(),
+            clock,
+        )
     }
 
     private suspend fun loaded(result: HistoryResult): HistoryState =
