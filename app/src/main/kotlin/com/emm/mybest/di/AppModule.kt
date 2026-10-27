@@ -273,7 +273,7 @@ val appModule = module {
     viewModel { HomeViewModel(get(), get()) }
     viewModel { AddWeightViewModel(get(), get(), get()) }
     viewModel { PhotosViewModel(get(), get(), get(), get()) }
-    viewModel { HistoryViewModel(get(), get(), get(), get()) }
+    viewModel { HistoryViewModel(get(), get(), get(), get(), get()) }
     viewModel { (beforeId: String, afterId: String) ->
         ComparePhotosViewModel(beforeId, afterId, get())
     }

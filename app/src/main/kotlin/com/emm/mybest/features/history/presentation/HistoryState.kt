@@ -21,6 +21,8 @@ data class HistoryState(
     val dayMarks: ImmutableMap<LocalDate, DayMarksState> = persistentMapOf(),
     val dayDetail: DayDetailState? = null,
     val recentEntries: ImmutableList<HistoryRecentRowState> = persistentListOf(),
+    val selectedView: HistoryView = HistoryView.CALENDAR,
+    val bitacoraDays: ImmutableList<BitacoraDayState> = persistentListOf(),
     val selectedDate: LocalDate? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,

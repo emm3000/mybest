@@ -72,7 +72,7 @@ private fun DaySummary.answerFor(type: DailyCheckType): CheckAnswer {
     return if (check.isDone) CheckAnswer.YES else CheckAnswer.NO
 }
 
-private fun WeightEntry.toLabel(): String {
+internal fun WeightEntry.toLabel(): String {
     val base = String.format(Locale.ROOT, "%.1f kg", weight)
     return if (note.isNullOrBlank()) base else "$base · $note"
 }

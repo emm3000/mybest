@@ -6,4 +6,5 @@ import kotlinx.datetime.LocalDate
 internal data class HistoryPagerCallbacks(
     val onMonthChange: (YearMonthValue) -> Unit,
     val onDateClick: (LocalDate) -> Unit,
+    val onViewSelect: (HistoryView) -> Unit,
 )

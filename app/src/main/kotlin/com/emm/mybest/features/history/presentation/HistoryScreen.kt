@@ -67,6 +67,7 @@ fun HistoryScreen(
             callbacks = HistoryPagerCallbacks(
                 onMonthChange = { viewModel.onIntent(HistoryIntent.OnMonthChange(it)) },
                 onDateClick = { viewModel.onIntent(HistoryIntent.OnDateSelected(it)) },
+                onViewSelect = { viewModel.onIntent(HistoryIntent.OnViewSelected(it)) },
             ),
             modifier = Modifier
                 .padding(padding)
@@ -122,7 +123,7 @@ private fun HistoryPagedContent(
         HistoryMonthPage(
             state = state,
             today = today,
-            onDateClick = callbacks.onDateClick,
+            callbacks = callbacks,
         )
     }
 }

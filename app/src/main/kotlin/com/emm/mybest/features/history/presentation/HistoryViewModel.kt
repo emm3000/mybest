@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
+import com.emm.mybest.domain.usecase.history.GetBitacoraUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
@@ -34,6 +35,7 @@ private fun initialHistoryState(today: LocalDate): HistoryState {
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModel(
     private val getHistoryUseCase: GetHistoryUseCase,
+    private val getBitacoraUseCase: GetBitacoraUseCase,
     private val deleteWeightByDate: DeleteWeightByDateUseCase,
     private val deletePhoto: DeletePhotoUseCase,
     appDayClock: AppDayClock,
@@ -43,6 +45,7 @@ class HistoryViewModel(
 
     private val _selectedMonth = MutableStateFlow(baseState.currentMonth)
     private val _selectedDate = MutableStateFlow<LocalDate?>(null)
+    private val _selectedView = MutableStateFlow(HistoryView.CALENDAR)
 
     val state: StateFlow<HistoryState> = combine(
         _selectedMonth,
@@ -50,7 +53,12 @@ class HistoryViewModel(
     ) { month, selectedDate ->
         Pair(month, selectedDate)
     }.flatMapLatest { (month, _) ->
-        getHistoryUseCase(month).combine(_selectedDate) { result, date ->
+        combine(
+            getHistoryUseCase(month),
+            getBitacoraUseCase(month),
+            _selectedDate,
+            _selectedView,
+        ) { result, bitacora, date, view ->
             baseState.copy(
                 selectedMonth = month,
                 monthNavigationLabel = month.toNavigationLabel(),
@@ -62,6 +70,8 @@ class HistoryViewModel(
                 dayMarks = result.monthlyData.mapValues { it.value.toMarks() }.toImmutableMap(),
                 dayDetail = date?.let { toDayDetailState(it, result.monthlyData[it], baseState.today) },
                 recentEntries = result.recentEntries.map { it.toRowState(baseState.today) }.toImmutableList(),
+                selectedView = view,
+                bitacoraDays = bitacora.map { it.toState(baseState.today) }.toImmutableList(),
                 isLoading = false,
                 errorMessage = null,
             )
@@ -71,6 +81,7 @@ class HistoryViewModel(
             baseState.copy(
                 selectedMonth = _selectedMonth.value,
                 selectedDate = _selectedDate.value,
+                selectedView = _selectedView.value,
                 isLoading = false,
                 errorMessage = throwable.message ?: "No se pudo cargar el historial.",
             ),
@@ -86,6 +97,7 @@ class HistoryViewModel(
             is HistoryIntent.OnMonthChange -> _selectedMonth.value = intent.newMonth
             is HistoryIntent.OnDateSelected -> _selectedDate.value = intent.date
             HistoryIntent.OnDateDismiss -> _selectedDate.value = null
+            is HistoryIntent.OnViewSelected -> _selectedView.value = intent.view
             is HistoryIntent.OnDeleteWeight -> viewModelScope.launch {
                 deleteWeightByDate(intent.date)
             }

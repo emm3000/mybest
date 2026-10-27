@@ -9,4 +9,5 @@ sealed class HistoryIntent {
     object OnDateDismiss : HistoryIntent()
     data class OnDeleteWeight(val date: LocalDate) : HistoryIntent()
     data class OnDeletePhoto(val photoId: String) : HistoryIntent()
+    data class OnViewSelected(val view: HistoryView) : HistoryIntent()
 }

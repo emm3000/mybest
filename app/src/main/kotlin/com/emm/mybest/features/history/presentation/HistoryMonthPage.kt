@@ -13,7 +13,7 @@ import kotlinx.datetime.LocalDate
 internal fun HistoryMonthPage(
     state: HistoryState,
     today: LocalDate,
-    onDateClick: (LocalDate) -> Unit,
+    callbacks: HistoryPagerCallbacks,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -23,20 +23,29 @@ internal fun HistoryMonthPage(
     ) {
         HistoryMonthHero(state = state)
         Hairline()
-        HistoryCalendarGrid(
-            calendar = HistoryCalendarState(
-                month = state.selectedMonth,
-                dayMarks = state.dayMarks,
-                today = today,
-            ),
-            onDateClick = onDateClick,
-        )
+        HistoryViewSwitch(selected = state.selectedView, onSelect = callbacks.onViewSelect)
         Hairline()
-        HistoryLegend()
-        Hairline()
-        HistoryRecentEntries(
-            entries = state.recentEntries,
-            onRowClick = onDateClick,
-        )
+        when (state.selectedView) {
+            HistoryView.CALENDAR -> HistoryCalendarContent(state, today, callbacks.onDateClick)
+            HistoryView.BITACORA -> BitacoraList(days = state.bitacoraDays, onDayClick = callbacks.onDateClick)
+        }
     }
+}
+
+@Composable
+private fun HistoryCalendarContent(
+    state: HistoryState,
+    today: LocalDate,
+    onDateClick: (LocalDate) -> Unit,
+) {
+    HistoryCalendarGrid(
+        calendar = HistoryCalendarState(
+            month = state.selectedMonth,
+            dayMarks = state.dayMarks,
+            today = today,
+        ),
+        onDateClick = onDateClick,
+    )
+    Hairline()
+    HistoryLegend()
 }

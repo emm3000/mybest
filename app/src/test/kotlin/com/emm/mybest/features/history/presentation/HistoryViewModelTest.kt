@@ -6,7 +6,10 @@ import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
 import com.emm.mybest.domain.models.WeightEntry
+import com.emm.mybest.domain.usecase.history.BitacoraDay
+import com.emm.mybest.domain.usecase.history.BitacoraEntry
 import com.emm.mybest.domain.usecase.history.DaySummary
+import com.emm.mybest.domain.usecase.history.GetBitacoraUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
 import com.emm.mybest.domain.usecase.history.HistoryRecentEntry
 import com.emm.mybest.domain.usecase.history.HistoryResult
@@ -17,6 +20,7 @@ import com.emm.mybest.testing.MainDispatcherRule
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -42,6 +46,7 @@ class HistoryViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val getHistoryUseCase = mockk<GetHistoryUseCase>(relaxed = true)
+    private val getBitacoraUseCase = mockk<GetBitacoraUseCase>()
     private val deleteWeightByDate = mockk<DeleteWeightByDateUseCase>(relaxed = true)
     private val deletePhoto = mockk<DeletePhotoUseCase>(relaxed = true)
 
@@ -76,9 +81,11 @@ class HistoryViewModelTest {
     private fun buildViewModel(
         result: HistoryResult = historyResult(),
         appDayClock: AppDayClock = mayAppDayClock,
+        bitacoraDays: List<BitacoraDay> = emptyList(),
     ): HistoryViewModel {
         every { getHistoryUseCase(any()) } returns flowOf(result)
-        return HistoryViewModel(getHistoryUseCase, deleteWeightByDate, deletePhoto, appDayClock)
+        every { getBitacoraUseCase(any()) } returns flowOf(bitacoraDays)
+        return HistoryViewModel(getHistoryUseCase, getBitacoraUseCase, deleteWeightByDate, deletePhoto, appDayClock)
     }
 
     @Test
@@ -184,6 +191,52 @@ class HistoryViewModelTest {
     }
 
     @Test
+    fun `the calendar is the initial view and OnViewSelected switches it`() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.state.test {
+            awaitItem()
+            assertEquals(HistoryView.CALENDAR, awaitItem().selectedView)
+
+            viewModel.onIntent(HistoryIntent.OnViewSelected(HistoryView.BITACORA))
+            assertEquals(HistoryView.BITACORA, awaitItem().selectedView)
+
+            viewModel.onIntent(HistoryIntent.OnViewSelected(HistoryView.CALENDAR))
+            assertEquals(HistoryView.CALENDAR, awaitItem().selectedView)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `bitacoraDays follow the use case`() = runTest {
+        val day = BitacoraDay(LocalDate(2026, 5, 10), listOf(BitacoraEntry.StayedInEntry))
+        val viewModel = buildViewModel(bitacoraDays = listOf(day))
+
+        viewModel.state.test {
+            awaitItem()
+            val loaded = awaitItem()
+            assertEquals(listOf(day.toState(loaded.today)), loaded.bitacoraDays)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `OnMonthChange subscribes the Bitácora to the new month`() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.state.test {
+            awaitItem()
+            awaitItem()
+
+            viewModel.onIntent(HistoryIntent.OnMonthChange(YearMonthValue(2026, 4)))
+            awaitItem()
+
+            verify { getBitacoraUseCase(YearMonthValue(2026, 4)) }
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `OnDateSelected sets selectedDate in state`() = runTest {
         val viewModel = buildViewModel()
 
@@ -268,7 +321,14 @@ class HistoryViewModelTest {
     fun `state updates reactively when use case emits new data`() = runTest {
         val resultFlow = MutableStateFlow(historyResult())
         every { getHistoryUseCase(any()) } returns resultFlow
-        val viewModel = HistoryViewModel(getHistoryUseCase, deleteWeightByDate, deletePhoto, mayAppDayClock)
+        every { getBitacoraUseCase(any()) } returns flowOf(emptyList())
+        val viewModel = HistoryViewModel(
+            getHistoryUseCase,
+            getBitacoraUseCase,
+            deleteWeightByDate,
+            deletePhoto,
+            mayAppDayClock,
+        )
 
         viewModel.state.test {
             awaitItem()
