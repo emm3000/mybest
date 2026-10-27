@@ -9,11 +9,14 @@ class CaptureNotificationUseCase(
 ) {
 
     /**
-     * Stores [notification] exactly as received when its app is selected for capture and it has a title or a text (ADR 0002).
+     * Stores [notification] exactly as received when its app is selected for capture, it has a title or a text,
+     * and it is not a group summary (ADR 0002).
      */
     suspend operator fun invoke(notification: PostedNotification) {
-        if (notification.title.isNullOrBlank() && notification.text.isNullOrBlank()) return
+        if (notification.isEmpty() || notification.isGroupSummary) return
         if (notification.packageName !in repository.observeSelectedApps().first()) return
         repository.saveCaptured(notification)
     }
+
+    private fun PostedNotification.isEmpty(): Boolean = title.isNullOrBlank() && text.isNullOrBlank()
 }

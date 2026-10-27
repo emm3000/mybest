@@ -60,6 +60,15 @@ class CaptureNotificationUseCaseTest {
     }
 
     @Test
+    fun `a group summary from a selected app is not saved`() = runTest {
+        val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
+
+        CaptureNotificationUseCase(repository)(posted(isGroupSummary = true))
+
+        assertTrue(repository.observeCaptured().first().isEmpty())
+    }
+
+    @Test
     fun `a notification from an unselected app is not saved`() = runTest {
         val repository = FakeNotificationCaptureRepository(selectedApps = setOf(YAPE))
 
@@ -78,5 +87,9 @@ class CaptureNotificationUseCaseTest {
     }
 }
 
-private fun posted(packageName: String = YAPE, title: String? = "Yape", text: String? = "Te yapearon S/ 25.00") =
-    PostedNotification(packageName, title, text, POSTED_AT)
+private fun posted(
+    packageName: String = YAPE,
+    title: String? = "Yape",
+    text: String? = "Te yapearon S/ 25.00",
+    isGroupSummary: Boolean = false,
+) = PostedNotification(packageName, title, text, POSTED_AT, isGroupSummary)
