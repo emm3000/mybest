@@ -1,5 +1,6 @@
 package com.emm.mybest.features.settings.presentation
 
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
@@ -56,7 +57,7 @@ class SettingsRemindersEditor(
         persist { field.withTime(it, time) }
 
     private suspend fun persist(change: (Setup) -> Setup): SettingsEffect? = saveLock.withLock {
-        runCatching { updateSetupUseCase(change(observeSetupUseCase().first())) }.failureEffect()
+        attempt { updateSetupUseCase(change(observeSetupUseCase().first())) }.failureEffect()
     }
 
     private fun Result<*>.failureEffect(): SettingsEffect? = exceptionOrNull()?.let { SettingsEffect.ReminderSaveFailed }
