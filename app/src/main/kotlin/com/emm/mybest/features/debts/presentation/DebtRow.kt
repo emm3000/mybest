@@ -110,7 +110,7 @@ private fun PayAction(
 private fun DoneTag(text: String, modifier: Modifier = Modifier) {
     MicroLabel(
         text = text,
-        style = MicroLabelStyle(tone = MicroLabelTone.Done),
+        style = MicroLabelStyle(tone = MicroLabelTone.Done, isSingleLine = true),
         modifier = modifier.padding(vertical = ACTION_VERTICAL),
     )
 }
@@ -126,5 +126,6 @@ private fun RowAction(
         modifier = modifier
             .clickable(onClick = onClick)
             .padding(vertical = ACTION_VERTICAL),
+        style = MicroLabelStyle(isSingleLine = true),
     )
 }
