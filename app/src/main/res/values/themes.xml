@@ -12,7 +12,7 @@
     <style name="Theme.MyBest.Starting" parent="Theme.SplashScreen.IconBackground">
         <item name="windowSplashScreenBackground">@color/splash_screen_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_progress_foreground</item>
-        <item name="windowSplashScreenIconBackgroundColor">@color/ic_progress_background</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/atelier_black</item>
         <item name="postSplashScreenTheme">@style/Theme.MyBest</item>
     </style>
 </resources>
