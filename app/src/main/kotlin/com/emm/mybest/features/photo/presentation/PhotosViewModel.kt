@@ -2,6 +2,7 @@ package com.emm.mybest.features.photo.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
@@ -64,7 +65,7 @@ class PhotosViewModel(
     private fun savePhoto(uri: String, type: PhotoType) {
         _selectedType.update { type }
         viewModelScope.launch {
-            runCatching {
+            attempt {
                 savePhotosUseCase(listOf(NewProgressPhoto(photoPath = uri, type = type, date = appDayClock.today())))
             }.onFailure { error ->
                 _effect.emit(PhotosEffect.ShowError("Error al guardar: ${error.message}"))
@@ -74,7 +75,7 @@ class PhotosViewModel(
 
     private fun deletePhoto(id: String) {
         viewModelScope.launch {
-            runCatching {
+            attempt {
                 deletePhotoUseCase(id)
             }.onFailure { error ->
                 _effect.emit(PhotosEffect.ShowError("Error al eliminar: ${error.message}"))
