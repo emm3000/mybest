@@ -16,8 +16,18 @@ internal val MIGRATION_10_11 = object : Migration(10, 11) {
     }
 }
 
+internal val MIGRATION_11_12 = object : Migration(11, 12) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `note` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`app_day` TEXT NOT NULL, `created_at_epoch_ms` INTEGER NOT NULL, `text` TEXT NOT NULL)",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_note_app_day` ON `note` (`app_day`)")
+    }
+}
+
 /** Every migration from [AppDatabase.V1_SCHEMA_VERSION] up to [AppDatabase.SCHEMA_VERSION], in order. */
-val ALL_MIGRATIONS: List<Migration> = listOf(MIGRATION_10_11)
+val ALL_MIGRATIONS: List<Migration> = listOf(MIGRATION_10_11, MIGRATION_11_12)
 
 private val PRE_V1_SCHEMA_VERSIONS = FIRST_SCHEMA_VERSION until AppDatabase.V1_SCHEMA_VERSION
 

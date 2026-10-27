@@ -16,6 +16,8 @@ import com.emm.mybest.data.entities.DebtPaymentEntity
 import com.emm.mybest.data.entities.GoalContributionEntity
 import com.emm.mybest.data.entities.NoOutingAnswerDao
 import com.emm.mybest.data.entities.NoOutingAnswerEntity
+import com.emm.mybest.data.entities.NoteDao
+import com.emm.mybest.data.entities.NoteEntity
 import com.emm.mybest.data.entities.NotificationCaptureDao
 import com.emm.mybest.data.entities.OutingDao
 import com.emm.mybest.data.entities.OutingEntity
@@ -43,11 +45,13 @@ import com.emm.mybest.data.entities.WonNightEntity
         GoalContributionEntity::class,
         CaptureAppEntity::class,
         CapturedNotificationEntity::class,
+        NoteEntity::class,
     ],
     version = AppDatabase.SCHEMA_VERSION,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
+@Suppress("TooManyFunctions")
 abstract class AppDatabase : RoomDatabase() {
     abstract fun dailyWeightDao(): DailyWeightDao
     abstract fun progressPhotoDao(): ProgressPhotoDao
@@ -59,10 +63,11 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun debtDao(): DebtDao
     abstract fun purchaseGoalDao(): PurchaseGoalDao
     abstract fun notificationCaptureDao(): NotificationCaptureDao
+    abstract fun noteDao(): NoteDao
 
     companion object {
         const val DB_NAME = "my_best_db"
-        const val SCHEMA_VERSION = 11
+        const val SCHEMA_VERSION = 12
         const val V1_SCHEMA_VERSION = 10
     }
 }
