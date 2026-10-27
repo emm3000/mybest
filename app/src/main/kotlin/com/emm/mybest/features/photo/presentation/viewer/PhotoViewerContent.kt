@@ -38,16 +38,32 @@ internal fun PhotoViewerContent(
     actions: PhotoViewerActions,
     modifier: Modifier = Modifier,
 ) {
-    val photos = state.photos
-    val pagerState = rememberPagerState(initialPage = state.initialPage) { photos.size }
-    var isOverlayVisible by remember { mutableStateOf(true) }
-    val currentPhoto = photos.getOrNull(pagerState.currentPage)
-
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black),
     ) {
+        if (state.isLoading) {
+            ViewerOverlay(currentPhoto = null, onBack = actions.onBack)
+        } else {
+            LoadedPhotoViewer(state = state, snackbarHostState = snackbarHostState, actions = actions)
+        }
+    }
+}
+
+@Composable
+private fun LoadedPhotoViewer(
+    state: PhotoViewerState,
+    snackbarHostState: SnackbarHostState,
+    actions: PhotoViewerActions,
+    modifier: Modifier = Modifier,
+) {
+    val photos = state.photos
+    val pagerState = rememberPagerState(initialPage = state.initialPage) { photos.size }
+    var isOverlayVisible by remember { mutableStateOf(true) }
+    val currentPhoto = photos.getOrNull(pagerState.currentPage)
+
+    Box(modifier = modifier.fillMaxSize()) {
         PhotoPager(
             photos = photos,
             pagerState = pagerState,
