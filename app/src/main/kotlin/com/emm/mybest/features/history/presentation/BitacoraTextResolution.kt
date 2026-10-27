@@ -13,7 +13,7 @@ internal fun List<BitacoraTextPart>.resolve(): String {
 
 @Suppress("SpreadOperator")
 @Composable
-private fun BitacoraTextPart.resolve(): String = when (this) {
+internal fun BitacoraTextPart.resolve(): String = when (this) {
     is BitacoraTextPart.Res -> stringResource(resId, *args.toTypedArray())
     is BitacoraTextPart.Plural -> pluralStringResource(resId, count, count)
     is BitacoraTextPart.Text -> value

@@ -4,6 +4,7 @@ import com.emm.mybest.R
 import com.emm.mybest.core.money.Money
 import com.emm.mybest.domain.models.CheckIn
 import com.emm.mybest.domain.models.Limits
+import com.emm.mybest.domain.models.Note
 import com.emm.mybest.domain.models.Outing
 import com.emm.mybest.domain.models.OutingKind
 import com.emm.mybest.domain.models.PhotoType
@@ -18,6 +19,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.time.Instant
 
 private val TODAY = LocalDate(2026, 11, 10)
 private val FRIDAY = LocalDate(2026, 11, 6)
@@ -40,7 +42,7 @@ class BitacoraMappingTest {
     fun `a kept planned outing is an outing row with the limits kept`() {
         val row = rowOf(BitacoraEntry.OutingEntry(planned(checkIn(9_000, mood = 4)), emptySet()))
 
-        assertEquals(R.string.bitacora_kind_outing, row.labelRes)
+        assertEquals(res(R.string.bitacora_kind_outing), row.label)
         assertFalse(row.isRelapse)
         assertEquals(
             listOf(
@@ -59,7 +61,7 @@ class BitacoraMappingTest {
 
         val row = rowOf(BitacoraEntry.OutingEntry(outing, setOf(RelapseReason.BROKE_LIMIT)))
 
-        assertEquals(R.string.bitacora_kind_relapse, row.labelRes)
+        assertEquals(res(R.string.bitacora_kind_relapse), row.label)
         assertTrue(row.isRelapse)
         assertEquals(
             listOf(
@@ -111,7 +113,7 @@ class BitacoraMappingTest {
         val estimated = rowOf(BitacoraEntry.WonNightEntry(WonNight(FRIDAY, Money(10_000))))
         val unestimated = rowOf(BitacoraEntry.WonNightEntry(WonNight(FRIDAY, null)))
 
-        assertEquals(R.string.bitacora_kind_won_night, estimated.labelRes)
+        assertEquals(res(R.string.bitacora_kind_won_night), estimated.label)
         assertEquals(
             listOf(res(R.string.bitacora_won_night_stayed), res(R.string.bitacora_won_night_estimate, "S/ 100.00")),
             estimated.parts,
@@ -149,13 +151,13 @@ class BitacoraMappingTest {
 
     @Test
     fun `non-outing rows carry their own label`() {
-        assertEquals(R.string.bitacora_kind_stayed_in, rowOf(BitacoraEntry.StayedInEntry).labelRes)
-        assertEquals(R.string.bitacora_kind_return, rowOf(BitacoraEntry.ReturnEntry(1)).labelRes)
+        assertEquals(res(R.string.bitacora_kind_stayed_in), rowOf(BitacoraEntry.StayedInEntry).label)
+        assertEquals(res(R.string.bitacora_kind_return), rowOf(BitacoraEntry.ReturnEntry(1)).label)
         assertEquals(
-            R.string.bitacora_kind_installment,
-            rowOf(BitacoraEntry.InstallmentEntry("Banco", Money(1))).labelRes,
+            res(R.string.bitacora_kind_installment),
+            rowOf(BitacoraEntry.InstallmentEntry("Banco", Money(1))).label,
         )
-        assertEquals(R.string.bitacora_kind_contribution, rowOf(BitacoraEntry.ContributionEntry(Money(1))).labelRes)
+        assertEquals(res(R.string.bitacora_kind_contribution), rowOf(BitacoraEntry.ContributionEntry(Money(1))).label)
     }
 
     @Test
@@ -166,5 +168,23 @@ class BitacoraMappingTest {
         assertEquals("06 NOV · VIE", friday.dateLabel)
         assertFalse(friday.isToday)
         assertTrue(today.isToday)
+    }
+
+    @Test
+    fun `a note row has the time as label, the full text and is not a relapse`() {
+        val text = "Volví a las 2\ny dormí bien"
+        val note = Note(7, FRIDAY, Instant.fromEpochSeconds(0), text)
+
+        val row = rowOf(BitacoraEntry.NoteEntry(note, LocalTime(2, 30)))
+
+        assertEquals(7L, row.noteId)
+        assertEquals(BitacoraTextPart.Text("02:30"), row.label)
+        assertEquals(listOf(BitacoraTextPart.Text(text)), row.parts)
+        assertFalse(row.isRelapse)
+    }
+
+    @Test
+    fun `event rows have no note id`() {
+        assertEquals(null, rowOf(BitacoraEntry.StayedInEntry).noteId)
     }
 }
