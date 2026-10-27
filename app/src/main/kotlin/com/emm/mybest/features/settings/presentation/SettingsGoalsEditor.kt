@@ -1,5 +1,6 @@
 package com.emm.mybest.features.settings.presentation
 
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.usecase.ObserveSetupUseCase
 import com.emm.mybest.domain.usecase.UpdateSetupUseCase
@@ -64,7 +65,7 @@ class SettingsGoalsEditor(
     }
 
     private suspend fun persist(field: SettingsField, candidate: Setup): SettingsEffect? =
-        runCatching { updateSetupUseCase(candidate) }
+        attempt { updateSetupUseCase(candidate) }
             .map { errors -> resultOf(field, errors) }
             .getOrElse { SettingsEffect.GoalSaveFailed }
 

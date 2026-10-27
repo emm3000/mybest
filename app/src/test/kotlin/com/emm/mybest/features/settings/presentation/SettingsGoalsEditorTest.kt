@@ -9,6 +9,7 @@ import com.emm.mybest.testing.FakeSetupRepository
 import com.emm.mybest.testing.SlowSetupRepository
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -17,6 +18,8 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
+import org.junit.Assert.fail
 import org.junit.Test
 
 private const val SLOW_SAVE_MS = 1_000L
@@ -150,6 +153,46 @@ class SettingsGoalsEditorTest {
         openSecondGoalDuringSlow(editor, SettingsIntent.OnFieldClear)
 
         assertEquals(SettingsEditorState(SettingsField.WEEKLY_GYM, "4"), editor.goals.first().editor)
+    }
+
+    @Test
+    fun `a cancelled save rethrows the cancellation instead of reporting a failure`() = runTest {
+        val cancellation = CancellationException("stop")
+        val editor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), failingUpdate(cancellation))
+
+        try {
+            saveTargetWeight(editor, "72")
+            fail("expected CancellationException")
+        } catch (thrown: CancellationException) {
+            assertSame(cancellation, thrown)
+        }
+    }
+
+    @Test
+    fun `a save after a cancelled save still completes`() = runTest {
+        val update = mockk<UpdateSetupUseCase>()
+        coEvery { update(any()) } throws CancellationException("stop") andThen emptyList()
+        val editor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), update)
+
+        runCatching { saveTargetWeight(editor, "72") }
+        val effect = editor.handle(SettingsIntent.OnFieldSave)
+
+        assertEquals(SettingsEffect.GoalSaved, effect)
+    }
+
+    @Test
+    fun `a failed save reports a goal save failure`() = runTest {
+        val editor = SettingsGoalsEditor(ObserveSetupUseCase(setupRepository), failingUpdate(IllegalStateException()))
+
+        val effect = saveTargetWeight(editor, "72")
+
+        assertEquals(SettingsEffect.GoalSaveFailed, effect)
+    }
+
+    private fun failingUpdate(error: Throwable): UpdateSetupUseCase {
+        val update = mockk<UpdateSetupUseCase>()
+        coEvery { update(any()) } throws error
+        return update
     }
 
     private fun editorOn(repository: FakeSetupRepository) =
