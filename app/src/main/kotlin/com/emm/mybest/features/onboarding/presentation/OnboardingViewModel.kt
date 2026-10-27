@@ -2,6 +2,7 @@ package com.emm.mybest.features.onboarding.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.domain.usecase.onboarding.ObserveOnboardingCompletedUseCase
 import com.emm.mybest.domain.usecase.onboarding.SetOnboardingCompletedUseCase
 import kotlinx.coroutines.CancellationException
@@ -50,8 +51,7 @@ class OnboardingViewModel(
 
     private fun complete() {
         viewModelScope.launch {
-            runCatching { setOnboardingCompleted(true) }
-                .onFailure { if (it is CancellationException) throw it }
+            attempt { setOnboardingCompleted(true) }
         }
     }
 
