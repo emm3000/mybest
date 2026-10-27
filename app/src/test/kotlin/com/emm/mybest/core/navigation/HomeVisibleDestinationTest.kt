@@ -39,6 +39,19 @@ class HomeVisibleDestinationTest {
     }
 
     @Test
+    fun `a Home that lost ownership cannot publish again`() {
+        holder.claim(oldHome)
+        holder.publish(oldHome, HomeDestination.DAILY_CHECKS)
+        holder.claim(newHome)
+
+        holder.publish(oldHome, HomeDestination.PRE_OUTING)
+
+        assertNull(holder.destination.value)
+        holder.publish(newHome, HomeDestination.CHECK_IN)
+        assertEquals(HomeDestination.CHECK_IN, holder.destination.value)
+    }
+
+    @Test
     fun `waiting for a loaded Home returns its destination`() = runTest {
         holder.claim(newHome)
         holder.publish(newHome, HomeDestination.PRE_OUTING)
