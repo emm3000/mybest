@@ -94,7 +94,9 @@ class HomeCheckInRoutingTest {
 
     @Test
     fun `a new Home resets what an older Home published while it loads`() = runTest {
-        visibleDestination.publish(Any(), HomeDestination.DAILY_CHECKS)
+        val olderHome = Any()
+        visibleDestination.claim(olderHome)
+        visibleDestination.publish(olderHome, HomeDestination.DAILY_CHECKS)
 
         buildViewModel(FakeOutingRepository(initialOutings = listOf(PENDING_FRIDAY)), FixedClock(SATURDAY_MORNING))
 
@@ -104,6 +106,7 @@ class HomeCheckInRoutingTest {
     @Test
     fun `an older Home going away keeps what a new Home published`() = runTest {
         val olderHome = Any()
+        visibleDestination.claim(olderHome)
         visibleDestination.publish(olderHome, HomeDestination.DAILY_CHECKS)
         buildViewModel(FakeOutingRepository(initialOutings = listOf(PENDING_FRIDAY)), FixedClock(SATURDAY_MORNING))
         advanceUntilIdle()

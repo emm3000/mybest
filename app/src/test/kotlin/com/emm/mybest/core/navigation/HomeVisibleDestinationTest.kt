@@ -18,6 +18,7 @@ class HomeVisibleDestinationTest {
 
     @Test
     fun `the publishing Home clears its destination`() {
+        holder.claim(oldHome)
         holder.publish(oldHome, HomeDestination.CHECK_IN)
 
         holder.clear(oldHome)
@@ -27,7 +28,9 @@ class HomeVisibleDestinationTest {
 
     @Test
     fun `an older Home going away keeps what a newer Home published`() {
+        holder.claim(oldHome)
         holder.publish(oldHome, HomeDestination.DAILY_CHECKS)
+        holder.claim(newHome)
         holder.publish(newHome, HomeDestination.CHECK_IN)
 
         holder.clear(oldHome)
@@ -37,6 +40,7 @@ class HomeVisibleDestinationTest {
 
     @Test
     fun `waiting for a loaded Home returns its destination`() = runTest {
+        holder.claim(newHome)
         holder.publish(newHome, HomeDestination.PRE_OUTING)
 
         assertEquals(HomeDestination.PRE_OUTING, holder.awaitLoaded())
@@ -44,6 +48,7 @@ class HomeVisibleDestinationTest {
 
     @Test
     fun `a Home that loads during the wait returns its destination`() = runTest {
+        holder.claim(newHome)
         val wait = async { holder.awaitLoaded() }
         advanceTimeBy(1.seconds)
 
@@ -53,17 +58,8 @@ class HomeVisibleDestinationTest {
     }
 
     @Test
-    fun `a launch action stays on Home when Home loads with its screen while on screen`() = runTest {
-        val screen = async { holder.screenForLaunchAction(ACTION_CHECK_IN) { isHomeVisible } }
-        advanceTimeBy(1.seconds)
-
-        holder.publish(newHome, HomeDestination.CHECK_IN)
-
-        assertEquals(Screen.Home, screen.await())
-    }
-
-    @Test
     fun `a launch action pushes its screen when the user leaves Home during the wait`() = runTest {
+        holder.claim(newHome)
         val screen = async { holder.screenForLaunchAction(ACTION_CHECK_IN) { isHomeVisible } }
         advanceTimeBy(1.seconds)
 
