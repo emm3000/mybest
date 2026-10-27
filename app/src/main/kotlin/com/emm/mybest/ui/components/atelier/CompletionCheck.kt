@@ -23,7 +23,7 @@ import com.emm.mybest.ui.theme.AtelierInkTertiary
 
 /**
  * 18dp completion check — filled sage square with a stroked tick when done,
- * 1dp hairline outline when not.
+ * 1dp outline in AtelierInkTertiary when not.
  *
  * The tick glyph mirrors the original SVG path `M1 4 l2.5 2.5 L9 1` from a
  * 10×8 viewBox, centred inside the 18dp box.

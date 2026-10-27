@@ -40,7 +40,7 @@ private val RESTING_BORDER_WIDTH = 1.dp
 private val FOCUSED_BORDER_WIDTH = 2.dp
 
 /**
- * Text input in the shadcn/ui style: external label above the field, no fill, no floating label.
+ * Text input with an external label above the field, no fill, no floating label.
  *
  * The field boundary is always drawn so it keeps at least 3:1 contrast (WCAG 2.2 SC 1.4.11):
  * - Rest: 1dp `outline` at alpha 0.40
