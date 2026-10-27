@@ -73,7 +73,8 @@
     <string name="photos_compare_summary_format">%1$s · %2$s KG</string>
     <string name="photos_compare_summary_empty">— DÍAS · — KG</string>
     <string name="photos_compare_cta">COMPARAR ↗</string>
-    <string name="photos_add_action_cd">Tomar foto</string>
+    <string name="photos_take_trunk">TOMAR FOTO · TRONCO</string>
+    <string name="photos_take_face">TOMAR FOTO · CARA</string>
     <string name="photos_camera_permission_denied">Habilita el permiso de cámara en Ajustes.</string>
     <string name="photos_camera_permission_settings">Ajustes</string>
     <string name="photos_camera_permission_required">Se necesita acceso a la cámara para tomar fotos.</string>

@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -22,10 +20,10 @@ import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.features.photo.presentation.components.CompareFooter
 import com.emm.mybest.features.photo.presentation.components.CompareHero
 import com.emm.mybest.features.photo.presentation.components.CompareSelection
+import com.emm.mybest.features.photo.presentation.components.PhotoCaptureButtons
 import com.emm.mybest.features.photo.presentation.components.PhotoTypeTabs
 import com.emm.mybest.features.photo.presentation.components.TimelineRail
 import com.emm.mybest.ui.components.AtelierAppBar
-import com.emm.mybest.ui.components.HIconButton
 import com.emm.mybest.ui.components.HSnackbarHost
 import com.emm.mybest.ui.components.atelier.FaceSilhouette
 import com.emm.mybest.ui.components.atelier.Hairline
@@ -63,15 +61,9 @@ fun PhotosScreen(
             AtelierAppBar(
                 title = stringResource(R.string.photos_app_bar_title),
                 onBack = callbacks.onBack,
-                actions = {
-                    HIconButton(
-                        icon = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.photos_add_action_cd),
-                        onClick = { cameraHandler.launch(state.selectedType) },
-                    )
-                },
             )
         },
+        bottomBar = { PhotoCaptureButtons(onTakePhoto = cameraHandler.launch) },
     ) { paddingValues ->
         PhotosContent(
             state = state,
