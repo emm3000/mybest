@@ -5,9 +5,9 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.LocalDate
 
 @Immutable
-data class BitacoraDayState(
+data class LogbookDayState(
     val appDay: LocalDate,
     val dateLabel: String,
     val isToday: Boolean,
-    val rows: ImmutableList<BitacoraRowState>,
+    val rows: ImmutableList<LogbookRowState>,
 )

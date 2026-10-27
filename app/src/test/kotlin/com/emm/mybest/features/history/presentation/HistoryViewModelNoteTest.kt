@@ -4,11 +4,11 @@ import app.cash.turbine.test
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.domain.models.Note
-import com.emm.mybest.domain.usecase.history.BitacoraDay
-import com.emm.mybest.domain.usecase.history.BitacoraEntry
-import com.emm.mybest.domain.usecase.history.GetBitacoraUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
+import com.emm.mybest.domain.usecase.history.GetLogbookUseCase
 import com.emm.mybest.domain.usecase.history.HistoryResult
+import com.emm.mybest.domain.usecase.history.LogbookDay
+import com.emm.mybest.domain.usecase.history.LogbookEntry
 import com.emm.mybest.domain.usecase.note.AddNoteUseCase
 import com.emm.mybest.domain.usecase.note.DeleteNoteUseCase
 import com.emm.mybest.domain.usecase.note.UpdateNoteUseCase
@@ -57,14 +57,14 @@ class HistoryViewModelNoteTest {
     private fun buildViewModel(): HistoryViewModel {
         val getHistory = mockk<GetHistoryUseCase>()
         every { getHistory(any()) } returns flowOf(HistoryResult(emptyMap(), 0, 0, 0, 0))
-        val getBitacora = mockk<GetBitacoraUseCase>()
-        val day = BitacoraDay(MAY_FIFTEENTH, listOf(BitacoraEntry.NoteEntry(STORED_NOTE, LocalTime(2, 30))))
-        every { getBitacora(any()) } returns flowOf(listOf(day))
+        val getLogbook = mockk<GetLogbookUseCase>()
+        val day = LogbookDay(MAY_FIFTEENTH, listOf(LogbookEntry.NoteEntry(STORED_NOTE, LocalTime(2, 30))))
+        every { getLogbook(any()) } returns flowOf(listOf(day))
         coEvery { addNote(any()) } returns null
         coEvery { updateNote(any(), any()) } returns null
         return HistoryViewModel(
             getHistory,
-            getBitacora,
+            getLogbook,
             mockk<DeleteWeightByDateUseCase>(relaxed = true),
             mockk<DeletePhotoUseCase>(relaxed = true),
             HistoryNoteUseCases(addNote, updateNote, deleteNote),

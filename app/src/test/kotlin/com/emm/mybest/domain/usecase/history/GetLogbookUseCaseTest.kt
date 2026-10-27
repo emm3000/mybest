@@ -20,15 +20,15 @@ import com.emm.mybest.domain.models.WeightEntry
 import com.emm.mybest.domain.models.WonNight
 import com.emm.mybest.domain.repository.PhotoRepository
 import com.emm.mybest.domain.repository.WeightRepository
-import com.emm.mybest.domain.usecase.history.BitacoraEntry.ContributionEntry
-import com.emm.mybest.domain.usecase.history.BitacoraEntry.InstallmentEntry
-import com.emm.mybest.domain.usecase.history.BitacoraEntry.NoteEntry
-import com.emm.mybest.domain.usecase.history.BitacoraEntry.OutingEntry
-import com.emm.mybest.domain.usecase.history.BitacoraEntry.PhotosEntry
-import com.emm.mybest.domain.usecase.history.BitacoraEntry.ReturnEntry
-import com.emm.mybest.domain.usecase.history.BitacoraEntry.StayedInEntry
-import com.emm.mybest.domain.usecase.history.BitacoraEntry.WeighInEntry
-import com.emm.mybest.domain.usecase.history.BitacoraEntry.WonNightEntry
+import com.emm.mybest.domain.usecase.history.LogbookEntry.ContributionEntry
+import com.emm.mybest.domain.usecase.history.LogbookEntry.InstallmentEntry
+import com.emm.mybest.domain.usecase.history.LogbookEntry.NoteEntry
+import com.emm.mybest.domain.usecase.history.LogbookEntry.OutingEntry
+import com.emm.mybest.domain.usecase.history.LogbookEntry.PhotosEntry
+import com.emm.mybest.domain.usecase.history.LogbookEntry.ReturnEntry
+import com.emm.mybest.domain.usecase.history.LogbookEntry.StayedInEntry
+import com.emm.mybest.domain.usecase.history.LogbookEntry.WeighInEntry
+import com.emm.mybest.domain.usecase.history.LogbookEntry.WonNightEntry
 import com.emm.mybest.domain.usecase.relapse.ObserveRelapsesUseCase
 import com.emm.mybest.domain.usecase.relapse.ObserveReturnTimesUseCase
 import com.emm.mybest.testing.FakeDailyCheckRepository
@@ -90,7 +90,7 @@ private data class Records(
     val notes: List<Note> = emptyList(),
 )
 
-private fun useCase(records: Records): GetBitacoraUseCase {
+private fun useCase(records: Records): GetLogbookUseCase {
     val weightRepository = mockk<WeightRepository>()
     every { weightRepository.getWeightProgress() } returns flowOf(records.weights)
     val photoRepository = mockk<PhotoRepository>()
@@ -99,12 +99,12 @@ private fun useCase(records: Records): GetBitacoraUseCase {
     val checkRepository = FakeDailyCheckRepository(records.checks)
     val observeRelapses = ObserveRelapsesUseCase(outingRepository, FakeSetupRepository())
     val appDayClock = AppDayClock(FixedClock(TODAY_NOON), LIMA)
-    return GetBitacoraUseCase(
-        BitacoraSources(
+    return GetLogbookUseCase(
+        LogbookSources(
             body = HistoryBodySources(weightRepository, photoRepository),
             nights = HistoryNightSources(outingRepository, observeRelapses),
             observeReturnTimes = ObserveReturnTimesUseCase(observeRelapses, checkRepository, appDayClock),
-            money = BitacoraMoneySources(
+            money = LogbookMoneySources(
                 FakeDebtRepository(records.debts, records.payments),
                 FakePurchaseGoalRepository(initialContributions = records.contributions),
             ),
@@ -146,7 +146,7 @@ private fun fxC() = Records(
 
 private val BANCO = Debt(id = 1, name = "Banco", balance = Money(160_000), installment = Money(40_000), paymentDay = 15)
 
-class GetBitacoraUseCaseTest {
+class GetLogbookUseCaseTest {
 
     private suspend fun days(records: Records, month: YearMonthValue = NOVEMBER) = useCase(records)(month).first()
 

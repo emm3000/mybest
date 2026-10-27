@@ -77,12 +77,12 @@ import com.emm.mybest.domain.usecase.debts.SaveDebtUseCase
 import com.emm.mybest.domain.usecase.goal.AddGoalContributionUseCase
 import com.emm.mybest.domain.usecase.goal.ObserveGoalProgressUseCase
 import com.emm.mybest.domain.usecase.goal.SavePurchaseGoalUseCase
-import com.emm.mybest.domain.usecase.history.BitacoraMoneySources
-import com.emm.mybest.domain.usecase.history.BitacoraSources
-import com.emm.mybest.domain.usecase.history.GetBitacoraUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
+import com.emm.mybest.domain.usecase.history.GetLogbookUseCase
 import com.emm.mybest.domain.usecase.history.HistoryBodySources
 import com.emm.mybest.domain.usecase.history.HistoryNightSources
+import com.emm.mybest.domain.usecase.history.LogbookMoneySources
+import com.emm.mybest.domain.usecase.history.LogbookSources
 import com.emm.mybest.domain.usecase.home.ResolveHomeDestinationUseCase
 import com.emm.mybest.domain.usecase.note.AddNoteUseCase
 import com.emm.mybest.domain.usecase.note.DeleteNoteUseCase
@@ -244,12 +244,12 @@ val appModule = module {
 
     factory { GetHistoryUseCase(HistoryBodySources(get(), get()), HistoryNightSources(get(), get()), get()) }
     factory {
-        GetBitacoraUseCase(
-            BitacoraSources(
+        GetLogbookUseCase(
+            LogbookSources(
                 HistoryBodySources(get(), get()),
                 HistoryNightSources(get(), get()),
                 get(),
-                BitacoraMoneySources(get(), get()),
+                LogbookMoneySources(get(), get()),
                 get(),
                 get(),
             ),

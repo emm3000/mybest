@@ -4,7 +4,7 @@ import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 
 /**
- * Free text the user writes in the Bitácora, stamped with the moment it was written ([createdAt])
+ * Free text the user writes in the Logbook, stamped with the moment it was written ([createdAt])
  * and the app day it belongs to ([appDay]).
  */
 data class Note(

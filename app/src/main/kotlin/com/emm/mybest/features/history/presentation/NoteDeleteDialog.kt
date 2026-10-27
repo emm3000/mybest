@@ -10,10 +10,10 @@ import com.emm.mybest.ui.components.HAlertDialog
 internal fun NoteDeleteDialog(onIntent: (HistoryIntent) -> Unit, modifier: Modifier = Modifier) {
     HAlertDialog(
         modifier = modifier,
-        title = stringResource(R.string.bitacora_note_delete_title),
-        description = stringResource(R.string.bitacora_note_delete_message),
-        confirmText = stringResource(R.string.bitacora_note_delete_confirm),
-        cancelText = stringResource(R.string.bitacora_note_cancel),
+        title = stringResource(R.string.logbook_note_delete_title),
+        description = stringResource(R.string.logbook_note_delete_message),
+        confirmText = stringResource(R.string.logbook_note_delete_confirm),
+        cancelText = stringResource(R.string.logbook_note_cancel),
         onConfirm = { onIntent(HistoryIntent.OnNoteDeleteConfirm) },
         onDismiss = { onIntent(HistoryIntent.OnNoteDeleteDismiss) },
         isDangerous = true,

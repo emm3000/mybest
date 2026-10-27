@@ -62,8 +62,8 @@ private fun NoteEditorContent(
         HInput(
             value = editor.text,
             onValueChange = { onIntent(HistoryIntent.OnNoteTextChange(it)) },
-            label = stringResource(R.string.bitacora_note_field),
-            supportingText = stringResource(R.string.bitacora_note_counter, editor.textLength, editor.maxLength),
+            label = stringResource(R.string.logbook_note_field),
+            supportingText = stringResource(R.string.logbook_note_counter, editor.textLength, editor.maxLength),
             errorMessage = editor.error?.let { stringResource(it.messageRes(), editor.maxLength) },
             singleLine = false,
             minLines = NOTE_MIN_LINES,
@@ -78,18 +78,18 @@ private fun NoteEditorButtons(isEditing: Boolean, onIntent: (HistoryIntent) -> U
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(SHEET_GAP)) {
         Row(horizontalArrangement = Arrangement.spacedBy(SHEET_GAP)) {
             HButton(
-                text = stringResource(R.string.bitacora_note_save),
+                text = stringResource(R.string.logbook_note_save),
                 onClick = { onIntent(HistoryIntent.OnNoteSave) },
             )
             HButton(
-                text = stringResource(R.string.bitacora_note_cancel),
+                text = stringResource(R.string.logbook_note_cancel),
                 onClick = { onIntent(HistoryIntent.OnNoteDismiss) },
                 variant = ButtonVariant.Outline,
             )
         }
         if (isEditing) {
             HButton(
-                text = stringResource(R.string.bitacora_note_delete),
+                text = stringResource(R.string.logbook_note_delete),
                 onClick = { onIntent(HistoryIntent.OnNoteDeleteClick) },
                 variant = ButtonVariant.Destructive,
             )
@@ -98,11 +98,11 @@ private fun NoteEditorButtons(isEditing: Boolean, onIntent: (HistoryIntent) -> U
 }
 
 private fun NoteEditorState.titleRes(): Int =
-    if (isEditing) R.string.bitacora_note_edit_title else R.string.bitacora_note_new_title
+    if (isEditing) R.string.logbook_note_edit_title else R.string.logbook_note_new_title
 
 private fun NoteValidationError.messageRes(): Int = when (this) {
-    NoteValidationError.Blank -> R.string.bitacora_note_error_blank
-    NoteValidationError.TooLong -> R.string.bitacora_note_error_too_long
+    NoteValidationError.Blank -> R.string.logbook_note_error_blank
+    NoteValidationError.TooLong -> R.string.logbook_note_error_too_long
 }
 
 @Preview(backgroundColor = 0xFF0A0A0C, showBackground = true)

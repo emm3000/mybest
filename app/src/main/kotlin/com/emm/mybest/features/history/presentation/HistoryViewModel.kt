@@ -6,8 +6,8 @@ import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.datetime.YearMonthValue
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
-import com.emm.mybest.domain.usecase.history.GetBitacoraUseCase
 import com.emm.mybest.domain.usecase.history.GetHistoryUseCase
+import com.emm.mybest.domain.usecase.history.GetLogbookUseCase
 import com.emm.mybest.domain.usecase.photo.DeletePhotoUseCase
 import com.emm.mybest.domain.usecase.weight.DeleteWeightByDateUseCase
 import com.emm.mybest.domain.validation.NoteValidationError
@@ -43,7 +43,7 @@ private fun initialHistoryState(today: LocalDate): HistoryState {
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModel(
     private val getHistoryUseCase: GetHistoryUseCase,
-    private val getBitacoraUseCase: GetBitacoraUseCase,
+    private val getLogbookUseCase: GetLogbookUseCase,
     private val deleteWeightByDate: DeleteWeightByDateUseCase,
     private val deletePhoto: DeletePhotoUseCase,
     private val noteUseCases: HistoryNoteUseCases,
@@ -69,11 +69,11 @@ class HistoryViewModel(
     }.flatMapLatest { (month, _) ->
         combine(
             getHistoryUseCase(month),
-            getBitacoraUseCase(month),
+            getLogbookUseCase(month),
             _selectedDate,
             _selectedView,
             _noteEditor,
-        ) { result, bitacora, date, view, noteEditor ->
+        ) { result, logbook, date, view, noteEditor ->
             baseState.copy(
                 selectedMonth = month,
                 monthNavigationLabel = month.toNavigationLabel(),
@@ -85,7 +85,7 @@ class HistoryViewModel(
                 dayMarks = result.monthlyData.mapValues { it.value.toMarks() }.toImmutableMap(),
                 dayDetail = date?.let { toDayDetailState(it, result.monthlyData[it], baseState.today) },
                 selectedView = view,
-                bitacoraDays = bitacora.map { it.toState(baseState.today) }.toImmutableList(),
+                logbookDays = logbook.map { it.toState(baseState.today) }.toImmutableList(),
                 noteEditor = noteEditor,
                 isLoading = false,
                 errorMessage = null,
@@ -149,7 +149,7 @@ class HistoryViewModel(
     }
 
     private fun openNote(noteId: Long) {
-        val text = state.value.bitacoraDays.noteTextOf(noteId) ?: return
+        val text = state.value.logbookDays.noteTextOf(noteId) ?: return
         _noteEditor.value = NoteEditorState(noteId = noteId, text = text)
     }
 
