@@ -1,4 +1,4 @@
-package com.emm.mybest.features.photo.presentation
+package com.emm.mybest.ui.components
 
 import android.net.Uri
 import androidx.compose.runtime.Stable
