@@ -10,7 +10,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 private const val TAG = "PhotoCaptureFiles"
-private const val PHOTOS_DIRECTORY = "photos"
 
 class PhotoCaptureFilesImpl(
     private val context: Context,

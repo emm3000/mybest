@@ -6,6 +6,7 @@ import com.emm.mybest.core.coroutines.CoroutineDispatchers
 import com.emm.mybest.data.entities.ProgressPhotoDao
 import com.emm.mybest.data.mappers.toDomain
 import com.emm.mybest.data.mappers.toEntity
+import com.emm.mybest.data.media.storedPhotoFile
 import com.emm.mybest.domain.models.NewProgressPhoto
 import com.emm.mybest.domain.models.PhotoType
 import com.emm.mybest.domain.models.ProgressPhoto
@@ -68,7 +69,6 @@ class PhotoRepositoryImpl(
         uri.authority?.endsWith(FILE_PROVIDER_AUTHORITY_SUFFIX) == true
 
     private fun resolveFileProviderPath(uriPath: String): File? {
-        val parent = context.filesDir.parent ?: return null
-        return File(parent, uriPath.removePrefix("/"))
+        return storedPhotoFile(context.filesDir, uriPath)
     }
 }
