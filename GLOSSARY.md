@@ -77,3 +77,13 @@ _Avoid_: Savings
 **Weigh-in**:
 The weekly weight record on the user-chosen day.
 _Avoid_: Weight entry
+
+## Bitácora
+
+**Bitácora**:
+The second view of Historia: one month of notes and recorded events (outings, won nights, stayed-in answers, returns, weigh-ins, photos, paid installments and purchase-goal contributions), newest app day first. Daily checks are not part of it.
+_Avoid_: Journal, diary, feed, timeline
+
+**Note** (nota):
+Free text the user writes in the Bitácora, stamped with the moment it was written and the app day it belongs to. Not the optional text saved with a weigh-in.
+_Avoid_: Entry, memo, comment
