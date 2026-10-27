@@ -1,268 +1,136 @@
-# MyBest — Design System: Starlink Mono
+# MyBest — Design System: Atelier Dark
 
-> Dark-first, high-contrast, monochrome with a single cyan accent. Inspired by the visual language of Starlink's mobile app.
+> Dark-only, editorial. Bone text on near-black, serif display numbers, mono micro labels, hairline rules, square corners, one sage accent for "done".
+
+Rules for writing UI against this system live in [`.claude/rules/ui.md`](../../.claude/rules/ui.md). Layer boundaries live in [`ARCHITECTURE.md`](../ARCHITECTURE.md).
 
 ---
 
-## 1. Principios
+## 1. Principles
 
-- **Dark-first**: la app fuerza tema oscuro siempre. `MyBestTheme` ignora `isSystemInDarkTheme()` y aplica únicamente `darkScheme`.
-- **Mono**: blanco sobre negro como base (`#FAFAFA` sobre `#000000`); un único acento cian (`#00A3FF`) para énfasis.
-- **Hairlines, no shadows**: bordes `1dp` con `outlineVariant` (`#1F1F1F`) en lugar de elevaciones (`shadowElevation = 0.dp` en todos los componentes).
-- **Hard edges**: radios `2–10dp`. Sin `CircleShape` en superficies, sin "pill" cards.
-- **Uppercase tracked labels**: secciones, chips y etiquetas de nav se renderizan en mayúsculas en el call site via `.uppercase()` con `StarlinkTextStyles.sectionLabel` / `.chipLabel`.
-- **Métricas hero grandes**: `displayLarge` (56sp) / `displayMedium` (40sp) / `displaySmall` (32sp) sobre etiquetas pequeñas tracked (`labelSmall` a 1.8sp).
+- **Dark-only**: `AtelierTheme` (`ui/theme/Theme.kt`) always applies one `darkColorScheme` (`atelierScheme`). There is no light scheme.
+- **Bone on ink**: text is bone (`AtelierInk`) on `AtelierBackground`; hierarchy comes from bone opacity steps, not from extra hues.
+- **One accent**: sage (`AtelierDone`) is reserved for the "done" state. `AtelierWarm` is a single soft hint.
+- **Hairlines, no shadows**: dividers are 1 dp rules at 8% bone (`Hairline`, `AtelierHairline`).
+- **Hard edges**: every Material 3 shape radius is 0 dp (`AtelierShapes`).
+- **Editorial type**: serif (Instrument Serif) for numbers and headlines, sans (Geist) for copy, mono (Geist Mono) for tracked uppercase micro labels.
 
 ---
 
 ## 2. Color tokens
 
-Fuente de verdad: `app/src/main/kotlin/com/emm/mybest/ui/theme/Color.kt` (bloque "Starlink Mono palette") y `Theme.kt` (`darkScheme`).
+Source of truth: the color file in `app/src/main/kotlin/com/emm/mybest/ui/theme/`. Material 3 role mapping: `atelierScheme` in `Theme.kt`.
 
-### Paleta Starlink Mono
+| Token | Value | Use |
+|---|---|---|
+| `AtelierInk` | `0xFFEEEAE2` | Primary text (bone) |
+| `AtelierInkSecondary` | `0x94EEEAE2` | Secondary text, 58% bone |
+| `AtelierInkTertiary` | `0x57EEEAE2` | Tertiary text, inactive icon, 34% bone |
+| `AtelierInkMuted` | `0x29EEEAE2` | Muted edge, disabled, 16% bone |
+| `AtelierHairline` | `0x14EEEAE2` | Hairline rule, 8% bone |
+| `AtelierBackground` | `0xFF0A0A0C` | Page background |
+| `AtelierBackgroundSheet` | `0xFF101013` | Sheet surface, one step above the page |
+| `AtelierBackgroundElevated` | `0xFF15151A` | Input fills, popovers |
+| `AtelierDone` | `0xFFC8E6A8` | Sage accent, "done" state |
+| `AtelierDoneDim` | `0x33C8E6A8` | Dim sage fill, 20% sage |
+| `AtelierWarm` | `0xFFE8C190` | Warm hint, single recommendation tag |
 
-| Token Kotlin         | Valor hex   | Descripción                                      |
-|----------------------|-------------|--------------------------------------------------|
-| `starlinkBlack`      | `#000000`   | Background puro                                  |
-| `starlinkSurface`    | `#0A0A0A`   | Surface elevada nivel 1                          |
-| `starlinkSurfaceHigh`| `#141414`   | Surface elevada nivel 2                          |
-| `starlinkBorder`     | `#1F1F1F`   | Hairline divider (`outlineVariant`)              |
-| `starlinkOutline`    | `#2A2A2A`   | Borde de input/card (`outline`)                  |
-| `starlinkMuted`      | `#8A8A8A`   | Texto secundario (`onSurfaceVariant`)            |
-| `starlinkOnSurface`  | `#FAFAFA`   | Texto primario sobre negro (`onSurface`)         |
-| `starlinkAccent`     | `#00A3FF`   | Acento cian Starlink (`tertiary`)                |
-| `starlinkAccentDim`  | `#0077B6`   | Acento atenuado / hover (`tertiaryContainer`)    |
-| `starlinkError`      | `#FF3B30`   | Error iOS red — alto contraste sobre negro puro  |
+`AtelierError` (`0xFFE85D5D`) is private to `Theme.kt`; it only feeds the `error` roles.
 
-### Mapeo a Material 3 dark scheme
+### Material 3 roles (`atelierScheme`)
 
-| Rol M3                    | Token Starlink         | Uso principal                                       |
-|---------------------------|------------------------|-----------------------------------------------------|
-| `primary`                 | `starlinkOnSurface`    | Botones primarios (texto blanco sobre fondo negro)  |
-| `onPrimary`               | `starlinkBlack`        | Texto sobre botones primarios                       |
-| `primaryContainer`        | `starlinkSurfaceHigh`  | Contenedor de acción principal                      |
-| `secondary`               | `starlinkMuted`        | Botones secundarios                                 |
-| `onSecondary`             | `starlinkBlack`        | Texto sobre secundario                              |
-| `secondaryContainer`      | `starlinkSurface`      | Contenedor secundario                               |
-| `onSecondaryContainer`    | `starlinkOnSurface`    | Texto sobre contenedor secundario                   |
-| `tertiary`                | `starlinkAccent`       | Acento cian: métricas positivas, dot success, CTA   |
-| `tertiaryContainer`       | `starlinkAccentDim`    | Contenedor de acento                                |
-| `error`                   | `starlinkError`        | Error; barra de `HAlert.Destructive`; dot destructive en `HBadge` |
-| `background`              | `starlinkBlack`        | Fondo de pantalla                                   |
-| `surface`                 | `starlinkBlack`        | Superficie de componentes                           |
-| `onSurface`               | `starlinkOnSurface`    | Texto/iconos sobre surface                          |
-| `surfaceVariant`          | `starlinkSurface`      | Variante de superficie                              |
-| `onSurfaceVariant`        | `starlinkMuted`        | Texto secundario / labels de chips                  |
-| `outline`                 | `starlinkOutline`      | Borde de `HInput` en reposo                         |
-| `outlineVariant`          | `starlinkBorder`       | Hairline de `HSeparator`, `HCard`, chips, alerts    |
-| `surfaceContainerLowest`  | `starlinkBlack`        | —                                                   |
-| `surfaceContainerLow`     | `starlinkSurface`      | —                                                   |
-| `surfaceContainer`        | `starlinkSurface`      | —                                                   |
-| `surfaceContainerHigh`    | `starlinkSurfaceHigh`  | —                                                   |
-| `surfaceContainerHighest` | `starlinkOutline`      | Fondo de `HCard.Filled`                             |
-
-> **Nota**: La `lightScheme` existe en `Theme.kt` pero está anotada con `@Suppress("UnusedPrivateProperty")` y no se aplica en runtime. No se usa en ningún path de ejecución.
+| Role | Token |
+|---|---|
+| `background`, `surface`, `surfaceContainerLowest` | `AtelierBackground` |
+| `onBackground`, `onSurface` | `AtelierInk` |
+| `surfaceContainer`, `surfaceContainerLow` | `AtelierBackgroundSheet` |
+| `surfaceVariant`, `surfaceContainerHigh`, `surfaceContainerHighest` | `AtelierBackgroundElevated` |
+| `onSurfaceVariant`, `secondary` | `AtelierInkSecondary` |
+| `primary`, `inversePrimary` | `AtelierDone` |
+| `onPrimary`, `onSecondary`, `onTertiary`, `inverseOnSurface` | `AtelierBackground` |
+| `primaryContainer` | `AtelierDoneDim` |
+| `onPrimaryContainer`, `onSecondaryContainer`, `onTertiaryContainer`, `inverseSurface` | `AtelierInk` |
+| `secondaryContainer`, `tertiaryContainer`, `errorContainer` | `AtelierBackgroundElevated` |
+| `tertiary` | `AtelierWarm` |
+| `error`, `onErrorContainer` | `AtelierError` |
+| `onError` | `AtelierInk` |
+| `outline` | `AtelierInkTertiary` |
+| `outlineVariant` | `AtelierHairline` |
+| `scrim` | `Color.Black` |
 
 ---
 
 ## 3. Typography
 
-Fuente base: **Geist** (Regular / Medium / SemiBold / Bold), cargada como `AppFontFamily`.
-Fuente de verdad: `app/src/main/kotlin/com/emm/mybest/ui/theme/Type.kt` y `TextStyles.kt`.
+Fonts: the font file in `ui/theme/` defines three families.
 
-### Escala Material 3
+| Family | Font | Weights |
+|---|---|---|
+| `AtelierSerifFamily` | Instrument Serif | Regular, Italic |
+| `AtelierSansFamily` | Geist | Regular, Medium, SemiBold, Bold |
+| `AtelierMonoFamily` | Geist Mono | Regular, Medium |
 
-| Token M3          | Tamaño   | Peso       | Line height | Letter spacing | Uso en MyBest                                        |
-|-------------------|----------|------------|-------------|----------------|------------------------------------------------------|
-| `displayLarge`    | 56sp     | Bold       | 64sp        | −1.5sp         | Métricas hero: peso actual, delta grande             |
-| `displayMedium`   | 40sp     | Bold       | 48sp        | −1.0sp         | Métricas secundarias: ratio de cumplimiento, delta   |
-| `displaySmall`    | 32sp     | SemiBold   | 40sp        | −0.5sp         | Métricas auxiliares; contador de paginación          |
-| `headlineLarge`   | 32sp     | ExtraBold  | 40sp        | −0.5sp         | Reservado                                            |
-| `headlineMedium`  | 28sp     | Bold       | 36sp        | −0.25sp        | Reservado                                            |
-| `headlineSmall`   | 24sp     | SemiBold   | 32sp        | 0sp            | Título de tarjeta en CardDetail                      |
-| `titleLarge`      | 20sp     | SemiBold   | 28sp        | 0sp            | TopAppBar, sección principal                         |
-| `titleMedium`     | 16sp     | Medium     | 24sp        | 0sp            | Subtítulos de sección                                |
-| `titleSmall`      | 14sp     | Medium     | 20sp        | 0sp            | Labels de sección (SectionCard)                      |
-| `bodyLarge`       | 16sp     | Normal     | 26sp        | 0sp            | Cuerpo principal de flashcard                        |
-| `bodyMedium`      | 14sp     | Normal     | 22sp        | 0sp            | Textos secundarios / `onSurfaceVariant`              |
-| `bodySmall`       | 12sp     | Normal     | 18sp        | 0sp            | Helper / supporting text                             |
-| `labelLarge`      | 14sp     | Medium     | 20sp        | 0sp            | Texto de botones                                     |
-| `labelMedium`     | 12sp     | Medium     | 16sp        | 1.2sp          | Valor numérico en `HStatChip`; badges; chips         |
-| `labelSmall`      | 10sp     | Medium     | 14sp        | 1.5sp          | Micro-labels; fechas de review                       |
-
-### Estilos Starlink adicionales (`StarlinkTextStyles`)
-
-| Propiedad                   | Base            | Letter spacing final | Uso                                              |
-|-----------------------------|-----------------|----------------------|--------------------------------------------------|
-| `StarlinkTextStyles.sectionLabel` | `labelSmall`  | 1.8sp          | Etiquetas de sección uppercase (encima de métricas hero) |
-| `StarlinkTextStyles.chipLabel`    | `labelMedium` | 1.4sp          | Etiqueta uppercase en chips y nav items          |
-
-**Extensión `uppercaseTracked()`**: añade `+0.4sp` al `letterSpacing` existente de cualquier `TextStyle`. No requiere `@Composable`; es Kotlin puro.
-
-> **Regla de call site**: la transformación a mayúsculas se realiza siempre en el call site con `.uppercase()`. Los `strings.xml` permanecen en minúsculas para preservar el casing correcto en datos localizados dinámicos (números, unidades).
+Scale: `AtelierTypography` in `Type.kt`, passed to `MaterialTheme` by `AtelierTheme`. The role-to-family/style table is in the KDoc at the top of that file; read it there instead of a copy here. In short: `display*` and `headline*` are serif, `title*`, `body*` and `labelLarge` are sans, `labelMedium` and `labelSmall` are mono.
 
 ---
 
-## 4. Shapes & Elevation
+## 4. Shapes
 
-Fuente de verdad: `app/src/main/kotlin/com/emm/mybest/ui/theme/Shape.kt`.
-
-### Radios
-
-| Token M3        | Radio  | Usos típicos                                  |
-|-----------------|--------|-----------------------------------------------|
-| `extraSmall`    | 2dp    | Elementos mínimos                             |
-| `small`         | 4dp    | Chips pequeños                                |
-| `medium`        | 6dp    | Filtros, inputs                               |
-| `large`         | 8dp    | Cards, alerts                                 |
-| `extraLarge`    | 10dp   | Modales, bottom sheets                        |
-
-
-### Regla de elevación
-
-**`shadowElevation = 0.dp` en todos los componentes.** El depth visual se obtiene exclusivamente con hairlines `1dp` (`outlineVariant` = `#1F1F1F`). No hay tonal elevation, ni `tonalElevation` efectivo. El `HCard.Elevated` tenía `1dp` antes del rebrand; la Fase 5 (`7387d38`) lo redujo a `0dp`.
+`AtelierShapes` (`Shape.kt`) sets `extraSmall`, `small`, `medium`, `large` and `extraLarge` to `RoundedCornerShape(0.dp)`. No component draws a rounded surface.
 
 ---
 
-## 5. Componentes
+## 5. Components
 
-Todos los componentes viven en `app/src/main/kotlin/com/emm/mybest/ui/components/`.
+Shared composables live in `app/src/main/kotlin/com/emm/mybest/ui/components/`; Atelier primitives live in `ui/components/atelier/`.
 
-### HBadge (`Badge.kt`)
-Etiqueta de estado pequeña. Variantes: `Default`, `Secondary`, `Destructive`, `Outline`, `Success`.
-- Superficie: `color = cs.surface`, `contentColor = cs.onSurface`.
-- Borde hairline: `BorderStroke(1.dp, cs.outlineVariant)`.
-- Dot indicator circular (`CircleShape`, 6dp): `onSurface` para Default/Secondary/Outline, `cs.tertiary` (cian) para Success, `cs.error` (iOS red) para Destructive.
-- Label: `StarlinkTextStyles.chipLabel` en uppercase.
+### `ui/components/`
 
-### HStatChip (`StatChip.kt`)
-Chip de métrica con label superior y valor numérico. Variantes: `Neutral`, `Primary`, `Secondary`, `Tertiary`, `Success`, `Destructive`.
-- Borde `1dp outlineVariant`; forma `CircleShape` (versión compacta) o `RoundedCornerShape`.
-- Label uppercase con `labelLarge`; valor con color según variante: `cs.tertiary` para Tertiary/Success, `cs.error` para Destructive, `cs.onSurface` para el resto.
-- El label se renderiza con `.uppercase()` en el call site.
+| Composable | File | Purpose |
+|---|---|---|
+| `AtelierAppBar` | `AtelierAppBar.kt` | Top app bar |
+| `HButton` | `Button.kt` | Button with `ButtonVariant` (`Default`, `Destructive`, `Outline`, `Secondary`, `Ghost`, `Link`), loading state and optional leading icon; a second overload exists in the same file |
+| `HIconButton` | `IconButton.kt` | Icon-only button |
+| `HInput` | `Input.kt` | Text field |
+| `HSwitch` | `Switch.kt` | Toggle |
+| `HAlertDialog` | `Dialog.kt` | Confirm/cancel dialog; `isDangerous` switches the confirm button to the destructive color |
+| `HBottomSheet` | `BottomSheet.kt` | Modal bottom sheet |
+| `HSnackbarHost`, `HSnackbar` | `Snackbar.kt` | Snackbar host and snackbar |
+| `HBottomNavigationBar` | `HBottomNavigationBar.kt` | Four-tab bar (Home, Summary, History, Settings). All four labels share one font size: it starts at `labelSmall` and shrinks in 0.25 sp steps, down to 6 sp, until every label fits its cell on one line |
+| `ReminderTimePickerDialog` | `ReminderTimePickerDialog.kt` | Reminder time picker, see [`TIME_PICKER.md`](TIME_PICKER.md) |
 
-### HFilterChip (`FilterChip.kt`)
-Chip de filtro seleccionable. Estado: `selected: Boolean`.
-- **Seleccionado**: `containerColor = cs.onSurface`, `contentColor = cs.surface`, sin borde explícito.
-- **No seleccionado**: `containerColor = Color.Transparent`, `contentColor = cs.onSurface`, `BorderStroke(1.dp, cs.outlineVariant)`.
-- Label uppercase via `.uppercase()` en call site; `StarlinkTextStyles.chipLabel`.
-- `FILTER_CHIP_DISABLED_ALPHA = 0.5f`.
+### `ui/components/atelier/`
 
-### HAlert (`Alert.kt`)
-Callout informativo con barra lateral de color. Variantes: `Default`, `Destructive`, `Warning`, `Success`.
-- Superficie `cs.surface`, borde `1dp outlineVariant`.
-- Barra de 2dp en el extremo izquierdo cuyo color indica la variante:
-  - Default → `cs.onSurfaceVariant` (gris)
-  - Destructive → `cs.error` (iOS red)
-  - Warning → `cs.onSurface` (blanco; mono, sin amarillo)
-  - Success → `cs.tertiary` (cian)
-- Icono opcional que hereda el `barColor`.
+| Composable | File | Purpose |
+|---|---|---|
+| `MicroLabel` | `MicroLabel.kt` | Geist Mono, all caps, 0.18 em tracking. Callers pass already-uppercase strings. `MicroLabelStyle` (`MicroLabelStyle.kt`) sets `tone`, `size` (default 10 sp) and `isSingleLine` (default `false`; when `true` the label stays on one line) |
+| `DisplayNumber` | `DisplayNumber.kt` | Instrument Serif numeric display with tabular digits. `DisplayNumberStyle` (`DisplayNumberStyle.kt`) sets `fontSize`, `italic` and `color` |
+| `Hairline` | `Hairline.kt` | 1 dp rule at 8% bone, with optional horizontal `inset` |
+| `CompletionCheck` | `CompletionCheck.kt` | Done/not-done check box: sage fill with a tick when done, 1 dp hairline outline when not |
+| `AtelierCaret` | `AtelierCaret.kt` | Decorative chevron, tertiary tint, no click handler |
 
-### HCard (`Card.kt`)
-Card con slots opcionales: `HCardHeader`, `HCardContent`, `HCardFooter`. Variantes: `Elevated`, `Filled`, `Outlined`.
-- `Elevated`: `surface` + `0dp shadow` + `1dp outlineVariant`.
-- `Filled`: `surfaceContainerHighest` (`starlinkOutline` = `#2A2A2A`) + sin borde.
-- `Outlined`: `surface` + `1dp outlineVariant`.
-- `cornerRadius` default `8dp` (igual a `Shapes.large`).
+`MicroLabelTone` (`MicroLabelTone.kt`) has four values:
 
-### HButton (`Button.kt`)
-Botón de acción. Variantes: `Default`, `Destructive`, `Outline`, `Secondary`, `Ghost`, `Link`.
-- `shadowElevation = 0.dp` en todas las variantes.
-- `Outline`: `Color.Transparent` + `1dp outlineVariant`.
-- Sin `uppercaseTracked`; el texto de botón usa `labelLarge` (0sp letter spacing).
+| Tone | Color |
+|---|---|
+| `Default` | Secondary bone (58%) |
+| `Dim` | Tertiary bone (34%) |
+| `Done` | Sage, completion context only |
+| `Warm` | Warm hint |
 
-### HTopBar (`TopBar.kt`)
-Barra superior de pantalla.
-- `shadowElevation = 0.dp`.
-- Título renderizado con `.uppercase()`, `titleSmall` + `letterSpacing = 1.2.sp`.
-- `HSeparator()` al fondo del componente como hairline de separación.
-
-### HBottomNavigationBar (`HBottomNavigationBar.kt`)
-Barra de navegación inferior.
-- `HSeparator(color = cs.outlineVariant)` encima de la barra en lugar de elevación.
-- Labels del nav item: `stringResource(id = item.labelResId).uppercase()` con `StarlinkTextStyles.chipLabel`.
-- Indicador de ítem activo: dot circular (`CircleShape`, `cs.onSurface`) debajo del icono, no un pill.
-
-### HSeparator (`Separator.kt`)
-Divisor horizontal. `HorizontalDivider` de `1dp` en `cs.outlineVariant` por defecto. Usado en `HTopBar` y `HBottomNavigationBar`.
-
-### HInput (`Input.kt`)
-Campo de texto basado en `BasicTextField`.
-- Borde en reposo: `1dp`, `outline` al 40% alfa (contraste 3:1 sobre el fondo, WCAG 1.4.11).
-- Borde con foco: `2dp`, `outline` al 45% alfa; el color se anima con `tween`.
-- Borde con error: `cs.error` a alfa completo, `1dp` en reposo y `2dp` con foco.
-- Estilo de texto: `bodyMedium`; placeholder: `onSurfaceVariant` al 60% alfa.
-
-### HProgressRing (`ProgressRing.kt`)
-Anillo de progreso circular dibujado en `Canvas`.
-- Track: `cs.tertiary.copy(alpha = 0.16f)` (`starlinkAccent` al 16%).
-- Arco de progreso: `cs.tertiary` (`starlinkAccent`, cian `#00A3FF`).
-- `StrokeCap.Round`; `strokeWidth` default `8dp`.
-- Animación de `300ms` en la fracción de progreso.
+`PhotoTypeLabel.kt` holds `photoTypeLabel(type)`, a function that returns the label for a `PhotoType`. `FaceSilhouette.kt` and `TrunkSilhouette.kt` hold the photo silhouette drawings.
 
 ---
 
-## 6. Reglas de uso
+## 6. Usage rules
 
-### Cuándo usar el acento cian (`starlinkAccent` / `cs.tertiary`)
-- Máximo **1 elemento por pantalla** con acento cian.
-- Reservado a: métricas de progreso positivo (compliance ratio, completados), dot de estado "Success" en `HBadge`, barra de `HAlert.Success`.
-- No usar en texto de cuerpo, labels de sección ni decoración.
-
-### Cuándo NO usar uppercase
-- Números, unidades de medida (kg, lbs, %).
-- Contenido localizado dinámico (nombres de hábitos, títulos de usuario).
-- Strings en `strings.xml`: no añadir `textAllCaps` ni mayúsculas en recursos. La transformación es siempre `.uppercase()` en el call site de Compose.
-
-### Status sin color
-- Success y Warning se expresan con dots / iconos en mono (`cs.onSurface` o `cs.onSurfaceVariant`).
-- `HAlert.Warning` usa `cs.onSurface` como barColor (blanco/gris), no amarillo.
-- Solo `AlertVariant.Destructive` y `BadgeVariant.Destructive` usan color semántico: `cs.error` = `#FF3B30`.
-
-### Nunca hardcodear
-- No usar hex literales para colores. Siempre `MaterialTheme.colorScheme.*`.
-- No hardcodear `sp` o `dp` para tamaños de tipografía. Siempre `MaterialTheme.typography.*`.
-- No ramificar en `isSystemInDarkTheme()`; `MyBestTheme` fuerza dark.
+See [`.claude/rules/ui.md`](../../.claude/rules/ui.md): container/presentational split, state hoisting, theme tokens and shared components before raw Material 3, previews. A component used by two or more features moves to `ui/components/`.
 
 ---
 
-## 7. Splash & System Bars
+## 7. Splash and system bars
 
-Fuente de verdad: `app/src/main/res/values/themes.xml`, `values-night/themes.xml`, `values/colors.xml`.
+Defined in `app/src/main/res/values/themes.xml` and `values-night/themes.xml`; colors in `values/colors.xml`.
 
-| Elemento                        | Valor                          |
-|---------------------------------|--------------------------------|
-| Splash background               | `@color/splash_screen_background` → `#000000` |
-| Splash animated icon            | `@drawable/ic_progress_foreground` (línea blanca `#FAFAFA`) |
-| Splash icon background          | `@color/ic_progress_background` → `#000000` |
-| Window background               | `@color/app_window_background` → `#000000` |
-| `statusBarColor`                | `#000000`                      |
-| `navigationBarColor`            | `#000000`                      |
-| `windowLightStatusBar`          | `false` (iconos claros)        |
-| `windowLightNavigationBar`      | `false` (iconos claros)        |
-
-El parent del tema de producción es `android.Theme.Material.Light.NoActionBar` (light) con overrides de barras; el tema noche usa `android.Theme.Material.NoActionBar` (dark). Ambos producen el mismo resultado visual: barras negras con iconos blancos.
-
-Los vectores de drawables del splash (`ic_progress_foreground`) cambiaron de `#FFF8EE`/`#E8B269` (amber/warm) a `#FAFAFA` (mono blanco) en la Fase 6 (`27016a3`). Los launcher icons se mantuvieron sin cambios.
-
----
-
-## 8. Decisiones tomadas
-
-### Por qué iOS red (`#FF3B30`) en vez de coral (`#F87171`)
-El shadcnDarkDestructive original era `#F87171` (Tailwind red-400, coral-pink). Sobre fondo `#000000` puro, ese tono coral se percibe como "muted" y casi playful. `#FF3B30` es el rojo de sistema iOS, diseñado específicamente para alta legibilidad sobre fondos oscuros y puros. Documentado en `Color.kt` y en el commit `f7131b9`.
-
-### Por qué tertiary cian en vez de success green
-En una paleta mono, introducir un verde funcional crearía un segundo color semántico además del error rojo. El cian `#00A3FF` cubre el rol de "énfasis positivo" sin añadir más cromáticas. Los tokens `shadcnDarkSuccess` (verde) permanecen en `Color.kt` como referencia del diseño anterior pero no están mapeados al `darkScheme` activo. Documentado en el comentario del bloque Starlink Mono en `Color.kt`.
-
-### Por qué uppercase en call site y no en `strings.xml`
-Aplicar `.uppercase()` en el call site de Compose permite que los mismos strings se reutilicen en contextos donde el uppercase no aplica (números, unidades, contenido dinámico del usuario). Si la casing estuviera en el recurso, los datos localizados podrían resultar incorrectos. Documentado en `TextStyles.kt` y en el commit `f36d68b`.
-
-### Por qué `shadowElevation = 0.dp` en todos los componentes
-El depth visual en un fondo negro puro no se transmite bien con sombras (producen un halo oscuro imperceptible). Los hairlines `1dp outlineVariant` son más legibles y corresponden al lenguaje visual de Starlink. Documentado en el commit `7387d38`.
-
-### Por qué el nav indicator es un dot y no un pill
-El pill de Android estándar introduce un color de fondo que rompe la paleta mono. Un dot circular `cs.onSurface` (blanco) debajo del icono activo preserva la austeridad del sistema sin perder señal visual de selección. Documentado en el commit `6bb8df0`.
-
-### Por qué la light scheme se retiene pero no se aplica
-`MyBestTheme` acepta `darkTheme: Boolean` para no romper la API de llamada, pero ignora su valor. La `lightScheme` se conserva como referencia arquitectónica del mapeo shadcn→M3, útil si en el futuro se decide soportar tema claro. Documentado en `Theme.kt`.
+- `Theme.MyBest`: window background is the `app_window_background` color (black); status bar and navigation bar are `#000000`; light status and navigation bar icons are off (`windowLightStatusBar` and `windowLightNavigationBar` are `false`). The base theme is `android:Theme.Material.Light.NoActionBar` in `values/` and `android:Theme.Material.NoActionBar` in `values-night/`.
+- `Theme.MyBest.Starting`: splash theme (`Theme.SplashScreen.IconBackground`). Background is `splash_screen_background` (black); the animated icon is `ic_progress_foreground`; after the splash the app switches to `Theme.MyBest`.
