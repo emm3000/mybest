@@ -127,6 +127,23 @@ class SettingsBackupRestoreTest {
     }
 
     @Test
+    fun `a restore that fails after closing the database announces it once and then relaunches the app once`() =
+        runTest {
+            val events = mutableListOf<Any>()
+            every { appRestarter.restart() } answers { events += RESTART }
+            val viewModel = buildViewModel(Result.success(RestoreResult.NotRestoredRequiresRestart))
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                viewModel.effect.collect { events += it }
+            }
+
+            viewModel.onIntent(SettingsIntent.OnImportBackup("content://backup"))
+            advanceUntilIdle()
+
+            assertEquals(listOf(SettingsEffect.BackupNotRestored, RESTART), events)
+            verify(exactly = 1) { appRestarter.restart() }
+        }
+
+    @Test
     fun `a failed import without a message announces the import failed`() = runTest {
         val viewModel = buildViewModel(Result.failure(IllegalStateException()))
 

@@ -125,6 +125,7 @@ class SettingsViewModel(
                     when (result) {
                         RestoreResult.RequiresRestart -> announceRestoredAndRestart()
                         RestoreResult.OtherSchemaVersion -> _effect.emit(SettingsEffect.BackupFromOtherVersion)
+                        RestoreResult.NotRestoredRequiresRestart -> announceNotRestoredAndRestart()
                     }
                 }.onFailure {
                     _effect.emit(SettingsEffect.BackupImportFailed)
@@ -134,6 +135,11 @@ class SettingsViewModel(
 
     private suspend fun announceRestoredAndRestart() {
         _effect.emit(SettingsEffect.BackupRestored)
+        dependencies.appRestarter.restart()
+    }
+
+    private suspend fun announceNotRestoredAndRestart() {
+        _effect.emit(SettingsEffect.BackupNotRestored)
         dependencies.appRestarter.restart()
     }
 }

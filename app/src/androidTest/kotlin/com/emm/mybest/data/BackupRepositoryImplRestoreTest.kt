@@ -139,6 +139,7 @@ class BackupRepositoryImplRestoreTest {
         }
         backupFile.delete()
 
+        assertTrue(liveDb.isOpen)
         assertTrue(LIVE_DATABASE_FILES.containsAll(dbPath.parentFile?.list().orEmpty().toSet()))
         assertTrue(liveDb.dailyWeightDao().observeAllOrdered().first().any { it.id == "live1" })
         liveDb.close()
@@ -146,7 +147,7 @@ class BackupRepositoryImplRestoreTest {
     }
 
     @Test
-    fun a_restore_whose_move_fails_keeps_rows_another_connection_left_in_the_wal() = runBlocking {
+    fun a_restore_whose_move_fails_after_closing_the_database_requires_a_restart_and_keeps_wal_rows() = runBlocking {
         val backupFile = seedBackupFile()
         deleteDatabaseFiles()
         val liveDb = openDatabase()
@@ -160,11 +161,31 @@ class BackupRepositoryImplRestoreTest {
         reader.close()
         backupFile.delete()
 
-        assertTrue(result.isFailure)
+        assertEquals(RestoreResult.NotRestoredRequiresRestart, result.getOrThrow())
+        assertFalse(liveDb.isOpen)
         assertTrue(hasWeightAfterReopen("live1"))
         assertFalse(hasWeightAfterReopen("seed1"))
         assertTrue(walBytesAfterRestore > 0)
     }
+
+    @Test
+    fun after_a_restore_whose_move_fails_the_restarted_database_accepts_writes_and_leaves_no_staged_files() =
+        runBlocking {
+            val backupFile = seedBackupFile()
+            deleteDatabaseFiles()
+            val liveDb = openDatabase()
+            liveDb.dailyWeightDao().upsert(DailyWeightEntity(id = "live1", date = KNOWN_DATE, weight = 71.0f))
+
+            BackupRepositoryImpl(context, liveDb, UnconfinedDispatchers, moveFile = ::failMove)
+                .restoreDatabase(backupFile.toURI().toString())
+            backupFile.delete()
+            val restarted = openDatabase()
+            restarted.dailyWeightDao().upsert(DailyWeightEntity(id = "after1", date = KNOWN_DATE, weight = 72.0f))
+            restarted.close()
+
+            assertTrue(hasWeightAfterReopen("after1"))
+            assertTrue(dbPath.parentFile?.list().orEmpty().none { it.endsWith(".restore") || it.endsWith(".aside") })
+        }
 
     @Test
     fun export_and_restore_keep_one_row_of_every_v1_table() = runBlocking {
