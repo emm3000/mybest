@@ -2,10 +2,10 @@ package com.emm.mybest.features.capture.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.core.datetime.AppDayClock
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -70,11 +70,8 @@ class NotificationCaptureViewModel(
 
     private fun perform(action: suspend () -> Unit) {
         viewModelScope.launch {
-            runCatching { action() }
-                .onFailure {
-                    if (it is CancellationException) throw it
-                    _effect.emit(NotificationCaptureEffect.ActionFailed)
-                }
+            attempt { action() }
+                .onFailure { _effect.emit(NotificationCaptureEffect.ActionFailed) }
         }
     }
 }

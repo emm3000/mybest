@@ -3,10 +3,10 @@ package com.emm.mybest.features.settings.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emm.mybest.BuildConfig
+import com.emm.mybest.core.coroutines.attempt
 import com.emm.mybest.core.flow.SUBSCRIPTION_TIMEOUT_MS
 import com.emm.mybest.core.flow.effectFlow
 import com.emm.mybest.domain.repository.RestoreResult
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -75,10 +75,9 @@ class SettingsViewModel(
 
     private fun replayOnboarding() {
         viewModelScope.launch {
-            runCatching {
+            attempt {
                 dependencies.userPreferencesRepository.updateOnboardingCompleted(false)
             }.onFailure {
-                if (it is CancellationException) throw it
                 _effect.emit(
                     SettingsEffect.ShowError(
                         it.message ?: "No se pudo actualizar la configuración",
@@ -90,10 +89,9 @@ class SettingsViewModel(
 
     private fun updateNotificationsPreference(enabled: Boolean) {
         viewModelScope.launch {
-            runCatching {
+            attempt {
                 dependencies.userPreferencesRepository.updateNotificationsEnabled(enabled)
             }.onFailure {
-                if (it is CancellationException) throw it
                 _effect.emit(
                     SettingsEffect.ShowError(
                         it.message ?: "No se pudo actualizar la configuración",
