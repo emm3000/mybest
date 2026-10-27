@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -44,7 +45,10 @@ internal fun HistoryMonthHero(
     val monthLabel = formatMonthLabel(state.selectedMonth)
     val monthName = formatMonthName(state.selectedMonth)
     val nightsText = stringResource(R.string.history_month_outings, state.monthOutingCount, state.monthWonNightCount)
-    val statsText = stringResource(R.string.history_month_stats, state.monthWeightCount, state.monthPhotoCount)
+    val weighInsText =
+        pluralStringResource(R.plurals.history_month_weigh_ins, state.monthWeightCount, state.monthWeightCount)
+    val photosText = pluralStringResource(R.plurals.history_month_photos, state.monthPhotoCount, state.monthPhotoCount)
+    val statsText = stringResource(R.string.history_month_stats, weighInsText, photosText)
 
     FlowRow(
         modifier = modifier
