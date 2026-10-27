@@ -6,6 +6,7 @@ import com.emm.mybest.domain.models.NewProgressPhoto
 import com.emm.mybest.domain.models.PhotoType
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class DataMappersTest {
@@ -57,6 +58,32 @@ class DataMappersTest {
         assertEquals(PhotoType.TRUNK, entity.type)
         assertEquals("/tmp/new.jpg", entity.photoPath)
         assertEquals(LocalDate(2026, 3, 8), entity.date)
+    }
+
+    @Test
+    fun `new progress photo with a creation stamp keeps it in the entity`() {
+        val input = NewProgressPhoto(
+            photoPath = "/tmp/new.jpg",
+            type = PhotoType.TRUNK,
+            date = LocalDate(2026, 3, 8),
+            createdAt = 1_000L,
+        )
+
+        assertEquals(1_000L, input.toEntity().createdAt)
+    }
+
+    @Test
+    fun `new progress photo without a creation stamp is stamped when mapped`() {
+        val input = NewProgressPhoto(
+            photoPath = "/tmp/new.jpg",
+            type = PhotoType.TRUNK,
+            date = LocalDate(2026, 3, 8),
+        )
+        val before = System.currentTimeMillis()
+
+        val stamp = input.toEntity().createdAt
+
+        assertTrue(stamp in before..System.currentTimeMillis())
     }
 
     @Test
