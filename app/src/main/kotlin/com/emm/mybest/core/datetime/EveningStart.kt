@@ -3,7 +3,6 @@ package com.emm.mybest.core.datetime
 import kotlinx.datetime.LocalTime
 
 private const val EVENING_START_HOUR = 18
-private const val SECONDS_PER_MINUTE = 60
 
 /**
  * The local time from which the evening begins, up to [APP_DAY_START].

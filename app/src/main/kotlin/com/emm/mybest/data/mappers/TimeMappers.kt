@@ -1,8 +1,7 @@
 package com.emm.mybest.data.mappers
 
+import com.emm.mybest.core.datetime.SECONDS_PER_MINUTE
 import kotlinx.datetime.LocalTime
-
-private const val SECONDS_PER_MINUTE = 60
 
 internal fun LocalTime.toMinutesSinceMidnight(): Int = toSecondOfDay() / SECONDS_PER_MINUTE
 
