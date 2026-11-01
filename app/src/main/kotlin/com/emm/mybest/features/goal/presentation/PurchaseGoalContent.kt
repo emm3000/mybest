@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
@@ -83,7 +84,7 @@ private fun GoalAction(
     MicroLabel(
         text = stringResource(textRes),
         modifier = Modifier
-            .clickable { onIntent(intent) }
+            .clickable(role = Role.Button) { onIntent(intent) }
             .padding(vertical = ACTION_VERTICAL),
     )
 }
