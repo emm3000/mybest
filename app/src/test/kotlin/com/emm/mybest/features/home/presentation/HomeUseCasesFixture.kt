@@ -12,6 +12,7 @@ import com.emm.mybest.domain.usecase.dailycheck.RecordDailyCheckUseCase
 import com.emm.mybest.domain.usecase.dailycheck.ToggleDailyCheckUseCase
 import com.emm.mybest.domain.usecase.home.ResolveHomeDestinationUseCase
 import com.emm.mybest.domain.usecase.preouting.GetEstimatedOutingCostUseCase
+import com.emm.mybest.domain.usecase.preouting.ObserveInstallmentInputsUseCase
 import com.emm.mybest.domain.usecase.preouting.ObserveNearestInstallmentUseCase
 import com.emm.mybest.domain.usecase.preouting.ObserveTonightUseCase
 import com.emm.mybest.testing.FakeDailyCheckRepository
@@ -46,9 +47,8 @@ internal data class HomeUseCasesFixture(
         ),
         observeHasPendingCheckIn = ObserveHasPendingCheckInUseCase(outings),
         observeNextInstallment = ObserveNearestInstallmentUseCase(
-            debts,
+            ObserveInstallmentInputsUseCase(debts, appDayClock),
             GetEstimatedOutingCostUseCase(setupRepository, outings),
-            appDayClock,
         ),
     )
 }

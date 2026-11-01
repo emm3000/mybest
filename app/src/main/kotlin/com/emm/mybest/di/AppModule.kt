@@ -97,6 +97,7 @@ import com.emm.mybest.domain.usecase.photo.ReplacePhotoUseCase
 import com.emm.mybest.domain.usecase.photo.SavePhotosUseCase
 import com.emm.mybest.domain.usecase.preouting.GetEstimatedOutingCostUseCase
 import com.emm.mybest.domain.usecase.preouting.HasDecisionOnUseCase
+import com.emm.mybest.domain.usecase.preouting.ObserveInstallmentInputsUseCase
 import com.emm.mybest.domain.usecase.preouting.ObserveNearestInstallmentUseCase
 import com.emm.mybest.domain.usecase.preouting.ObserveNotSpentThisMonthUseCase
 import com.emm.mybest.domain.usecase.preouting.ObserveOutingMonthUseCase
@@ -261,9 +262,10 @@ val appModule = module {
     factory { GetEstimatedOutingCostUseCase(get(), get()) }
     factory { ObserveNotSpentThisMonthUseCase(get(), get()) }
     factory { ObserveOutingMonthUseCase(get(), get(), get()) }
-    factory { ObserveNearestInstallmentUseCase(get(), get(), get()) }
+    factory { ObserveInstallmentInputsUseCase(get(), get()) }
+    factory { ObserveNearestInstallmentUseCase(get(), get()) }
     factory { ObservePurchaseGoalLeftUseCase(get()) }
-    factory { PreOutingUseCases(get(), get(), get(), get(), get(), get()) }
+    factory { PreOutingUseCases(get(), get(), get(), get(), get()) }
     factory { ObservePreOutingSnapshotUseCase(get()) }
     factory { HasDecisionOnUseCase(get()) }
     factory { PlanOutingUseCase(get(), get(), get()) }
