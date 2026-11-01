@@ -14,7 +14,6 @@ import com.emm.mybest.domain.models.PreOutingSnapshot
 import com.emm.mybest.domain.models.PurchaseGoal
 import com.emm.mybest.domain.models.Setup
 import com.emm.mybest.domain.models.WonNight
-import com.emm.mybest.domain.usecase.debts.ObserveDebtSummaryUseCase
 import com.emm.mybest.testing.FakeDebtRepository
 import com.emm.mybest.testing.FakeOutingRepository
 import com.emm.mybest.testing.FakePurchaseGoalRepository
@@ -56,11 +55,10 @@ class ObservePreOutingSnapshotUseCaseTest {
         val useCase = ObservePreOutingSnapshotUseCase(
             PreOutingUseCases(
                 outingMonth = ObserveOutingMonthUseCase(outingRepository, setupRepository, clock),
-                nearestInstallment = ObserveNearestInstallmentUseCase(debtRepository, estimate, clock),
+                installmentInputs = ObserveInstallmentInputsUseCase(debtRepository, clock),
                 purchaseGoalLeft = ObservePurchaseGoalLeftUseCase(FakePurchaseGoalRepository(goal, contributions)),
                 estimatedOutingCost = estimate,
                 notSpentThisMonth = ObserveNotSpentThisMonthUseCase(outingRepository, clock),
-                debtSummary = ObserveDebtSummaryUseCase(debtRepository),
             ),
         )
 

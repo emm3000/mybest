@@ -38,7 +38,8 @@ class ObserveNearestInstallmentUseCaseTest {
     ): InstallmentShare? {
         val clock = AppDayClock(FixedClock(LocalDateTime(today, LocalTime(12, 0)).toInstant(LIMA)), LIMA)
         val estimate = GetEstimatedOutingCostUseCase(FakeSetupRepository(Setup()), FakeOutingRepository())
-        return ObserveNearestInstallmentUseCase(FakeDebtRepository(debts, payments), estimate, clock)().first()
+        val inputs = ObserveInstallmentInputsUseCase(FakeDebtRepository(debts, payments), clock)
+        return ObserveNearestInstallmentUseCase(inputs, estimate)().first()
     }
 
     private fun paid(debt: Debt, month: YearMonthValue) = DebtPayment(debt.id, month, debt.installment)
