@@ -3,7 +3,11 @@ package com.emm.mybest.core.datetime
 import kotlinx.datetime.LocalTime
 
 private const val APP_DAY_START_HOUR = 5
-private const val SECONDS_PER_MINUTE = 60
+
+/**
+ * Seconds in one minute.
+ */
+const val SECONDS_PER_MINUTE = 60
 
 /**
  * Minutes in one calendar day.
