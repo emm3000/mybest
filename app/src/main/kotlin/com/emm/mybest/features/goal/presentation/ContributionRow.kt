@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.emm.mybest.R
 import com.emm.mybest.ui.components.atelier.MicroLabel
@@ -38,7 +39,7 @@ internal fun ContributionRow(
         }
         MicroLabel(
             text = stringResource(R.string.purchase_goal_contribution_delete),
-            modifier = Modifier.clickable(onClick = onDelete).padding(vertical = ACTION_VERTICAL),
+            modifier = Modifier.clickable(role = Role.Button, onClick = onDelete).padding(vertical = ACTION_VERTICAL),
         )
     }
 }
