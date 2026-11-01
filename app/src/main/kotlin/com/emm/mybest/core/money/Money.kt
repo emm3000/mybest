@@ -14,7 +14,8 @@ value class Money(val cents: Long) : Comparable<Money> {
     operator fun times(count: Int): Money = Money(cents * count)
 
     /**
-     * This amount as a whole percentage of [whole], rounded half-up, or null when [whole] is zero.
+     * This amount as a whole percentage of [whole], rounded half toward positive infinity, or null when [whole] is zero.
+     * Either amount may be negative; the result is clamped to the [Int] range.
      */
     fun percentOf(whole: Money): Int? =
         if (whole.cents == 0L) null else percentRoundingHalfUp(cents, whole.cents)
