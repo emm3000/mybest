@@ -20,6 +20,7 @@ internal fun SettingsEffectsHandler(
         SettingsEffect.BackupFromOtherVersion to stringResource(R.string.settings_backup_other_version),
         SettingsEffect.BackupImportFailed to stringResource(R.string.settings_backup_import_failed),
         SettingsEffect.BackupNotRestored to stringResource(R.string.settings_backup_not_restored),
+        SettingsEffect.BackupFileUnreadable to stringResource(R.string.settings_backup_file_unreadable),
     )
     LaunchedEffect(Unit) {
         effects.collectLatest { effect ->
@@ -32,6 +33,7 @@ internal fun SettingsEffectsHandler(
                 is SettingsEffect.BackupFromOtherVersion,
                 is SettingsEffect.BackupImportFailed,
                 is SettingsEffect.BackupNotRestored,
+                is SettingsEffect.BackupFileUnreadable,
                 -> backupMessages.getValue(effect)
             }
             snackbarHostState.showSnackbar(message)

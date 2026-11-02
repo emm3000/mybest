@@ -1,6 +1,7 @@
 package com.emm.mybest.data
 
 import android.database.Cursor
+import android.database.DatabaseErrorHandler
 import android.database.sqlite.SQLiteDatabase
 import java.io.File
 
@@ -10,7 +11,8 @@ internal fun readLiveIdentityHash(database: AppDatabase): String? =
         .use { it.firstStringOrNull() }
 
 internal fun readBackupIdentityHash(backupCopy: File): String? =
-    SQLiteDatabase.openDatabase(backupCopy.path, null, BACKUP_OPEN_FLAGS).use { it.readIdentityHash() }
+    SQLiteDatabase.openDatabase(backupCopy.path, null, BACKUP_OPEN_FLAGS, keepCorruptBackup)
+        .use { it.readIdentityHash() }
 
 private fun SQLiteDatabase.readIdentityHash(): String? {
     if (!hasRoomMasterTable()) return null
@@ -21,6 +23,8 @@ private fun SQLiteDatabase.hasRoomMasterTable(): Boolean =
     rawQuery(ROOM_MASTER_TABLE_QUERY, null).use { it.moveToFirst() }
 
 private fun Cursor.firstStringOrNull(): String? = if (moveToFirst()) getString(0) else null
+
+private val keepCorruptBackup = DatabaseErrorHandler { }
 
 private const val ROOM_MASTER_ROW_ID = "42"
 private const val IDENTITY_HASH_QUERY = "SELECT identity_hash FROM room_master_table WHERE id = ?"

@@ -154,6 +154,17 @@ class SettingsBackupRestoreTest {
     }
 
     @Test
+    fun `importing an unreadable file asks for a MyBest backup without relaunching`() = runTest {
+        val viewModel = buildViewModel(Result.success(RestoreResult.UnreadableFile))
+
+        viewModel.onIntent(SettingsIntent.OnImportBackup("content://backup"))
+
+        assertEquals(SettingsEffect.BackupFileUnreadable, viewModel.effect.first())
+        advanceUntilIdle()
+        verify(exactly = 0) { appRestarter.restart() }
+    }
+
+    @Test
     fun `an import that fails for a reason other than the file announces the import failed without relaunching`() =
         runTest {
             val viewModel = buildViewModel(Result.failure(IOException("No space left on device")))

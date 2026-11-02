@@ -10,4 +10,5 @@ sealed class SettingsEffect {
     object BackupFromOtherVersion : SettingsEffect()
     object BackupImportFailed : SettingsEffect()
     object BackupNotRestored : SettingsEffect()
+    object BackupFileUnreadable : SettingsEffect()
 }

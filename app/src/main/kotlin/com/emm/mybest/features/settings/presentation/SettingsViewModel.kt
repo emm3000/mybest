@@ -123,6 +123,7 @@ class SettingsViewModel(
                         RestoreResult.RequiresRestart -> announceRestoredAndRestart()
                         RestoreResult.OtherSchemaVersion -> _effect.emit(SettingsEffect.BackupFromOtherVersion)
                         RestoreResult.NotRestoredRequiresRestart -> announceNotRestoredAndRestart()
+                        RestoreResult.UnreadableFile -> _effect.emit(SettingsEffect.BackupFileUnreadable)
                     }
                 }.onFailure {
                     _effect.emit(SettingsEffect.BackupImportFailed)
