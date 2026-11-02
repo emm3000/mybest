@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import java.io.IOException
 
 class SettingsBackupRestoreTest {
 
@@ -151,6 +152,18 @@ class SettingsBackupRestoreTest {
 
         assertEquals(SettingsEffect.BackupImportFailed, viewModel.effect.first())
     }
+
+    @Test
+    fun `an import that fails for a reason other than the file announces the import failed without relaunching`() =
+        runTest {
+            val viewModel = buildViewModel(Result.failure(IOException("No space left on device")))
+
+            viewModel.onIntent(SettingsIntent.OnImportBackup("content://backup"))
+
+            assertEquals(SettingsEffect.BackupImportFailed, viewModel.effect.first())
+            advanceUntilIdle()
+            verify(exactly = 0) { appRestarter.restart() }
+        }
 
     private companion object {
         const val RESTART = "restart"
