@@ -9,4 +9,7 @@ sealed class RestoreResult {
      * file is kept, and the app must restart because the closed database cannot be reopened in this process.
      */
     object NotRestoredRequiresRestart : RestoreResult()
+
+    /** The chosen file could not be opened or is not a readable SQLite database; nothing was touched. */
+    object UnreadableFile : RestoreResult()
 }

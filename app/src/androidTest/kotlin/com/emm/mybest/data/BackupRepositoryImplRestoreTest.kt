@@ -32,6 +32,10 @@ private object UnconfinedDispatchers : CoroutineDispatchers {
 private val KNOWN_DATE = LocalDate(2026, 3, 15)
 private const val SQLITE_USER_VERSION_OFFSET = 60L
 private const val FAIL_AFTER_BYTES = 4096
+private const val SQLITE_HEADER_END = 100L
+private const val CORRUPT_RANGE_END = 4096
+private const val CORRUPT_BYTE = 0xFF.toByte()
+private const val RESTORE_COPY_PREFIX = "mybest-restore-"
 private val LIVE_DATABASE_FILES = setOf(AppDatabase.DB_NAME, "${AppDatabase.DB_NAME}-wal", "${AppDatabase.DB_NAME}-shm")
 private const val READ_SCHEMA_SQL = "SELECT COUNT(*) FROM sqlite_master"
 private const val WRONG_IDENTITY_HASH_SQL = "UPDATE room_master_table SET identity_hash = 'deadbeef' WHERE id = 42"
@@ -76,7 +80,7 @@ class BackupRepositoryImplRestoreTest {
     }
 
     @Test
-    fun restore_rejects_non_sqlite_file_with_failure_result() = runBlocking {
+    fun restore_reports_a_non_sqlite_file_as_unreadable() = runBlocking {
         val fakeFile = File.createTempFile("not-sqlite-", ".db", context.cacheDir)
         fakeFile.writeBytes("not a database".toByteArray())
 
@@ -88,7 +92,38 @@ class BackupRepositoryImplRestoreTest {
         db.close()
         fakeFile.delete()
 
-        assertTrue(result.isFailure)
+        assertEquals(RestoreResult.UnreadableFile, result.getOrThrow())
+    }
+
+    @Test
+    fun restore_reports_a_missing_file_as_unreadable() = runBlocking {
+        val missingFile = File(context.cacheDir, "test-missing.db").apply { deleteWithSideFiles() }
+        val db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
+
+        val result = BackupRepositoryImpl(context, db, UnconfinedDispatchers)
+            .restoreDatabase(missingFile.toURI().toString())
+        db.close()
+
+        assertEquals(RestoreResult.UnreadableFile, result.getOrThrow())
+    }
+
+    @Test
+    fun restore_reports_a_corrupt_backup_as_unreadable_and_keeps_the_live_database_open() = runBlocking {
+        val backupFile = seedBackupFile().apply { overwriteFirstPageAfterHeader() }
+        deleteDatabaseFiles()
+        val liveDb = openDatabase()
+        liveDb.dailyWeightDao().upsert(DailyWeightEntity(id = "live1", date = KNOWN_DATE, weight = 71.0f))
+
+        val result = BackupRepositoryImpl(context, liveDb, UnconfinedDispatchers)
+            .restoreDatabase(backupFile.toURI().toString())
+        backupFile.deleteWithSideFiles()
+
+        assertEquals(RestoreResult.UnreadableFile, result.getOrThrow())
+        assertTrue(context.cacheDir.list().orEmpty().none { it.startsWith(RESTORE_COPY_PREFIX) })
+        assertTrue(liveDb.isOpen)
+        assertTrue(liveDb.dailyWeightDao().observeAllOrdered().first().any { it.id == "live1" })
+        liveDb.close()
+        assertTrue(hasWeightAfterReopen("live1"))
     }
 
     @Test
@@ -238,6 +273,13 @@ class BackupRepositoryImplRestoreTest {
 
     private fun File.deleteSideFiles() {
         listOf("-wal", "-shm", "-journal").forEach { File("$path$it").delete() }
+    }
+
+    private fun File.overwriteFirstPageAfterHeader() {
+        RandomAccessFile(this, "rw").use { file ->
+            file.seek(SQLITE_HEADER_END)
+            file.write(ByteArray(CORRUPT_RANGE_END - SQLITE_HEADER_END.toInt()) { CORRUPT_BYTE })
+        }
     }
 
     private fun File.writeUserVersion(version: Int) {

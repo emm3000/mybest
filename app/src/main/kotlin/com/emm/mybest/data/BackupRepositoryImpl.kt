@@ -1,6 +1,7 @@
 package com.emm.mybest.data
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabaseCorruptException
 import android.net.Uri
 import com.emm.mybest.core.coroutines.CoroutineDispatchers
 import com.emm.mybest.domain.repository.BackupRepository
@@ -8,7 +9,9 @@ import com.emm.mybest.domain.repository.RestoreResult
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.nio.ByteBuffer
 
 class BackupRepositoryImpl(
@@ -43,8 +46,7 @@ class BackupRepositoryImpl(
         withContext(dispatchers.io) {
             val backupCopy = File.createTempFile("mybest-restore-", ".db", context.cacheDir)
             try {
-                copySource(sourceUri, backupCopy)
-                restoreFrom(backupCopy)
+                if (copySource(sourceUri, backupCopy)) restoreFrom(backupCopy) else RestoreResult.UnreadableFile
             } finally {
                 backupCopy.delete()
                 deleteSqliteSideFiles(backupCopy)
@@ -52,21 +54,32 @@ class BackupRepositoryImpl(
         }
     }
 
-    private fun copySource(sourceUri: String, target: File) {
-        context.contentResolver.openInputStream(Uri.parse(sourceUri)).use { input ->
-            checkNotNull(input) { "Unable to open input stream for restore" }
-            FileOutputStream(target).use { output -> input.copyTo(output) }
-        }
+    private fun copySource(sourceUri: String, target: File): Boolean {
+        val source = openSource(sourceUri) ?: return false
+        source.use { input -> FileOutputStream(target).use { output -> input.copyTo(output) } }
+        return true
+    }
+
+    private fun openSource(sourceUri: String): InputStream? = try {
+        context.contentResolver.openInputStream(Uri.parse(sourceUri))
+    } catch (ignored: FileNotFoundException) {
+        null
+    } catch (ignored: SecurityException) {
+        null
     }
 
     private fun restoreFrom(backupCopy: File): RestoreResult = when (readHeaderCheck(backupCopy)) {
-        BackupHeaderCheck.NOT_SQLITE -> error("Invalid SQLite backup file")
+        BackupHeaderCheck.NOT_SQLITE -> RestoreResult.UnreadableFile
         BackupHeaderCheck.OTHER_VERSION -> RestoreResult.OtherSchemaVersion
         BackupHeaderCheck.SAME_VERSION -> restoreMatchingIdentity(backupCopy)
     }
 
     private fun restoreMatchingIdentity(backupCopy: File): RestoreResult {
-        val backupHash = readBackupIdentityHash(backupCopy)
+        val backupHash = try {
+            readBackupIdentityHash(backupCopy)
+        } catch (ignored: SQLiteDatabaseCorruptException) {
+            return RestoreResult.UnreadableFile
+        }
         if (backupHash == null || backupHash != readLiveIdentityHash(database)) {
             return RestoreResult.OtherSchemaVersion
         }
