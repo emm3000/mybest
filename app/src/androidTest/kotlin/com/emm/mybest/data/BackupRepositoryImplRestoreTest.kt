@@ -93,6 +93,7 @@ class BackupRepositoryImplRestoreTest {
         fakeFile.delete()
 
         assertEquals(RestoreResult.UnreadableFile, result.getOrThrow())
+        assertTrue(context.cacheDir.list().orEmpty().none { it.startsWith(RESTORE_COPY_PREFIX) })
     }
 
     @Test
@@ -105,6 +106,7 @@ class BackupRepositoryImplRestoreTest {
         db.close()
 
         assertEquals(RestoreResult.UnreadableFile, result.getOrThrow())
+        assertTrue(context.cacheDir.list().orEmpty().none { it.startsWith(RESTORE_COPY_PREFIX) })
     }
 
     @Test
